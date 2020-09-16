@@ -15,7 +15,7 @@
         .draggableUl li .cnt{padding: 5px;border:1px dashed #fff;min-width: 300px;display: inline-block;font-size: 14;}
         .draggableUl li:hover .cnt{border:1px dashed #ecedf2;font-size: 14;}
         .draggableUl .el-form:hover,.draggableUl .el-form-item:hover,.draggableUl .el-form-item .el-form-item__content:hover,.draggableUl .el-form-item .el-input__inner:hover,.draggableUl .el-textarea__inner{cursor: move!important;}
-        .draggableUl .el-textarea__inner{height: auto!important;}
+        /*.draggableUl .el-textarea__inner{height: auto!important;}*/
         .round{width: 20px;height: 20px;border-radius: 50%;border: 1px solid;text-align: center;display: inline-block;line-height: 20px;margin-right: 10px;}
         .dynamic .el-input{width: 680px;}
         .tipicon{position: absolute;left: 228px;top: 39px;width: 16px;height: 16px;background: #e67020;text-align: center;line-height: 16px;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
@@ -59,8 +59,7 @@
                                       { max: 100, message: '顾问常用语最多不能超过100字', trigger: 'change' },
                                     ]"
                                     label-width="30px"
-                                    style="margin-bottom: 20px;" 
-                                    
+                                    style="margin-bottom: 20px;"                                     
                                     >
                                     <el-input type="textarea"  autosize v-model="domain.comText" style="margin-right: 10px;width: 655px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1',domain,$event)"  :disabled="domain.iptDisabled" placeholder="请输入常用语内容，点击回车保存"></el-input>
                                     <!-- <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button>  -->
@@ -467,9 +466,11 @@
                         if(comText&&comText.charCodeAt()!=10&&comText.charCodeAt()!=32){//10是只有回车,32是空格加回车
                             axios.post(url).then(function (response) { 
                                 console.log(response)
-                                setTimeout(function(){
-                                    window.location.href="/im/imCommonUseSitting/index"
-                                },100)                                
+                                mainDivVM.$message({type: 'success', message: '保存成功!',duration:2000,onClose:function(){
+                                    setTimeout(function(){
+                                        window.location.href="/im/imCommonUseSitting/index"
+                                    },100) 
+                                }});                                                               
                             }).catch(function (error) {
                                 mainDivVM.$message({
                                     message: "请求失败，请稍后重试",
@@ -502,9 +503,11 @@
                         if(comText&&comText.charCodeAt()!=10&&comText.charCodeAt()!=32){//10是只有回车,32是空格加回车
                             axios.post(url).then(function (response) { 
                                 console.log(response)
-                                setTimeout(function(){
-                                    window.location.href="/im/imCommonUseSitting/index?type="+urlType
-                                },100)  
+                                mainDivVM.$message({type: 'success', message: '保存成功!',duration:2000,onClose:function(){
+                                    setTimeout(function(){
+                                        window.location.href="/im/imCommonUseSitting/index?type="+urlType
+                                    },100) 
+                                }});  
                             }).catch(function (error) {
                                 mainDivVM.$message({
                                     message: "请求失败，请稍后重试",
