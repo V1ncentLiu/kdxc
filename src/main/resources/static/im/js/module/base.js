@@ -67,7 +67,7 @@ YX.fn.initUI = function() {
 YX.fn.showMe = function() {
   var user = this.cache.getUserById(userUID);
   this.$userName.text(user.nick);
-  this.$userPic.attr('src', getAvatar(user.avatar)!='null'?getAvatar(user.avatar):'//static-huiju-new.kuaidao.cn/lark/Lark20200911-112905.png');
+  this.$userPic.attr('src', getAvatar(user.avatar)!='null'?getAvatar(user.avatar):'http://static-huiju-new.kuaidao.cn/lark/Lark20200911-112905.png');
   setCookie('nickName', user.nick);
   setCookie('avatar', user.avatar);
 };
