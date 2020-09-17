@@ -111,8 +111,9 @@ public class ClueRuleController {
     @ResponseBody
     @LogRecord(operationType = OperationType.INSERT, description = "资源释放领取规则",
             menuName = MenuEnum.CLUE_RELEASE_RECEIVE_RULE)
-    public JSONResult<Boolean> insertAndUpdateClueRule(
-            @RequestBody ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO) {
+    public JSONResult<Boolean> insertAndUpdateClueRule(@RequestBody ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO) {
+        UserInfoDTO user = getUser();
+        reqAndReceiveRuleDTO.setOperatorUser(user.getId());
         return ClueRuleFeignClient.insertAndUpdateClueRule(reqAndReceiveRuleDTO);
     }
 
