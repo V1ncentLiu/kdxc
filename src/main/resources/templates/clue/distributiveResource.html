@@ -23,7 +23,7 @@
     <el-row class="marginB20">
         <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
         <shiro:hasPermission name="DistributiveResource:recall">
-	        <el-button type="success" @click="toRecall">撤回</el-button>
+            <el-button type="success" @click="toRecall">撤回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="DistributiveResource:exportCRecord">
             <el-button v-if="isExport1" icon="el-icon-download" type="warning" @click="exportFun(1)">导出电销资源沟通记录</el-button>
@@ -225,20 +225,20 @@
                     <el-form-item label="站点是否为空:">
                         <el-select v-model="form.siteIsNull" placeholder="站点是否为空" clearable >
                             <el-option
-                                v-for="item in comArr"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否自建:">
                         <el-select v-model="form.buildSelf" placeholder="是否自建" clearable >
                             <el-option
-                                v-for="item in buildSelfArr"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
+                                    v-for="item in buildSelfArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -494,7 +494,7 @@
         el: '#optimizeClueManagement',
         data: function() {
             return {
-            	isShowTime:false,
+                isShowTime:false,
                 timer:null,//计时器
                 isExport1:true,
                 isExport2:true,
@@ -574,11 +574,11 @@
                     {value:"1",name:"是"},
                     {value:"0",name:"否"}
                 ],
-                  buildSelfArr:[
+                buildSelfArr:[
                     {value:"",name:"全部"},
                     {value:"1",name:"是"},
                     {value:"0",name:"否"}
-                  ],
+                ],
                 tableData:[],
                 customer:'',
                 basic:'',
@@ -647,15 +647,15 @@
                 });
             },
             initTableData(){
-            	var param = {};
-            	if(!this.isShowTime){
-            		var a = new Date();
+                var param = {};
+                if(!this.isShowTime){
+                    var a = new Date();
                     var year = a.getFullYear();
                     var month = a.getMonth();
                     var date = a.getDate();
                     param.createTimeStart=new Date(year+"-" + month + "-" + date+" 00:00:00");
                     param.createTimeEnd=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
-            	}
+                }
                 var pageSize = this.pager.pageSize;
                 var pageNum = this.pager.currentPage;
                 param.pageNum=pageNum;
@@ -791,14 +791,14 @@
                 if (rows) {
                     rows.forEach(row => {
                         this.$refs.multipleTable.toggleRowSelection(row,true);
-                    });
+                });
                 } else {
                     this.$refs.multipleTable.clearSelection();
                 }
             },
             //跳转编辑页
             toUpdatePage(row) {
-            	var clueId=row.clueId;
+                var clueId=row.clueId;
                 // 存储选中信息--start
                 this.setSessionStore("distributiveResourceStoreForm", this.storeForm);
                 var otherVal = {
@@ -808,7 +808,7 @@
                 }
                 this.setSessionStore("distributiveResourceOtherVal", otherVal);
                 // 存储选中信息--end
-              	document.location.href='/exetend/distributionedTaskManager/toUpdatePage?id='+clueId;
+                document.location.href='/exetend/distributionedTaskManager/toUpdatePage?id='+clueId;
             },
             rowDblClick(row, column, event){
                 //双击查看详情
@@ -996,14 +996,14 @@
                 var pageNum = this.pager.currentPage;
                 param.pageNum=pageNum;
                 param.pageSize=pageSize;
-            	if(!this.isShowTime){
-            		var a = new Date();
+                if(!this.isShowTime){
+                    var a = new Date();
                     var year = a.getFullYear();
                     var month = a.getMonth();
                     var date = a.getDate();
                     param.createTimeStart=new Date(year+"-" + month + "-" + date+" 00:00:00");
                     param.createTimeEnd=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
-            	}
+                }
                 if(this.form.starTime){
                     param.createTimeStart=new Date(this.form.starTime);
                 }
@@ -1037,6 +1037,11 @@
                 param.searchWord = this.form.searchWord;
                 param.sourcetwo = this.form.sourcetwo;
                 param.buildSelf = this.form.buildSelf;
+                param.businessLine = this.form.businessLine;
+                param.operatorId = this.form.operatorId;
+                param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
+                param.categoryList = this.form.resourceTypeList;
+                param.projectList = this.form.resourceProjectList;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -1066,46 +1071,46 @@
                 }
                 var falgNew=falg;
                 axios.post('/exetend/distributionedTaskManager/findCluesCount', param)
-                .then(function (response) {
-                	if(response.data.data>150000){
-                        ocmVM.$message({
-                            message: '选择数据过多，不允许进行一次性导出',
+                    .then(function (response) {
+                        if(response.data.data>150000){
+                            ocmVM.$message({
+                                message: '选择数据过多，不允许进行一次性导出',
+                                type: 'warning'
+                            });
+                            return;
+                        }
+                        ocmVM.$confirm("当前导出数据量为"+response.data.data+"条，确认导出吗？", '提示', {
+                            confirmButtonText: '确认',
+                            cancelButtonText: '取消',
                             type: 'warning'
-                          });
-                		return;
-                	}
-                	ocmVM.$confirm("当前导出数据量为"+response.data.data+"条，确认导出吗？", '提示', {
-                         confirmButtonText: '确认',
-                         cancelButtonText: '取消',
-                         type: 'warning'
-                     }).then(() => {
-                    	
-                    	 if(falg==1){ // 导出电销沟通情况
-                    		 ocmVM.isExport1=false;
-                             // 存localstorage
-                             localStorage.setItem('distributeExport1','1');
-                         }else if(falg==3){ // 导出话务沟通情况
+                        }).then(() => {
+
+                            if(falg==1){ // 导出电销沟通情况
+                            ocmVM.isExport1=false;
+                            // 存localstorage
+                            localStorage.setItem('distributeExport1','1');
+                        }else if(falg==3){ // 导出话务沟通情况
                             ocmVM.isExport3=false;
                             // 存localstorage
                             localStorage.setItem('distributeExport3','3');
                         }else{ // 资源记录
-                        	 ocmVM.isExport2=false;
-                             // 存localstorage
-                             localStorage.setItem('distributeExport2','2');
-                         }
-                    	 ocmVM.timedown();
-                    	 window.parent.distributeExportFun(falgNew,param)
-                     }).catch(() => {
-                         this.$message({
-                             type: 'info',
-                             message: '已取消导出'
-                         });          
-                     });
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
-                
+                            ocmVM.isExport2=false;
+                            // 存localstorage
+                            localStorage.setItem('distributeExport2','2');
+                        }
+                        ocmVM.timedown();
+                        window.parent.distributeExportFun(falgNew,param)
+                    }).catch(() => {
+                            this.$message({
+                            type: 'info',
+                            message: '已取消导出'
+                        });
+                    });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
             },
             timedown(){
                 console.log(0)
@@ -1136,81 +1141,81 @@
                 }
             },
 
-          toRecall() {
-            var rows = this.multipleSelection;
-            if(rows.length < 1){
-              this.$message({
-                message: '请选择至少一条数据进行撤回',
-                type: 'warning'
-              });
-              return;
-            }else{
-              var clueIds =[];
-              if(rows.length == 1) {
-                if (rows[0].phase > 3) {
-                  this.$message({
-                    message: '该资源已分配电销顾问，不可撤回',
-                    type: 'warning'
-                  });
-                  clueIds = [];
-                  return;
-                }
-              } else {
-                for (var i = 0; i < rows.length; i++) {
-                  if (rows[i].phase > 3) {
-                    this.$message({
-                      message: '该批资源包含已分配电销顾问，不可批量撤回',
-                      type: 'warning'
-                    });
-                    clueIds = [];
-                    return;
-                  } else {
-                    clueIds.push(rows[i].clueId);
-                  }
-                }
-              }
-              console.log('撤回'+clueIds);
-              this.$confirm('撤回资源后分配人员不可见，同时该资源转移至待分发资源中，确定将资源撤回?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-              }).then(() => {
-                debugger;
-                var url ='';
-                var param={};
+            toRecall() {
                 var rows = this.multipleSelection;
-                if(rows.length == 1){
-                  param.id=rows[0].clueId;
-                  url = '/exetend/agendaTaskManager/recallClue';
-                }else {
-                  var rows = this.multipleSelection;
-                  param.idList=clueIds;
-                  url = '/exetend/agendaTaskManager/recallClues';
-                }
-                // var param={};
-                // var rows = this.multipleSelection;
-                // param.clueIds=clueIds;
-                axios.post(url,param).then(function (response) {
-                  if(!response||!response.data||response.data.code!='0'){
-                    ocmVM.$message({
-                      message: "接口调用失败",
-                      type: 'error'
+                if(rows.length < 1){
+                    this.$message({
+                        message: '请选择至少一条数据进行撤回',
+                        type: 'warning'
                     });
-                    return ;
-                  }
-                  var resobj= response.data;
-                  ocmVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
-                      ocmVM.initTableData();
-                    }});
+                    return;
+                }else{
+                    var clueIds =[];
+                    if(rows.length == 1) {
+                        if (rows[0].phase > 3) {
+                            this.$message({
+                                message: '该资源已分配电销顾问，不可撤回',
+                                type: 'warning'
+                            });
+                            clueIds = [];
+                            return;
+                        }
+                    } else {
+                        for (var i = 0; i < rows.length; i++) {
+                            if (rows[i].phase > 3) {
+                                this.$message({
+                                    message: '该批资源包含已分配电销顾问，不可批量撤回',
+                                    type: 'warning'
+                                });
+                                clueIds = [];
+                                return;
+                            } else {
+                                clueIds.push(rows[i].clueId);
+                            }
+                        }
+                    }
+                    console.log('撤回'+clueIds);
+                    this.$confirm('撤回资源后分配人员不可见，同时该资源转移至待分发资源中，确定将资源撤回?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        debugger;
+                    var url ='';
+                    var param={};
+                    var rows = this.multipleSelection;
+                    if(rows.length == 1){
+                        param.id=rows[0].clueId;
+                        url = '/exetend/agendaTaskManager/recallClue';
+                    }else {
+                        var rows = this.multipleSelection;
+                        param.idList=clueIds;
+                        url = '/exetend/agendaTaskManager/recallClues';
+                    }
+                    // var param={};
+                    // var rows = this.multipleSelection;
+                    // param.clueIds=clueIds;
+                    axios.post(url,param).then(function (response) {
+                        if(!response||!response.data||response.data.code!='0'){
+                            ocmVM.$message({
+                                message: "接口调用失败",
+                                type: 'error'
+                            });
+                            return ;
+                        }
+                        var resobj= response.data;
+                        ocmVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
+                                ocmVM.initTableData();
+                            }});
+                    });
+                }).catch(() => {
+                        this.$message({
+                        type: 'info',
+                        message: '已取消操作'
+                    });
                 });
-              }).catch(() => {
-                this.$message({
-                  type: 'info',
-                  message: '已取消操作'
-                });
-              });
-            }
-          },
+                }
+            },
             setSessionStore (name, content) {
                 if (!name) return
                 if (typeof content !== 'string') {
@@ -1231,22 +1236,22 @@
                 return window.sessionStorage.removeItem(name)
             },
             search(){
-            	this.isShowTime = true;
-            	this.initTableData();
+                this.isShowTime = true;
+                this.initTableData();
             }
         },
         mounted(){
-        	document.getElementById('optimizeClueManagement').style.display = 'block';
+            document.getElementById('optimizeClueManagement').style.display = 'block';
         },
         created(){
 
-        /*   var a = new Date();
-          var year = a.getFullYear();
-          var month = a.getMonth();
-          var date = a.getDate();
-          
-          this.form.starTime=new Date(year+"-" + month + "-" + date+" 00:00:00");
-          this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59"); */
+            /*   var a = new Date();
+              var year = a.getFullYear();
+              var month = a.getMonth();
+              var date = a.getDate();
+
+              this.form.starTime=new Date(year+"-" + month + "-" + date+" 00:00:00");
+              this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59"); */
             var storageDistributeExport1 = localStorage.getItem("distributeExport1");
             var storageDistributeExport2 = localStorage.getItem("distributeExport2");
             var storageDistributeExport3 = localStorage.getItem("distributeExport3");

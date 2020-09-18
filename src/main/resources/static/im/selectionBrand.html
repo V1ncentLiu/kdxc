@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/selectionBrand.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="../3rd/jquery-1.11.3.min.js"></script>
+
+</head>
+
+<body>
+    <div class="selectionBrandBar" id="selectionBrandBar">
+        <div class="selectionBrandSearch">
+            <input autocomplete="off" v-on:keyup.enter="inputSearch" maxlength="15" v-model="inputValue" id="selectionBrandSearchInput" class="selectionBrandSearchInput" type="text"
+                placeholder="请输入品牌关键字">
+            <span><img @click="inputSearch" style="cursor: pointer;" src="images/newImages/fada@3x.png" alt=""></span>
+        </div>
+        <div class="selectionBrandSelect">
+            <ul>
+                <li>餐盟分类：</li>
+                <li :class="{'active':item.id==classificationAllianceNum}"
+                    v-for="(item,index) in classificationAlliance" :key="item.id"
+                    @click="classificationAllianceClick(item)">{{item.name}}</li>
+            </ul>
+            <br />
+            <ul>
+                <li>投资区间：</li>
+                <li :class="{'active':item.num==investmentRangeNum}" v-for="(item,index) in investmentRange"
+                    :key="item.num" @click="investmentRangeClick(item)">{{item.name}}</li>
+            </ul>
+        </div>
+        <div class="selectionBrandContent">
+            <ul>
+                <li :key="item.id" v-for="(item,index) in brandList" @click="submitBrand(item)">
+                    <img :src="item.logo" alt="">
+                    <span>{{showLittleBit(item.brandName)}}</span>
+                </li>
+                <li v-if="isBrandList" style="width:95%;padding-top: 60px;">暂无匹配品牌</li>
+            </ul>
+            <div class="leftSanjiao" @click="turnPpage('pre')">
+                <!-- <img class="imgSanjiao" src="./images/newImages/arrow@3x.png" alt=""> -->
+            </div>
+            <div class="rightSanjiao" @click="turnPpage('next')">
+                <!-- <img class="imgSanjiao" src="./images/newImages/arrow@3x.png" alt=""> -->
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script th:inline="javascript">
+    var vm = new Vue({
+        el: '#selectionBrandBar',
+        data: {
+            classificationAlliance: [],
+            investmentRange: [
+                { name: '全部', num: 0,joinInvestMin:'',joinInvestMax:'' },
+                { name: '10-20万', num: 1,joinInvestMin:'10',joinInvestMax:'20'  },
+                { name: '20-30万', num: 2,joinInvestMin:'20',joinInvestMax:'30'  },
+                { name: '30-50万', num: 3,joinInvestMin:'30',joinInvestMax:'50'  },
+                { name: '50万以上', num: 4,joinInvestMin:'50',joinInvestMax:''  },
+            ],
+            brandList:[],
+            classificationAllianceNum: 0,
+            investmentRangeNum: 0,
+
+            inputValue: '',
+            pageNum:1,
+            brandNameCategory:'',
+            investmentRangeNumData:'',
+            pages:'',
+            isBrandList:true
+        },
+        methods: {
+            showLittleBit(value){
+                if(value.length>5){
+                    value=value.toString().slice(0,5)+'...'
+                }
+                return value
+            },
+            classificationAllianceClick(data) {
+                this.classificationAllianceNum = data.id
+                this.brandNameCategory=data.id
+                this.pageNum=1
+                this.initDataBrandList()
+            },
+            investmentRangeClick(data) {
+                this.investmentRangeNum = data.num
+                this.investmentRangeNumData = data
+                this.pageNum=1
+                this.initDataBrandList()
+            },
+            turnPpage(type) {
+                if (type == 'pre') {
+                    if(this.pageNum>1){
+                        this.pageNum-=1
+                    }else{
+                        this.pageNum=1
+                    }
+                } else if (type == 'next') {
+                    console.log(this.pageNum,this.pages,type);
+                    if(this.pageNum<this.pages){
+                        this.pageNum+=1
+                    }else{
+                        this.pageNum=this.pages
+                    }
+                }
+                this.initDataBrandList()
+            },
+            inputSearch() {
+                this.pageNum=1
+                this.initDataBrandList()
+            },
+            submitBrand(data){
+                window.parent.postMessage(JSON.stringify(data), '*');
+            },
+            initDataBrandClassification(){
+                var that=this
+                $.ajax({
+                    url: '/brand/brandCategory/list',
+                    type: 'GET',
+                    contentType: "application/json",
+                    success: function (data) {
+                        if(data.data){
+                            that.classificationAlliance=data.data
+                            that.classificationAlliance.unshift({name:'全部',id:''})
+                        }
+                    },
+                    error: function () {
+                    }
+                })
+            },
+            initDataBrandList(){
+                let that=this
+                let params={
+                    pageSize:12,
+                    pageNum:this.pageNum,
+                    joinInvestMin:this.investmentRangeNumData.joinInvestMin||'',
+                    joinInvestMax:this.investmentRangeNumData.joinInvestMax||'',
+                    brandCategory:this.brandNameCategory||'',
+                    brandName:this.inputValue||'',
+                }
+                console.log(params);
+                $.ajax({
+                    url: '/brand/listBrand',
+                    type: 'POST',
+                    data: JSON.stringify(params),
+                    contentType: "application/json",
+                    success: function (data) {
+                        if(data.data){
+                            that.brandList=data.data.list
+                            that.pages=data.data.pages
+                        }
+                        if(that.brandList.length>0){
+                            that.isBrandList=false
+                        }else{
+                            that.isBrandList=true
+                        }
+                    },
+                    error: function () {
+
+                    }
+                })
+
+               
+            }
+        },
+        created() {
+            var obj = {
+                value: '我是子页面传过来的参数'
+            };
+            this.initDataBrandClassification()
+            this.initDataBrandList()
+            
+        }
+    })
+
+
+</script>

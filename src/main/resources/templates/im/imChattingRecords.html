@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>IM聊天记录</el-breadcrumb-item>
+    </el-breadcrumb>    
+    <el-row class="marginB20">        
+         <shiro:hasPermission name="statistics:teleSaleTalkTime:export"> 
+        <el-button type="danger" @click="exportRs">导出</el-button>   
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">  
+                <el-form-item label="会话内容:"> 
+                    <el-input v-model="form.body" placeholder="会话内容"></el-input>
+                </el-form-item>  
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleGorupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup">
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="会话顾问:">  
+                    <el-select v-model="form.teleSaleId" placeholder="会话顾问" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in teleSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                          
+                <el-form-item label="聊天时间:">
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" v-model="form.chatBegin" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" v-model="form.chatEnd" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>   
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
+                </div>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                <el-table-column prop="teleGorupName" align="center" label="电销组">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="会话顾问" width="120">
+                </el-table-column>
+                <el-table-column prop="cusName" align="center" label="会话客户">
+                </el-table-column>
+                <el-table-column prop="msgTimestamp" align="center" label="聊天时间" width="130">
+                </el-table-column>
+                <el-table-column prop="body" align="center" label="聊天内容">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.msgType === 'VIDEO'">
+                            【视频】:  <a :href="JSON.parse(scope.row.attach ).url" target="_blank" class="buttonText" style="color: #1E9FFF">点击查看视频</a>
+                        </div>
+                        <div v-else-if="scope.row.msgType === 'PICTURE'">
+                            【图片】:  <a :href="JSON.parse(scope.row.attach ).url" target="_blank" class="buttonText" style="color: #1E9FFF">点击查看图片</a>
+                        </div>
+                        <div v-else-if="scope.row.msgType === 'FILE'">
+                            【文件】:  <a :href="JSON.parse(scope.row.attach ).url" target="_blank" class="buttonText" style="color: #1E9FFF">点击查看文件</a>
+                        </div>
+                        <div v-else-if="scope.row.msgType === 'AUDIO'">
+                            {{scope.row.body}}<br>
+                            <video width="250" height="20" controls>
+                                <source :src="JSON.parse(scope.row.attach ).url" type="video/mp4">
+                            </video>
+                        </div>
+                        <div v-else>
+                            {{scope.row.body}}
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+        </el-row>
+    </div>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var queryOrg=[[${dzList}]]; // 电销组
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                loading: false,
+                isDisabled: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
+                form: {
+                    body: '',
+                    teleGorupId: '',
+                    teleSaleName: '',
+                    chatBegin: '',
+                    chatEnd: '',
+                },
+                export: {
+                    body: '',
+                    teleGorupId: '',
+                    teleSaleName: '',
+                    chatBegin: '',
+                    chatEnd: '',
+                },
+                tableData: [],
+                orgTeleArr: queryOrg, // 电销组
+                teleSaleArr: [], // 顾问
+            }             
+        },
+        methods: {
+            changeTeleGroup(selectedValue) {//改变电销组
+                this.teleSaleArr = [];
+                if (!selectedValue) {
+                    return;
+                }
+                var param = {};
+                param.orgId = selectedValue;
+                axios.post('/business/busAllocation/getSaleList', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        var table = result.data;
+                        mainDivVM.teleSaleArr = table;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },       
+            searchTable() { 
+                var startTime = this.form.chatBegin;
+                var endTime = this.form.chatEnd;
+                if(endTime && startTime){
+                    
+                    if(startTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    var startTime1 = new Date(this.form.chatBegin);
+                    var endTime1 = new Date(this.form.chatEnd);
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59:59");
+                    date.setMonth(date.getMonth()-6);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime1 < beforeSixMonthRes || endTime1 > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择起止时间',
+                        type: 'warning'
+                    });
+                    return;
+                } 
+                var param = {};
+                param.chatBegin = startTime;
+                param.chatEnd = endTime;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.body = this.form.body;
+                param.teleGorupId = this.form.teleGorupId;
+                param.teleSaleId = this.form.teleSaleId;
+                this.loading = true; 
+                axios.post('/message/im/getChatRecordPage',param).then(function (response) {   
+                    mainDivVM.loading = false;  
+                    console.log(response)
+                    var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        // if(table){// 转换数据显示类型
+                        //     for(var i = 0 ; i < table.length ; i++){
+                        //         var msgType = table[i].msgType;
+                        //         if(msgType == "AUDIO"){
+                        //         }else if(msgType == "VIDEO"){
+                        //             var split = table[i].body.split(":");
+                        //             var splitElement1 = split[0];
+                        //             var splitElement2 = split[1];
+                        //             table[i].body = "["+split[0]+"]:"+"<a href='"+split[1]+"' >"+split[1]+"</a>"
+                        //         }else if(msgType == "PICTURE"){
+                        //             var split = table[i].body.split(":");
+                        //             var splitElement1 = split[0];
+                        //             var splitElement2 = split[1];
+                        //             table[i].body = "["+split[0]+"]:"+"<a href='"+split[1]+"' >"+split[1]+"</a>"
+                        //         }
+                        //     }
+                        // }
+                        mainDivVM.tableData= table;
+                        mainDivVM.pager.total =  result.total;
+                        mainDivVM.pager.currentPage = result.pageNum;
+                        // 给导出参数赋值
+                        mainDivVM.export.chatBegin = mainDivVM.form.chatBegin;
+                        mainDivVM.export.chatEnd = mainDivVM.form.chatEnd;
+                        mainDivVM.export.body = mainDivVM.form.body;
+                        mainDivVM.export.teleGorupId = mainDivVM.form.teleGorupId;
+                        mainDivVM.export.teleSaleName = mainDivVM.form.teleSaleName;
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }   
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            timeFormat(row, column) { // 时间格式化：时分秒fn                
+                var time = row.msgTimestamp;
+                if(!time){return "";}
+                var timeResult = this.getCaption(time,0);
+                return timeResult;
+            },
+            getCaption(obj,state) {
+                var index=obj.lastIndexOf("\.");
+                if(state==0){
+                    obj=obj.substring(0,index);
+                }else {
+                    obj=obj.substring(index+1,obj.length);
+                }
+                return obj;
+            },
+            exportRs(){
+                // 判断不能超过一天
+
+                var param = {};
+                param.body = this.export.body;
+                param.teleGorupId = this.export.teleGorupId;
+                param.teleSaleName =  this.export.teleSaleName; 
+                param.chatBegin = this.export.chatBegin;
+                param.chatEnd = this.export.chatEnd;
+                axios.post('/message/im/export',param,{responseType:'blob'})
+                    .then(function (response) {
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
+            }
+        },
+        created(){
+            // 默认进入显示当天时间
+            var today = new Date();
+            var startTime = moment(today).format("YYYY-MM-DD 00:00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59:59");
+            this.form.chatBegin=startTime;
+            this.form.chatEnd=endTime; 
+            this.export.chatBegin = this.form.chatBegin;
+            this.export.chatEnd = this.form.chatEnd;
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>

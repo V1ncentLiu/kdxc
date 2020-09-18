@@ -28,7 +28,7 @@
                 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
                 <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户</el-button>
                 <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button>
-                <!-- <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button> -->
+                <el-button v-show="isShowOnlineRecordBtn" type="warning" @click="showOnlineRecord" style="margin-left: 10px;">在线聊天记录</el-button>
                 <el-button type="warning" @click="showOnlineRecord" style="margin-left: 10px;display: none;">在线聊天记录</el-button>
             </div>
 
@@ -296,12 +296,12 @@
                     </el-col>
                 </shiro:hasPermission>
                 <el-col :span="4" :offset="4" class="f-tar">
-                    <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow"><span v-if="addButtons">取消添加</span><span v-else>取消编辑</span></span><span v-else>添加</span>
+                    <el-button size="small" type="primary" @click="lineFormShowFun()"><span v-if="lineFormShow"><span v-if="addButtons">取消添加</span><span v-else>取消编辑</span></span><span v-else>添加</span>
                     </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                 </el-col>
             </el-row>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
+                <el-table ref="tableDataC2" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
                     <el-table-column prop="id" type="selection" width="50" @selection-change="handleTrackingSelection" align="center"></el-table-column>
                     <el-table-column prop="callTime" label="跟进时间" align="center" min-width="12%">
                     </el-table-column>
@@ -829,30 +829,37 @@
     </el-dialog>
     <!-- 在线聊天记录弹窗 -->
     <el-dialog title="在线聊天记录"  :visible.sync="onlineRecordDialogVisible" width="1000px" class="onlineRecordDialog">
-        <p class="marginB10"><span>客户姓名：<em v-if="customerInfo">{{customerInfo.cusName}}</em></span><span style="margin-right:100px;"></span><span class="onlineService">在线客服：</span><span></span></p>
-        <p class="marginB10">聊天内容：</p>
         <div class="borderbox padding10">
-            <!-- <div class="listBox listScroll"> -->
-            <div :class="['listBox',{'listScroll':isActive}]">
+            <div class="listBox listScroll">
+            <!-- <div :class="['listBox',{'listScroll':isActive}]"> -->
                 <ul>
                     <li  v-for="(item,i) in onlineRecordData" :key="item.id">
                         <!-- 发送类型 0-自己发送，1-对方发送 -->
-                        <p class="padding10 bluecolor" v-if="item.fromType==0">
-                            <span class="marginR10">在线客服</span>
-                            <span>{{item.messageTime}}</span>
+                        <!-- /* 1、顾问为发送方 2、客户为发送方*/ -->
+                        <p class="padding10 bluecolor" v-if="item.cusIs==1">
+                            <span class="marginR10">{{item.teleSaleName}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p class="padding10 yellowcolor" v-else>
-                            <span class="marginR10"><em v-if="customerInfo">{{customerInfo.cusName}}</em></span>
-                            <span>{{item.messageTime}}</span>
+                            <span class="marginR10">{{item.cusName}}</span>
+                            <span>{{item.msgTimestamp}}</span>
                         </p>
                         <p style="padding:0 10px;">
-                            <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span>
-                            <span v-else>{{item.message}}</span>
+                            <!-- <span v-if="item.messageType==3"><img :src="item.message" alt="" class="maxWidth500"></span> -->
+                            <span v-if="item.msgType === 'VIDEO'">【视频】:  <a :href="JSON.parse(item.attach ).url" target="_blank" style="color: #1E9FFF">点击查看视频</a>
+                            </span>
+                            <span v-if="item.msgType === 'PICTURE'">【图片】:  <a :href="JSON.parse(item.attach ).url" target="_blank" style="color: #1E9FFF">点击查看图片</a>
+                            </span>
+                            <span v-if="item.msgType === 'FILE'">【文件】:  <a :href="JSON.parse(item.attach ).url" target="_blank" style="color: #1E9FFF">点击查看文件</a>
+                            </span>
+                            <span v-if="item.msgType === 'AUDIO'"><!-- {{item.body}}<br> --><video width="250" height="20" controls><source :src="JSON.parse(item.attach ).url" type="video/mp4"></video>
+                            </span>
+                            <span v-else>{{item.body}}</span>
                         </p>
                     </li>
                 </ul>
             </div>
-            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
+            <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多聊天内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
     <!--添加客户跟进备注-->
@@ -1023,7 +1030,7 @@
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
-                isShowOnlineRecordBtn:false,
+                isShowOnlineRecordBtn:true,
                 onlineRecordData:[],
                 onlineRecordDialogVisible:false,
                 showAddDomainBtn:true,
@@ -1331,42 +1338,80 @@
                 tableDataC2: trackingList,//跟进记录
                 tableDataC3: callRecord,  //通话记录
                 tableDataC4: circulationList,//流转记录
-                tableDataC5:telCreatePhoneAudits//流转记录
-            }
+                tableDataC5:telCreatePhoneAudits,//流转记录
+                pageNum2:2,
+            }           
         },
         methods: {
             isActiveFun(){
-                this.isActive=true;
-                this.isShowMoreBtn=false;
+                // this.isActive=true;
+                // this.isShowMoreBtn=false;
+                var param = {};
+                param.cusId = clueId;
+                param.pageNum = this.pageNum2++;
+                param.pageSize = 10;
+                console.log(param)
+                // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                axios.post('/message/im/listChatRecord', param).then(function (response) {    
+                    var recordData=response.data;
+                    if(recordData){
+                        var dataList=recordData.data
+                        if(dataList){                            
+                            addCustomerVM.onlineRecordData.push(...dataList);
+                            for(var i=0;i<dataList.length;i++){
+                                if(dataList[i].msgTimestamp){
+                                    dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
+                                }
+                            } 
+                                                    
+                        }
+                        // 大于一页显示更多按钮
+                        if(recordData.pages>1){
+                            addCustomerVM.isShowMoreBtn=true;
+                        }else{
+                            addCustomerVM.isShowMoreBtn=false;
+                        } 
+                        if(recordData.pages==param.pageNum){//请求页数和总页数相等
+                            addCustomerVM.isShowMoreBtn=false;
+                        }
+                    }else{
+                        addCustomerVM.$message({
+                            message: recordData.msg,
+                            type: 'warning'
+                        });
+                    }
+
+                });
             },
             showOnlineRecord(){
                 this.onlineRecordDialogVisible=true;
             },
             initData(){
                 var param = {};
-                param.clueId = clueId;
+                param.cusId = clueId;
                 param.pageNum = 1;
                 param.pageSize = 10;
-                axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
+                axios.post('/message/im/listChatRecord', param).then(function (response) {    
                     var recordData=response.data;
                     if(recordData){
                         var dataList=recordData.data
                         if(dataList){
+                            addCustomerVM.isShowOnlineRecordBtn=true;
                             addCustomerVM.onlineRecordData=dataList;
                             for(var i=0;i<dataList.length;i++){
-                                if(dataList[i].messageTime){
-                                    dataList[i].messageTime=addCustomerVM.formatTimeFn(dataList[i].messageTime);
+                                if(dataList[i].msgTimestamp){
+                                    dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
                                 }
-                            }
-                            if(dataList.length>0){
-                                addCustomerVM.isShowOnlineRecordBtn=true;
-                                if(dataList.length>10){
-                                    addCustomerVM.isShowMoreBtn=true;
-                                }else{
-                                    addCustomerVM.isShowMoreBtn=false;
-                                }
-                            }
+                            } 
+                                                    
                         }
+                        // 大于一页显示更多按钮
+                        if(recordData.pages>1){
+                            addCustomerVM.isShowMoreBtn=true;
+                        }else{
+                            addCustomerVM.isShowMoreBtn=false;
+                        } 
                     }else{
                         addCustomerVM.$message({
                             message: recordData.msg,
@@ -1500,7 +1545,7 @@
                 addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
                     addCustomerVM.uploadParamData.realName= file.name
             },
-            lineFormShowFun() {
+            lineFormShowFun(rows) {
             	this.isDisabledCustomer = false;
                 if(this.lineFormShow){
                     this.lineFormShow = false
@@ -1516,6 +1561,15 @@
                 this.callDetailsText="";
                 //this.formInline.callTime =new Date(teleEndTime);
                 this.formInline.callTime =new Date();
+                // 清除编辑状态
+                isEdit=false;
+                if (rows) {//清除选中状态
+                  rows.forEach(row => {
+                    this.$refs.tableDataC2.toggleRowSelection(row);
+                  });
+                } else {
+                  this.$refs.tableDataC2.clearSelection();
+                }
             },
             async gettelNumberIcon(tel) {
             	var isReturn =false;
@@ -2801,7 +2855,7 @@
             switchSoundBtn(id, url, callSource) {
                 // 播放器显示
                 // this.audioShow=true;
-                if (callSource == '2') {
+                if (callSource == '2'  || callSource=='7' ) {
                     // switchSound(id, url);
                     window.parent.open(url)
                     return;
@@ -2860,6 +2914,10 @@
                                 }else if(callSource=='3'  ||callSource =='5'){
                                     decodeUrl = encodeURI(url);
                                   url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                                }else if(callSource == 7){
+                                    var httpUrl = url.replace("https","http");
+                                    window.parent.open(httpUrl);
+                                    return;
                                 }
                                 var x = new XMLHttpRequest();
                                 x.open("GET", url, true);

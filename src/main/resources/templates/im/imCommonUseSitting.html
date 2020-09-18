@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <style>
+        .titleBox{font-size: 14px;margin-bottom: 10px;border-bottom: 1px solid #ecedf2;padding-bottom: 10px;}
+        .titleBox span{border-left: 3px solid #ecedf2;padding-left: 20px;height: 20px;line-height: 20px;}
+        .el-form-item__label{font-size: 14px;}
+        .tip{color: #c0c4cc;}
+        .el-card{border: none;margin-bottom: 10px;width: 500px;height: 30px;line-height: 30px;padding-left: 10px;}
+        .el-card__body{padding:0;}
+        .el-form-item__error{padding-top: 4px;}
+        .draggableUl{overflow: hidden;}
+        .draggableUl li{min-height: 30px;}
+        .draggableUl li .cnt{padding: 5px;border:1px dashed #fff;min-width: 300px;display: inline-block;font-size: 14;}
+        .draggableUl li:hover .cnt{border:1px dashed #ecedf2;font-size: 14;}
+        .draggableUl .el-form:hover,.draggableUl .el-form-item:hover,.draggableUl .el-form-item .el-form-item__content:hover,.draggableUl .el-form-item .el-input__inner:hover,.draggableUl .el-textarea__inner{cursor: move!important;}
+        /*.draggableUl .el-textarea__inner{height: auto!important;}*/
+        .round{width: 20px;height: 20px;border-radius: 50%;border: 1px solid;text-align: center;display: inline-block;line-height: 20px;margin-right: 10px;}
+        .dynamic .el-input{width: 680px;}
+        .tipicon{position: absolute;left: 228px;top: 39px;width: 16px;height: 16px;background: #e67020;text-align: center;line-height: 16px;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
+        .tipcnt{position: absolute;left: 255px;top: 40px;z-index: 3;font-size: 12px;width: 348px;}
+        .tipicon1{position: absolute;left: 175px;top: 8px;width: 18px;height: 18px;text-align: center;line-height: 18px;/*border:1px solid #5c6be8;*/background:#5c6be8;color: #fff;border-radius: 50%;z-index: 5;cursor: default;}
+        .tipcnt1{position: absolute;left: 200px;top: -5px;z-index: 5;width: 430px;padding: 10px 15px 10px 6px;background: #f5f7fa;    border-radius: 5px;font-size: 14px;line-height: 1.5;margin-bottom: 20px;overflow: hidden;}
+        .tipcnt1 span{width: 16px;height: 16px;border:1px solid #5c6be8;color: #5c6be8;border-radius: 50%;float: left;text-align: center;line-height: 16px;margin: 3px 10px 0 0;}
+        .tipcnt1 p{float: left;}
+        .tipcontent{width: 654px;padding: 10px 15px;background: #f5f7fa;border-radius: 5px;font-size: 14px;line-height: 1.5;margin-bottom: 20px;overflow: hidden;}
+        .tipcontent span{width: 16px;height: 16px;border:1px solid #5c6be8;color: #5c6be8;border-radius: 50%;float: left;text-align: center;line-height: 16px;margin: 3px 10px 0 0;}
+        .tipcontent p{width: 625px;float: left;}
+        .floatL .el-form-item__label{text-align: left;}
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>IM常用设置</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <div class="mainSearchBg marginB20 fs14">         
+        <el-row class="mainSearchForm">   
+            <template style="position: relative;">
+                <div class="titleBox"><span class="fs16">常用语设置</span></div>
+                <!-- <span class="tipicon" @mouseover="mouseOverTip" @mouseout="mouseLeaveTip">?</span> -->
+                <!-- <p class="tipcnt" v-show="isshowTipcnt">常用语为用户常问的问题。在用户进入时，推出自动开场语与常用语。同时，点击聊窗中底部标签【常用语】，也可查看相关内容</p> -->
+                <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+                    <el-tab-pane label="顾问常用语设置" name="first">
+                        <div class="marginB20">
+                            <el-button  @click="addDomain1" type="success" size="small" icon="el-icon-plus" :disabled="isDisabled">添加顾问常用语</el-button>
+                        </div> 
+                        <el-form :model="dynamicValidateForm1" ref="dynamicValidateForm1" label-width="100px" class="dynamic" @mouseenter.native="mouseOver" @mouseleave.native="mouseLeave" @submit.native.prevent>
+                            <draggable element="ul" v-model="dynamicValidateForm1.domains" class="draggableUl" @end.native="endEvent">
+                                <el-form-item
+                                    v-for="(domain, index) in dynamicValidateForm1.domains"
+                                    :label=" index+1 + '、'"
+                                    :key="domain.key"
+                                    :prop="'domains.' + index + '.comText'"
+                                    :rules="[
+                                      { max: 100, message: '顾问常用语最多不能超过100字', trigger: 'change' },
+                                    ]"
+                                    label-width="30px"
+                                    style="margin-bottom: 20px;"                                     
+                                    >
+                                    <el-input type="textarea"  autosize v-model="domain.comText" style="margin-right: 10px;width: 655px;" @keyup.enter.native="submitdialogForm1('dynamicValidateForm1',domain,$event)"  :disabled="domain.iptDisabled" placeholder="请输入常用语内容，点击回车保存"></el-input>
+                                    <!-- <el-button type="warning" @click.prevent="editDomain1(domain)" icon="el-icon-edit-outline" v-if="isShowEdit">编辑</el-button>  -->
+                                    <el-button type="danger" @click.prevent="removeDomain1(domain)" icon="el-icon-delete" v-if="isShowEdit">删除</el-button>          
+                                </el-form-item>
+                            </draggable>
+                        </el-form>
+                       
+                        <!-- 输出list数据 -->
+                        <!-- {{dynamicValidateForm1.domains}} -->
+                    </el-tab-pane>
+                    <el-tab-pane label="客户常用语" name="second">
+                        <div class="tipcontent">
+                            <span>!</span><p>常用语为用户常问的问题。在用户进入时，推出自动开场语与常用语。同时，点击聊窗中底部标签【常用语】，也可查看相关内容</p></div>
+                        <el-button  @click="addDomain2" type="success" size="small" class="marginB20" icon="el-icon-plus" :disabled="isDisabled2">添加客户常用语</el-button>
+                        <el-form :model="dynamicValidateForm2" ref="dynamicValidateForm2" label-width="100px" class="dynamic" @mouseenter.native="mouseOver2" @mouseleave.native="mouseLeave2" @submit.native.prevent>
+                            <draggable element="ul" v-model="dynamicValidateForm2.domains" class="draggableUl" @end.native="endEvent2">
+                                <el-form-item
+                                    v-for="(domain, index) in dynamicValidateForm2.domains"
+                                    :label=" index+1 + '、'"
+                                    :key="domain.key"
+                                    :prop="'domains.' + index + '.comText'"
+                                    :rules="[
+                                      { max: 100, message: '客户常用语最多不能超过100字', trigger: 'change' },
+                                    ]"
+                                    label-width="30px"
+                                    style="margin-bottom: 20px;" 
+                                    
+                                    >
+                                    <el-input type="textarea"  autosize v-model="domain.comText" style="margin-right: 10px;width: 655px;" @keyup.enter.native="submitdialogForm2('dynamicValidateForm2',domain,2)"  :disabled="domain.iptDisabled" placeholder="请输入常用语内容，点击回车保存"></el-input>
+                                    <!-- <el-button type="warning" @click.prevent="editDomain2(domain)" icon="el-icon-edit-outline" v-if="isShowEdit2">编辑</el-button>  -->
+                                    <el-button type="danger" @click.prevent="removeDomain1(domain,2)" icon="el-icon-delete" v-if="isShowEdit2">删除</el-button>          
+                                </el-form-item>
+                            </draggable>
+                        </el-form>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>          
+        </el-row>
+    </div>
+    <div class="mainSearchBg fs14">
+        <el-form :model="form" class="mainSearchForm" ref="form">
+            <el-row>
+                <div class="titleBox"><span class="fs16">自动回复设置</span></div>
+                <el-form-item label="开场白设置：" :label-width="labelWidth"> 
+                    <el-button  @click="editPrologue" type="primary"  size="small">编辑开场白</el-button>
+                </el-form-item>
+                <!-- 开场白list -->
+                <el-form-item label="" :label-width="labelWidth"> 
+                    <ul>
+                        <li v-for="(item,index) in prologuesArr"><span class="round">{{index+1}}</span><span class="cnt">{{item.content}}</span></li>
+                    </ul>
+                    
+                </el-form-item>
+                <el-form-item label="超时自动回复设置：" :label-width="labelWidth"> 
+                    <el-radio-group v-model="form.timeOutEnable" @change="timoutChange">
+                        <el-radio  label="1">启用</el-radio>
+                        <el-radio  label="0">禁用</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="超时自动回复时间：" :label-width="labelWidth"> 
+                    <el-input v-model="form.timeOut" placeholder="" style="margin-right: 10px;" :disabled="timeoutDisabled"></el-input>秒
+                </el-form-item>
+                <el-form-item label="超时自动回复内容：" :label-width="labelWidth"> 
+                    <el-input type="textarea" v-model="form.content" maxlength="500" :rows="3" style="width: 488px;" placeholder="请输入超时自动回复话术" :disabled="timeoutDisabled"></el-input>
+                    <p class="tip">不超过500个字</p>
+                </el-form-item>
+                <el-form-item label="非工作时间自动回复设置：" :label-width="labelWidth"> 
+                    <el-radio-group v-model="form.nonWorktimeEnable" @change="nonWorkChange">
+                        <el-radio  label="1">启用</el-radio>
+                        <el-radio  label="0">禁用</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="非工作时间段：" :label-width="labelWidth">
+                    <span>每日</span>
+                    <el-time-picker
+                        v-model="form.startTime"
+                        :picker-options="{
+                          selectableRange: '00:00:00 - 23:59:59'
+                        }"
+                        placeholder="每日" :disabled="nonWorkDisabled">
+                    </el-time-picker>
+                    <span>——</span>
+                    <span>次日</span>
+                    <el-time-picker
+                        v-model="form.endTime"
+                        :picker-options="{
+                          selectableRange: '00:00:00 - 23:59:59'
+                        }"
+                        placeholder="次日" :disabled="nonWorkDisabled">
+                    </el-time-picker>
+                </el-form-item>                
+                <el-form-item label="非工作时间自动回复内容：" :label-width="labelWidth"> 
+                    <el-input type="textarea" v-model="form.content1" maxlength="500" :rows="3" style="width: 488px;" placeholder="请输入非工作时间自动回复话术" :disabled="nonWorkDisabled"></el-input>
+                    <p class="tip">不超过500个字</p>
+                </el-form-item>                
+                <div style="position: relative;">
+                    <span class="tipicon1" @mouseover="mouseOverTip1" @mouseout="mouseLeaveTip1">!</span>
+                    <div class="tipcnt1" v-show="isshowTipcnt1">
+                        <!-- <span>!</span> -->
+                        <p>在顾问将状态改为忙碌或离线时，回复该话术。设置自动回复语时，“##电话号码##”放到文中，可动态获取当前顾问的手机号</p>
+                    </div>
+                    <el-form-item label="离线/忙碌状态自动回复语：" :label-width="labelWidth" class="floatL"> 
+                        <el-input type="textarea" v-model="form.content2" maxlength="500" :rows="3" style="width: 488px;"></el-input>
+                        <p class="tip">不超过500个字</p>
+                    </el-form-item>
+                </div>
+                
+            </el-row>
+            <div class="padding20 f-tac">            
+                <el-button type="primary" @click="submitForm('form')">保存设置</el-button>
+                <el-button @click="cancelForm()">取消修改</el-button>
+            </div> 
+        </el-form>
+    </div>
+    <!-- dialog -->
+    <el-dialog  title="编辑开场白"  :visible.sync="dynamicVisible" width="800px" :close-on-click-modal="false">
+        <template>
+            <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
+                <el-button type="success" @click="addDomain" style="margin-bottom: 10px;">添加</el-button>
+                <el-form-item
+                    v-for="(domain, index) in dynamicValidateForm.domains"
+                    :key="domain.key"
+                    :prop="'domains.' + index + '.content'"
+                    :rules="{
+                      required: true, message: '开场白文字不允许为空', trigger: 'blur'
+                    }"
+                  >
+                    <el-input type="textarea" maxlength="500" style="width: 600px;margin-right: 10px;" :rows="4" placeholder="请输入开场白话术，不超过500字" v-model="domain.content"></el-input>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-if="isshowDelete">删除</el-button>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="submitdialogForm('dynamicValidateForm')">提 交</el-button>
+                <el-button  @click="cancelForm()">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+</div>
+
+<input id="addOrUpdate" type="hidden" >
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<!-- <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script> -->
+<!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+</body>
+<script th:inline="javascript">    
+    var userLangList=[[${userLangList}]]; // 用户
+    var saleLangList = [[${saleLangList}]];//顾问
+    var kaichangList = [[${kaichangList}]];//开场白
+    var timeOut = [[${timeOut}]];//超时
+    var noWork = [[${noWork}]];//noWork
+    var lixian = [[${lixian}]];//lixian
+
+    console.log(userLangList)
+    console.log(saleLangList)
+    console.log(kaichangList)
+    console.log(timeOut)
+    console.log(noWork)
+    console.log(lixian)
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                loading: false,
+                isDisabled: false,
+                isDisabled2: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
+                tableData: [],
+                activeName: 'first',//
+                dynamicValidateForm1: {//常用语设置
+                    domains: [],
+                },
+                dynamicValidateForm2: {//常用语设置
+                    domains: [],
+                },
+                labelWidth:"200px",
+                isShowEdit:false,
+                isShowEdit2:false,
+                // iptDisabled:false,
+                // iptDisabled2:false,
+                dynamicVisible:false,//开场白弹窗
+                dynamicValidateForm: {
+                    domains: [{
+                        content: ''
+                    }],
+                },
+                isshowDelete:false,
+                prologuesArr:[],//开场白                
+                form: {//自动回复设置
+                    timeOutEnable:'0',//超时自动回复设置
+                    timeOut:'',//超时自动回复时间
+                    content:'',//超时自动回复内容
+                    nonWorktimeEnable:'0',//非工作时间自动回复设置
+                    startTime:'',//非工作时间段
+                    endTime:'',
+                    noWork:'',//非工作时间自动回复内容
+                    lixian:'',//离线/忙碌状态自动回复语
+                    content1:'',//非工作时间自动回复内容
+                    content2:'',//离线自动回复内容
+                    id:'',
+                    id1:'',
+                    id2:'',
+                },
+                realList:{},
+                realList2:{},
+                isshowTipcnt:false,
+                isshowTipcnt1:false,
+                timeoutDisabled:true,
+                nonWorkDisabled:true,
+
+            }             
+        },
+        methods: { 
+            timoutChange(val){
+                if(val=="0"){
+                    this.timeoutDisabled=true;
+                }else{
+                    this.timeoutDisabled=false;
+                }
+            },
+            nonWorkChange(val){
+                if(val=="0"){
+                    this.nonWorkDisabled=true;
+                }else{
+                    this.nonWorkDisabled=false;
+                }
+            },
+            mouseOverTip(){
+                this.isshowTipcnt=true               
+            },
+            mouseLeaveTip(){
+                this.isshowTipcnt=false;
+            },
+            mouseOverTip1(){
+                this.isshowTipcnt1=true               
+            },
+            mouseLeaveTip1(){
+                this.isshowTipcnt1=false;
+            },
+            //开场白结束
+            submitForm(){
+                // 选择启用相关输入框不能为空，为空点击保存给出提示“***不能为空”
+                if(this.form.timeOutEnable=="1"){
+                    if(!this.form.timeOut){
+                        this.$message({type: 'warning', message:"超时自动回复时间不能为空"});
+                        return
+                    }
+                    if(!this.form.content){
+                        this.$message({type: 'warning', message:"超时自动回复内容不能为空"});
+                        return
+                    }
+                }
+                if(this.form.nonWorktimeEnable=="1"){
+                    if(!this.form.startTime){
+                        this.$message({type: 'warning', message:"非工作时间段不能为空"});
+                        return
+                    }
+                    if(!this.form.endTime){
+                        this.$message({type: 'warning', message:"非工作时间段不能为空"});
+                        return
+                    }
+                    if(!this.form.content1){
+                        this.$message({type: 'warning', message:"非工作时间自动回复内容不能为空"});
+                        return
+                    }
+                }
+                var param = {};
+                var kaichangListParm={};
+                var timeOutParm={};
+                var noWorkParm={};
+                var lixianParm={};
+                //开场lsit
+                kaichangListParm=this.dynamicValidateForm.domains; 
+                if(timeOut&&timeOut.id){
+                    timeOutParm.id=timeOut.id;
+                }
+                // 超时对象
+                timeOutParm.content=this.form.content;
+                timeOutParm.timeOutEnable=parseInt(this.form.timeOutEnable);
+                timeOutParm.timeOut=this.form.timeOut;
+                // 非工作时间
+                if(noWork&&noWork.id){
+                    noWorkParm.id=noWork.id;
+                }
+                noWorkParm.nonWorktimeEnable=parseInt(this.form.nonWorktimeEnable);
+                noWorkParm.startTime=this.form.startTime;
+                noWorkParm.endTime=this.form.endTime;
+                noWorkParm.content=this.form.content1;
+                // 离线
+                if(lixian&&lixian.id){
+                  lixianParm.id=lixian.id; 
+                }
+                lixianParm.content=this.form.content2; 
+
+                param.kaiChangList=kaichangListParm;
+                param.timeOut=timeOutParm;
+                param.nonWorkTime=noWorkParm;
+                param.lixian=lixianParm;
+                console.log(param)
+                this.loading = true; 
+                axios.post('/autoResponse/saveOrUpdate',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                    console.log(response)
+                    window.location.href="/im/imCommonUseSitting/index"
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            cancelForm(){
+                window.location.href="/im/imCommonUseSitting/index"
+            },
+            // 常用语设置
+            endEvent(evt){
+                var realList=this.dynamicValidateForm1.domains;
+                var param={};
+                var listArr=[];
+                for(var i=0;i<realList.length;i++){
+                    var listObj={};
+                    listObj.id=realList[i].id;
+                    listObj.order=i+1;
+                    listArr.push(listObj);
+                }
+                param.list=listArr;
+                console.log(param)
+                axios.post('/commonLanguage/updateOrder',param).then(function (response) { 
+                    // console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
+            endEvent2(evt){
+                var realList=this.dynamicValidateForm2.domains;
+                var param={};
+                var listArr=[];
+                for(var i=0;i<realList.length;i++){
+                    var listObj={};
+                    listObj.id=realList[i].id;
+                    listObj.order=i+1;
+                    listArr.push(listObj);
+                }
+                param.list=listArr;
+                console.log(param)
+                axios.post('/commonLanguage/updateOrder',param).then(function (response) { 
+                    // console.log(response)
+                    
+                }).catch(function (error) {
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });  
+            },
+            mouseOver(){
+                // if(this.iptDisabled==true){
+                    this.isShowEdit=true;
+                // }                
+            },
+            mouseOver2(){
+                // if(this.iptDisabled2==true){
+                    this.isShowEdit2=true;
+                // }                
+            },
+            mouseLeave(){
+                this.isShowEdit=false;
+            },
+            mouseLeave2(){
+                this.isShowEdit2=false;
+            },
+            handleClick(tab, event) {
+                console.log(tab);
+                if(tab.name=="first"){
+                    window.location.href="/im/imCommonUseSitting/index"
+                }
+            },
+            submitdialogForm1(formName,item) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var type=2;//类型：1=用户常用语  2:顾问常用语
+                        var comText=item.comText
+                        var id=item.id;
+                        var url="";
+                        if(id){
+                            url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                        }else{
+                            url="/commonLanguage/save?type="+type+'&comText='+comText
+                        }
+                        console.log(comText.charCodeAt())
+                        if(comText&&comText.charCodeAt()!=10&&comText.charCodeAt()!=32){//10是只有回车,32是空格加回车
+                            axios.post(url).then(function (response) { 
+                                console.log(response)
+                                mainDivVM.$message({type: 'success', message: '保存成功!',duration:2000,onClose:function(){
+                                    setTimeout(function(){
+                                        window.location.href="/im/imCommonUseSitting/index"
+                                    },100) 
+                                }});                                                               
+                            }).catch(function (error) {
+                                mainDivVM.$message({
+                                    message: "请求失败，请稍后重试",
+                                    type: "error"
+                                });
+                            }); 
+                        }else{
+                            window.location.href="/im/imCommonUseSitting/index"
+                        }
+                         
+                    } else {
+                        console.log('error submit!!');
+                        return;
+                    }
+                });
+                
+            },
+            submitdialogForm2(formName,item,urlType) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var type=1;//类型：1=用户常用语  2:顾问常用语
+                        var comText=item.comText
+                        var id=item.id; 
+                        var url="";
+                        if(id){
+                            url="/commonLanguage/update?type="+type+'&id='+id+'&comText='+comText
+                        }else{
+                            url="/commonLanguage/save?type="+type+'&comText='+comText
+                        }
+                        if(comText&&comText.charCodeAt()!=10&&comText.charCodeAt()!=32){//10是只有回车,32是空格加回车
+                            axios.post(url).then(function (response) { 
+                                console.log(response)
+                                mainDivVM.$message({type: 'success', message: '保存成功!',duration:2000,onClose:function(){
+                                    setTimeout(function(){
+                                        window.location.href="/im/imCommonUseSitting/index?type="+urlType
+                                    },100) 
+                                }});  
+                            }).catch(function (error) {
+                                mainDivVM.$message({
+                                    message: "请求失败，请稍后重试",
+                                    type: "error"
+                                });
+                            });  
+                        }else{
+                            window.location.href="/im/imCommonUseSitting/index?type="+urlType
+                        }                        
+                    } else {
+                        console.log('error submit!!');
+                        return;
+                    }
+                });
+                
+            },
+            removeDomain1(item,urlType) {
+                // var index = this.dynamicValidateForm1.domains.indexOf(item)
+                // if (index !== -1) {
+                //     this.dynamicValidateForm1.domains.splice(index, 1)
+                // }
+                var id=item.id;
+                console.log(id)
+                this.$confirm('是否确认删除?').then(() => {
+                    axios.get('/commonLanguage/deleteById?id='+id).then(function (response) { 
+                        console.log(response)
+                        if(urlType){
+                            setTimeout(function(){
+                                window.location.href="/im/imCommonUseSitting/index?type="+urlType 
+                            },100) 
+                        }else{
+                            setTimeout(function(){
+                                window.location.href="/im/imCommonUseSitting/index" 
+                            },100) 
+                        }                                
+                    }).catch(function (error) {
+                        mainDivVM.$message({
+                            message: "请求失败，请稍后重试",
+                            type: "error"
+                        });
+                    }); 
+
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });                    
+            },
+            addDomain1() {
+                this.dynamicValidateForm1.domains.unshift({
+                    comText: '',
+                    // iptDisabled:false,
+                    key: Date.now()
+                });
+                this.isDisabled=true;
+            },
+            addDomain2() {
+                this.dynamicValidateForm2.domains.unshift({
+                    comText: '',
+                    // iptDisabled:false,
+                    key: Date.now()
+                });
+                this.isDisabled2=true;
+            },
+            editDomain1(item){
+                item.iptDisabled=false;
+            },
+            editDomain2(item){
+                item.iptDisabled=false;
+            },
+            //开场白开始
+            editPrologue(){
+                this.dynamicVisible=true;
+            },
+            submitdialogForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.dynamicVisible=false;
+                        this.prologuesArr=JSON.parse(JSON.stringify(this.dynamicValidateForm.domains));
+                    } else {
+                        console.log('error submit!!');
+                        return;
+                    }
+                });
+            },
+            resetdialogForm(formName) {
+                this.dynamicVisible=false;
+            },
+            removeDomain(item) {
+                var index = this.dynamicValidateForm.domains.indexOf(item)
+                if (index !== -1) {
+                    this.dynamicValidateForm.domains.splice(index, 1)
+                }
+                if(this.dynamicValidateForm.domains.length==1){
+                    this.isshowDelete=false;
+                }
+            },
+            addDomain() {
+                this.dynamicValidateForm.domains.push({
+                    content: '',
+                    key: Date.now()
+                });
+                this.isshowDelete=true;
+            },
+        },
+        created(){
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}      
+            // 常用语列表：
+            // 用户type=1：userLangList
+            // 顾问type=2：saleLangList
+
+            // 子段：
+
+            // {
+            // id:"id"，
+            // type:"类型，1=用户，2:顾问"，
+            // comText:“常用语内容”，
+            // weight:"权重"
+            // }
+
+            // 自动提交：
+            // 1、开场白：kaichangList
+            // 2、超时:timeOut
+            // 3、非工作时间：noWork
+            // 4、离线：lixian
+            // {
+            // id:"id",
+            // "type":"类型" 1、开场白，2、超时，3、非工作时间，4、离线
+            // “content”：内容
+            // timeOutEnable :超时自动回复启用状态 1:启用，0:禁用
+            // timeOut ：超时自动回复时间 秒
+            // nonWorktimeEnable:非工作时间自动回复启用状态1:启用，0:禁用
+            // startTime  非工作时间开始时间
+            // endTime   非工作时间结束时间~~~~
+            // }  
+            // form: {//自动回复设置
+            //         timeOutEnable:'',//超时自动回复设置
+            //         timeOut:'',//超时自动回复时间
+            //         content:'',//超时自动回复内容
+            //         nonWorktimeEnable:'',//非工作时间自动回复设置
+            //         startTime:'',//非工作时间段
+            //         endTime:'',
+            //         noWork:'',//非工作时间自动回复内容
+            //         lixian:'',//离线/忙碌状态自动回复语
+            //     }, 
+            if(kaichangList){
+                this.prologuesArr=JSON.parse(JSON.stringify(kaichangList));
+                this.dynamicValidateForm.domains=JSON.parse(JSON.stringify(kaichangList));
+                if(this.dynamicValidateForm.domains.length>1){
+                    this.isshowDelete=true;
+                }
+            }
+            if(timeOut){
+                this.form.timeOutEnable=timeOut.timeOutEnable+"";
+                this.form.timeOut=timeOut.timeOut;
+                this.form.content=timeOut.content;
+                if(this.form.timeOutEnable=="0"){
+                    this.timeoutDisabled=true;
+                }else{
+                    this.timeoutDisabled=false;
+                }
+            }
+            if(noWork){
+                this.form.nonWorktimeEnable=noWork.nonWorktimeEnable+"";
+                this.form.startTime=noWork.startTime;
+                this.form.endTime=noWork.endTime;
+                this.form.content1=noWork.content;
+                if(this.form.nonWorktimeEnable=="0"){
+                    this.nonWorkDisabled=true;
+                }else{
+                    this.nonWorkDisabled=false;
+                }
+            }
+            if(lixian){
+                if(lixian.content){
+                   this.form.content2=lixian.content; 
+               }else{
+                    this.form.content2='您好，我现在有其他事情在忙，稍后回复您。着急的话可拨打我的电话##电话号码##，给您带来的不变非常抱歉！';
+               }
+                
+            }
+            if(saleLangList){
+                this.dynamicValidateForm1.domains=saleLangList;
+                this.isShowEdit=true;
+                // this.iptDisabled=true;
+                // if(this.dynamicValidateForm1.domains.length>0){
+                //     for(var i=0;i<this.dynamicValidateForm1.domains.length;i++){
+                //         this.dynamicValidateForm1.domains[i].iptDisabled=true;
+                //     }
+                // }
+                
+            }
+            if(userLangList){
+                this.dynamicValidateForm2.domains=userLangList;
+                this.isShowEdit2=true;
+                // this.iptDisabled2=true;
+                // if(this.dynamicValidateForm2.domains.length>0){
+                //     for(var i=0;i<this.dynamicValidateForm2.domains.length;i++){
+                //         this.dynamicValidateForm2.domains[i].iptDisabled=true;
+                //     }
+                // }
+            }
+            // 获取地址栏
+            var type=getQueryString("type");
+            console.log(type)
+            if(type==2){
+                this.activeName="second";
+            }
+
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
