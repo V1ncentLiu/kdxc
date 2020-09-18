@@ -1669,20 +1669,37 @@
             this.vicemanagerFormVisible = false;
 
             this.btnDisabled = true;
-
-            axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
-            .then(function (response) {
-              customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+              axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
+                  .then(function (response) {
+                      var data = response.data;
+                      if (data.code == '0') {
+                          customerManVM.$message({
+                              message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                  customerManVM.btnDisabled = false;
+                                  customerManVM.initTableData();
+                              }
+                          });
+                      } else if (data.code == '21918') {
+                          customerManVM.$message({
+                              message: data.msg,
+                              type: 'warning'
+                          });
+                          customerManVM.btnDisabled = false;
+                          customerManVM.initTableData();
+                      } else {
+                          clueVM.$message({
+                              message: "接口调用失败",
+                              type: 'error'
+                          });
+                          customerManVM.btnDisabled = false;
+                      }
+                  }).catch(function (error) {
+                  console.log(error);
                   customerManVM.btnDisabled = false;
-                  customerManVM.initTableData();
-                }});
-            }).catch(function (error) {
-              console.log(error);
-              customerManVM.btnDisabled = false;
-            });
+              });
           } else {
-            console.log('error submit!!');
-            return false;
+              console.log('error submit!!');
+              return false;
           }
         });
       },
