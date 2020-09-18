@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.cluerule;
 
+import com.kuaidao.businessconfig.dto.cluerule.TeleUnsignLimitRuleDTO;
+import com.kuaidao.common.entity.IdEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -33,6 +35,8 @@ public interface ClueRuleFeignClient {
     public JSONResult<Boolean> insertAndUpdateClueRule(
             @RequestBody ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO);
 
+    @PostMapping("/getUnSignLimitRule")
+    JSONResult<TeleUnsignLimitRuleDTO> getUnSignLimitRule(@RequestBody IdEntity idEntity);
     /**
      * 删除电销规则 -具体人员的规则
      * 
@@ -63,6 +67,11 @@ public interface ClueRuleFeignClient {
         public JSONResult<Boolean> insertAndUpdateClueRule(
                 ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO) {
             return fallBackError("插入或更新规则");
+        }
+
+        @Override
+        public JSONResult<TeleUnsignLimitRuleDTO> getUnSignLimitRule(IdEntity idEntity) {
+            return fallBackError("查询电销顾问未签约上限规则");
         }
 
         @Override
