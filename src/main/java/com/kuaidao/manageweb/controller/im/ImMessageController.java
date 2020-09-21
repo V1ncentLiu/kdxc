@@ -496,7 +496,7 @@ public class ImMessageController {
      */
     @PostMapping("/onlineleave")
     public @ResponseBody JSONResult<Boolean> onlineleave(@Valid @RequestBody  SaleOnlineLeaveLogReq saleOnlineLeaveLogReq , BindingResult result , HttpServletRequest request){
-        log.info("web-onlineleave入参={},result={}" , JSON.toJSONString(saleOnlineLeaveLogReq) , JSON.toJSONString(result));
+        log.info("web-onlineleave入参={}" , JSON.toJSONString(saleOnlineLeaveLogReq));
         String agent=request.getHeader("User-Agent");
         log.info("web-agent浏览器={}" , agent);
         if (result.hasErrors()) {
