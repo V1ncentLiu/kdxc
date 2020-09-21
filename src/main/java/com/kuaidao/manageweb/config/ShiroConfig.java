@@ -1,7 +1,6 @@
 package com.kuaidao.manageweb.config;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
@@ -17,9 +16,11 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Configuration
 public class ShiroConfig {
@@ -79,6 +80,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/business/schedule/visitRecordReminder", "anon");
         filterChainDefinitionMap.put("/business/schedule/signRecordReminder", "anon");
         filterChainDefinitionMap.put("/merchant/merchantOnlineRecharge/toAlipayPage", "anon");
+        /* 不拦截上线/下线*/
         filterChainDefinitionMap.put("/message/im/onlineleave", "anon");
         // 配置退出 过滤器,其中的具体的退出代码Shiro已经替我们实现了
         filterChainDefinitionMap.put("/logout", "logout");
