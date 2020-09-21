@@ -499,21 +499,28 @@ public class ImMessageController {
             // 参数校验
             return CommonUtil.validateParam(result);
         }
-        UserInfoDTO user = CommUtil.getCurLoginUser();
-        if(null == user ){
-            log.warn("user is null!");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
-        }
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if(CollectionUtils.isEmpty(roleList)){
-            log.warn("roleList is null");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
-        }
-        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
-        // 电销顾问 & 业务线是的商机盒子的
-        if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
-            // 设置顾问Id
-            saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
+        // 顾问Id不存在直接从session中获得
+        if(null == saleOnlineLeaveLogReq.getTeleSaleId()){
+
+            UserInfoDTO user = CommUtil.getCurLoginUser();
+            if(null == user ){
+                log.warn("user is null!");
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+            }
+            List<RoleInfoDTO> roleList = user.getRoleList();
+            if(CollectionUtils.isEmpty(roleList)){
+                log.warn("roleList is null");
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+            }
+            Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+            // 电销顾问 & 业务线是的商机盒子的
+            if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
+                // 设置顾问Id
+                saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
+                return customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+            }
+        }else{
+            // 顾问Id存在直接设置在线离线
             return customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
         }
         return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
