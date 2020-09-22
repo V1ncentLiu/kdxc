@@ -143,10 +143,9 @@
                         <el-input v-model="searchForm.signNo" placeholder="签约单编号"></el-input>
                     </el-form-item>
                     <el-form-item label="签约项目:">
-                        <el-select v-model="searchForm.signProjectId" placeholder="签约项目" style="width: 100%;" clearable
-                                   filterable>
+                        <el-select v-model="searchForm.signProjectId" placeholder="签约项目"  clearable filterable>
                             <el-option
-                                    v-for="item in proSelect"
+                                    v-for="item in projectList"
                                     :key="item.id"
                                     :label="item.projectName"
                                     :value="item.id">
@@ -444,7 +443,6 @@ var payModeItem =[[${payModeItem}]];
 var giveTypeList =[[${giveTypeList}]];
 var businessLine = [[${businessLine}]];
 var roleCode = [[${roleCode}]];
-var proSelect = [[${proSelect}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -454,7 +452,7 @@ var clueVM = new Vue({
           isShow:false,
           btnDisabled:false,
           btnDisabled1:false,
-            projectArr: proSelect,
+            projectList: [],
       		searchForm: {
 	       		busAreaId: '',
 	       		busGroupId: '',
@@ -1459,6 +1457,23 @@ var clueVM = new Vue({
                         this.isShow=true
                     }          
                 },
+            //获取签约项目
+            getProjectList() {
+                axios.post('/sign/signRecord/queryProjectList', {})
+                    .then(function (response) {
+                        var result = response.data;
+                        if (result.code == '0') {
+                            var table = result.data;
+                            clueVM.projectList = table;
+                        } else {
+                            console.error(response);
+                        }
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
         },
         created(){
             console.info("create method");
@@ -1479,6 +1494,7 @@ var clueVM = new Vue({
 
             this.searchTable();
             this.getUploadParam();
+            this.getProjectList();
         },
         mounted(){
            console.info("mounted method");
