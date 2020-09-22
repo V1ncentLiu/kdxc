@@ -700,6 +700,8 @@ public class ExtendClueDistributionedTaskController {
                     repeatPhone = "否";
                 }
                 curList.add(repeatPhone);
+                //url地址
+                curList.add(taskDTO.getUrlAddress());
                 dataList.add(curList);
             }
         }
