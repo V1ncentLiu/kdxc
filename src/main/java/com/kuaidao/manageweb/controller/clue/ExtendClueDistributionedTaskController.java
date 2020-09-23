@@ -573,6 +573,8 @@ public class ExtendClueDistributionedTaskController {
                         DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 资源类别
                 curList.add(taskDTO.getCategoryName());
+                //资源类型
+                curList.add(taskDTO.getTypeName());
                 // 媒介
                 curList.add(taskDTO.getSourceName());
                 // 资源项目
