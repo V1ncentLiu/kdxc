@@ -704,6 +704,13 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(repeatPhone);
                 //url地址
                 curList.add(taskDTO.getUrlAddress());
+                String im ;
+                if (taskDTO.getInputType() == 5) {
+                    im = "是";
+                } else {
+                    im = "否";
+                }
+                curList.add(im);
                 dataList.add(curList);
             }
         }
