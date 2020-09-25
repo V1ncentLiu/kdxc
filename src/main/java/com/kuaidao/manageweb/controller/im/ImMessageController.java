@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.im;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
@@ -494,27 +495,40 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/onlineleave")
-    public @ResponseBody JSONResult<Boolean> onlineleave(@Valid @RequestBody  SaleOnlineLeaveLogReq saleOnlineLeaveLogReq , BindingResult result){
+    public @ResponseBody JSONResult<Boolean> onlineleave(@Valid @RequestBody  SaleOnlineLeaveLogReq saleOnlineLeaveLogReq , BindingResult result , HttpServletRequest request){
+        log.info("web-onlineleave入参={}" , JSON.toJSONString(saleOnlineLeaveLogReq));
+        String agent=request.getHeader("User-Agent");
+        log.info("web-agent浏览器={}" , agent);
         if (result.hasErrors()) {
             // 参数校验
             return CommonUtil.validateParam(result);
         }
-        UserInfoDTO user = CommUtil.getCurLoginUser();
-        if(null == user ){
-            log.warn("user is null!");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
-        }
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if(CollectionUtils.isEmpty(roleList)){
-            log.warn("roleList is null");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
-        }
-        Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
-        // 电销顾问 & 业务线是的商机盒子的
-        if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
-            // 设置顾问Id
-            saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
-            return customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+        // 顾问Id不存在直接从session中获得
+        if(null == saleOnlineLeaveLogReq.getTeleSaleId()){
+            UserInfoDTO user = CommUtil.getCurLoginUser();
+            if(null == user ){
+                log.warn("user is null!");
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+            }
+            List<RoleInfoDTO> roleList = user.getRoleList();
+            if(CollectionUtils.isEmpty(roleList)){
+                log.warn("roleList is null");
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+            }
+            Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
+            // 电销顾问 & 业务线是的商机盒子的
+            if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
+                // 设置顾问Id
+                saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
+                JSONResult<Boolean> onlineleave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+                log.info("session返回结果={}" , onlineleave);
+                return onlineleave ;
+            }
+        }else{
+            // 顾问Id存在直接设置在线离线
+            JSONResult<Boolean> onlineleave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+            log.info("无session返回结果={}" , onlineleave);
+            return onlineleave ;
         }
         return new JSONResult().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
     }
