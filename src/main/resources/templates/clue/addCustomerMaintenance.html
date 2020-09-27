@@ -359,14 +359,14 @@
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 100px;">
-                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="isDisabledCustomer" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
+                                    <el-select v-model="formInline.customerStatusSub"  @change="customerStatusChange2" placeholder="客户状态" :disabled="isDisabledCustomer" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
                                         <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
                             </div>
                             <div style="width: 19.2%;float: left;text-align: center;">
                                     <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 100px;">
-                                        <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer" style="width: 100%;display: block;margin:0 auto;" clearable>
+                                        <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer1" style="width: 100%;display: block;margin:0 auto;" clearable>
                                             <el-option label="是" value="1"></el-option>
                                             <el-option label="否" value="0"></el-option>
                                         </el-select>
@@ -1026,7 +1026,8 @@
                 mediumName:"",
                 clueProject:clueProject,
                 telemarketingLayout:telemarketingLayout,
-            	isDisabledCustomer:false,
+                isDisabledCustomer:false,
+            	isDisabledCustomer1:false,
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
@@ -1546,7 +1547,8 @@
                     addCustomerVM.uploadParamData.realName= file.name
             },
             lineFormShowFun(rows) {
-            	this.isDisabledCustomer = false;
+                this.isDisabledCustomer = false;
+            	this.isDisabledCustomer1 = false;
                 if(this.lineFormShow){
                     this.lineFormShow = false
                 }else{
@@ -1626,6 +1628,16 @@
                     // $(".paddingL55 .lineForm_customerStatus").css("width","420px");
                 }
                 this.isCallChange();
+            },
+            customerStatusChange2(val){
+                console.log(val)
+                if(val=="1"||val=="2"||val=="7"){//A.不跟进  空号错号  未接通,B.不跟进  停机关机   未接通，G.  不跟进   多次拨打未接通或拒接   未接通
+                    this.formInline.isCall="0";//未接通
+                    this.isDisabledCustomer1=true;//不可编辑
+                }else if(val=="3"||val=="4"||val=="5"||val=="6"||val=="8"||val=="9"){//C. 不跟进   轴品牌  接通,D.不跟进   观望状态   接通，E. 不跟进   资金不到位   接通，F.  不跟进  家人或合伙人意见不一致  接通，H.   不跟进   不看项目     接通，I.    不跟进   内部重复    接通
+                    this.formInline.isCall="1";//接通
+                    this.isDisabledCustomer1=true;//不可编辑
+                }
             },
             isCallChange(){
                var  customerStatus =  this.formInline.customerStatus;
@@ -2226,6 +2238,7 @@
                 }
                 this.addButtons = false;
                 this.isDisabledCustomer = true;
+                this.isDisabledCustomer1 = true;
                 this.lineFormShow = true;
                 this.formInline.id = rows[0].id;
                 this.formInline.callTime = rows[0].callTime;
