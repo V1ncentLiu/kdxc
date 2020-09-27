@@ -23,8 +23,21 @@
                     <el-col :span="12">
                         <el-form-item label="规则名称：" prop="assignName" :label-width="formLabelWidth">
                             <el-col :span="17">
-                                <el-input v-model="form.assignName"   autocomplete="off"  style="width: 100%;" maxlength="50"></el-input>
+                                <el-input v-model="form.assignName" autocomplete="off" style="width: 100%;"
+                                          maxlength="50"></el-input>
                             </el-col>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="行业类别:">
+                            <el-select v-model="form.industryCategory" placeholder="行业类别" clearable filterable>
+                                <el-option
+                                        v-for="item in industryCategoryArr"
+                                        :key="item.value"
+                                        :label="item.name"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -174,12 +187,14 @@
                 btnDisabled: false,
             	categoryArr:[],
             	typeArr:[],
+                industryCategoryArr:[],
                 form: {
                 	assignName:'',
                     startTime:'',
                     endTime:'',
                     type:[],
                     category:[],
+                    industryCategory:'',
                     status:'1',//默认value值，启用
                     person:'',
                     searchWord:'',
@@ -272,7 +287,9 @@
                    
                     var endTime=this.form.endTime ;	
                     
-                    var category=this.form.category ;	
+                    var category=this.form.category ;
+
+                    var industryCategory = this.form.industryCategory;
                     
                     var type=this.form.type ;
                     	
@@ -331,6 +348,7 @@
                     param.assignName=assignName;
                     param.startTime=startTime;
                     param.endTime=endTime;
+                    param.industryCategory =industryCategory;
                     if(null!=category&&category.length>0){
                     	
                     	param.category=category.join(",");
@@ -408,20 +426,26 @@
         　　}
 
         },
-        created(){
+       created() {
            //初始资源类别数据
-          	var  param={};
-          	param.groupCode="clueCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-            	AddRuleVM.categoryArr=response.data.data;
-            });
-          	 //初始化资源类型数据
-       	    param={};
-       	   param.groupCode="clueType";
-           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-         	AddRuleVM.typeArr=response.data.data;
-            });
-        },
+           var param = {};
+           param.groupCode = "clueCategory";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+               AddRuleVM.categoryArr = response.data.data;
+           });
+           //初始行业类别
+           param = {};
+           param.groupCode = "industryCategory";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+               AddRuleVM.industryCategoryArr = response.data.data;
+           });
+           //初始化资源类型数据
+           param = {};
+           param.groupCode = "clueType";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+               AddRuleVM.typeArr = response.data.data;
+           });
+       },
         mounted(){
           document.getElementById('addModule').style.display = 'block';
         }

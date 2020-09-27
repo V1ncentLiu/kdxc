@@ -285,6 +285,13 @@
 	                                   :value="item.value"></el-option>
 	                    </el-select>
 	                </el-form-item>
+                    <el-form-item label="是否话务转化:">
+                        <el-select v-model="form.phtraConversion" placeholder="是否话务转化" clearable>
+                            <el-option v-for="item in phtraConversionArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -311,10 +318,23 @@
 
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone'">
                     <template slot-scope="scope" >
-                        <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span>
+                        <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span><span v-if="scope.row.phoneLocale != null && scope.row.phoneLocale != ''">（{{scope.row.phoneLocale}}）</span>
+
                         <input type='hidden'>
                         <img th:src="@{/images/tel.png}" :readonly="phoneDisabled" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone2'">
+                    <!--  <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template> -->
+                    <template slot-scope="scope">
+                        {{scope.row.phone2}}<span v-if="scope.row.phone2Locale != null && scope.row.phone2Locale != ''">（{{scope.row.phone2Locale}}）</span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone3'">
+                    <!--  <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template> -->
+                    <template slot-scope="scope">
+                        {{scope.row.phone3}}<span v-if="scope.row.phone3Locale != null && scope.row.phone3Locale != ''"> （{{scope.row.phone3Locale}}）</span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'customerStatusName'">
@@ -989,6 +1009,7 @@
             label: '跟访'
           }
         ],
+          phtraConversionArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
         teleReceiveSourceArr:[
        	 {value:"1",name:"分配"},
             {value:"3",name:"领取"},
@@ -1030,7 +1051,8 @@
           status:"",
           isCall:"",
           isTailMoney:"",
-          isSign:0
+          isSign:0,
+            phtraConversion:""
         },
         form1: {
           type: [],
@@ -1206,6 +1228,7 @@
         param.isSign = this.form.isSign;
         param.isTailMoney = this.form.isTailMoney;
         param.teleReceiveSource = this.form.teleReceiveSource;
+          param.phtraConversion = this.form.phtraConversion;
         if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
           param.teleSaleId= this.form.teleSaleId.join(",");
         }
@@ -1647,20 +1670,37 @@
             this.vicemanagerFormVisible = false;
 
             this.btnDisabled = true;
-
-            axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
-            .then(function (response) {
-              customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+              axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
+                  .then(function (response) {
+                      var data = response.data;
+                      if (data.code == '0') {
+                          customerManVM.$message({
+                              message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                  customerManVM.btnDisabled = false;
+                                  customerManVM.initTableData();
+                              }
+                          });
+                      } else if (data.code == '21918') {
+                          customerManVM.$message({
+                              message: data.msg,
+                              type: 'warning'
+                          });
+                          customerManVM.btnDisabled = false;
+                          customerManVM.initTableData();
+                      } else {
+                          clueVM.$message({
+                              message: "接口调用失败",
+                              type: 'error'
+                          });
+                          customerManVM.btnDisabled = false;
+                      }
+                  }).catch(function (error) {
+                  console.log(error);
                   customerManVM.btnDisabled = false;
-                  customerManVM.initTableData();
-                }});
-            }).catch(function (error) {
-              console.log(error);
-              customerManVM.btnDisabled = false;
-            });
+              });
           } else {
-            console.log('error submit!!');
-            return false;
+              console.log('error submit!!');
+              return false;
           }
         });
       },

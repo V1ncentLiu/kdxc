@@ -18,6 +18,7 @@
         input[type="number"]{
             -moz-appearance: textfield;
         }
+        .el-form--inline .el-form-item__label{}
     </style>
 </head>
 <body>
@@ -59,6 +60,18 @@
                     </el-form-item>
                 <el-form-item label="小时。" style="margin-bottom: 0"></el-form-item>
             </el-row>
+
+            <div class="fs16 marginB20 paddingT20">电销顾问手中持有未签约上线设置</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-checkbox v-model="checked9" class="marginR10 paddingT8"></el-checkbox>
+                    <el-form-item  prop="number22">
+                        <span slot="label">本业务线内电销顾问手中持有<span style="color:red">未签约资源</span>上限为</span>
+                        <el-input v-model="form.number22" placeholder="1-2000以内整数" maxLength="4" type="number" min="1" max="2000"></el-input>
+                    </el-form-item>
+                    <el-form-item label="个资源。顾问手中持有超过上限则不再给予(任何途径的分发/分配)资源给此顾问。"></el-form-item>
+                </el-row>
+            </div>
             <el-row>
                 <el-checkbox v-model="checked2" class="marginR10 paddingT8"></el-checkbox><el-form-item label="自动释放规则"></el-form-item>
             </el-row>
@@ -338,7 +351,8 @@
                 checked5:0,     
                 checked6:0,     
                 checked7:0,     
-                checked8:0, 
+                checked8:0,
+                checked9:0,
                 form: {   
                     startTime:'',
                     endTime:'',
@@ -363,6 +377,7 @@
                     number19:'',
                     number20:'',
                     number21:'',
+                    number22:'',
                     remindValue1:0,
                     remindValue2:0,
                     remindValue3:0,
@@ -379,6 +394,7 @@
                     id9:'',
                     id10:'',
                     id11:'',
+                    id12:'',
                     domains: []                    
                 },
                 rules:{
@@ -814,6 +830,28 @@
                             callback();
                         }, trigger: 'blur'}
                     ],
+                    //1-2000数字
+                    number22: [
+                        {
+                            validator: function (rule, value, callback) {
+                                if (releaseRuleVM.checked9 == true) {
+                                    if (value.length != 0) {
+                                        if (/^[0-9]*$/.test(value) == false || value > 2000 || value == 0) {
+                                            callback(new Error("请输入1-2000以内整数"));
+                                            return
+                                        } else {
+                                            callback();
+                                        }
+                                    } else {
+                                        callback(new Error("请输入数字"));
+                                        return
+                                    }
+
+                                }
+                                callback();
+                            }, trigger: 'blur'
+                        }
+                    ],
                     number20:[
                         { validator:function(rule,value,callback){ 
                             if(releaseRuleVM.checked2==true){
@@ -891,8 +929,28 @@
                         	 isFestivalRuleBl=true;
                         	 param.festivalRule= festivalRule;
                          }
-                         
-                        
+                         //电销顾问未签约资源上线规则
+                        var unSignRuleIsEnabled = this.checked9 == true ? 1 : 0;
+                        var unSignLimitRuleBl = false;
+                        if (!unSignRuleIsEnabled) {//未启用
+                            var unSignLimitId = form.id12;
+                            if (unSignLimitId) {
+                                var teleUnsignLimitRule = {};
+                                teleUnsignLimitRule.id = unSignLimitId;
+                                teleUnsignLimitRule.isEnabled = unSignRuleIsEnabled;
+                                teleUnsignLimitRule.limitNum = this.form.number22;
+                                unSignLimitRuleBl = true;
+                                param.teleUnsignLimitRule = teleUnsignLimitRule;
+                            }
+
+                        } else {
+                            var teleUnsignLimitRule = {};
+                            teleUnsignLimitRule.id = form.id12;
+                            teleUnsignLimitRule.isEnabled = unSignRuleIsEnabled;
+                            teleUnsignLimitRule.limitNum = this.form.number22;
+                            unSignLimitRuleBl = true;
+                            param.teleUnsignLimitRule = teleUnsignLimitRule;
+                        }
                          //自动释放规则
                          var autoReleaseRule = new Array();
                          var autoReleaseRuleIsEnabled = this.checked2==true?1:0;
@@ -1185,8 +1243,8 @@
                         	  isPublicPoolRuleBl = true;
                         	  param.publicPoolReceiveRuleList=publicPoolRuleList;
                          }
-                         
-                        if(!isFestivalRuleBl && !isAutoReleaseBl && !isForceRcycleRuleListBl && !isPublicPoolRuleBl){
+                        debugger;
+                        if(!isFestivalRuleBl&& !unSignLimitRuleBl && !isAutoReleaseBl && !isForceRcycleRuleListBl && !isPublicPoolRuleBl){
                         	console.info("未选择数据");
                         	  this.clueRuleSubmitBtnDiabled=false;
                         	return ;
@@ -1297,6 +1355,14 @@
                         	releaseRuleVM.form.endTime=festivalRule.endTime;
                         	releaseRuleVM.checked1=festivalRule.isEnabled==0?false:true;
                         }
+                         //电销顾问资源未签约上限
+                         var unSignLimitRule = resData.teleUnsignLimitRule;
+                         if (unSignLimitRule) {
+                             releaseRuleVM.form.id12 = unSignLimitRule.id;
+                             releaseRuleVM.checked9 = unSignLimitRule.isEnabled == 0 ? false : true;
+                             releaseRuleVM.form.number22 = unSignLimitRule.limitNum;
+                             debugger;
+                         }
                         //自动释放规则
                         var autoReleRuleList = resData.autoReleRuleList;
                         for(var i=0;i<autoReleRuleList.length;i++){
