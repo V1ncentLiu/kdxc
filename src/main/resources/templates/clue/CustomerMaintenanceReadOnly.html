@@ -279,6 +279,7 @@
                         </div>
                     </el-col>
                 </el-row>
+
                 <el-row>
                     <el-col :span="8"  v-show="form.qq !=null && form.qq !=''">
                         <el-form-item label="QQ：" :label-width="formLabelWidth120" >
@@ -371,13 +372,34 @@
                 </el-row>
 
                 <el-row>
-                    <el-col :span="8">
+                   <!-- <el-col :span="8">
                         <el-form-item label="身份证号：" :label-width="formLabelWidth120" >
                             <span>
                                 {{form.identityCard}}
                             </span>
                         </el-form-item>
+                    </el-col>-->
+                    <el-col :span="8"  >
+                        <el-form-item label="身份证号：" :label-width="formLabelWidth120" >
+                                <span> {{form.identityCard}}</span>
+                        </el-form-item>
+
+                        <el-form-item label="创建:" v-show="form.idCardCreateUser !=null && form.idCardCreateUser !=''" prop="身份证号" :label-width="formLabelWidth120" >
+                                <font >{{form.idCardCreateUserRoleMame}}</font>
+                                <font v-show="form.idCardCreateUser !=null && form.idCardCreateUser !=''">[{{form.idCardCreateUserName}}]</font>
+                                <font >{{formatTimeFn(form.idCardCreateTime)}}</font>
+                        </el-form-item>
+                        <div v-show="form.idCardUpdateUser !=null && form.idCardUpdateUser !=''">
+                            <el-form-item label="修改:" :label-width="formLabelWidth120" >
+                                <font >{{form.idCardUpdateUserRoleMame}}</font>
+                                <font >[{{form.idCardUpdateUserName}}]</font>
+                                <font >{{formatTimeFn(form.idCardUpdateTime)}}</font>
+                            </el-form-item>
+                        </div>
                     </el-col>
+
+                </el-row>
+                <el-row>
                     <el-col :span="8">
                         <el-form-item label="卡点：" :label-width="formLabelWidth120" >
                             <span>{{form.offerEndTime}}</span>
@@ -389,8 +411,6 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-
-
 
                 <el-row>
                     <el-col :span="8">
@@ -519,7 +539,13 @@
                 </el-table-column>
                 <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="140"></el-table-column>
                 <el-table-column prop="createUserName" label="创建人" align="center"></el-table-column>
-            </el-table> 
+            </el-table>
+            <div v-show="trackingRemarkFlag" class="marginB20 fs16 paddingT20"  style="color: #EA7500;">客户跟进备注</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    {{trackingRemark}}
+                </el-row>
+            </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
             <el-row>
                 <el-table
@@ -1134,6 +1160,8 @@ var ossUrl = [[${ossUrl}]];//上传文件地址
 var telCreatePhoneAuditFlag=[[${telCreatePhoneAuditFlag}]];//电销创建手机号审核按钮是否显示标志
 var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
 var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
+var  trackingRemarkFlag = false; //跟进备注标识
+var trackingRemark = null;//跟进内容
 if(commonPool==1){
     showPhone = false;
 }
@@ -1163,7 +1191,10 @@ if(relate){
 if (null != telCreatePhoneAudits && telCreatePhoneAudits.length> 0 ){
     telCreatePhoneAuditsFlag  = true;
 }
-
+if (null != base.trackingRemark && '' != base.trackingRemark) {
+    trackingRemarkFlag = true;
+    trackingRemark = base.trackingRemark;
+}
 function transTeleReceiveSource(source){
     if(!source){
         return "";
@@ -1342,7 +1373,15 @@ if(customer==null){
         wechatCodeUpdateUser:'',
         wechatCodeUpdateUserName:'',
         wechatCodeUpdateUserRoleMame:'',
-        wechatCodeUpdateTime:''
+        wechatCodeUpdateTime:'',
+        idCardCreateUser:'',
+        idCardCreateUserName:'',
+        idCardCreateUserRoleMame:'',
+        idCardCreateTime:'',
+        idCardUpdateUser:'',
+        idCardUpdateUserName:'',
+        idCardUpdateUserRoleMame:'',
+        idCardUpdateTime:''
     };
 }else{
 
@@ -1491,7 +1530,15 @@ if(customer==null){
         wechatCodeUpdateUser:customer.wechatCodeUpdateUser,
         wechatCodeUpdateUserName:customer.wechatCodeUpdateUserName,
         wechatCodeUpdateUserRoleMame:customer.wechatCodeUpdateUserRoleMame,
-        wechatCodeUpdateTime:customer.wechatCodeUpdateTime
+        wechatCodeUpdateTime:customer.wechatCodeUpdateTime,
+        idCardCreateUser:customer.idCardCreateUser,
+        idCardCreateUserName:customer.idCardCreateUserName,
+        idCardCreateUserRoleMame:customer.idCardCreateUserRoleMame,
+        idCardCreateTime:customer.idCardCreateTime,
+        idCardUpdateUser:customer.idCardUpdateUser,
+        idCardUpdateUserName:customer.idCardUpdateUserName,
+        idCardUpdateUserRoleMame:customer.idCardUpdateUserRoleMame,
+        idCardUpdateTime:customer.idCardUpdateTime
 
     }
     if(customer.wechatCode !=null && customer.wechatCode!=''){
@@ -1531,7 +1578,8 @@ function dateFormat(val) {
         data: function() {
             return {
                 isActive:false,
-
+                trackingRemark:trackingRemark,
+                trackingRemarkFlag:trackingRemarkFlag,
                 formLabelWidth160: '160px',
                 saveDisabled: false,
                 btnDisabled: false,
