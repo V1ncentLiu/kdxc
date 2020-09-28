@@ -208,7 +208,7 @@
                     endTime:updateRule.endTime,
                     type:updateRule.type.split(","),
                     category:updateRule.category.split(","),
-                    industryCategory:updateRule.industryCategory.split(","),
+                    industryCategory:[],
                     status:updateRule.status+'',//默认value值，启用
                     person:'',
                     searchWord:'',
@@ -269,8 +269,8 @@
                    
                     var endTime=this.form.endTime ;	
                     
-                    var category=this.form.category ;	
-                    
+                    var category=this.form.category ;
+
                     var type=this.form.type ;
                     	
                     var status=this.form.status ;	
@@ -278,8 +278,6 @@
                     var searchWord=this.tags ;	
                     
                     var area=this.areaTags ;
-
-                    var industryCategory = this.form.industryCategory;
 
                     if(endTime<startTime){
                         this.$message({
@@ -305,17 +303,20 @@
                     }
                     
                     var param={};
-                    
-                    param.teleAssignRuleMember=saveMemner;
-                   // param.assignName=assignName;
-                    param.startTime=startTime;
-                    param.id=updateRule.id;
-                    param.endTime=endTime;
-                    param.industryCategory =industryCategory;
-                    if(null!=category&&category.length>0){
-                    	
-                    //	param.category=category.join(",");
-                   }
+
+                        param.teleAssignRuleMember = saveMemner;
+                        // param.assignName=assignName;
+                        param.startTime = startTime;
+                        param.id = updateRule.id;
+                        param.endTime = endTime;
+                        var industryCategory = this.form.industryCategory;
+                        if (null != industryCategory && industryCategory.length > 0) {
+                            param.industryCategory = industryCategory.join(",");
+                        }
+                        if (null != category && category.length > 0) {
+
+                            //	param.category=category.join(",");
+                        }
                     if(null!=type&&type.length>0){
                     	
                    // 	param.type=type.join(",");
@@ -425,8 +426,10 @@
                  });
         	   }
               }
-        	   
-        	   
+           var   industryCategory = updateRule.industryCategory;
+           if (null != industryCategory && industryCategory != "" ){
+               AddRuleVM.form.industryCategory =    industryCategory.split(",");
+           }
         },
         mounted(){
             document.getElementById('addModule').style.display = 'block';
