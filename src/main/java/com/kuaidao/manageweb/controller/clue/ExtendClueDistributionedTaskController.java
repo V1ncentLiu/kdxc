@@ -449,6 +449,13 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getPhone2Locale());
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
+                String im ;
+                if (taskDTO.getInputType() == 5) {
+                    im = "是";
+                } else {
+                    im = "否";
+                }
+                curList.add(im);
                 dataList.add(curList);
             }
         }
