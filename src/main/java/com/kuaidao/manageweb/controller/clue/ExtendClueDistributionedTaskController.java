@@ -702,15 +702,17 @@ public class ExtendClueDistributionedTaskController {
                     repeatPhone = "否";
                 }
                 curList.add(repeatPhone);
-                //url地址
-                curList.add(taskDTO.getUrlAddress());
                 String im ;
                 if (taskDTO.getInputType() == 5) {
                     im = "是";
                 } else {
                     im = "否";
                 }
-                curList.add(im);
+                if(!queryDto.getPhtraExport()){
+                    curList.add(im);
+                }
+                //url地址
+                curList.add(taskDTO.getUrlAddress());
                 dataList.add(curList);
             }
         }
