@@ -1476,89 +1476,94 @@
         // this.allocateFormVisible = false;
         // this.dialogFormTransferVisible = false;
       },
-      submitAllocatForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            var telSale=this.formAllocat.telSales;
-            var rows = this.multseleSelection;
-            var cusLevel = this.formAllocat.cusLevel;
-            var idArr=[];
-            for(var i=0;i<rows.length;i++){
-              idArr.push(rows[i].clueId);
-            }
-            var  param={};
-            param.idList=idArr;
-            param.teleSaleId=telSale;
-            param.cusLevel = cusLevel;
-            // this.allocateFormVisible = false;
-
-            this.btnDisabled = true;
-
-            // 判断选择几条
-            if(rows.length==1){
-              console.log(rows)
-              var name=rows[0].teleSaleName;
-              var time=rows[0].teleReceiveTime;
-              if(time == "" || time == null || time == undefined){
-                time = rows[0].createTime;
-              }
-              /* if(name){
-              } */
-                this.$confirm('此资源已在'+time+'分配给顾问'+name+'。确认再次分配吗？', '提示', {
-                  confirmButtonText: '确定',
-                  cancelButtonText: '取消',
-                  type: 'warning'
-                }).then(() => {
-                  axios.post('/clue/pendingAllocation/allocationClue', param)
-                  .then(function (response) {
-                    if(response.data.code==-1){
-                      customerManVM.$message.error(response.data.msg);
-                      customerManVM.btnDisabled = false;
-                    }else {
-                      customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                          customerManVM.allocateFormVisible = false; //关闭弹窗
-                          customerManVM.btnDisabled = false;
-                          customerManVM.initTableData();
-                        }});
+        submitAllocatForm(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    var telSale = this.formAllocat.telSales;
+                    var rows = this.multseleSelection;
+                    var cusLevel = this.formAllocat.cusLevel;
+                    var idArr = [];
+                    for (var i = 0; i < rows.length; i++) {
+                        idArr.push(rows[i].clueId);
                     }
-                  }).catch(function (error) {
-                    console.log(error);
-                    customerManVM.allocateFormVisible = false; //关闭弹窗
-                    customerManVM.btnDisabled = false;
-                  });
-                }).catch(() => {
-                  this.$message({
-                    type: 'info',
-                    message: '已取消分配'
-                  });
-                  customerManVM.btnDisabled = false;
-                });
+                    var param = {};
+                    param.idList = idArr;
+                    param.teleSaleId = telSale;
+                    param.cusLevel = cusLevel;
+                    // this.allocateFormVisible = false;
 
-            }else{
-              axios.post('/clue/pendingAllocation/allocationClue', param)
-              .then(function (response) {
-                if(response.data.code==-1){
-                  customerManVM.$message.error(response.data.msg);
-                  customerManVM.btnDisabled = false;
-                }else {
-                  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                      customerManVM.allocateFormVisible = false;
-                      customerManVM.btnDisabled = false;
-                      customerManVM.initTableData();
-                    }});
+                    this.btnDisabled = true;
+
+                    // 判断选择几条
+                    if (rows.length == 1) {
+                        console.log(rows)
+                        var name = rows[0].teleSaleName;
+                        var time = rows[0].teleReceiveTime;
+                        if (time == "" || time == null || time == undefined) {
+                            time = rows[0].createTime;
+                        }
+                        /* if(name){
+                        } */
+                        this.$confirm('此资源已在' + time + '分配给顾问' + name + '。确认再次分配吗？', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            axios.post('/clue/pendingAllocation/allocationClue', param)
+                                .then(function (response) {
+                                    if (response.data.code == -1 || response.data.code == 21918) {
+                                        customerManVM.$message.error(response.data.msg);
+                                        customerManVM.btnDisabled = false;
+                                        customerManVM.initTableData();
+                                    } else {
+                                        customerManVM.$message({
+                                            message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                                customerManVM.allocateFormVisible = false; //关闭弹窗
+                                                customerManVM.btnDisabled = false;
+                                                customerManVM.initTableData();
+                                            }
+                                        });
+                                    }
+                                }).catch(function (error) {
+                                console.log(error);
+                                customerManVM.allocateFormVisible = false; //关闭弹窗
+                                customerManVM.btnDisabled = false;
+                            });
+                        }).catch(() => {
+                            this.$message({
+                                type: 'info',
+                                message: '已取消分配'
+                            });
+                            customerManVM.btnDisabled = false;
+                        });
+
+                    } else {
+                        axios.post('/clue/pendingAllocation/allocationClue', param)
+                            .then(function (response) {
+                                if (response.data.code == -1) {
+                                    customerManVM.$message.error(response.data.msg);
+                                    customerManVM.btnDisabled = false;
+                                } else {
+                                    customerManVM.$message({
+                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                            customerManVM.allocateFormVisible = false;
+                                            customerManVM.btnDisabled = false;
+                                            customerManVM.initTableData();
+                                        }
+                                    });
+                                }
+                            }).catch(function (error) {
+                            console.log(error);
+                            customerManVM.allocateFormVisible = false;
+                            customerManVM.btnDisabled = false;
+                        });
+                    }
+                } else {
+                    console.log('error submit!!');
+                    return false;
                 }
-              }).catch(function (error) {
-                console.log(error);
-                customerManVM.allocateFormVisible = false;
-                customerManVM.btnDisabled = false;
-              });
-            }
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },
+            });
+        },
       openTrackingDialog(cid){
         var param = {};
         param.clueId = cid;
