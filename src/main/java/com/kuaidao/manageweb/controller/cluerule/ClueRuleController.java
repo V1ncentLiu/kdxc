@@ -114,6 +114,7 @@ public class ClueRuleController {
     public JSONResult<Boolean> insertAndUpdateClueRule(@RequestBody ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO) {
         UserInfoDTO user = getUser();
         reqAndReceiveRuleDTO.setOperatorUser(user.getId());
+        reqAndReceiveRuleDTO.setBusinessLine(user.getBusinessLine());
         return ClueRuleFeignClient.insertAndUpdateClueRule(reqAndReceiveRuleDTO);
     }
 
