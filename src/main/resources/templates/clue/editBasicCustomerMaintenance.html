@@ -390,7 +390,12 @@
                 <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="140"></el-table-column>
                 <el-table-column prop="createUserName" label="创建人" align="center"></el-table-column>
             </el-table>
-
+            <div v-show="trackingRemarkFlag" class="marginB20 fs16 paddingT20"  style="color: #EA7500;">客户跟进备注</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    {{trackingRemark}}
+                </el-row>
+            </div>
             <div class="marginB20 fs16 paddingT20 callLogBox">
                 通话记录
                 <!-- 播放器 -->
@@ -778,6 +783,7 @@
   var editPhone = 0;
   var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
   var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
+  var  trackingRemarkFlag = false; //跟进备注标识
   for(var i = 0 ; i < proSelect.length ; i++){
     if( proSelect[i].id == intention.purInProject){
       intention.purInProject =  proSelect[i].projectName;
@@ -789,10 +795,16 @@
   if (null != telCreatePhoneAudits && telCreatePhoneAudits.length> 0 ){
       telCreatePhoneAuditsFlag  = true;
   }
+  if (null != base.trackingRemark && '' != base.trackingRemark) {
+      trackingRemarkFlag = true;
+      trackingRemark = base.trackingRemark;
+  }
   var addCustomerVM = new Vue({
     el: '#addCustomer',
     data: function () {
       return {
+          trackingRemark:trackingRemark,
+          trackingRemarkFlag:trackingRemarkFlag,
           clueProject:clueProject,
           mediumList:mediumList,
           mediumName:"",
