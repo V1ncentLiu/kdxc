@@ -25,11 +25,12 @@
 </head>
 <body>
 <div id="myCustom" class="myCustom mainPadding" style="display: none;">    
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
+    <!-- <el-breadcrumb separator="/" class="elBreadcrumb marginB20" v-if="isElBreadcrumb">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的客户</el-breadcrumb-item>
-    </el-breadcrumb>
+    </el-breadcrumb> -->
+    <table-uniontabtemplate :param="dataUrlParamHJ" v-if="isElBreadcrumb"></table-uniontabtemplate>
     <table-uniontabtemplate :param="dataUrlParam" v-else></table-uniontabtemplate>
     <el-row class="marginB20">
         <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
@@ -298,6 +299,19 @@
                             <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name" :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="手机号归属地:">
+                        <el-input v-model="form.phoneLocale" placeholder="手机号归属地" ></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否话务转化:">
+                        <el-select v-model="form.phtraConversion" placeholder="是否话务转化" clearable>
+                            <el-option v-for="item in phtraConversionArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+
+
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
@@ -336,8 +350,19 @@
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone'">
                     <!--  <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template> -->
                     <template slot-scope="scope">
-                        {{scope.row.phone}}
-                        <input type='hidden'><img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template>
+                        {{scope.row.phone}}<span v-if="scope.row.phoneLocale != null && scope.row.phoneLocale != ''">（{{scope.row.phoneLocale}}）</span>
+                        <input type='hidden'><img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone2'">
+                    <template slot-scope="scope">
+                        {{scope.row.phone2}}<span v-if="scope.row.phone2Locale != null && scope.row.phone2Locale != ''">（{{scope.row.phone2Locale}}）</span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone3'">
+                    <template slot-scope="scope">
+                        {{scope.row.phone3}}<span v-if="scope.row.phone3Locale != null && scope.row.phone3Locale != ''"> （{{scope.row.phone3Locale}}）</span>
+                    </template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'customerStatusName'">
                     <template slot-scope="scope">
@@ -934,44 +959,81 @@
         disabledCreateTime:false,//默认可选
         disabledTeleReceiveSource:false,//默认可选
         dataUrlParam:{
-            dataUrlArr:[{
+            dataUrlArr:[{//0
                 isActive:false,
                 name:"未签约客户",
                 url:"/tele/clueMyCustomerInfo/initmyCustomer?type=1",                
-            },{
+            },{//1
                 isActive:false,
                 name:"今日新增",
                 url:"/tele/clueMyCustomerInfo/initmyCustomer?type=2"
             },
-            {
+            {//2
                 isActive:false,
                 name:"今日回访",
                 url:"/tele/clueMyCustomerInfo/customerVisitToday"
             },
-            {
+            {//3
                 isActive:false,
                 name:"今日领取",
                 url:"/tele/clueMyCustomerInfo/initmyCustomer?type=5"
             },
-            {
+            {//4
                 isActive:false,
                 name:"自建客户",
                 url:"/tele/clueMyCustomerInfo/initmyCustomer?type=3"
             },
-            {
+            {//5
                 isActive:false,
                 name:"重单客户",
                 url:"/clue/cluerepetition/queryRepeatPage?type=1"
             },
-            {
+            {//6
                 isActive:false,
                 name:"邀约客户",
                 url:"/clue/appiontment/initAppiontmentList?type=1"
             },
-            {
+            {//7
                 isActive:false,
                 name:"已签约客户",
                 url:" /tele/clueMyCustomerInfo/initmyCustomer?type=4"
+            }]
+        },
+        dataUrlParamHJ:{
+            dataUrlArr:[{//0
+                isActive:false,
+                name:"未签约客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=1",
+                type:"hJtype"                
+            },{//1
+                isActive:false,
+                name:"今日新增",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=2",
+                type:"hJtype"
+            },
+            {//2
+                isActive:false,
+                name:"今日回访",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=1",
+                type:"hJtype"
+            },
+            {//3
+                isActive:false,
+                name:"今日领取",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=5",
+                type:"hJtype"
+            },
+            {//4
+                isActive:false,
+                name:"自建客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=3",
+                type:"hJtype"
+            },
+            {//5
+                isActive:false,
+                name:"已签约客户",
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?hJtype=4",
+                type:"hJtype"
             }]
         },
         isElBreadcrumb:true,
@@ -1023,6 +1085,8 @@
           isSign:"",
           teleReceiveSource:"",
             todayFollowNum:"",
+            phoneLocale:"",
+            phtraConversion:"",
         },
           todayFollowNumArr:todayFollowNumList,
         teleReceiveSourceArr:[
@@ -1078,6 +1142,7 @@
           tableData:[]
         },
         isTailMoneyArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
+          phtraConversionArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
         isSignOptions: [{
           value: 0,
           name: "未签约"
@@ -1420,6 +1485,8 @@
         param.isTailMoney = this.form.isTailMoney;
         param.teleReceiveSource = this.form.teleReceiveSource;
         param.todayFollowNum = this.form.todayFollowNum;
+          param.phoneLocale = this.form.phoneLocale;
+          param.phtraConversion = this.form.phtraConversion;
         this.loading=true;
         axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
           if(!response){
@@ -2058,9 +2125,10 @@
      // 4已签约客户 isSign = 1
      // 5今日领取 teleReceiveSource = 1
       var type=getQueryString("type");
+      var hJtype=getQueryString("hJtype");
       console.log(type)
         if(type){
-            // 隐藏面包屑
+            // 隐藏慧聚tab
             this.isElBreadcrumb=false;
             if(type==1){
                 this.form.isSign=0;
@@ -2084,23 +2152,53 @@
                 this.dataUrlParam.dataUrlArr[3].isActive=true;
                 this.disabledTeleReceiveSource=true;
             }
-        }else{
-            this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
-            this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
-            // 进入页面判断有是否有存储值
-          if(!this.paginationShow){
-            var storeVal = this.getSessionStore("storeForm");
-            var otherVal = this.getSessionStore("otherVal");
-            if(storeVal && otherVal){
-              this.form = storeVal;
-              this.$set(this.pager,"currentPage",otherVal.currentPage);
-              this.storeId = otherVal.clueId;
-              this.scrollTop = otherVal.scrollTop;
+        }else if(hJtype){
+            // 显示慧聚tab
+            this.isElBreadcrumb=true;
+            if(hJtype==1){ //未签约客户
+                this.form.isSign=0;
+                this.dataUrlParamHJ.dataUrlArr[0].isActive=true;
+                this.disabledIsSign=true;
+            }else if(hJtype==2){ //今日新增
+                this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
+                this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
+                this.dataUrlParamHJ.dataUrlArr[1].isActive=true;
+                this.disabledCreateTime=true;
+            }else if(hJtype==3){ //今日领取
+                this.form.teleReceiveSource="4";
+                this.dataUrlParamHJ.dataUrlArr[4].isActive=true;
+                this.disabledTeleReceiveSource=true;
+            }else if(hJtype==4){ //自建客户
+                this.form.isSign=1;
+                this.dataUrlParamHJ.dataUrlArr[5].isActive=true;
+                this.disabledIsSign=true;
+            }else if(hJtype==5){ //已签约客户
+                /* 今日领取加入 */
+                this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
+                this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
+
+                this.form.teleReceiveSource="3";
+                this.dataUrlParamHJ.dataUrlArr[3].isActive=true;
+                this.disabledTeleReceiveSource=true;
             }
-            // 取页数存储
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pager.pageSize = localVal;}
-          }
+            // 默认选中当天了，只有今日新增默认选中当天
+            // this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
+            // this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
+
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("storeForm");
+                var otherVal = this.getSessionStore("otherVal");
+                if(storeVal && otherVal){
+                  this.form = storeVal;
+                  this.$set(this.pager,"currentPage",otherVal.currentPage);
+                  this.storeId = otherVal.clueId;
+                  this.scrollTop = otherVal.scrollTop;
+                }
+                // 取页数存储
+                var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+                if(localVal){this.pager.pageSize = localVal;}
+            }
         }
       //初始化数据列表
       this.initTableData();

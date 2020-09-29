@@ -59,15 +59,8 @@
                 <el-form-item label="客户姓名:">
                     <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
                 </el-form-item>
-                <el-form-item label="资源类别:">
-                    <el-select v-model="form.category" placeholder="资源类别" clearable>
-                        <el-option
-                            v-for="item in categoryArr"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
+                <el-form-item label="资源ID:">
+                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
                 </el-form-item>
                 <el-form-item label="创建时间:">
                     <el-date-picker
@@ -95,7 +88,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="客户级别:">
-                        <el-select v-model="form.cusLeve" placeholder="客户级别" clearable>
+                        <el-select v-model="form.cusLevelList" placeholder="客户级别"  clearable multiple>
                             <el-option
                                 v-for="item in cusLevelArr"
                                 :key="item.value"
@@ -234,8 +227,15 @@
                     <!--    <el-form-item label="">
                         <el-input v-model="form.address" placeholder="地址"></el-input>
                     </el-form-item> -->
-                    <el-form-item label="资源ID:">
-                        <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                    <el-form-item label="资源类别:">
+                        <el-select v-model="form.category" placeholder="资源类别" clearable>
+                            <el-option
+                                    v-for="item in categoryArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="QQ:">
                         <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
@@ -285,6 +285,16 @@
 	                                   :value="item.value"></el-option>
 	                    </el-select>
 	                </el-form-item>
+                    <el-form-item label="是否话务转化:">
+                        <el-select v-model="form.phtraConversion" placeholder="是否话务转化" clearable>
+                            <el-option v-for="item in phtraConversionArr" :key="item.value" :label="item.label"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="手机号归属地:">
+                        <el-input v-model="form.phoneLocale" placeholder="手机号归属地" ></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -311,10 +321,23 @@
 
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone'">
                     <template slot-scope="scope" >
-                        <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span>
+                        <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span><span v-if="scope.row.phoneLocale != null && scope.row.phoneLocale != ''">（{{scope.row.phoneLocale}}）</span>
+
                         <input type='hidden'>
                         <img th:src="@{/images/tel.png}" :readonly="phoneDisabled" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone2'">
+                    <!--  <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template> -->
+                    <template slot-scope="scope">
+                        {{scope.row.phone2}}<span v-if="scope.row.phone2Locale != null && scope.row.phone2Locale != ''">（{{scope.row.phone2Locale}}）</span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone3'">
+                    <!--  <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template> -->
+                    <template slot-scope="scope">
+                        {{scope.row.phone3}}<span v-if="scope.row.phone3Locale != null && scope.row.phone3Locale != ''"> （{{scope.row.phone3Locale}}）</span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'customerStatusName'">
@@ -989,6 +1012,7 @@
             label: '跟访'
           }
         ],
+          phtraConversionArr: [{value: '', label: '全部'}, {value: '0', label: '否'}, {value: '1', label: '是'}],
         teleReceiveSourceArr:[
        	 {value:"1",name:"分配"},
             {value:"3",name:"领取"},
@@ -1030,7 +1054,10 @@
           status:"",
           isCall:"",
           isTailMoney:"",
-          isSign:0
+          isSign:0,
+            phtraConversion:"",
+            cusLevelList:[],
+            phoneLocale:""
         },
         form1: {
           type: [],
@@ -1206,6 +1233,9 @@
         param.isSign = this.form.isSign;
         param.isTailMoney = this.form.isTailMoney;
         param.teleReceiveSource = this.form.teleReceiveSource;
+          param.phtraConversion = this.form.phtraConversion;
+          param.phoneLocale = this.form.phoneLocale;
+          param.cusLevels = this.form.cusLevelList;
         if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
           param.teleSaleId= this.form.teleSaleId.join(",");
         }
@@ -1453,89 +1483,95 @@
         // this.allocateFormVisible = false;
         // this.dialogFormTransferVisible = false;
       },
-      submitAllocatForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            var telSale=this.formAllocat.telSales;
-            var rows = this.multseleSelection;
-            var cusLevel = this.formAllocat.cusLevel;
-            var idArr=[];
-            for(var i=0;i<rows.length;i++){
-              idArr.push(rows[i].clueId);
-            }
-            var  param={};
-            param.idList=idArr;
-            param.teleSaleId=telSale;
-            param.cusLevel = cusLevel;
-            // this.allocateFormVisible = false;
-
-            this.btnDisabled = true;
-
-            // 判断选择几条
-            if(rows.length==1){
-              console.log(rows)
-              var name=rows[0].teleSaleName;
-              var time=rows[0].teleReceiveTime;
-              if(time == "" || time == null || time == undefined){
-                time = rows[0].createTime;
-              }
-              /* if(name){
-              } */
-                this.$confirm('此资源已在'+time+'分配给顾问'+name+'。确认再次分配吗？', '提示', {
-                  confirmButtonText: '确定',
-                  cancelButtonText: '取消',
-                  type: 'warning'
-                }).then(() => {
-                  axios.post('/clue/pendingAllocation/allocationClue', param)
-                  .then(function (response) {
-                    if(response.data.code==-1){
-                      customerManVM.$message.error(response.data.msg);
-                      customerManVM.btnDisabled = false;
-                    }else {
-                      customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                          customerManVM.allocateFormVisible = false; //关闭弹窗
-                          customerManVM.btnDisabled = false;
-                          customerManVM.initTableData();
-                        }});
+        submitAllocatForm(formName) {
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    var telSale = this.formAllocat.telSales;
+                    var rows = this.multseleSelection;
+                    var cusLevel = this.formAllocat.cusLevel;
+                    var idArr = [];
+                    for (var i = 0; i < rows.length; i++) {
+                        idArr.push(rows[i].clueId);
                     }
-                  }).catch(function (error) {
-                    console.log(error);
-                    customerManVM.allocateFormVisible = false; //关闭弹窗
-                    customerManVM.btnDisabled = false;
-                  });
-                }).catch(() => {
-                  this.$message({
-                    type: 'info',
-                    message: '已取消分配'
-                  });
-                  customerManVM.btnDisabled = false;
-                });
+                    var param = {};
+                    param.idList = idArr;
+                    param.teleSaleId = telSale;
+                    param.cusLevel = cusLevel;
+                    // this.allocateFormVisible = false;
 
-            }else{
-              axios.post('/clue/pendingAllocation/allocationClue', param)
-              .then(function (response) {
-                if(response.data.code==-1){
-                  customerManVM.$message.error(response.data.msg);
-                  customerManVM.btnDisabled = false;
-                }else {
-                  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                      customerManVM.allocateFormVisible = false;
-                      customerManVM.btnDisabled = false;
-                      customerManVM.initTableData();
-                    }});
+                    this.btnDisabled = true;
+
+                    // 判断选择几条
+                    if (rows.length == 1) {
+                        console.log(rows)
+                        var name = rows[0].teleSaleName;
+                        var time = rows[0].teleReceiveTime;
+                        if (time == "" || time == null || time == undefined) {
+                            time = rows[0].createTime;
+                        }
+                        /* if(name){
+                        } */
+                        this.$confirm('此资源已在' + time + '分配给顾问' + name + '。确认再次分配吗？', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            axios.post('/clue/pendingAllocation/allocationClue', param)
+                                .then(function (response) {
+                                    if (response.data.code == -1 || response.data.code == 21918) {
+                                        customerManVM.$message.error(response.data.msg);
+                                        customerManVM.btnDisabled = false;
+                                        customerManVM.allocateFormVisible = false; //关闭弹窗
+                                        customerManVM.initTableData();
+                                    } else {
+                                        customerManVM.$message({
+                                            message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                                customerManVM.allocateFormVisible = false; //关闭弹窗
+                                                customerManVM.btnDisabled = false;
+                                                customerManVM.initTableData();
+                                            }
+                                        });
+                                    }
+                                }).catch(function (error) {
+                                console.log(error);
+                                customerManVM.allocateFormVisible = false; //关闭弹窗
+                                customerManVM.btnDisabled = false;
+                            });
+                        }).catch(() => {
+                            this.$message({
+                                type: 'info',
+                                message: '已取消分配'
+                            });
+                            customerManVM.btnDisabled = false;
+                        });
+
+                    } else {
+                        axios.post('/clue/pendingAllocation/allocationClue', param)
+                            .then(function (response) {
+                                if (response.data.code == -1) {
+                                    customerManVM.$message.error(response.data.msg);
+                                    customerManVM.btnDisabled = false;
+                                } else {
+                                    customerManVM.$message({
+                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                            customerManVM.allocateFormVisible = false;
+                                            customerManVM.btnDisabled = false;
+                                            customerManVM.initTableData();
+                                        }
+                                    });
+                                }
+                            }).catch(function (error) {
+                            console.log(error);
+                            customerManVM.allocateFormVisible = false;
+                            customerManVM.btnDisabled = false;
+                        });
+                    }
+                } else {
+                    console.log('error submit!!');
+                    return false;
                 }
-              }).catch(function (error) {
-                console.log(error);
-                customerManVM.allocateFormVisible = false;
-                customerManVM.btnDisabled = false;
-              });
-            }
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },
+            });
+        },
       openTrackingDialog(cid){
         var param = {};
         param.clueId = cid;
@@ -1647,20 +1683,37 @@
             this.vicemanagerFormVisible = false;
 
             this.btnDisabled = true;
-
-            axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
-            .then(function (response) {
-              customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+              axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
+                  .then(function (response) {
+                      var data = response.data;
+                      if (data.code == '0') {
+                          customerManVM.$message({
+                              message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                  customerManVM.btnDisabled = false;
+                                  customerManVM.initTableData();
+                              }
+                          });
+                      } else if (data.code == '21918') {
+                          customerManVM.$message({
+                              message: data.msg,
+                              type: 'warning'
+                          });
+                          customerManVM.btnDisabled = false;
+                          customerManVM.initTableData();
+                      } else {
+                          clueVM.$message({
+                              message: "接口调用失败",
+                              type: 'error'
+                          });
+                          customerManVM.btnDisabled = false;
+                      }
+                  }).catch(function (error) {
+                  console.log(error);
                   customerManVM.btnDisabled = false;
-                  customerManVM.initTableData();
-                }});
-            }).catch(function (error) {
-              console.log(error);
-              customerManVM.btnDisabled = false;
-            });
+              });
           } else {
-            console.log('error submit!!');
-            return false;
+              console.log('error submit!!');
+              return false;
           }
         });
       },

@@ -102,6 +102,17 @@
               <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择日期时间">
               </el-date-picker>
             </el-form-item>
+            <el-form-item label="签约项目:" label-width="58px">
+              <el-select v-model="form.signProjectId" placeholder="签约项目" style="width: 100%;" clearable
+                         filterable>
+                <el-option
+                        v-for="item in projectList"
+                        :key="item.id"
+                        :label="item.projectName"
+                        :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
           </el-row>
           <div class="mainSearchBtnBox">
             <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -323,6 +334,7 @@
         ratio:'',
         ossUrl: ossSignatureUrl,
         fileList: [],
+        projectList: [],
         dialogFormVisible: false,//驳回编辑
         reasonDialog: false,//驳回原因
         downloadDialogVisible: false,//下载图片dialog
@@ -347,7 +359,8 @@
           endTime: '',
           teleDeptId: '',
           teleGroupId: '',
-          teleId: ''
+          teleId: '',
+          signProjectId: ''
 
 
         },
@@ -822,6 +835,7 @@
         this.initSignShopTypeSelect();
         this.initSignProvinceSelect();
         this.initTeleDeptId();
+        this.getProjectList();
       },
       initBusAreaSelect() {//商务大区下拉框
         axios.post('/organization/organization/queryBusinessAreaList?businessLine=' + businessLine, {})
@@ -1203,6 +1217,24 @@
       closeEditRefundDialog() {
         this.$refs['dialogForm'].resetFields();
       },
+      //获取签约项目
+      getProjectList() {
+        axios.post('/sign/signRecord/queryProjectList', {})
+                .then(function (response) {
+                  var result = response.data;
+                  if (result.code == '0') {
+                    var table = result.data;
+                    mainDivVM.projectList = table;
+                  } else {
+                    console.error(response);
+                  }
+
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+      },
+
       cancleRefundEditDialog() {
         this.dialogFormVisible = false;
         this.closeEditRefundDialog();

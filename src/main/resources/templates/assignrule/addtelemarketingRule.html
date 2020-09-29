@@ -23,8 +23,21 @@
                     <el-col :span="12">
                         <el-form-item label="规则名称：" prop="assignName" :label-width="formLabelWidth">
                             <el-col :span="17">
-                                <el-input v-model="form.assignName"   autocomplete="off"  style="width: 100%;" maxlength="50"></el-input>
+                                <el-input v-model="form.assignName" autocomplete="off" style="width: 100%;"
+                                          maxlength="50"></el-input>
                             </el-col>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="行业类别:">
+                            <el-select v-model="form.industryCategory" placeholder="行业类别" clearable filterable multiple>
+                                <el-option
+                                        v-for="item in industryCategoryArr"
+                                        :key="item.value"
+                                        :label="item.name"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -174,12 +187,14 @@
                 btnDisabled: false,
             	categoryArr:[],
             	typeArr:[],
+                industryCategoryArr:[],
                 form: {
                 	assignName:'',
                     startTime:'',
                     endTime:'',
                     type:[],
                     category:[],
+                    industryCategory:'',
                     status:'1',//默认value值，启用
                     person:'',
                     searchWord:'',
@@ -262,100 +277,107 @@
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
-                    //规则成员数据	
-                    var saveMemner=[];
-                    var memberArry=this.form.tableData ;
+                        //规则成员数据
+                        var saveMemner = [];
+                        var memberArry = this.form.tableData;
 
-                    var assignName=this.form.assignName ;
-                    	
-                    var startTime=this.form.startTime ;	
-                   
-                    var endTime=this.form.endTime ;	
-                    
-                    var category=this.form.category ;	
-                    
-                    var type=this.form.type ;
-                    	
-                    var status=this.form.status ;	
-                    
-                    var searchWord=this.tags ;	
-                    
-                    var area=this.areaTags ;
+                        var assignName = this.form.assignName;
 
-                    var ary=[];  //自定义存选择人员的数组
+                        var startTime = this.form.startTime;
 
-                    if(endTime<startTime){
-                        this.$message({
-                            type: 'warning',
-                            message: '结束时间不能早于开始时间'
-                        });
-                        return ;
-                    }	
+                        var endTime = this.form.endTime;
 
-                    if(null!=memberArry&&memberArry.length>0) {
-                        for(var i=0;i<memberArry.length;i++) {
-                            // 不能重复选择人员
-                            ary.push(memberArry[i].person);//把选择的值放入自定义数组
-                            var s = ary.join(",")+",";                            
-                            console.log(ary)
-                            for(var j=0;j<ary.length;j++) {
-                                console.log(ary[j])
-                                if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要添加重复人员',
-                                            type: 'warning'
-                                        });
-                                        return;
-                                    }
-                                }                                
-                            }
-                            // 不能重复选择人员结束
+                        var category = this.form.category;
 
-                            var save={};
-                            save.memberId=memberArry[i].person;
-                            save.resourceLimit=memberArry[i].num;
-                            saveMemner.push(save);
+                        var industryCategory = this.form.industryCategory;
+
+                        var type = this.form.type;
+
+                        var status = this.form.status;
+
+                        var searchWord = this.tags;
+
+                        var area = this.areaTags;
+
+                        var ary = [];  //自定义存选择人员的数组
+
+                        if (endTime < startTime) {
+                            this.$message({
+                                type: 'warning',
+                                message: '结束时间不能早于开始时间'
+                            });
+                            return;
                         }
-                    }else{
-                        this.$message({
-                            type: 'warning',
-                            message: '组内人员必输项，请输入!'
-                        });
-                        return ;
-                    }
-                    
-                    var param={};
-                    
-                    param.teleAssignRuleMember=saveMemner;
-                    param.assignName=assignName;
-                    param.startTime=startTime;
-                    param.endTime=endTime;
-                    if(null!=category&&category.length>0){
-                    	
-                    	param.category=category.join(",");
-                   }
-                    if(null!=type&&type.length>0){
-                    	
-                    	param.type=type.join(",");
-                   }
-                   if(null!=searchWord&&searchWord.length>0){
-                    	
-                    	param.searchWord=searchWord.join(",");
-                   }
-                   if(null!=area&&area.length>0){
-                   	
-                    	param.area=area.join(",");
-                  }
-                   param.status=status; 
-                   AddRuleVM.btnDisabled = true; 
-                   axios.post('/assignrule/teleAssignRule/saveTeleAssignRule',param)
-                   .then(function (response) {
-                	   AddRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                         AddRuleVM.btnDisabled = false;
-                		 window.location.href="/assignrule/teleAssignRule/initteleAssignRule"; 
-		        	}});
-                  });
+
+                        if (null != memberArry && memberArry.length > 0) {
+                            for (var i = 0; i < memberArry.length; i++) {
+                                // 不能重复选择人员
+                                ary.push(memberArry[i].person);//把选择的值放入自定义数组
+                                var s = ary.join(",") + ",";
+                                console.log(ary)
+                                for (var j = 0; j < ary.length; j++) {
+                                    console.log(ary[j])
+                                    if (ary[j] != "") {
+                                        if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                            this.$message({
+                                                message: '请不要添加重复人员',
+                                                type: 'warning'
+                                            });
+                                            return;
+                                        }
+                                    }
+                                }
+                                // 不能重复选择人员结束
+
+                                var save = {};
+                                save.memberId = memberArry[i].person;
+                                save.resourceLimit = memberArry[i].num;
+                                saveMemner.push(save);
+                            }
+                        } else {
+                            this.$message({
+                                type: 'warning',
+                                message: '组内人员必输项，请输入!'
+                            });
+                            return;
+                        }
+
+                        var param = {};
+
+                        param.teleAssignRuleMember = saveMemner;
+                        param.assignName = assignName;
+                        param.startTime = startTime;
+                        param.endTime = endTime;
+                        if (null != industryCategory && industryCategory.length > 0) {
+                            param.industryCategory = industryCategory.join(",");
+                        }
+                        if (null != category && category.length > 0) {
+
+                            param.category = category.join(",");
+                        }
+                        if (null != type && type.length > 0) {
+
+                            param.type = type.join(",");
+                        }
+                        if (null != searchWord && searchWord.length > 0) {
+
+                            param.searchWord = searchWord.join(",");
+                        }
+                        if (null != area && area.length > 0) {
+
+                            param.area = area.join(",");
+                        }
+                        param.status = status;
+                        AddRuleVM.btnDisabled = true;
+                        axios.post('/assignrule/teleAssignRule/saveTeleAssignRule', param)
+                            .then(function (response) {
+                                AddRuleVM.$message({
+                                    message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                        AddRuleVM.btnDisabled = false;
+                                        window.location.href = "/assignrule/teleAssignRule/initteleAssignRule";
+                                    }
+                                });
+                            });
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -408,20 +430,26 @@
         　　}
 
         },
-        created(){
+       created() {
            //初始资源类别数据
-          	var  param={};
-          	param.groupCode="clueCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-            	AddRuleVM.categoryArr=response.data.data;
-            });
-          	 //初始化资源类型数据
-       	    param={};
-       	   param.groupCode="clueType";
-           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-         	AddRuleVM.typeArr=response.data.data;
-            });
-        },
+           var param = {};
+           param.groupCode = "clueCategory";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+               AddRuleVM.categoryArr = response.data.data;
+           });
+           //初始行业类别
+           param = {};
+           param.groupCode = "industryCategory";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+               AddRuleVM.industryCategoryArr = response.data.data;
+           });
+           //初始化资源类型数据
+           param = {};
+           param.groupCode = "clueType";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+               AddRuleVM.typeArr = response.data.data;
+           });
+       },
         mounted(){
           document.getElementById('addModule').style.display = 'block';
         }
