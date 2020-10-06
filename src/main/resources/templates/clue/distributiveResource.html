@@ -11,6 +11,10 @@
         /*.el-checkbox{margin-right: 30px!important;}*/
         /*.el-checkbox+.el-checkbox{margin-left: 0;}*/
         .phoneBox .el-form-item__content{max-width: 247px;word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;}
+   		.widthauto1 .el-form-item__label {
+            width: auto!important;
+            color: #606266;
+        }
     </style>
 </head>
 <body>
@@ -43,10 +47,10 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                 <el-form-item label="手机号:">
-                    <el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number"></el-input>
+                    <el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number" class="ipt100"></el-input>
                 </el-form-item>
-                <el-form-item label="电销分公司:">
-                    <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" clearable filterable>
+                <el-form-item label="电销分公司:" class="widthauto1">
+                    <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" clearable filterable class="ipt100">
                         <el-option
                                 v-for="item in dxBusinessList"
                                 :key="item.id"
@@ -55,8 +59,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="事业部:">
-                    <el-select v-model="form.businessUnit" placeholder="事业部"   clearable filterable>
+                <el-form-item label="事业部:" class="widthauto1">
+                    <el-select v-model="form.businessUnit" placeholder="事业部"   clearable filterable class="ipt100">
                         <el-option
                                 v-for="item in dxCauseBList"
                                 :key="item.id"
@@ -65,7 +69,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="创建时间:">
+                <el-form-item label="资源ID:" class="widthauto1">
+                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number" class="ipt100"></el-input>
+                </el-form-item>
+                <el-form-item label="创建时间:" class="widthauto1">
                     <el-date-picker
                             v-model="form.starTime"
                             type="datetime"
@@ -197,6 +204,9 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <!--<el-form-item label="资源ID:">
+                        <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                    </el-form-item>-->
                     <el-form-item label="是否接通:">
                         <el-select v-model="form.isCall" placeholder="是否接通" clearable >
                             <el-option
@@ -206,9 +216,6 @@
                                     :value="item.value">
                             </el-option>
                         </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源ID:">
-                        <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
                     </el-form-item>
                     <el-form-item label="QQ:">
                         <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
@@ -289,6 +296,16 @@
                                     :key="item.id"
                                     :label="item.name"
                                     :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否IM资源:">
+                        <el-select v-model="form.im" placeholder="是否IM资源" clearable >
+                            <el-option
+                                    v-for="item in comArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -544,6 +561,7 @@
                     businessLine:"",
                     operatorId:"",
                     firstAsssignTrafficGroupId:"",
+                    im:"",
                 },
                 pager:{
                     total: 0,
@@ -700,6 +718,7 @@
                 param.businessLine = this.form.businessLine;
                 param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
                 param.operatorId = this.form.operatorId;
+                param.im = this.form.im;
 
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
@@ -1042,6 +1061,7 @@
                 param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
                 param.categoryList = this.form.resourceTypeList;
                 param.projectList = this.form.resourceProjectList;
+                param.im = this.form.im;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(endTime){

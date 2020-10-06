@@ -6,7 +6,8 @@
 </head>
 <body>
 <div id="mainDiv"  class="mainPadding consoleStyle" style="display: none;">
-    <table-uniontabtemplate :param="dataUrlParam"></table-uniontabtemplate>
+    <table-uniontabtemplate :param="dataUrlParamHJ" v-if="isElBreadcrumbTab"></table-uniontabtemplate>
+    <table-uniontabtemplate :param="dataUrlParam" v-else></table-uniontabtemplate>
     <!-- 今日待跟进客户资源 -->    
     <el-row class="mainWhiteBg mainWhitePadding marginB20" v-if="isElBreadcrumb">
         <el-table 
@@ -50,7 +51,8 @@
             </el-table-column>
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
             <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="140"></el-table-column>
-            <el-table-column align="center" prop="assignTime" label="分配时间" width="140" sortable></el-table-column>
+            <!--分配时间从assignTime更改为teleReceiveTime-->
+            <el-table-column align="center" prop="teleReceiveTime" label="分配时间" width="140" sortable></el-table-column>
         </el-table>
         <table-pagination :pager="pager" @change="initTableData"></table-pagination>
     </el-row>
@@ -359,7 +361,45 @@ var mainDivVM = new Vue({
                 url:" /tele/clueMyCustomerInfo/initmyCustomer?type=4"
             }]
         },
+        dataUrlParamHJ:{
+            dataUrlArr:[{//0
+                isActive:false,
+                name:"未签约客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=1",
+                type:"hJtype"               
+            },{//1
+                isActive:false,
+                name:"今日新增",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=2",
+                type:"hJtype"
+            },
+            {//2
+                isActive:true,
+                name:"今日回访",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=1",
+                type:"hJtype"
+            },
+            {//3
+                isActive:false,
+                name:"今日领取",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=5",
+                type:"hJtype"
+            },
+            {//4
+                isActive:false,
+                name:"自建客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=3",
+                type:"hJtype"
+            },
+            {//5
+                isActive:false,
+                name:"已签约客户",
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?hJtype=4",
+                type:"hJtype"
+            }]
+        },
         isElBreadcrumb:true,
+        isElBreadcrumbTab:true,
         receiveDialog:false,
         receiveTitle:"",
         dailogTitleType:"",
@@ -859,6 +899,14 @@ var mainDivVM = new Vue({
         // 今日待跟进客户资源
         //初始化数据列表
         this.initTableData();
+        // 判断是慧聚还是餐盟
+        var hJtype=getQueryString("hJtype");//慧聚
+        console.log(hJtype)
+        if(hJtype){
+            this.isElBreadcrumbTab=true;
+        }else{
+            this.isElBreadcrumbTab=false;
+        }
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';

@@ -282,13 +282,20 @@
             </div>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-row class="marginB10">
-                <el-col :span="16">
+                <el-col :span="2">
                     <!--<el-button size="small" type="danger" @click="deteleTracking">删除-->
                     <!--</el-button>-->
                     <el-button size="small" type="primary" @click="editRecord">编辑
                     </el-button>
                 </el-col>
-                <el-col :span="4" :offset="4" class="f-tar">
+                <shiro:hasPermission name="customerManager:updateTrackingRemark">
+                    <el-col :span="2">
+                        <!--<el-button size="small" type="danger" @click="deteleTracking">删除-->
+                        <!--</el-button>-->
+                        <el-button size="small" type="primary" @click="openTrackingRemark  ">维护客户跟进备注</el-button>
+                    </el-col>
+                </shiro:hasPermission>
+                <el-col :span="4" :offset="16" class="f-tar">
                     <el-button size="small" type="primary" @click="lineFormShowFun()"><span v-if="lineFormShow"><span v-if="addButtons">取消添加</span><span v-else>取消编辑</span></span><span v-else>添加</span>
                     </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                 </el-col>
@@ -352,14 +359,14 @@
                                     </el-select>
                                 </el-form-item>
                                 <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 100px;">
-                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="isDisabledCustomer" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
+                                    <el-select v-model="formInline.customerStatusSub"  @change="customerStatusChange2" placeholder="客户状态" :disabled="isDisabledCustomer" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
                                         <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
                             </div>
                             <div style="width: 19.2%;float: left;text-align: center;">
                                     <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 100px;">
-                                        <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer" style="width: 100%;display: block;margin:0 auto;" clearable>
+                                        <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer1" style="width: 100%;display: block;margin:0 auto;" clearable>
                                             <el-option label="是" value="1"></el-option>
                                             <el-option label="否" value="0"></el-option>
                                         </el-select>
@@ -407,6 +414,13 @@
                     </div>
                 </el-table>
             </el-row>
+
+                <div v-show="trackingRemarkFlag" class="marginB20 fs16 paddingT20"  style="color: #EA7500;">客户跟进备注</div>
+                <div class="borderbox padding20">
+                    <el-row>
+                        {{trackingRemark}}
+                    </el-row>
+                </div>
             <div class="marginB20 fs16 paddingT20">投资意向信息</div>
             <div class="borderbox padding20">
                 <el-row>
@@ -848,7 +862,21 @@
             <div v-if="isShowMoreBtn"><p class="f-tac"><span @click="isActiveFun" class="f-csp">加载更多聊天内容&nbsp;<i class="el-icon-arrow-down"></i></span></p></div>
         </div>
     </el-dialog>
-
+    <!--添加客户跟进备注-->
+    <el-dialog title="填写客户跟进备注" :visible.sync="trackingRemarkVisible" width="540px">
+        <template>
+            <el-form :model="trackingRemarkForm" :rules="dialogTrackingRemarRules" ref="trackingRemarkForm" >
+                <el-form-item label="填写客户跟进备注：" :label-width="formLabelWidth160"  prop="trackingRemark">
+                    <el-input type="textarea" rows="4" maxlength="500" v-model="trackingRemarkForm.trackingRemark" placeholder="填写客户跟进注意事项"
+                              class="marginB20" style="width:80%;"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" :disabled="btnEditDisabled"  @click="trackingRemarkSumbit('trackingRemarkForm')">提 交</el-button>
+                <el-button  @click="trackingRemarkVisible=false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -964,6 +992,8 @@
     var editPhone = 1;
     var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
     var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
+    var  trackingRemarkFlag = false;
+    var trackingRemark = null;
     if(repeatClueStatus == 1 ){
         repeatStatus = true;
     }
@@ -977,10 +1007,18 @@
     if (null != telCreatePhoneAudits && telCreatePhoneAudits.length> 0 ){
         telCreatePhoneAuditsFlag  = true;
     }
+    if (null != base.trackingRemark && '' != base.trackingRemark) {
+        trackingRemarkFlag = true;
+        trackingRemark = base.trackingRemark;
+    }
     var addCustomerVM = new Vue({
         el: '#addCustomer',
         data: function () {
             return {
+                trackingRemark:trackingRemark,
+                trackingRemarkFlag:trackingRemarkFlag,
+                formLabelWidth160: '160px',
+                btnEditDisabled:false,
                 callDetailsText:'',
                 isElBreadcrumb:true,
                 addButtons:true,
@@ -988,7 +1026,8 @@
                 mediumName:"",
                 clueProject:clueProject,
                 telemarketingLayout:telemarketingLayout,
-            	isDisabledCustomer:false,
+                isDisabledCustomer:false,
+            	isDisabledCustomer1:false,
                 isActive:false,
                 isShowMoreBtn:false,
                 customerInfo:customer,
@@ -1022,6 +1061,7 @@
                 wechatVisible: false,//新增微信号
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
+                trackingRemarkVisible:false,//跟进备注
                 radio: '1',
                 radio1: '1',
                 dialogFormUploadImg: false, //上传资源图片弹框
@@ -1085,6 +1125,9 @@
                     wechatUrl:'',
                     fileList:[]
                 },
+                trackingRemarkForm: {
+                    trackingRemark:''
+                },
                 clueBase: base,
                 intention:intention,
                 categoryArr: [],
@@ -1108,6 +1151,11 @@
                 proSelect: [],
                 formLabelWidth: '120px',
                 formLabelWidth1: '140px',
+                dialogTrackingRemarRules: {
+                    trackingRemark: [
+                        {required: true, message: '请输入客户跟进备注', trigger: 'blur'}
+                    ]
+                },
                 rules: {
                     customerName: [
                         {required: true, message: '客户姓名不能为空', trigger: 'blur'}
@@ -1499,7 +1547,8 @@
                     addCustomerVM.uploadParamData.realName= file.name
             },
             lineFormShowFun(rows) {
-            	this.isDisabledCustomer = false;
+                this.isDisabledCustomer = false;
+            	this.isDisabledCustomer1 = false;
                 if(this.lineFormShow){
                     this.lineFormShow = false
                 }else{
@@ -1578,7 +1627,19 @@
                     this.substatus = true;
                     // $(".paddingL55 .lineForm_customerStatus").css("width","420px");
                 }
+                this.formInline.isCall="1";//接通
+                this.isDisabledCustomer1=false;//可编辑
                 this.isCallChange();
+            },
+            customerStatusChange2(val){
+                console.log(val)
+                if(val=="1"||val=="2"||val=="7"){//A.不跟进  空号错号  未接通,B.不跟进  停机关机   未接通，G.  不跟进   多次拨打未接通或拒接   未接通
+                    this.formInline.isCall="0";//未接通
+                    this.isDisabledCustomer1=true;//不可编辑
+                }else if(val=="3"||val=="4"||val=="5"||val=="6"||val=="8"||val=="9"){//C. 不跟进   轴品牌  接通,D.不跟进   观望状态   接通，E. 不跟进   资金不到位   接通，F.  不跟进  家人或合伙人意见不一致  接通，H.   不跟进   不看项目     接通，I.    不跟进   内部重复    接通
+                    this.formInline.isCall="1";//接通
+                    this.isDisabledCustomer1=true;//不可编辑
+                }
             },
             isCallChange(){
                var  customerStatus =  this.formInline.customerStatus;
@@ -2179,6 +2240,7 @@
                 }
                 this.addButtons = false;
                 this.isDisabledCustomer = true;
+                this.isDisabledCustomer1 = true;
                 this.lineFormShow = true;
                 this.formInline.id = rows[0].id;
                 this.formInline.callTime = rows[0].callTime;
@@ -2916,6 +2978,50 @@
                 this.wechatForm.wechat2=this.form.wechat2;
                 this.wechatForm.wechatUrl=this.form.wechatUrl;
             },
+            openTrackingRemark() {
+                this.resetForm("trackingRemarkForm");
+                this.trackingRemarkForm.trackingRemark = trackingRemark;
+                this.trackingRemarkVisible = true;
+            },
+            resetForm(formName) {
+                if (addCustomerVM.$refs[formName]) {
+                    addCustomerVM.$refs[formName].resetFields();
+                }
+            },
+            trackingRemarkSumbit(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        param.clueId = this.clueId;
+                        param.trackingRemark = addCustomerVM.trackingRemarkForm.trackingRemark;
+                        addCustomerVM.btnEditDisabled = true;
+                        axios.post('/aggregation/tracking/updateTrackingRemark', param).then(function (response) {
+                            if (null === response || response.data == null || response.data.code != '0') {
+                                addCustomerVM.$message({
+                                    message: response.data.msg,
+                                    type: 'warning'
+                                });
+                                addCustomerVM.btnEditDisabled = false;
+                                return;
+                            } else {
+                                if(zjFalg){
+                                    window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                }else{
+                                    window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                }
+                            }
+                        }).catch(function (error) {
+                            console.log(error);
+                            addCustomerVM.btnEditDisabled = false;
+                        });
+                        console.log('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+
             wechatSumbit() {
                 this.form.wechat2=this.wechatForm.wechat2;
                 this.form.wechatUrl=this.wechatForm.wechatUrl;

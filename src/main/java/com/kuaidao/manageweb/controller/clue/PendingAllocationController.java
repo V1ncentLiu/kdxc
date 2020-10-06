@@ -340,6 +340,7 @@ public class PendingAllocationController {
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
         allocationClueReq.setOrg(user.getOrgId());
+        allocationClueReq.setBusinessLine(user.getBusinessLine());
         return clueBasicFeignClient.ceoDistributionClue(allocationClueReq);
     }
 

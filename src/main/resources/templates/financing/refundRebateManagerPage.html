@@ -142,6 +142,16 @@
                     <el-form-item label="签约单编号:" prop="signNo">
                         <el-input v-model="searchForm.signNo" placeholder="签约单编号"></el-input>
                     </el-form-item>
+                    <el-form-item label="签约项目:">
+                        <el-select v-model="searchForm.signProjectId" placeholder="签约项目"  clearable filterable>
+                            <el-option
+                                    v-for="item in projectList"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
           		      <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -202,7 +212,7 @@
              <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
                   <span style="color:red;">当前项目为给品牌商结算</span>
               </el-form-item>
-              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
+              <el-form-item v-if="roleCode== 'CYCW' && businessLine == 8" label="退款审批时间：" :label-width="formLabelWidth" prop="refundTime">
                   <el-date-picker
                       style="width: 290px;"
                       v-model="allocationForm.refundTime"
@@ -210,6 +220,14 @@
                       placeholder="选择日期时间">
                   </el-date-picker>
               </el-form-item>
+                  <el-form-item v-else  label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
+                      <el-date-picker
+                              style="width: 290px;"
+                              v-model="allocationForm.refundTime"
+                              type="datetime"
+                              placeholder="选择日期时间">
+                      </el-date-picker>
+                  </el-form-item>
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
               		<el-upload
                     class="upload-demo"
@@ -423,13 +441,18 @@ var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 var payModeItem =[[${payModeItem}]];
 var giveTypeList =[[${giveTypeList}]];
+var businessLine = [[${businessLine}]];
+var roleCode = [[${roleCode}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            businessLine:businessLine,
+            roleCode:roleCode,
           paginationShow: false,
           isShow:false,
           btnDisabled:false,
           btnDisabled1:false,
+            projectList: [],
       		searchForm: {
 	       		busAreaId: '',
 	       		busGroupId: '',
@@ -445,7 +468,8 @@ var clueVM = new Vue({
 	       		signProvince: '',
 	       		signStatus: '',
 	       		phone: '',
-	       		signNo: ''
+	       		signNo: '',
+                signProjectId: ''
           },
           allocationForm: {
         	  
@@ -884,7 +908,7 @@ var clueVM = new Vue({
                 param.signStatus = this.searchForm.signStatus;
                 param.phone = this.searchForm.phone;
                 param.signNo = this.searchForm.signNo;
-                
+                param.signProjectId = this.searchForm.signProjectId;
                 //列表只查询正常数据，取消删除数据不查询
                 //param.delFalg = this.searchForm.delFalg;
                 console.info(param);
@@ -1433,6 +1457,23 @@ var clueVM = new Vue({
                         this.isShow=true
                     }          
                 },
+            //获取签约项目
+            getProjectList() {
+                axios.post('/sign/signRecord/queryProjectList', {})
+                    .then(function (response) {
+                        var result = response.data;
+                        if (result.code == '0') {
+                            var table = result.data;
+                            clueVM.projectList = table;
+                        } else {
+                            console.error(response);
+                        }
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
         },
         created(){
             console.info("create method");
@@ -1453,6 +1494,7 @@ var clueVM = new Vue({
 
             this.searchTable();
             this.getUploadParam();
+            this.getProjectList();
         },
         mounted(){
            console.info("mounted method");
