@@ -363,9 +363,11 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getProjectName()); // 资源项目
                 curList.add(taskDTO.getCusName()); // 姓名
                 curList.add(taskDTO.getPhone()); // 手机1
+                curList.add(taskDTO.getPhoneLocale());
                 curList.add(taskDTO.getEmail()); // 邮箱
                 curList.add(taskDTO.getQq()); // QQ
                 curList.add(taskDTO.getPhone2()); // 手机2
+                curList.add(taskDTO.getPhone2Locale());
                 curList.add(taskDTO.getWechat()); // 微信1
                 curList.add(taskDTO.getWechat2()); // 微信2
                 curList.add(taskDTO.getAddress()); // 地址
@@ -445,8 +447,6 @@ public class ExtendClueDistributionedTaskController {
                     phstatus = "否";
                 }
                 curList.add(phstatus);
-                curList.add(taskDTO.getPhoneLocale());
-                curList.add(taskDTO.getPhone2Locale());
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
                 String im ;
