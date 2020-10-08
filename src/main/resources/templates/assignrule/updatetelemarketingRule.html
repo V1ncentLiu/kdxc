@@ -23,8 +23,21 @@
                     <el-col :span="12">
                         <el-form-item label="规则名称：" prop="assignName" :label-width="formLabelWidth">
                             <el-col :span="17">
-                                <el-input v-model="form.assignName" disabled   autocomplete="off"  style="width: 100%;" maxlength="50"></el-input>
+                                <el-input v-model="form.assignName" disabled autocomplete="off" style="width: 100%;"
+                                          maxlength="50"></el-input>
                             </el-col>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="品类:" :label-width="formLabelWidth">
+                            <el-select v-model="form.industryCategory" placeholder="行业类别" filterable multiple style="width: 70%;">
+                                <el-option
+                                        v-for="item in industryCategoryArr"
+                                        :key="item.value"
+                                        :label="item.name"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -188,12 +201,14 @@
                 btnDisabled: false,  
             	categoryArr:[],
             	typeArr:[],
+                industryCategoryArr:[],
                 form: {
                 	assignName:updateRule.assignName,
                     startTime:updateRule.startTime,
                     endTime:updateRule.endTime,
                     type:updateRule.type.split(","),
                     category:updateRule.category.split(","),
+                    industryCategory:[],
                     status:updateRule.status+'',//默认value值，启用
                     person:'',
                     searchWord:'',
@@ -254,16 +269,16 @@
                    
                     var endTime=this.form.endTime ;	
                     
-                    var category=this.form.category ;	
-                    
+                    var category=this.form.category ;
+
                     var type=this.form.type ;
                     	
                     var status=this.form.status ;	
                     
                     var searchWord=this.tags ;	
                     
-                    var area=this.areaTags ;	
-                    
+                    var area=this.areaTags ;
+
                     if(endTime<startTime){
                         this.$message({
                             type: 'warning',
@@ -288,16 +303,22 @@
                     }
                     
                     var param={};
-                    
-                    param.teleAssignRuleMember=saveMemner;
-                   // param.assignName=assignName;
-                    param.startTime=startTime;
-                    param.id=updateRule.id;
-                    param.endTime=endTime;
-                    if(null!=category&&category.length>0){
-                    	
-                    //	param.category=category.join(",");
-                   }
+
+                        param.teleAssignRuleMember = saveMemner;
+                        // param.assignName=assignName;
+                        param.startTime = startTime;
+                        param.id = updateRule.id;
+                        param.endTime = endTime;
+                        var industryCategory = this.form.industryCategory;
+                        if (null != industryCategory && industryCategory.length > 0) {
+                            param.industryCategory = industryCategory.join(",");
+                        }else{
+                            param.industryCategory = '';
+                        }
+                        if (null != category && category.length > 0) {
+
+                            //	param.category=category.join(",");
+                        }
                     if(null!=type&&type.length>0){
                     	
                    // 	param.type=type.join(",");
@@ -384,6 +405,12 @@
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
          	AddRuleVM.typeArr=response.data.data;
             });
+            //初始行业类别
+            param={};
+            param.groupCode="industryCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                AddRuleVM.industryCategoryArr=response.data.data;
+            });
            var searchWord=  updateRule.searchWord;
            var area = updateRule.area;
            if(null!=searchWord){
@@ -401,8 +428,10 @@
                  });
         	   }
               }
-        	   
-        	   
+           var   industryCategory = updateRule.industryCategory;
+           if (null != industryCategory && industryCategory != "" ){
+               this.form.industryCategory =    industryCategory.split(",");
+           }
         },
         mounted(){
             document.getElementById('addModule').style.display = 'block';

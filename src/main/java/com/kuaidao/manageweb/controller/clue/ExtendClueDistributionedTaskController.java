@@ -363,9 +363,11 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getProjectName()); // 资源项目
                 curList.add(taskDTO.getCusName()); // 姓名
                 curList.add(taskDTO.getPhone()); // 手机1
+                curList.add(taskDTO.getPhoneLocale());
                 curList.add(taskDTO.getEmail()); // 邮箱
                 curList.add(taskDTO.getQq()); // QQ
                 curList.add(taskDTO.getPhone2()); // 手机2
+                curList.add(taskDTO.getPhone2Locale());
                 curList.add(taskDTO.getWechat()); // 微信1
                 curList.add(taskDTO.getWechat2()); // 微信2
                 curList.add(taskDTO.getAddress()); // 地址
@@ -445,10 +447,15 @@ public class ExtendClueDistributionedTaskController {
                     phstatus = "否";
                 }
                 curList.add(phstatus);
-                curList.add(taskDTO.getPhoneLocale());
-                curList.add(taskDTO.getPhone2Locale());
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
+                String im ;
+                if (taskDTO.getInputType() == 5) {
+                    im = "是";
+                } else {
+                    im = "否";
+                }
+                curList.add(im);
                 dataList.add(curList);
             }
         }
@@ -573,14 +580,20 @@ public class ExtendClueDistributionedTaskController {
                         DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 资源类别
                 curList.add(taskDTO.getCategoryName());
+                //资源类型
+                curList.add(taskDTO.getTypeName());
                 // 媒介
                 curList.add(taskDTO.getSourceName());
                 // 资源项目
                 curList.add(taskDTO.getProjectName());
                 // 手机号
                 curList.add(taskDTO.getPhone());
+                // 手机号归属地
+                curList.add(taskDTO.getPhoneLocale());
                 // 手机号2
                 curList.add(taskDTO.getPhone2());
+                // 手机号2归属地
+                curList.add(taskDTO.getPhone2Locale());
                 // QQ
                 curList.add(taskDTO.getQq());
                 // 微信
@@ -696,19 +709,20 @@ public class ExtendClueDistributionedTaskController {
                     repeatPhone = "否";
                 }
                 curList.add(repeatPhone);
+                String im ;
+                if (taskDTO.getInputType() == 5) {
+                    im = "是";
+                } else {
+                    im = "否";
+                }
+                if(!queryDto.getPhtraExport()){
+                    curList.add(im);
+                }
+                //url地址
+                curList.add(taskDTO.getUrlAddress());
                 dataList.add(curList);
             }
         }
-        // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
-        // String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-        // response.addHeader("Content-Disposition",
-        // "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-        // response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
-        // response.setContentType("application/octet-stream");
-        // ServletOutputStream outputStream = response.getOutputStream();
-        // wbWorkbook.write(outputStream);
-        // outputStream.close();
-
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             String title = "";
             if(queryDto !=null && queryDto.getPhtraExport() !=null){

@@ -3,6 +3,8 @@
  */
 package com.kuaidao.manageweb.controller.financing;
 
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.manageweb.constant.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -91,13 +94,31 @@ public class RefundRebateManagerController {
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
         request.setAttribute("provinceList", getproviceList.getData());
-
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+            request.setAttribute("proAllSelect", proJson.getData());
+            if (!CollectionUtils.isEmpty(proJson.getData())) {
+                List<ProjectInfoDTO> data = proJson.getData();
+                List<ProjectInfoDTO> alist = new ArrayList<>();
+                for (ProjectInfoDTO infoDTO : data) {
+                    if (AggregationConstant.NO.equals(infoDTO.getIsNotSign())) {
+                        alist.add(infoDTO);
+                    }
+                }
+                request.setAttribute("proSelect", alist);
+            }
+        }
         // 查询签约店型集合
         request.setAttribute("vistitStoreTypeList",
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("ossUrl", ossUrl);
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
+        request.setAttribute("businessLine", user.getBusinessLine());
+        request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         return "financing/refundRebateManagerPage";
     }
 
