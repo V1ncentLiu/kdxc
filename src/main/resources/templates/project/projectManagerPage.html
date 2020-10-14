@@ -63,6 +63,16 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="是否不可签约:">
+                    <el-select v-model="projectSearchForm.isNotSign" placeholder="是否不可签约" style="width: 100%;" clearable>
+                        <el-option
+                                v-for="item in isNotSign"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
            <el-form-item label=""> 
                 <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
             </el-form-item> 
@@ -112,7 +122,8 @@ var projectVM = new Vue({
        		    projectName: '',
                 category: '',
                 groupId: '',
-                projectAttributive:''
+                projectAttributive:'',
+                isNotSign:''
             },
             dataTable:[],
             pager:{
@@ -134,6 +145,16 @@ var projectVM = new Vue({
             userInfoList:userInfoList,
             projectAttributives:projectAttributiveList,
             scrollTop: 0,
+            isNotSign:[
+                {
+                    value: '1',
+                    label: '是'
+                },
+                {
+                    value: '0',
+                    label: '否'
+                }
+            ],
         },
         methods: {
         	searchTable() {
@@ -144,6 +165,7 @@ var projectVM = new Vue({
                 param.groupId = this.projectSearchForm.groupId;
                 param.category = this.projectSearchForm.category;
                 param.projectAttributive = this.projectSearchForm.projectAttributive;
+                param.isNotSign = this.projectSearchForm.isNotSign;
                 console.info(param);
                 axios.post('/aggregation/projectManager/list', param)
                 .then(function (response) {
@@ -213,7 +235,6 @@ var projectVM = new Vue({
               },
             //项目归属转换
             transProjectAttributive(row, column, cellValue, index){
-        	    debugger;
                 var text="";
                 if(projectAttributiveList){
                     for(var i=0;i<projectAttributiveList.length;i++){
