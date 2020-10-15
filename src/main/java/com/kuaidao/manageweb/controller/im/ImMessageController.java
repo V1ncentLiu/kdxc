@@ -500,15 +500,15 @@ public class ImMessageController {
             if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
                 // 设置顾问Id
                 saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
-                JSONResult<Boolean> onlineleave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-                log.info("session返回结果={}" , onlineleave);
-                return onlineleave ;
+                JSONResult<Boolean> onlineLeave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+                log.info("session返回结果={}" , onlineLeave);
+                return onlineLeave ;
             }
         }else{
             // 顾问Id存在直接设置在线离线
-            JSONResult<Boolean> onlineleave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-            log.info("无session返回结果={}" , onlineleave);
-            return onlineleave ;
+            JSONResult<Boolean> onlineLeave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
+            log.info("无session返回结果={}" , onlineLeave);
+            return onlineLeave ;
         }
         return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
     }
