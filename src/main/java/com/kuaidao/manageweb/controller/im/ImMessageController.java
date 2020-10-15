@@ -114,16 +114,21 @@ public class ImMessageController {
             idEntity.setId( null == user.getOrgId() ? "-1" : user.getOrgId() + "");
             JSONResult<OrganizationDTO> singleOrganizationDTO = organizationFeignClient.queryOrgById(idEntity);
             // 当前登陆人所属组织
-            OrganizationDTO myOrganizationDTO = new OrganizationDTO();
-            myOrganizationDTO.setId(user.getOrgId());
-            if (!JSONResult.SUCCESS.equals(singleOrganizationDTO.getCode())) {
+            OrganizationDTO myOrganizationDTO  = null ;
+            if (JSONResult.SUCCESS.equals(singleOrganizationDTO.getCode())) {
+                myOrganizationDTO = new OrganizationDTO();
+                myOrganizationDTO.setId(user.getOrgId());
                 // 设置当前登陆人组织名
-                myOrganizationDTO.setName(user.getOrgName());
+                myOrganizationDTO.setName( null == singleOrganizationDTO.getData() ? "" : singleOrganizationDTO.getData().getName());
             }
             if(CollectionUtils.isEmpty(dxzList)){
+
                 dxzList = new ArrayList(1);
             }
-            dxzList.add(myOrganizationDTO);
+            if(null != myOrganizationDTO){
+
+                dxzList.add(myOrganizationDTO);
+            }
             return dxzList;
         }
     }
