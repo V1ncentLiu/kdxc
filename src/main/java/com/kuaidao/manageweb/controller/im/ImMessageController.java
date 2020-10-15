@@ -266,12 +266,11 @@ public class ImMessageController {
             // 创建一个工作薄对象sheet
             XSSFSheet sheet = workBook.createSheet();
             // 设置宽度
-            sheet.setColumnWidth(1, 4000);
-            sheet.setColumnWidth(2, 4000);
+            sheet.setColumnWidth(1, 5000);
+            sheet.setColumnWidth(2, 5000);
             sheet.setColumnWidth(3, 4000);
-            sheet.setColumnWidth(4, 4000);
-            sheet.setColumnWidth(5, 8000);
-            sheet.setColumnWidth(6, 8000);
+            sheet.setColumnWidth(4, 6200);
+            sheet.setColumnWidth(5, 9000);
 
             XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
             String name = "IM聊天记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
