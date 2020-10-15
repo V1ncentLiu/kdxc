@@ -199,8 +199,8 @@ public class ImMessageController {
         // 设置accId
         messageRecordPageReq.setAccId(customerInfoDTO.getImId());
         JSONPageResult<List<MessageRecordData>> listJSONPageResult = imFeignClient.listChatRecord(messageRecordPageReq);
-
         if(null != listJSONPageResult){
+            // 对象结果参数转化
             transChatRecord(listJSONPageResult.getData(),false);
         }
         return listJSONPageResult;
@@ -238,6 +238,7 @@ public class ImMessageController {
             dataList.add(getHeadTitleList());
             if(null != chatRecordList && JSONResult.SUCCESS.equals(chatRecordList.getCode()) && chatRecordList.getData() != null && chatRecordList.getData().size() != 0) {
                 List<MessageRecordData> resultList = chatRecordList.getData();
+                // 对象结果参数转化
                 transChatRecord(resultList , true );
                 int size = resultList.size();
                 for (int i = 0; i < size; i++) {
@@ -287,7 +288,11 @@ public class ImMessageController {
         }
     }
 
-    // 消息体Attach自定义消息组装封装到body
+    /**
+     * 消息体Attach自定义消息组装封装到body
+     * @param messageRecordDataList
+     * @param isCal
+     */
      void transChatRecord(List<MessageRecordData> messageRecordDataList , boolean isCal) {
         if(CollectionUtils.isEmpty(messageRecordDataList)){  return ; }
         Map<String,String> productCardMap = new LinkedHashMap<>();
