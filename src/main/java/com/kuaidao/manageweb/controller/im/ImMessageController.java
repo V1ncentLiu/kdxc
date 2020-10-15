@@ -110,7 +110,7 @@ public class ImMessageController {
             // 自己组织加入
             OrganizationDTO myOrganizationDTO = new OrganizationDTO();
             myOrganizationDTO.setId(user.getOrgId());
-            myOrganizationDTO.setName(user.getName());
+            myOrganizationDTO.setName(user.getOrgName());
             if(CollectionUtils.isEmpty(dxzList)){
                 dxzList = new ArrayList(1);
             }
