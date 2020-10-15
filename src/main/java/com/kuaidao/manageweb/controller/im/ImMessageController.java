@@ -107,8 +107,8 @@ public class ImMessageController {
             OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
             organizationQueryDTO.setParentId(user.getOrgId());
             organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-            JSONResult<List<OrganizationDTO>> listDescenDantByParentId = organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
-            dxzList = listDescenDantByParentId.getData();
+            JSONResult<List<OrganizationDTO>> organizationDTOList = organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            dxzList = organizationDTOList.getData();
             // 当前用户组织名称
             IdEntity idEntity = new IdEntity();
             idEntity.setId( null == user.getOrgId() ? "-1" : user.getOrgId() + "");
@@ -135,45 +135,31 @@ public class ImMessageController {
     @SuppressWarnings("all")
     @PostMapping("/getChatRecordPage")
     public @ResponseBody JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq ){
-        // 查询条件无顾问
+        // 查询条件无顾问Id
         if(StringUtils.isBlank(messageRecordPageReq.getTeleSaleId())){
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             String roleCode = CommUtil.getRoleCode(curLoginUser);
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
             // 当前登陆用户不是管理员!
             if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())){
-                // 电销总监
-                if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-                    List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                    if(CollectionUtils.isEmpty(userList)) {
-                        JSONPageResult jsonPageResult = new JSONPageResult();
-                        jsonPageResult.setPageSize(messageRecordPageReq.getPageSize());
-                        jsonPageResult.setPageNum(messageRecordPageReq.getPageNum());
-                        return new JSONPageResult().success(new ArrayList<>());
-                    }
-                    List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
-                    // 当前登陆人Id
-                    idList.add(curLoginUser.getId());
-                    // 封装多个电销顾问ID
-                    messageRecordPageReq.setTeleSaleId(Joiner.on(",").join(idList));
-
-                }else {
-                    List<UserInfoDTO>  userInfoList  = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                    if (CollectionUtils.isEmpty(userInfoList)) {
-                        JSONPageResult jsonPageResult = new JSONPageResult();
-                        jsonPageResult.setPageSize(messageRecordPageReq.getPageSize());
-                        jsonPageResult.setPageNum(messageRecordPageReq.getPageNum());
-                        return new JSONPageResult().success(new ArrayList<>());
-                    }
-                    List<Long> idList = userInfoList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
-                    // 当前登陆人Id
-                    idList.add(curLoginUser.getId());
-                    messageRecordPageReq.setTeleSaleId(Joiner.on(",").join(idList));
+                // 当前登录人组织下所有人员
+                List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
+                if(CollectionUtils.isEmpty(userList)) {
+                    JSONPageResult jsonPageResult = new JSONPageResult();
+                    jsonPageResult.setPageSize(messageRecordPageReq.getPageSize());
+                    jsonPageResult.setPageNum(messageRecordPageReq.getPageNum());
+                    return new JSONPageResult().success(new ArrayList<>());
                 }
+                List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
+                // 当前登陆人Id
+                idList.add(curLoginUser.getId());
+                // 封装多个电销顾问ID
+                messageRecordPageReq.setTeleSaleId(Joiner.on(",").join(idList));
             }
         }
         JSONPageResult<List<MessageRecordData>> chatRecordPage = imFeignClient.getChatRecordPage(messageRecordPageReq);
         if(null != chatRecordPage){
+            // 对象结果参数转化
             transChatRecord(chatRecordPage.getData(),false);
         }
         return chatRecordPage;
@@ -205,13 +191,15 @@ public class ImMessageController {
             return new JSONPageResult<List<MessageRecordData>>().success(new ArrayList<>());
         }
         CustomerInfoDTO customerInfoDTO = data.get(0);
-        // 客户Im无值?
+        // 客户Im无值
         if(StringUtils.isBlank(customerInfoDTO.getImId())){
+
             return new JSONPageResult<List<MessageRecordData>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         // 设置accId
         messageRecordPageReq.setAccId(customerInfoDTO.getImId());
         JSONPageResult<List<MessageRecordData>> listJSONPageResult = imFeignClient.listChatRecord(messageRecordPageReq);
+
         if(null != listJSONPageResult){
             transChatRecord(listJSONPageResult.getData(),false);
         }
@@ -225,36 +213,22 @@ public class ImMessageController {
      */
     @PostMapping("/export")
     public void export(@RequestBody MessageRecordExportSearchReq messageRecordExportSearchReq , HttpServletResponse response){
-        // 查询条件无顾问
+        // 查询条件无顾问Id
         if(StringUtils.isBlank(messageRecordExportSearchReq.getTeleSaleId())){
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-            String roleCode = CommUtil.getRoleCode(curLoginUser);
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
-            // // 非管理员
+            // 当前登陆用户不是管理员!
             if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())){
-                // 电销总监
-                if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-                    //电销总监
-                    List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                    if(CollectionUtils.isEmpty(userList)) {
-                        messageRecordExportSearchReq.setTeleSaleId("-2");
-                    }else{
-                        List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
-                        idList.add(curLoginUser.getId());
-                        // 封装多个电销顾问ID
-                        messageRecordExportSearchReq.setTeleSaleId(Joiner.on(",").join(idList));
-                    }
-                }else {
-                    List<UserInfoDTO>  userInfoList  = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                    if (CollectionUtils.isEmpty(userInfoList)) {
-                        messageRecordExportSearchReq.setTeleSaleId("-1");
-                    }else{
-                        List<Long> idList = userInfoList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
-                        idList.add(curLoginUser.getId());
-                        messageRecordExportSearchReq.setTeleSaleId(Joiner.on(",").join(idList));
-                    }
+                // 当前登录人组织下所有人员
+                List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
+                if(CollectionUtils.isEmpty(userList)) {
+                    messageRecordExportSearchReq.setTeleSaleId("-2");
+                }else{
+                    List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
+                    idList.add(curLoginUser.getId());
+                    // 封装多个电销顾问ID
+                    messageRecordExportSearchReq.setTeleSaleId(Joiner.on(",").join(idList));
                 }
-
             }
         }
         // 获得历史聊天记录
@@ -434,14 +408,12 @@ public class ImMessageController {
         if( null == tSaleMonitorReq.getTeleSaleId()){
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             Long orgId = curLoginUser.getOrgId();
-            String roleCode = CommUtil.getRoleCode(curLoginUser);
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
-            // 非管理员时
+            // 当前登陆用户不是管理员!
             if(CollectionUtils.isNotEmpty(roleList)
                     && CollectionUtils.isNotEmpty(roleList)
                     && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-                if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-                    //电销总监
+                    // 当前登录人组织下所有人员
                     List<UserInfoDTO> userList = getTeleSaleByOrgId(orgId);
                     if(CollectionUtils.isEmpty(userList)) {
                         tSaleMonitorReq.setTeleSaleIds(Arrays.asList(-1L));
@@ -452,15 +424,6 @@ public class ImMessageController {
                         // 封装多个电销顾问ID
                         tSaleMonitorReq.setTeleSaleIds(idList);
                     }
-                }else {
-                    List<UserInfoDTO>  userInfoList  = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                    if (CollectionUtils.isEmpty(userInfoList)) {
-                        tSaleMonitorReq.setTeleSaleIds(Arrays.asList(-1L));
-                    }else{
-                        List<Long> idList = userInfoList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
-                        tSaleMonitorReq.setTeleSaleIds(idList);
-                    }
-                }
             }
         }else{
 
