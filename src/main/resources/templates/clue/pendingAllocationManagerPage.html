@@ -170,6 +170,14 @@
                     </template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'projectName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayout !=null && (','+telemarketingLayout.category+',').indexOf(','+scope.row.category+',') != -1">
+                           <el-button @click="showHasRepeatClue(scope.row)" type="text" size="small">{{scope.row.projectName}}</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                                  v-else>
                 </el-table-column>
 
@@ -602,6 +610,34 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <div v-if="telemarketingLayout !=null && (','+telemarketingLayout.category+',').indexOf(','+item.clueDTO.clueBasic.category+',') != -1">
+                    <el-row >
+                        <el-col :span="12" v-if="telemarketingLayout.projectShow ==1">
+                            <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueProject.projectName}}
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                            <el-form-item label="媒介：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.sourceName}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                            <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.ad}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.urlShow ==1">
+                            <el-form-item label="URL：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueReceive.urlAddress}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
             </div>
         </el-form>
     </el-dialog>
@@ -622,6 +658,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+    var telemarketingLayout = [[${telemarketingLayout}]];
     var teleGorupList=[[${teleGorupList}]];//电销组查询筛选条件
     var orgList=[[${orgList}]];//电销组
     var saleList=[[${saleList}]];//电销顾问
@@ -644,6 +681,7 @@
     var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            telemarketingLayout:telemarketingLayout,
             dialogForm: {
                 phoneNum: ''
             },

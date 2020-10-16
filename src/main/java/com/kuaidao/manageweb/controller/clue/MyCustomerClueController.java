@@ -180,6 +180,10 @@ public class MyCustomerClueController {
         if (("," + repetitionBusinessLine + ",").contains("," + user.getBusinessLine() + ",")) {
             isShowRepetition = true;
         }
+        TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
+        //获取电销布局
+        telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,user.getRoleList().get(0).getRoleCode(),telemarketingLayoutDTO);
+        request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
         request.setAttribute("isShowRepetition", isShowRepetition);
         request.setAttribute("type", type);
         request.setAttribute("hJtype", hJtype);
@@ -326,7 +330,7 @@ public class MyCustomerClueController {
                     accountList.add(user.getId());
                 }
                 //获取电销布局
-                getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
+                telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
             }
         }
         // 获取资源跟进记录数据
@@ -424,6 +428,11 @@ public class MyCustomerClueController {
             } else {
                 request.setAttribute("clueProject", new ArrayList());
             }
+            if (null != clueInfo.getData().getClueReceive()) {
+                request.setAttribute("clueReceive", clueInfo.getData().getClueReceive());
+            } else {
+                request.setAttribute("clueReceive", new ArrayList());
+            }
         }
 
         dto.setClueId(new Long(clueId));
@@ -485,6 +494,7 @@ public class MyCustomerClueController {
         } else {
             request.setAttribute("telCreatePhoneAudits", new ArrayList<>());
         }
+        request.setAttribute("telemarketingLayoutDTO", telemarketingLayoutDTO);
         return "clue/addCustomerMaintenance";
     }
 
@@ -525,7 +535,7 @@ public class MyCustomerClueController {
                     accountList.add(user.getId());
                 }
                 // 获取电销布局信息
-                getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
+                telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
             }
         }
         // 获取已上传的文件数据
@@ -607,6 +617,11 @@ public class MyCustomerClueController {
             } else {
                 request.setAttribute("clueProject", new ArrayList());
             }
+            if (null != clueInfo.getData().getClueReceive()) {
+                request.setAttribute("clueReceive", clueInfo.getData().getClueReceive());
+            } else {
+                request.setAttribute("clueReceive", new ArrayList());
+            }
         }
         // 获取资源跟进记录数据
         TrackingReqDTO dto = new TrackingReqDTO();
@@ -665,6 +680,7 @@ public class MyCustomerClueController {
         } else {
             request.setAttribute("telCreatePhoneAudits", new ArrayList<>());
         }
+        request.setAttribute("telemarketingLayoutDTO", telemarketingLayoutDTO);
         if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
             return "clue/editBasicCustomerMaintenance";
         } else {
@@ -1783,7 +1799,7 @@ public class MyCustomerClueController {
         return todayFollowNumList;
     }
 
-    public void getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO){
+    public TelemarketingLayoutDTO getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO){
         // 获取电销布局信息
         if (roleCode.equals(RoleCodeEnum.DXZJ.name())
                 || roleCode.equals(RoleCodeEnum.DXCYGW.name()) || roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())) {
@@ -1797,7 +1813,7 @@ public class MyCustomerClueController {
                     List<Long> teleGroupIds = jsonResult.getData().stream().map(a->a.getId()).collect(Collectors.toList());
                     telemarketingLayoutDTO.setTeleGroupIds(teleGroupIds);
                 }else{
-                    return;
+                    return telemarketingLayoutDTO;
                 }
             }
             if(roleCode.equals(RoleCodeEnum.DXZJ.name())
@@ -1813,5 +1829,6 @@ public class MyCustomerClueController {
                 telemarketingLayoutDTO = telemarketingLayoutResult.getData();
             }
         }
+        return telemarketingLayoutDTO;
     }
 }

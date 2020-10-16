@@ -2,12 +2,16 @@ package com.kuaidao.manageweb.controller.clue;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -71,6 +75,9 @@ public class CustomerManagerController {
     private ClueBasicFeignClient clueBasicFeignClient;
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
+
+    @Autowired
+    private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
 
     @RequiresPermissions("customerManager:view")
     @RequestMapping("/initcustomerManager")
@@ -147,6 +154,12 @@ public class CustomerManagerController {
         queryFieldByUserAndMenuReq.setMenuCode("customerManager");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+
+        TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
+        //获取电销布局
+        telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,user.getRoleList().get(0).getRoleCode(),telemarketingLayoutDTO);
+        request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
+
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         request.setAttribute("businessLine", user.getBusinessLine());
@@ -404,5 +417,37 @@ public class CustomerManagerController {
             return byCode.getData().getValue();
         }
         return null;
+    }
+    public TelemarketingLayoutDTO getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO){
+        // 获取电销布局信息
+        if (roleCode.equals(RoleCodeEnum.DXZJ.name())
+                || roleCode.equals(RoleCodeEnum.DXCYGW.name()) || roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())) {
+            if(roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())){
+                OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
+                reqDto.setParentId(user.getOrgId());
+                JSONResult<List<OrganizationDTO>> jsonResult =
+                        organizationFeignClient.listDescenDantByParentId(reqDto);
+                if (jsonResult.getCode().equals(JSONResult.SUCCESS)
+                        && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+                    List<Long> teleGroupIds = jsonResult.getData().stream().map(a->a.getId()).collect(Collectors.toList());
+                    telemarketingLayoutDTO.setTeleGroupIds(teleGroupIds);
+                }else{
+                    return telemarketingLayoutDTO;
+                }
+            }
+            if(roleCode.equals(RoleCodeEnum.DXZJ.name())
+                    || roleCode.equals(RoleCodeEnum.DXCYGW.name())){
+                telemarketingLayoutDTO.setTelemarketingTeamId(user.getOrgId());
+            }
+            JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult =
+                    telemarketingLayoutFeignClient
+                            .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
+            if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS)
+                    && telemarketingLayoutResult.getData() != null
+                    && telemarketingLayoutResult.getData().getId() != null) {
+                telemarketingLayoutDTO = telemarketingLayoutResult.getData();
+            }
+        }
+        return telemarketingLayoutDTO;
     }
 }
