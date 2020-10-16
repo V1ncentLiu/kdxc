@@ -110,8 +110,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             curList.add(ra.getDeptName());
             curList.add(ra.getOrgName());
             curList.add(ra.getAssignClueCount());
-            curList.add(ra.getCallRate());
             curList.add(ra.getTrackRate());
+            curList.add(ra.getAverageTrackSums());
             curList.add(ra.getJointExhibition());
             curList.add(ra.getPriceCompetition());
             curList.add(ra.getOptimization());
@@ -191,8 +191,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             curList.add(ra.getOrgName());
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
-            curList.add(ra.getCallRate());
             curList.add(ra.getTrackRate());
+            curList.add(ra.getAverageTrackSums());
             curList.add(ra.getJointExhibition());
             curList.add(ra.getPriceCompetition());
             curList.add(ra.getOptimization());
@@ -277,7 +277,7 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
             curList.add(ra.getTrackRate());
-            curList.add(ra.getCallRate());
+            curList.add(ra.getAverageTrackSums());
             curList.add(ra.getJointExhibition());
             curList.add(ra.getPriceCompetition());
             curList.add(ra.getOptimization());
@@ -505,8 +505,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("事业部");
         headTitleList.add("电销组");
         headTitleList.add("首次分配资源数");
-        headTitleList.add("资源回访率");
-        headTitleList.add("首次资源回访率");
+        headTitleList.add("资源跟访率");
+        headTitleList.add("平均跟访次数");
         headTitleList.add("联展");
         headTitleList.add("竞价");
         headTitleList.add("优化");
@@ -527,8 +527,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         headTitleList.add("电销组");
         headTitleList.add("电销顾问");
         headTitleList.add("首次分配资源数");
-        headTitleList.add("首次分源数回访率");
-        headTitleList.add("资源回访率");
+        headTitleList.add("资源跟访率");
+        headTitleList.add("平均跟访次数");
         headTitleList.add("联展");
         headTitleList.add("竞价");
         headTitleList.add("优化");
@@ -550,8 +550,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
 //        headTitleList.add("电销组");
         headTitleList.add("电销顾问");
         headTitleList.add("首次分配资源数");
-        headTitleList.add("资源回访率");
-        headTitleList.add("首次资源跟访率");
+        headTitleList.add("资源跟访率");
+        headTitleList.add("平均跟访次数");
         headTitleList.add("联展");
         headTitleList.add("竞价");
         headTitleList.add("优化");
@@ -592,8 +592,10 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         // 品牌
         Long brand = list.stream().mapToLong(FirstResourceAllocationDto::getBrand).sum();
 
-        Long callCounts=list.stream().mapToLong(FirstResourceAllocationDto::getCallCounts).sum();
-
+//        Long callCounts=list.stream().mapToLong(FirstResourceAllocationDto::getCallCounts).sum();
+        //跟访资源次数之和
+        Long tracksums =list.stream().mapToLong(FirstResourceAllocationDto::getTrackSums).sum();
+        //trackCounts
         Long trackCounts=list.stream().mapToLong(FirstResourceAllocationDto::getTrackCounts).sum();
 
         // 商机盒子
@@ -604,7 +606,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         firstResourceAllocationDto.setDeptName("");
         firstResourceAllocationDto.setOrgName("合计");
         firstResourceAllocationDto.setAssignClueCount(assignClueCount);
-        firstResourceAllocationDto.setCallCounts(callCounts);
+//        firstResourceAllocationDto.setCallCounts(callCounts);
+        firstResourceAllocationDto.setTrackSums(tracksums);
         firstResourceAllocationDto.setTrackCounts(trackCounts);
         firstResourceAllocationDto.setJointExhibition(jointExhibition);
         firstResourceAllocationDto.setPriceCompetition(priceCompetition);
@@ -617,7 +620,6 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         firstResourceAllocationDto.setCmpt(cmpt);
         firstResourceAllocationDto.setOther(other);
         firstResourceAllocationDto.setTrackCounts(trackCounts);
-        firstResourceAllocationDto.setCallCounts(callCounts);
         firstResourceAllocationDto.setNetizensMissed(netizensMissed);
         return firstResourceAllocationDto;
     }
@@ -828,8 +830,8 @@ public class FirstResourceAllocationController extends BaseStatisticsController 
         totalList.add(resTotal.getAssignClueCount());
 //        totalList.add(resTotal.getCallCounts());
 //        totalList.add(resTotal.getTrackCounts());
-        totalList.add(resTotal.getCallRate());
         totalList.add(resTotal.getTrackRate());
+        totalList.add(resTotal.getAverageTrackSums());
         totalList.add(resTotal.getJointExhibition());
         totalList.add(resTotal.getPriceCompetition());
         totalList.add(resTotal.getOptimization());
