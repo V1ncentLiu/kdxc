@@ -154,6 +154,12 @@
                         <el-radio label="1" >可查看</el-radio>
                     </el-radio-group>
                 </el-form-item>
+                <el-form-item label="URL："  :label-width="formLabelWidth" prop="urlShow">
+                    <el-radio-group v-model="form.urlShow">
+                        <el-radio label="0" >不可查看</el-radio>
+                        <el-radio label="1" >可查看</el-radio>
+                    </el-radio-group>
+                </el-form-item>
             </el-row>
 
             <el-form-item label="开始时间：" :label-width="formLabelWidth" prop="beginTime">
@@ -290,6 +296,7 @@
              adShow:"0",
              projectShow:"0",
              sourceShow:"0",
+                urlShow:"0",
              category:"",
               companyGroupId:''
 
@@ -368,6 +375,19 @@
                             callback();
                         }, trigger: 'blur'}
                 ],
+                urlShow:[
+                    { required: true, message: '请选择url是否可以查看', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            if(orgVM.form.category ==null || orgVM.form.category ==''){
+                                callback();
+                            }else{
+                                if(orgVM.form.urlShow ==null){
+                                    callback(new Error("请选择ur是否可以查看"));
+                                }
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                ]
             }
 
         },
@@ -475,6 +495,7 @@
                               orgVM.form.adShow = telemarketing.adShow+"" ;
                               orgVM.form.sourceShow = telemarketing.sourceShow+"" ;
                               orgVM.form.projectShow = telemarketing.projectShow+"" ;
+                              orgVM.form.urlShow = telemarketing.urlShow+"" ;
                           }
                     	  var valueMultiple=[];
                     	  if(projects != null && projects !=''){
@@ -662,6 +683,7 @@
                                 param.adShow = this.form.adShow;
                                 param.sourceShow = this.form.sourceShow;
                                 param.projectShow = this.form.projectShow;
+                                param.urlShow = this.form.urlShow;
                             }
                           orgVM.btnDisabled = true;
                           var url = "/telemarketing/addTelemarketingLayout";
@@ -813,6 +835,7 @@
                     this.form.adShow = "0";
                     this.form.projectShow = "0";
                     this.form.sourceShow = "0";
+                    this.form.urlShow = "0";
                 }
             }
         },

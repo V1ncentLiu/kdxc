@@ -325,22 +325,8 @@ public class MyCustomerClueController {
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
                     accountList.add(user.getId());
                 }
-                // 获取电销布局信息
-                if (roleCode.equals(RoleCodeEnum.DXZJ.name())
-                        || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
-
-                    telemarketingLayoutDTO.setTelemarketingTeamId(user.getOrgId());
-                    JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult =
-                            telemarketingLayoutFeignClient
-                                    .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
-                    if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS)
-                            && telemarketingLayoutResult.getData() != null
-                            && telemarketingLayoutResult.getData().getId() != null) {
-                        telemarketingLayoutDTO = telemarketingLayoutResult.getData();
-                    }
-                }
-
-
+                //获取电销布局
+                getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
             }
         }
         // 获取资源跟进记录数据
@@ -539,16 +525,7 @@ public class MyCustomerClueController {
                     accountList.add(user.getId());
                 }
                 // 获取电销布局信息
-                if (roleCode.equals(RoleCodeEnum.DXZJ.name()) || roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
-
-                    telemarketingLayoutDTO.setTelemarketingTeamId(user.getOrgId());
-                    JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult = telemarketingLayoutFeignClient
-                            .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
-                    if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS) && telemarketingLayoutResult.getData() != null
-                            && telemarketingLayoutResult.getData().getId() != null) {
-                        telemarketingLayoutDTO = telemarketingLayoutResult.getData();
-                    }
-                }
+                getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
             }
         }
         // 获取已上传的文件数据
@@ -1804,5 +1781,37 @@ public class MyCustomerClueController {
             }
         }
         return todayFollowNumList;
+    }
+
+    public void getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO){
+        // 获取电销布局信息
+        if (roleCode.equals(RoleCodeEnum.DXZJ.name())
+                || roleCode.equals(RoleCodeEnum.DXCYGW.name()) || roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())) {
+            if(roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())){
+                OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
+                reqDto.setParentId(user.getOrgId());
+                JSONResult<List<OrganizationDTO>> jsonResult =
+                        organizationFeignClient.listDescenDantByParentId(reqDto);
+                if (jsonResult.getCode().equals(JSONResult.SUCCESS)
+                        && CollectionUtils.isNotEmpty(jsonResult.getData())) {
+                    List<Long> teleGroupIds = jsonResult.getData().stream().map(a->a.getId()).collect(Collectors.toList());
+                    telemarketingLayoutDTO.setTeleGroupIds(teleGroupIds);
+                }else{
+                    return;
+                }
+            }
+            if(roleCode.equals(RoleCodeEnum.DXZJ.name())
+                    || roleCode.equals(RoleCodeEnum.DXCYGW.name())){
+                telemarketingLayoutDTO.setTelemarketingTeamId(user.getOrgId());
+            }
+            JSONResult<TelemarketingLayoutDTO> telemarketingLayoutResult =
+                    telemarketingLayoutFeignClient
+                            .getTelemarketingLayoutByTeamId(telemarketingLayoutDTO);
+            if (telemarketingLayoutResult.getCode().equals(JSONResult.SUCCESS)
+                    && telemarketingLayoutResult.getData() != null
+                    && telemarketingLayoutResult.getData().getId() != null) {
+                telemarketingLayoutDTO = telemarketingLayoutResult.getData();
+            }
+        }
     }
 }
