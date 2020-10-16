@@ -87,7 +87,11 @@ public class ImMessageController {
         return "im/imManagement";
     }
 
-    private List getCommonDxzList() {
+    /**
+     * 当前登陆人所属组的下属组 && 都是电销组
+     * @return
+     */
+    List getCommonDxzList() {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         List dxzList = new ArrayList(0);
@@ -112,14 +116,18 @@ public class ImMessageController {
             // 当前用户组织名称
             IdEntity idEntity = new IdEntity();
             idEntity.setId( null == user.getOrgId() ? "-1" : user.getOrgId() + "");
-            JSONResult<OrganizationDTO> singleOrganizationDTO = organizationFeignClient.queryOrgById(idEntity);
+            JSONResult<OrganizationDTO> singleOrganizationDTOResult = organizationFeignClient.queryOrgById(idEntity);
             // 当前登陆人所属组织
             OrganizationDTO myOrganizationDTO  = null ;
-            if (JSONResult.SUCCESS.equals(singleOrganizationDTO.getCode())) {
-                myOrganizationDTO = new OrganizationDTO();
-                myOrganizationDTO.setId(user.getOrgId());
-                // 设置当前登陆人组织名
-                myOrganizationDTO.setName( null == singleOrganizationDTO.getData() ? "" : singleOrganizationDTO.getData().getName());
+            if (null != singleOrganizationDTOResult && JSONResult.SUCCESS.equals(singleOrganizationDTOResult.getCode())) {
+                OrganizationDTO organizationDTO = singleOrganizationDTOResult.getData();
+                // 当前登录人的组织是否是DXZ
+                if(null != organizationDTO && OrgTypeConstant.DXZ.equals(organizationDTO.getOrgType())){
+                    myOrganizationDTO = new OrganizationDTO();
+                    myOrganizationDTO.setId(user.getOrgId());
+                    // 设置当前登陆人组织名
+                    myOrganizationDTO.setName(organizationDTO.getName());
+                }
             }
             if(CollectionUtils.isEmpty(dxzList)){
 
@@ -227,7 +235,8 @@ public class ImMessageController {
                 // 当前登录人组织下所有人员
                 List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
                 if(CollectionUtils.isEmpty(userList)) {
-                    messageRecordExportSearchReq.setTeleSaleId("-2");
+                    // 避免数据库条件多拉取!
+                    messageRecordExportSearchReq.setTeleSaleId("-1");
                 }else{
                     List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
                     idList.add(curLoginUser.getId());
@@ -425,6 +434,7 @@ public class ImMessageController {
                     // 当前登录人组织下所有人员
                     List<UserInfoDTO> userList = getTeleSaleByOrgId(orgId);
                     if(CollectionUtils.isEmpty(userList)) {
+                        // 避免数据库条件多拉取!
                         tSaleMonitorReq.setTeleSaleIds(Arrays.asList(-1L));
                     }else{
                         List<Long> idList = userList.parallelStream()
@@ -487,12 +497,12 @@ public class ImMessageController {
         if(null == saleOnlineLeaveLogReq.getTeleSaleId()){
             UserInfoDTO user = CommUtil.getCurLoginUser();
             if(null == user ){
-                log.warn("user is null!");
+                log.warn("user-is-null!");
                 return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
             }
             List<RoleInfoDTO> roleList = user.getRoleList();
             if(CollectionUtils.isEmpty(roleList)){
-                log.warn("roleList is null");
+                log.warn("roleList-is-null");
                 return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
             }
             Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
@@ -534,12 +544,12 @@ public class ImMessageController {
      */
     @SuppressWarnings("all")
     private List<UserInfoDTO> getTeleSaleByOrgId(Long orgId) {
-        log.info("callrecord orgId {{}}",orgId);
+        log.info("callrecord-orgId {{}}",orgId);
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(orgId);
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
-        log.info("callrecord userJr {{}}",userJr);
+        log.info("callrecord-userJr {{}}",userJr);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
             log.error(
                     "查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
