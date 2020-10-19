@@ -323,6 +323,12 @@ var mainDivVM = new Vue({
                                 mainDivVM.btnDisabled = false; 
                                 mainDivVM.searchTable();
                             }});
+                        }else if ( data.code == '21918') {
+                            mainDivVM.$message({
+                                message: data.msg,
+                                type: 'warning'
+                            });
+                            mainDivVM.btnDisabled = false;
                         }else{
                             mainDivVM.$message({
                                 message: "接口调用失败",
