@@ -242,6 +242,12 @@ public class ZkClientController {
                 }else if (j == 4) {
                     // 号码所属公司
                     rowDto.setNumberAttributionCompany(value);
+                }else if (j == 5) {
+                    // 坐席归属地
+                    rowDto.setAttribution(value);
+                }else if (j == 6) {
+                    // 绑定手机号
+                    rowDto.setBindPhone(value);
                 }
             }
             dataList.add(rowDto);
