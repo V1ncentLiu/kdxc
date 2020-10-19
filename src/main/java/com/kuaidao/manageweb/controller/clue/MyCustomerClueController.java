@@ -182,7 +182,7 @@ public class MyCustomerClueController {
         }
         TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
         //获取电销布局
-        telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,user.getRoleList().get(0).getRoleCode(),telemarketingLayoutDTO);
+        telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,user.getRoleList().get(0).getRoleCode(),telemarketingLayoutDTO,OrgTypeConstant.DXZ);
         request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
         request.setAttribute("isShowRepetition", isShowRepetition);
         request.setAttribute("type", type);
@@ -330,7 +330,7 @@ public class MyCustomerClueController {
                     accountList.add(user.getId());
                 }
                 //获取电销布局
-                telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
+                telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO,OrgTypeConstant.DXZ);
             }
         }
         // 获取资源跟进记录数据
@@ -535,7 +535,7 @@ public class MyCustomerClueController {
                     accountList.add(user.getId());
                 }
                 // 获取电销布局信息
-                telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO);
+                telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,roleCode,telemarketingLayoutDTO,OrgTypeConstant.DXZ);
             }
         }
         // 获取已上传的文件数据
@@ -1799,13 +1799,14 @@ public class MyCustomerClueController {
         return todayFollowNumList;
     }
 
-    public TelemarketingLayoutDTO getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO){
+    public TelemarketingLayoutDTO getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO,Integer orgType){
         // 获取电销布局信息
         if (roleCode.equals(RoleCodeEnum.DXZJ.name())
                 || roleCode.equals(RoleCodeEnum.DXCYGW.name()) || roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())) {
             if(roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())){
                 OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
                 reqDto.setParentId(user.getOrgId());
+                reqDto.setOrgType(orgType);
                 JSONResult<List<OrganizationDTO>> jsonResult =
                         organizationFeignClient.listDescenDantByParentId(reqDto);
                 if (jsonResult.getCode().equals(JSONResult.SUCCESS)
