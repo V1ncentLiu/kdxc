@@ -157,7 +157,7 @@ public class CustomerManagerController {
 
         TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
         //获取电销布局
-        telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,user.getRoleList().get(0).getRoleCode(),telemarketingLayoutDTO);
+        telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,user.getRoleList().get(0).getRoleCode(),telemarketingLayoutDTO,OrgTypeConstant.DXZ);
         request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
 
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
@@ -418,13 +418,14 @@ public class CustomerManagerController {
         }
         return null;
     }
-    public TelemarketingLayoutDTO getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO){
+    public TelemarketingLayoutDTO getTelemarketingLayoutDTO(UserInfoDTO user,String roleCode,TelemarketingLayoutDTO telemarketingLayoutDTO,Integer orgType){
         // 获取电销布局信息
         if (roleCode.equals(RoleCodeEnum.DXZJ.name())
                 || roleCode.equals(RoleCodeEnum.DXCYGW.name()) || roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())) {
             if(roleCode.equals(RoleCodeEnum.DXFZ.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())){
                 OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
                 reqDto.setParentId(user.getOrgId());
+                reqDto.setOrgType(orgType);
                 JSONResult<List<OrganizationDTO>> jsonResult =
                         organizationFeignClient.listDescenDantByParentId(reqDto);
                 if (jsonResult.getCode().equals(JSONResult.SUCCESS)
