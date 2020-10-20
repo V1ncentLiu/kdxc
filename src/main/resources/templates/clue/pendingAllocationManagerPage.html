@@ -172,8 +172,8 @@
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                                  v-else-if="item.fieldCode == 'projectName'">
                     <template slot-scope="scope">
-                        <span v-if="telemarketingLayout !=null && (','+telemarketingLayout.category+',').indexOf(','+scope.row.category+',') != -1">
-                           <el-button @click="showHasRepeatClue(scope.row)" type="text" size="small">{{scope.row.projectName}}</el-button>
+                        <span v-if="telemarketingLayoutIsShow(scope.row.categoryNum)">
+                           <el-button  type="text" size="small">{{scope.row.projectName}}</el-button>
                         </span>
                     </template>
                 </el-table-column>
@@ -878,6 +878,7 @@
                         var table=result.data;
                         var data= table.data;
                         for(var i=0;i<data.length;i++){
+                            data[i].categoryNum=data[i].category;
                             data[i].category=clueVM.transformCategory(data[i].category);
                             data[i].type=clueVM.transformType(data[i].type);
                             data[i].createTime=clueVM.dateFormat(data[i].createTime);
@@ -1530,6 +1531,12 @@
                 clueVM.repeatWechatVisible =true;
                 clueVM.repeatCustomer = val;
             },
+            telemarketingLayoutIsShow(category){
+                if(telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.projectShow ==1){
+                    return true;
+                }
+                return false;
+            }
         },
         created(){
             console.info("create method");
