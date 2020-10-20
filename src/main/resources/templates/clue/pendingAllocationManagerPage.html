@@ -172,8 +172,16 @@
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                                  v-else-if="item.fieldCode == 'projectName'">
                     <template slot-scope="scope">
-                        <span v-if="telemarketingLayoutIsShow(scope.row.categoryNum)">
-                           <el-button  type="text" size="small">{{scope.row.projectName}}</el-button>
+                        <span v-if="telemarketingLayoutProjectIsShow(scope.row.categoryNum)">
+                           {{scope.row.projectName}}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'sourceName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayoutSourceIsShow(scope.row.categoryNum)">
+                           {{scope.row.sourceName}}
                         </span>
                     </template>
                 </el-table-column>
@@ -678,9 +686,11 @@
     // 业务线(待分配新资源页面和客户管理页面允许外包业务线复制，外包业务线编码如下：1、5、6、10、11、12、13)
     var businessLine=[[${businessLine}]];
     var canCopy=[[${canCopy}]];
+    var roleCode = [[${roleCode}]];
     var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            roleCode:roleCode,
             telemarketingLayout:telemarketingLayout,
             dialogForm: {
                 phoneNum: ''
@@ -1531,12 +1541,19 @@
                 clueVM.repeatWechatVisible =true;
                 clueVM.repeatCustomer = val;
             },
-            telemarketingLayoutIsShow(category){
-                if(telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.projectShow ==1){
+            telemarketingLayoutProjectIsShow(category){
+                if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.projectShow ==1) || roleCode =="GLY"){
                     return true;
                 }
                 return false;
-            }
+            },
+            telemarketingLayoutSourceIsShow(category){
+                if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.sourceShow ==1) || roleCode =="GLY"){
+                    return true;
+                }
+                return false;
+            },
+
         },
         created(){
             console.info("create method");

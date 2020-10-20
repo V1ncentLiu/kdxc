@@ -428,6 +428,22 @@
                         </span>
                     </template>
                 </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'sourceName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayoutSourceIsShow(scope.row.category)">
+                           {{scope.row.sourceName}}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'clueProjectName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayoutProjectIsShow(scope.row.category)">
+                           {{scope.row.clueProjectName}}
+                        </span>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'distributionTime'||item.fieldCode == 'updateTime'||item.fieldCode == 'createTime'||item.fieldCode == 'storeArea' "></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else></el-table-column>
             </el-table>
@@ -972,6 +988,8 @@
   var isShowRepetition = [[${isShowRepetition}]];//业务线
   var todayFollowNumList = [[${todayFollowNumList}]];//电销今日跟访次数下拉列表值
   var telemarketingLayout = [[${telemarketingLayout}]];
+  //角色编码
+  var roleCode = [[${roleCode}]];
   var mycustomVM=new Vue({
     el: '#myCustom',
     data: function() {
@@ -2090,6 +2108,18 @@
             mycustomVM.repeatCustomer = {};
             mycustomVM.repeatWechatVisible =true;
             mycustomVM.repeatCustomer = val;
+        },
+        telemarketingLayoutProjectIsShow(category){
+            if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.projectShow ==1) || roleCode =="GLY"){
+                return true;
+            }
+            return false;
+        },
+        telemarketingLayoutSourceIsShow(category){
+            if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.sourceShow ==1) || roleCode =="GLY"){
+                return true;
+            }
+            return false;
         },
     },
     mounted(){

@@ -189,6 +189,7 @@ public class MyCustomerClueController {
         request.setAttribute("hJtype", hJtype);
         List<String> todayFollowNumList =  buildTodayFollowNum(user.getRoleList().get(0).getRoleCode());
         request.setAttribute("todayFollowNumList", todayFollowNumList);
+        request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         return "clue/myCustom";
     }
 

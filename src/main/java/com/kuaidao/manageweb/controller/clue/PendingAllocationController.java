@@ -210,6 +210,7 @@ public class PendingAllocationController {
         request.setAttribute("businessLine", user.getBusinessLine());
         Boolean canCopy = handleCanCopy(user.getBusinessLine());
         request.setAttribute("canCopy", canCopy);
+        request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         return "clue/pendingAllocationManagerPage";
     }
 
