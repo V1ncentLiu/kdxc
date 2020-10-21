@@ -1,13 +1,5 @@
 package com.kuaidao.manageweb.feign.im;
 
-import java.util.List;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.clue.IMSubmitQueryDTO;
 import com.kuaidao.aggregation.dto.es.EsQueryDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -19,13 +11,19 @@ import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
 import com.kuaidao.custservice.dto.onlineleave.TSaleMonitorReq;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
+import java.util.Map;
+
 
 /**
- * 退返款
- * 
- * @author Chen
- * @date 2019年4月10日 下午7:35:14
- * @version V1.0
+ * Im feign
  */
 @FeignClient(name = "cust-service-service", path = "/custservice/customerInfo",
         fallback = CustomerInfoFeignClient.HystrixClientFallback.class)

@@ -42,9 +42,13 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item>  
-                          
-                <el-form-item label="聊天时间:">
+                </el-form-item>
+
+               <el-form-item label="会话客户:">
+                   <el-input v-model="form.cusName" placeholder="会话客户"></el-input>
+               </el-form-item>
+
+               <el-form-item label="聊天时间:">
                     <el-date-picker format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss" v-model="form.chatBegin" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
@@ -66,11 +70,11 @@
                 :data="tableData"
                 v-loading="loading">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="teleGorupName" align="center" label="电销组">
+                <el-table-column prop="teleGorupName" align="center" label="电销组" width="160">
                 </el-table-column>
                 <el-table-column prop="teleSaleName" align="center" label="会话顾问" width="120">
                 </el-table-column>
-                <el-table-column prop="cusName" align="center" label="会话客户">
+                <el-table-column prop="cusName" align="center" label="会话客户" width="120">
                 </el-table-column>
                 <el-table-column prop="msgTimestamp" align="center" label="聊天时间" width="130">
                 </el-table-column>
@@ -196,7 +200,8 @@
                 param.body = this.form.body;
                 param.teleGorupId = this.form.teleGorupId;
                 param.teleSaleId = this.form.teleSaleId;
-                this.loading = true; 
+                param.cusName = this.form.cusName;
+                this.loading = true;
                 axios.post('/message/im/getChatRecordPage',param).then(function (response) {   
                     mainDivVM.loading = false;  
                     var result =  response.data;
@@ -225,6 +230,7 @@
                         // 给导出参数赋值
                         mainDivVM.export.chatBegin = mainDivVM.form.chatBegin;
                         mainDivVM.export.chatEnd = mainDivVM.form.chatEnd;
+                        mainDivVM.export.cusName = mainDivVM.form.cusName;
                         mainDivVM.export.body = mainDivVM.form.body;
                         mainDivVM.export.teleGorupId = mainDivVM.form.teleGorupId;
                         mainDivVM.export.teleSaleName = mainDivVM.form.teleSaleName;
@@ -264,6 +270,7 @@
                 param.teleSaleName =  this.export.teleSaleName; 
                 param.chatBegin = this.export.chatBegin;
                 param.chatEnd = this.export.chatEnd;
+                param.cusName = this.export.cusName;
                 axios.post('/message/im/export',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
@@ -287,6 +294,7 @@
             this.form.chatEnd=endTime; 
             this.export.chatBegin = this.form.chatBegin;
             this.export.chatEnd = this.form.chatEnd;
+            this.export.cusName = this.form.cusName;
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
