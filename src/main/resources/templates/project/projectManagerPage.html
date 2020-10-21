@@ -52,7 +52,27 @@
            </el-form-item>
            <el-form-item label="项目名称:">
             	<el-input v-model="projectSearchForm.projectName" placeholder="项目名称" ></el-input>
-            </el-form-item>     
+            </el-form-item>
+                <el-form-item label="项目归属:">
+                    <el-select v-model="projectSearchForm.projectAttributive" filterable clearable placeholder="项目归属">
+                        <el-option
+                                v-for="item in projectAttributives"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="是否不可签约:">
+                    <el-select v-model="projectSearchForm.isNotSign" placeholder="是否不可签约" style="width: 100%;" clearable>
+                        <el-option
+                                v-for="item in isNotSign"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
            <el-form-item label=""> 
                 <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索</el-button>
             </el-form-item> 
@@ -69,14 +89,15 @@
               <el-table-column align="center" prop="groupName" label="项目所属集团"></el-table-column>
               <el-table-column align="center" prop="ratio" width="80" label="结算比例"></el-table-column>
               <el-table-column align="center" prop="lowestCommission" width="100" label="保底服务费"></el-table-column>
-              <el-table-column align="center" prop="marketLeader" label="市场部负责人"></el-table-column>
+              <!--<el-table-column align="center" prop="marketLeader" label="市场部负责人"></el-table-column>
               <el-table-column align="center" prop="promotionLeader" label="推广部负责人"></el-table-column>
-              <el-table-column align="center" prop="investmentLeader" label="招商负责人"></el-table-column>
+              <el-table-column align="center" prop="investmentLeader" label="招商负责人"></el-table-column>-->
               <el-table-column align="center" prop="shopType" label="店型" :formatter="transShopType"></el-table-column>              
               <el-table-column align="center" prop="isNotSign" label="是否不可签约" :formatter="transformStatus" width="110px"></el-table-column>
               <el-table-column align="center" prop="category" label="项目品类" :formatter="transCategory"></el-table-column>
               <el-table-column align="center" prop="classification" label="行业类别" :formatter="transClassification"></el-table-column>
              <el-table-column align="center" prop="createUserName" label="条目创建人" ></el-table-column>
+              <el-table-column align="center" prop="projectAttributive" label="项目归属" :formatter="transProjectAttributive"></el-table-column>
           </el-table>
           <table-pagination :pager="pager" v-if="paginationShow" @change="searchTable"></table-pagination>
       </el-row>
@@ -89,6 +110,8 @@
 var classificationList=[[${classificationList}]];//行业类别集合
 var categoryList=[[${categoryList}]];//项目品类集合
 var shopTypeList=[[${shopTypeList}]];//店型集合
+//项目归属
+var projectAttributiveList =[[${projectAttributiveList}]];
 //var companyList=[[${companyList}]];//集团集合
 var userInfoList=[[${userInfoList}]];//商家集团集合
 var projectVM = new Vue({
@@ -98,7 +121,9 @@ var projectVM = new Vue({
         	projectSearchForm: {
        		    projectName: '',
                 category: '',
-                groupId: ''
+                groupId: '',
+                projectAttributive:'',
+                isNotSign:''
             },
             dataTable:[],
             pager:{
@@ -118,7 +143,18 @@ var projectVM = new Vue({
            // companyOptions: companyList,
             categoryOptions: categoryList,
             userInfoList:userInfoList,
+            projectAttributives:projectAttributiveList,
             scrollTop: 0,
+            isNotSign:[
+                {
+                    value: '1',
+                    label: '是'
+                },
+                {
+                    value: '0',
+                    label: '否'
+                }
+            ],
         },
         methods: {
         	searchTable() {
@@ -128,6 +164,8 @@ var projectVM = new Vue({
                 param.projectName = this.projectSearchForm.projectName;
                 param.groupId = this.projectSearchForm.groupId;
                 param.category = this.projectSearchForm.category;
+                param.projectAttributive = this.projectSearchForm.projectAttributive;
+                param.isNotSign = this.projectSearchForm.isNotSign;
                 console.info(param);
                 axios.post('/aggregation/projectManager/list', param)
                 .then(function (response) {
@@ -195,6 +233,18 @@ var projectVM = new Vue({
             	  }
                   return text;
               },
+            //项目归属转换
+            transProjectAttributive(row, column, cellValue, index){
+                var text="";
+                if(projectAttributiveList){
+                    for(var i=0;i<projectAttributiveList.length;i++){
+                        if(cellValue==projectAttributiveList[i].value){
+                            text=projectAttributiveList[i].name;
+                        }
+                    }
+                }
+                return text;
+            },
               //品类转换方法
               transCategory(row, column, cellValue, index) {
             	  var text="";

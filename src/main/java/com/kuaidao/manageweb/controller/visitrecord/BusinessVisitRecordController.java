@@ -477,4 +477,13 @@ public class BusinessVisitRecordController {
     public JSONResult<VisitNoRecordRespDTO> notVisitReason(@RequestBody IdEntityLong idEntityLong) {
         return visitRecordFeignClient.findMaxNewNotVisitOne(idEntityLong);
     }
+
+    /**
+     * 未到访原因查看
+     */
+    @PostMapping("/notVisitOne")
+    @ResponseBody
+    public JSONResult<VisitNoRecordRespDTO> notVisitOne(@RequestBody IdEntityLong idEntityLong) {
+        return visitRecordFeignClient.notVisitOne(idEntityLong);
+    }
 }

@@ -149,7 +149,8 @@ public class ExtendClueDistributionedTaskController {
                 || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {

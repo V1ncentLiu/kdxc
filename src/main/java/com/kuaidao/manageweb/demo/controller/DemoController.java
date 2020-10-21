@@ -79,6 +79,7 @@ public class DemoController {
 	@GetMapping("/getTableNum")
 	public int getTableNum(int id) {
 		logger.info("id:"+id);
+		
 		return 22;
 	}
 	
