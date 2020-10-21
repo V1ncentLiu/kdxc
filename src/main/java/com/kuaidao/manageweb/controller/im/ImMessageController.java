@@ -145,10 +145,11 @@ public class ImMessageController {
                 // 封装多个电销顾问ID
                 messageRecordPageReq.setTeleSaleId(Joiner.on(",").join(idList));
 
-            }else if (CollectionUtils.isNotEmpty(roleList) && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-                // 管理员
+            } else if (CollectionUtils.isNotEmpty(roleList) && (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
+                    || RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode()))) {
+                        // 管理员
 
-            }else {
+                    }else {
                 List<UserInfoDTO>  userInfoList  = getTeleSaleByOrgId(curLoginUser.getOrgId());
                 if (CollectionUtils.isEmpty(userInfoList)) {
                     JSONPageResult jsonPageResult = new JSONPageResult();

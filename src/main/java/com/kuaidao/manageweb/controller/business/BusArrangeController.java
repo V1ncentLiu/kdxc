@@ -148,9 +148,10 @@ public class BusArrangeController {
                 pageParam.setBusDirectorIdList(idList);
             }
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {// 商务总监
-            List<Long> idList = new ArrayList<>();
-            idList.add(user.getId());
-            pageParam.setBusDirectorIdList(idList);
+//            List<Long> idList = new ArrayList<>();
+//            idList.add(user.getId());
+//            pageParam.setBusDirectorIdList(idList);
+            pageParam.setBusGroupId(orgId);
         } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
