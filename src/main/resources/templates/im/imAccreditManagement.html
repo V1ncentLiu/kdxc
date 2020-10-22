@@ -97,7 +97,7 @@
                         <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small" style="width: 90px;">IM授权修改</el-button>
                         <el-button  v-else-if="scope.row.imAuthorizeStatus === 2" @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small" style="width: 90px;">IM授权</el-button>
                         
-                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="untie(scope.row.id)" type="danger"  size="small" style="width: 90px;">解绑IM</el-button>
+                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="untie(scope.row.id,scope.row.teleSaleId)" type="danger"  size="small" style="width: 90px;">解绑IM</el-button>
                         
                         <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">名片设置</el-button>
                         
@@ -310,7 +310,7 @@
                 //状态调整
                 window.location.href="/custservice/saleIm/initUpdatePage?teleSaleId="+id                
             }, 
-            untie(id) {
+            untie(id,teleSaleId) {
             	this.$confirm('确定将此顾问进行解绑吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -319,6 +319,7 @@
                 //解绑
             	 var param = {};
                  param.id=id;
+                 param.teleSaleId=teleSaleId;
                  var url="/custservice/saleIm/untie";
                  axios.post(url, param)
                  .then(function (response) {
