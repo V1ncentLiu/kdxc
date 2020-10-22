@@ -154,7 +154,7 @@ public class ImMessageController {
             String roleCode = CommUtil.getRoleCode(curLoginUser);
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
             // 当前登陆用户不是管理员!
-            if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())){
+            if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())&& !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())){
                 // 当前登录人组织下所有人员
                 List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
                 if(CollectionUtils.isEmpty(userList)) {
@@ -428,9 +428,8 @@ public class ImMessageController {
             Long orgId = curLoginUser.getOrgId();
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
             // 当前登陆用户不是管理员!
-            if(CollectionUtils.isNotEmpty(roleList)
-                    && CollectionUtils.isNotEmpty(roleList)
-                    && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+            if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
+                    && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())) {
                     // 当前登录人组织下所有人员
                     List<UserInfoDTO> userList = getTeleSaleByOrgId(orgId);
                     if(CollectionUtils.isEmpty(userList)) {
