@@ -21,7 +21,7 @@ import com.kuaidao.custservice.dto.saleim.SaleImReq;
  * @date 2020年8月31日
  * @version V1.0
  */
-@FeignClient(name = "cust-service-service-zhang", path = "/custservice/saleIm", fallback = SaleImFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "cust-service-service", path = "/custservice/saleIm", fallback = SaleImFeignClient.HystrixClientFallback.class)
 public interface SaleImFeignClient {
     /**
      * 保存顾问im授权
