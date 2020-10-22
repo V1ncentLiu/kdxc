@@ -135,24 +135,8 @@
                 <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType" width="100"></el-table-column>
                 <el-table-column align="center" prop="sourceType" label="广告位" :formatter="transformSourceType" width="100"></el-table-column>
                 <el-table-column align="center" prop="projectId" label="资源项目" :formatter="transformProject"  width="120"></el-table-column>
-                <el-table-column align="center" prop="searchWord" label="包含搜索词">
-                    <template slot-scope="scope">
-                        <span v-for="(item,index) in scope.row.searchWordList">
-                            <em v-if="searchwordShow(item)" style="color:#ebb563;">{{item}}</em>
-                            <em v-else="searchwordShow(item)">{{item}}</em>
-                            <em v-if="index<(scope.row.searchWordListLength-1)">,</em>
-                        </span>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="notSearchWord" label="不包含搜索词">
-                    <template slot-scope="scope">
-                        <span v-for="(item,index) in scope.row.notSearchWordList">
-                            <em v-if="notSearchwordShow(item)" style="color:#ebb563;">{{item}}</em>
-                            <em v-else="notSearchwordShow(item)">{{item}}</em>
-                            <em v-if="index<(scope.row.notSearchWordListLength-1)">,</em>
-                        </span>
-                    </template>
-                </el-table-column>
+                <el-table-column align="center" prop="searchWord" label="包含搜索词"></el-table-column>
+                <el-table-column align="center" prop="notSearchWord" label="不包含搜索词"></el-table-column>
                 <el-table-column align="center" prop="province" label="包含省份" width="90"></el-table-column>
                 <el-table-column align="center" prop="notProvince" label="不包含省份" width="90" ></el-table-column>
                 <el-table-column align="center" prop="updateTime" label="最后编辑时间"  :formatter="dateFormat" width="130"></el-table-column>
@@ -370,18 +354,6 @@ var queryOrg=[[${queryOrg}]];//电销组
             }        	  
         },
         methods: {
-            searchwordShow(val){
-                if(val.indexOf(this.form.searchWord)!=-1){
-                    return true;
-                }
-                return false;
-            },
-            notSearchwordShow(val){
-                if(val.indexOf(this.form.notSearchword)!=-1){
-                    return true;
-                }
-                return false;
-            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -549,18 +521,6 @@ var queryOrg=[[${queryOrg}]];//电销组
                         ocmVM.dataTable= table.data;
                         ocmVM.pager.total =  table.total;
                         ocmVM.pager.currentPage = table.currentPage;
-
-                        // 和搜索框有匹配值则设置颜色
-                        for(var i=0;i<table.data.length;i++){
-                            if(table&&table.data[i].searchWord){
-                                ocmVM.dataTable[i].searchWordList=table.data[i].searchWord.split(",");
-                                ocmVM.dataTable[i].searchWordListLength = table.data[i].searchWord.split(",").length;
-                            }
-                            if(table&&table.data[i].notSearchWord){
-                                ocmVM.dataTable[i].notSearchWordList=table.data[i].notSearchWord.split(",");
-                                ocmVM.dataTable[i].notSearchWordListLength = table.data[i].notSearchWord.split(",").length;
-                            }
-                        }
 
                         // 取出存储的id
                         if(!ocmVM.paginationShow){
