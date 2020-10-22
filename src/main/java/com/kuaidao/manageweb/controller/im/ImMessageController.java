@@ -12,6 +12,7 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.common.util.JSONUtil;
 import com.kuaidao.custservice.dto.custservice.CustomerInfoDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleMonitorDTO;
 import com.kuaidao.custservice.dto.onlineleave.SaleOnlineLeaveLogReq;
@@ -97,16 +98,14 @@ public class ImMessageController {
         List dxzList = new ArrayList(0);
         // 管理员
         if(roleList != null
-                &&
-                (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
-                ||
-                RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode()))){
+                && ( RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode()) || RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode()))){
             if (CollectionUtils.isNotEmpty(roleList) && roleList.get(0) != null) {
                 OrganizationQueryDTO dto = new OrganizationQueryDTO();
                 dto.setSystemCode(SystemCodeConstant.HUI_JU);
                 dto.setOrgType(OrgTypeConstant.DXZ);
-                dto.setBusinessLine(user.getBusinessLine());
+                dto.setBusinessLine(BusinessLineConstant.SHANGJI);
                 JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+                log.info("dzList-dzList={}", JSONUtil.toJSon(dzList));
                 dxzList = dzList.getData();
             }
             return dxzList;
