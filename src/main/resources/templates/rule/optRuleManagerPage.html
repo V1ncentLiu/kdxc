@@ -138,10 +138,12 @@
                 <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
                 <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory" width="80"></el-table-column>
                 <el-table-column align="center" prop="industryCategory" label="行业类别" :formatter="transformIndustry" width="80"></el-table-column>
-                <el-table-column align="center" prop="searchWord" label="包含搜索词"  width="130">
+                <el-table-column align="center" prop="searchWordList" label="包含搜索词"  width="130">
                     <template slot-scope="scope">
-                        <span>
-                            {{scope.row.searchWord}}
+                        <span v-for="(item,index) in scope.row.searchWordList">
+                            <em v-if="searchwordShow(item)" style="color:red;">{{item}}</em>
+                            <em v-else="searchwordShow(item)">{{item}}</em>
+                            <em v-if="index<(scope.row.searchWordListLength-1)">,</em>
                         </span>
                     </template>
                 </el-table-column>
@@ -352,6 +354,12 @@
             }        	  
         },
         methods: {
+            searchwordShow(val){
+                if(val.indexOf(this.form.searchWord)!=-1){
+                    return true;
+                }
+                return false;
+            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -512,31 +520,11 @@
                         ocmVM.pager.currentPage = table.currentPage;
 
                         // 和搜索框有匹配值则设置颜色
-                        var searchWordIpt=ocmVM.form.searchWord;                        
-                        debugger
                         for(var i=0;i<table.data.length;i++){
-                            var searchWordTexArr=[]
-                            var searchWordArr=table.data[i].searchWord.split(","); 
-                            for(var j=0;i<searchWordArr[i].length;j++){
-                                if(searchWordArr[i][j]==searchWordIpt){
-                                    searchWordArr[i][j]='<em style="background-color:yellow;">'+searchWordArr[i][j]+'</em>'
-                                }
-                                searchWordTexArr=searchWordArr;
+                            if(table&&table.data[i].searchWord){
+                                ocmVM.dataTable[i].searchWordList=table.data[i].searchWord.split(",");
+                                ocmVM.dataTable[i].searchWordListLength = table.data[i].searchWord.split(",").length;
                             }
-                            ocmVM.dataTable[i].searchWord=searchWordTexArr.join(",")
-                        }
-
-                        var notSearchWordIpt=ocmVM.form.notSearchWord;                        
-                        for(var i=0;i<table.data.length;i++){
-                            var notSearchWordTexArr=[]
-                            var notSearchWordArr=table.data[i].notSearchWord.split(","); 
-                            for(var j=0;i<notSearchWordArr[i].length;j++){
-                                if(notSearchWordArr[i][j]==notSearchWordIpt){
-                                    notSearchWordArr[i][j]='<em style="background-color:yellow;">'+searchWordArr[i][j]+'</em>'
-                                }
-                                notSearchWordTexArr=notSearchWordArr;
-                            }
-                            ocmVM.dataTable[i].notSearchWord=notSearchWordTexArr.join(",")
                         }
 
                         // 取出存储的id
