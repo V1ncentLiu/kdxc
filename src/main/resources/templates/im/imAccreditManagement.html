@@ -97,6 +97,8 @@
                         <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small" style="width: 90px;">IM授权修改</el-button>
                         <el-button  v-else-if="scope.row.imAuthorizeStatus === 2" @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small" style="width: 90px;">IM授权</el-button>
                         
+                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="untie(scope.row.teleSaleId)" type="error"  size="small" style="width: 90px;">解绑IM</el-button>
+                        
                         <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">名片设置</el-button>
                         
                         <el-button v-else-if="scope.row.teleCardStatus === 1" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="success" style="margin-left: 10px;">修改名片</el-button>
@@ -307,6 +309,27 @@
             updateStatus(id) {
                 //状态调整
                 window.location.href="/custservice/saleIm/initUpdatePage?teleSaleId="+id                
+            }, 
+            untie(id) {
+                //解绑
+            	 var param = {};
+                 param.teleSaleId=id;
+                 var url="/custservice/saleIm/untie";
+                 axios.post(url, param)
+                 .then(function (response) {
+                   var result =  response.data;
+                   if(result.code=="0"){
+                     userVM.$message({message:'解绑成功',type:'success',duration:1000,onClose:function(){
+                   	  userVM.searchTable();
+             	      }});
+                     
+                   }else{
+                     userVM.$message.error("解绑失败");
+                   }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 });              
             }, 
             cardSubmit(){
                 var param = {};

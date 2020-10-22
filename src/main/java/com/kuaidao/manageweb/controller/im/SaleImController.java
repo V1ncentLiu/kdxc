@@ -213,6 +213,24 @@ public class SaleImController {
     }
 
     /**
+     * 解绑顾问Im授权
+     * @param orgDTO
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/untie")
+    @ResponseBody
+    @RequiresPermissions("custservice:saleIm:edit")
+    @LogRecord(description = "解绑Im授权", operationType = OperationType.UPDATE, menuName = MenuEnum.SALE_IM)
+    public JSONResult untie(@Valid @RequestBody SaleImReq saleImReq, BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        return saleImFeignClient.untie(saleImReq);
+    }
+
+    /**
      * 获取当前登录账号ID
      * @param orgDTO
      * @return

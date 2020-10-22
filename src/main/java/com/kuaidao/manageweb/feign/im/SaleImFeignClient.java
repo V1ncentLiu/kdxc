@@ -32,6 +32,14 @@ public interface SaleImFeignClient {
     JSONResult<Long> save(@RequestBody SaleImReq saleImReq);
 
     /**
+     * 解绑im授权
+     * @param saleImReq
+     * @return
+     */
+    @PostMapping(value = "/untie")
+    JSONResult<Void> untie(@RequestBody SaleImReq saleImReq);
+
+    /**
      * 根据顾问id查询授权信息
      * @param idEntity
      * @return
@@ -60,6 +68,11 @@ public interface SaleImFeignClient {
         @Override
         public JSONResult<Long> save(@RequestBody SaleImReq saleImReq) {
             return fallBackError("保存顾问im授权");
+        }
+
+        @Override
+        public JSONResult<Void> untie(@RequestBody SaleImReq saleImReq) {
+            return fallBackError("解绑im授权");
         }
 
         @Override
