@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -16,17 +17,14 @@ import com.kuaidao.custservice.dto.saleim.SaleImReq;
 
 /**
  * 顾问im授权
- * 
  * @author zxy
  * @date 2020年8月31日
  * @version V1.0
  */
-@FeignClient(name = "cust-service-service", path = "/custservice/saleIm",
-        fallback = SaleImFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "cust-service-service-zhang", path = "/custservice/saleIm", fallback = SaleImFeignClient.HystrixClientFallback.class)
 public interface SaleImFeignClient {
     /**
      * 保存顾问im授权
-     * 
      * @param saleImReq
      * @return
      */
@@ -35,7 +33,6 @@ public interface SaleImFeignClient {
 
     /**
      * 根据顾问id查询授权信息
-     * 
      * @param idEntity
      * @return
      */
@@ -44,7 +41,6 @@ public interface SaleImFeignClient {
 
     /**
      * 查询顾问im授权列表
-     * 
      * @param pageParam
      * @return
      */
@@ -58,8 +54,7 @@ public interface SaleImFeignClient {
 
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
         }
 
         @Override
@@ -77,6 +72,5 @@ public interface SaleImFeignClient {
             return fallBackError("查询顾问im授权列表");
         }
     }
-
 
 }
