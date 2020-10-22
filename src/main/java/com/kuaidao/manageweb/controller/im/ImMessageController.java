@@ -280,7 +280,7 @@ public class ImMessageController {
             // 创建一个工作薄对象sheet
             XSSFSheet sheet = workBook.createSheet();
             // 设置宽度
-            sheet.setColumnWidth(1, 5000);
+            sheet.setColumnWidth(1, 6000);
             sheet.setColumnWidth(2, 5000);
             sheet.setColumnWidth(3, 4000);
             sheet.setColumnWidth(4, 6200);
