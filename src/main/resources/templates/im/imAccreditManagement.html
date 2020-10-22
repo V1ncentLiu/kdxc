@@ -97,7 +97,7 @@
                         <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small" style="width: 90px;">IM授权修改</el-button>
                         <el-button  v-else-if="scope.row.imAuthorizeStatus === 2" @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small" style="width: 90px;">IM授权</el-button>
                         
-                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="untie(scope.row.teleSaleId)" type="danger"  size="small" style="width: 90px;">解绑IM</el-button>
+                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="untie(scope.row.id,scope.row.teleSaleId)" type="danger"  size="small" style="width: 90px;">解绑IM</el-button>
                         
                         <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">名片设置</el-button>
                         
@@ -165,7 +165,7 @@
     var teleSaleArr=[];
     var teleGroupDisabled=false;
     if(roleCode=='DXZJ'){
-    	teleGroupId=orgId+'';
+    	teleGroupId=orgId;
     	teleSaleArr=teleSale;
     	teleGroupDisabled=true;
     }
@@ -310,26 +310,35 @@
                 //状态调整
                 window.location.href="/custservice/saleIm/initUpdatePage?teleSaleId="+id                
             }, 
-            untie(id) {
+            untie(id,teleSaleId) {
+            	this.$confirm('确定将此顾问进行解绑吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
                 //解绑
             	 var param = {};
-                 param.teleSaleId=id;
+                 param.id=id;
+                 param.teleSaleId=teleSaleId;
                  var url="/custservice/saleIm/untie";
                  axios.post(url, param)
                  .then(function (response) {
                    var result =  response.data;
                    if(result.code=="0"){
-                     userVM.$message({message:'解绑成功',type:'success',duration:1000,onClose:function(){
-                   	  userVM.searchTable();
+                	   mainDivVM.$message({message:'解绑成功',type:'success',duration:1000,onClose:function(){
+                		   mainDivVM.searchTable();
              	      }});
                      
                    }else{
-                     userVM.$message.error("解绑失败");
+                     mainDivVM.$message.error("解绑失败");
                    }
                  })
                  .catch(function (error) {
                    console.log(error);
-                 });              
+                 });         
+                }).catch(() => {
+                    
+                });
             }, 
             cardSubmit(){
                 var param = {};
