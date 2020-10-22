@@ -104,7 +104,7 @@ public class SaleImController {
         request.setAttribute("teleGroupList", data);
         request.setAttribute("teleSaleList", userList);
         request.setAttribute("roleCode", roleCode);
-        request.setAttribute("orgId", user.getOrgId());
+        request.setAttribute("orgId", user.getOrgId() + "");
 
         return "im/imAccreditManagement";
     }
