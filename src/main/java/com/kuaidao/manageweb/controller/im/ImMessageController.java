@@ -104,6 +104,7 @@ public class ImMessageController {
                 dto.setSystemCode(SystemCodeConstant.HUI_JU);
                 dto.setOrgType(OrgTypeConstant.DXZ);
                 dto.setBusinessLine(BusinessLineConstant.SHANGJI);
+                log.info("user.getBusinessLine={}", user.getBusinessLine());
                 JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
                 log.info("dzList-dzList={}", JSONUtil.toJSon(dzList));
                 dxzList = dzList.getData();
