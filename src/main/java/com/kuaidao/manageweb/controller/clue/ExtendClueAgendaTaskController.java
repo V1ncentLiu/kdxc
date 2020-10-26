@@ -297,7 +297,8 @@ public class ExtendClueAgendaTaskController {
                 || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {

@@ -80,6 +80,8 @@ public class ProjectController {
                 getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
         // 查询字典店型集合
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
+        // 查询字典项目归属集合
+        request.setAttribute("projectAttributiveList", getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
         // // 查询所属集团列表
         // JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         // 获取商家账号集合，倒叙

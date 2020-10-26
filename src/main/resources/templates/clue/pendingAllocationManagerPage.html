@@ -170,6 +170,22 @@
                     </template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'projectName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayoutProjectIsShow(scope.row.categoryNum)">
+                           {{scope.row.projectName}}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'sourceName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayoutSourceIsShow(scope.row.categoryNum)">
+                           {{scope.row.sourceName}}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                                  v-else>
                 </el-table-column>
 
@@ -602,6 +618,34 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <div v-if="telemarketingLayout !=null && (','+telemarketingLayout.category+',').indexOf(','+item.clueDTO.clueBasic.category+',') != -1">
+                    <el-row >
+                        <el-col :span="12" v-if="telemarketingLayout.projectShow ==1">
+                            <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueProject.projectName}}
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                            <el-form-item label="媒介：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.sourceName}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                            <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.ad}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.urlShow ==1">
+                            <el-form-item label="URL：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueReceive.urlAddress}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
             </div>
         </el-form>
     </el-dialog>
@@ -622,6 +666,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+    var telemarketingLayout = [[${telemarketingLayout}]];
     var teleGorupList=[[${teleGorupList}]];//电销组查询筛选条件
     var orgList=[[${orgList}]];//电销组
     var saleList=[[${saleList}]];//电销顾问
@@ -641,9 +686,12 @@
     // 业务线(待分配新资源页面和客户管理页面允许外包业务线复制，外包业务线编码如下：1、5、6、10、11、12、13)
     var businessLine=[[${businessLine}]];
     var canCopy=[[${canCopy}]];
+    var roleCode = [[${roleCode}]];
     var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            roleCode:roleCode,
+            telemarketingLayout:telemarketingLayout,
             dialogForm: {
                 phoneNum: ''
             },
@@ -840,6 +888,7 @@
                         var table=result.data;
                         var data= table.data;
                         for(var i=0;i<data.length;i++){
+                            data[i].categoryNum=data[i].category;
                             data[i].category=clueVM.transformCategory(data[i].category);
                             data[i].type=clueVM.transformType(data[i].type);
                             data[i].createTime=clueVM.dateFormat(data[i].createTime);
@@ -1492,6 +1541,19 @@
                 clueVM.repeatWechatVisible =true;
                 clueVM.repeatCustomer = val;
             },
+            telemarketingLayoutProjectIsShow(category){
+                if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.projectShow ==1) || roleCode =="GLY"){
+                    return true;
+                }
+                return false;
+            },
+            telemarketingLayoutSourceIsShow(category){
+                if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.sourceShow ==1) || roleCode =="GLY"){
+                    return true;
+                }
+                return false;
+            },
+
         },
         created(){
             console.info("create method");
