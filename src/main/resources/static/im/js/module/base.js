@@ -198,7 +198,8 @@ YX.fn.openChatBox = function(account, scene) {
           if(infoSession[i].to==info.account&&infoSession[i].clueId){
             console.log(infoSession[i].clueId,'将clueId显示隐藏按钮');
             // 将data-imId作为标签属性
-            if(infoSession[i].clueId){
+            // if(infoSession[i].clueId){
+            if(infoSession[i].isSubmit==1){//1是已提交
               $('#submitCustomer').css({
                 'display':'none'
               })
