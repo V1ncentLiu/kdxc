@@ -89,6 +89,13 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <el-row >
+                    <el-col :span="24" v-if="telemarketingLayout !=null && telemarketingLayout.urlShow ==1">
+                        <el-form-item label="URL：" :label-width="formLabelWidth">
+                            <span class="lineFeed">{{clueReceive.urlAddress}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
             </div>
             <div class="marginB20 fs16 paddingT20">基本信息</div>
@@ -814,6 +821,34 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <div v-if="telemarketingLayoutDTO !=null && (','+telemarketingLayoutDTO.category+',').indexOf(','+item.clueDTO.clueBasic.category+',') != -1">
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayoutDTO.projectShow ==1">
+                            <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueProject.projectName}}
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12" v-if="telemarketingLayoutDTO.sourceShow ==1">
+                            <el-form-item label="媒介：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.sourceName}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayoutDTO.adShow ==1">
+                            <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.ad}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayoutDTO.urlShow ==1">
+                            <el-form-item label="URL：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueReceive.urlAddress}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
             </div>
         </el-form>
     </el-dialog>
@@ -987,8 +1022,10 @@
     var repeatClueList = [[${repeatClueList}]];
     var repeatClueStatus = [[${repeatClueStatus}]];
     var telemarketingLayout = [[${telemarketingLayout}]];
+    var telemarketingLayoutDTO = [[${telemarketingLayoutDTO}]];
     var clueProject = [[${clueProject}]];
-    var mediumList = [[${mediumList}]]
+    var mediumList = [[${mediumList}]];
+    var clueReceive = [[${clueReceive}]]
     var repeatStatus =false;
     var editPhone = 1;
     var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
@@ -1016,6 +1053,8 @@
         el: '#addCustomer',
         data: function () {
             return {
+                telemarketingLayoutDTO:telemarketingLayoutDTO,
+                clueReceive:clueReceive,
                 trackingRemark:trackingRemark,
                 trackingRemarkFlag:trackingRemarkFlag,
                 formLabelWidth160: '160px',

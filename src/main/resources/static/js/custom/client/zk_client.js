@@ -32,6 +32,8 @@ var clientVm = new Vue({
              clientNo:'',
              userId:'',
              numberAttributionCompany:'',
+             attribution:'',
+             bindPhone:'',
              requestType:'',
              isDxzj:false
          },
@@ -54,6 +56,21 @@ var clientVm = new Vue({
                  label: 'sip外呼'
              }],
          rules:{
+             bindPhone:[
+                 {validator:function(rule,value,callback){
+                         if(value){
+                             if(!/^[0-9]*$/.test(value)){
+                                 callback(new Error("只可以输入正整数,不超过11位"));
+                             }else{
+                                 callback();
+                             }
+
+                         }else{
+                             callback();
+                         }
+
+                     },trigger:'blur'},
+             ],
              clientNo:[
         		 { required: true, message: '坐席编号不能为空'},
         	],

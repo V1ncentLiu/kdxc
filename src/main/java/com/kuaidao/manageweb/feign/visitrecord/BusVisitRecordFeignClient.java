@@ -42,6 +42,10 @@ public interface BusVisitRecordFeignClient {
 	@RequestMapping("/notVisitMaxNewone")
 	public JSONResult<VisitNoRecordRespDTO> findMaxNewNotVisitOne(@RequestBody IdEntityLong idEntityLong);
 
+
+	@RequestMapping("/notVisitOne")
+	public JSONResult<VisitNoRecordRespDTO> notVisitOne(@RequestBody IdEntityLong idEntityLong);
+
 	@Component
 	static class HystrixClientFallback implements BusVisitRecordFeignClient {
 		private static Logger logger = LoggerFactory.getLogger(BusVisitRecordFeignClient.class);
@@ -91,6 +95,11 @@ public interface BusVisitRecordFeignClient {
 		@Override
 		public JSONResult<VisitNoRecordRespDTO> findMaxNewNotVisitOne(IdEntityLong idEntityLong) {
 			return fallBackError("查询最新一条未到访记录");
+		}
+
+		@Override
+		public JSONResult<VisitNoRecordRespDTO> notVisitOne(IdEntityLong idEntityLong) {
+			return fallBackError("查询未到访记录");
 		}
 	}
 }

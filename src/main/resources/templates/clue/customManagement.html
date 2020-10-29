@@ -237,6 +237,16 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="媒介:">
+                        <el-select v-model="form.medium" placeholder="媒介" clearable filterable>
+                            <el-option
+                                    v-for="item in mediumArry"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item label="QQ:">
                         <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
                     </el-form-item>
@@ -295,6 +305,7 @@
                     <el-form-item label="手机号归属地:">
                         <el-input v-model="form.phoneLocale" placeholder="手机号归属地" ></el-input>
                     </el-form-item>
+                    
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -395,6 +406,22 @@
                     <template slot-scope="scope">
                         <span v-if="scope.row.hasRepeatClue ==1">
                            <el-button @click="showHasRepeatClue(scope.row)" type="text" size="small">点击查看</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'sourceName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayoutSourceIsShow(scope.row.category)">
+                           {{scope.row.sourceName}}
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                                 v-else-if="item.fieldCode == 'clueProjectName'">
+                    <template slot-scope="scope">
+                        <span v-if="telemarketingLayoutProjectIsShow(scope.row.category)">
+                           {{scope.row.clueProjectName}}
                         </span>
                     </template>
                 </el-table-column>
@@ -862,6 +889,34 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <div v-if="telemarketingLayout !=null && (','+telemarketingLayout.category+',').indexOf(','+item.clueDTO.clueBasic.category+',') != -1">
+                    <el-row >
+                        <el-col :span="12" v-if="telemarketingLayout.projectShow ==1">
+                            <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueProject.projectName}}
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                            <el-form-item label="媒介：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.sourceName}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                            <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.ad}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.urlShow ==1">
+                            <el-form-item label="URL：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueReceive.urlAddress}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
             </div>
         </el-form>
     </el-dialog>
@@ -890,6 +945,7 @@
   var fieldList=[[${fieldList}]];//自定义字段
   var userFieldList=[[${userFieldList}]];//用户自定义字段
   var ownOrgId=[[${ownOrgId}]];//电销总监电销组
+  var telemarketingLayout = [[${telemarketingLayout}]];
   //角色编码
   var roleCode = [[${roleCode}]];
   // var userFieldList=[];
@@ -900,6 +956,8 @@
     el: '#myCustom',
     data: function() {
       return {
+          mediumArry:[],
+          telemarketingLayout:telemarketingLayout,
           dialogForm: {
               phoneNum: ''
           },
@@ -1022,6 +1080,7 @@
             {value:"6",name:"平台"}
        ],
         form: {
+            medium:'',
           teleReceiveSource:"",
           isTransfer:'',
           cluesta:'',
@@ -1237,6 +1296,7 @@
           param.phtraConversion = this.form.phtraConversion;
           param.phoneLocale = this.form.phoneLocale;
           param.cusLevels = this.form.cusLevelList;
+          param.source=this.form.medium;
         if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
           param.teleSaleId= this.form.teleSaleId.join(",");
         }
@@ -1864,6 +1924,19 @@
             customerManVM.repeatWechatVisible =true;
             customerManVM.repeatCustomer = val;
         },
+        telemarketingLayoutProjectIsShow(category){
+            if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.projectShow ==1) || roleCode =="GLY"){
+                return true;
+            }
+            return false;
+        },
+        telemarketingLayoutSourceIsShow(category){
+            if((telemarketingLayout &&  (','+telemarketingLayout.category+',').indexOf(','+category+',') != -1 && telemarketingLayout.sourceShow ==1) || roleCode =="GLY"){
+                return true;
+            }
+            return false;
+        },
+
     },
     mounted(){
       document.getElementById('myCustom').style.display = 'block';
@@ -1927,6 +2000,11 @@
       axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
         customerManVM.provinceArr=response.data.data.data;
       });
+        var param={};
+        param.groupCode="medium";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+            customerManVM.mediumArry=response.data.data;
+        });
 
       // 初始化电销人员
       //axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {

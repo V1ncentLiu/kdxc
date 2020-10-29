@@ -81,6 +81,9 @@
                             <span>{{clueBase.createUserRole}}</span>
                         </el-form-item>
                     </el-col>
+
+                </el-row>
+                <el-row>
                     <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.projectShow ==1">
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
                             <span >{{clueProject.projectName}}</span>
@@ -94,6 +97,13 @@
                     <el-col :span="8" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
                         <el-form-item label="广告文案：" :label-width="formLabelWidth">
                             <span >{{clueBase.ad}}</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24" v-if="telemarketingLayout !=null && telemarketingLayout.urlShow ==1">
+                        <el-form-item label="URL：" :label-width="formLabelWidth">
+                            <span >{{clueReceive.urlAddress}}</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -878,6 +888,34 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <div v-if="telemarketingLayoutDTO !=null && (','+telemarketingLayoutDTO.category+',').indexOf(','+item.clueDTO.clueBasic.category+',') != -1">
+                    <el-row>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.projectShow ==1">
+                            <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueProject.projectName}}
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12" v-if="telemarketingLayout !=null && telemarketingLayout.sourceShow ==1">
+                            <el-form-item label="媒介：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.sourceName}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="24" v-if="telemarketingLayout !=null && telemarketingLayout.adShow ==1">
+                            <el-form-item label="广告文案：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueBasic.ad}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="24" v-if="telemarketingLayout !=null && telemarketingLayout.urlShow ==1">
+                            <el-form-item label="URL：" :label-width="formLabelWidth">
+                                {{item.clueDTO.clueReceive.urlAddress}}
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </div>
             </div>
         </el-form>
     </el-dialog>
@@ -1139,6 +1177,7 @@
 <script src="/js/common/download.js"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script th:inline="javascript" >
+    var clueReceive = [[${clueReceive}]];
 var clueId=[[${clueId}]];//资源ID
 var customer=[[${customer}]];//客户信息
 var base=[[${base}]];//资源基本信息
@@ -1153,6 +1192,7 @@ var repeatFlag=[[${repeatFlag}]];//重单审批控制标识
 var callRecord=[[${callRecord}]];//上传文件
 var loginUserId=[[${loginUserId}]];
 var telemarketingLayout = [[${telemarketingLayout}]];
+var telemarketingLayoutDTO=[[${telemarketingLayoutDTO}]];
 var clueProject = [[${clueProject}]];
 var mediumList = [[${mediumList}]]
 var showPhone = true;
@@ -1577,6 +1617,10 @@ function dateFormat(val) {
         el: '#addCustomer',
         data: function() {
             return {
+                clueProject:clueProject,
+                telemarketingLayout:telemarketingLayout,
+                telemarketingLayoutDTO:telemarketingLayoutDTO,
+                clueReceive:clueReceive,
                 isActive:false,
                 trackingRemark:trackingRemark,
                 trackingRemarkFlag:trackingRemarkFlag,
