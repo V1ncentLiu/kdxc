@@ -35,6 +35,8 @@ var clientVm = new Vue({
              attribution:'',
              bindPhone:'',
              requestType:'',
+             zkAccount:'',
+             zkPassword:'',
              isDxzj:false
          },
          userList:[],//关联用户列表
@@ -79,6 +81,12 @@ var clientVm = new Vue({
         	 ],
              requestType:[
                  { required: true, message: '呼叫方式不能为空'},
+             ],
+             zkAccount:[
+                 { required: true, message: '中科外呼账号不能为空'},
+             ],
+             zkPassword:[
+                 { required: true, message: '中科外呼密码不能为空'},
              ],
         	 userId:[
         		 { required: true, message: '关联用户不能为空'},
