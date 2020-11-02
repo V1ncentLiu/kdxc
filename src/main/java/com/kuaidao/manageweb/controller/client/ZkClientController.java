@@ -56,6 +56,8 @@ public class ZkClientController {
 
     public static final String CLIENT_NO = "clientNo";
     public static final String REQUEST_TYPE = "requestType";
+    public static final String ZK_ACCOUNT = "zkAccount";
+    public static final String ZK_PASSWORD = "zkPassword";
 
     public static final String SIP = "2";
     public static final String SIP_NAME = "sip外呼";
@@ -248,6 +250,12 @@ public class ZkClientController {
                 }else if (j == 6) {
                     // 绑定手机号
                     rowDto.setBindPhone(value);
+                }else if (j == 7) {
+                    // 中科外呼开户账号
+                    rowDto.setZkAccount(value);
+                }else if (j == 8) {
+                    // 中科外呼账号密码
+                    rowDto.setZkPassword(value);
                 }
             }
             dataList.add(rowDto);
@@ -298,9 +306,17 @@ public class ZkClientController {
             if(StringUtils.isBlank(zkClientRespDTO.getClientNo())){
                 return new JSONResult<>().fail(SysErrorCodeEnum.CLIENT_NO_NOT_EXIT.getCode(),SysErrorCodeEnum.CLIENT_NO_NOT_EXIT.getMessage());
             }
+            if(StringUtils.isBlank(zkClientRespDTO.getZkAccount())){
+                return new JSONResult<>().fail(SysErrorCodeEnum.LOGIN_ZK_ACCOUNT_NOT_EXIT.getCode(),SysErrorCodeEnum.LOGIN_ZK_ACCOUNT_NOT_EXIT.getMessage());
+            }
+            if(StringUtils.isBlank(zkClientRespDTO.getZkPassword())){
+                return new JSONResult<>().fail(SysErrorCodeEnum.LOGIN_ZK_PASSWORD_NOT_EXIT.getCode(),SysErrorCodeEnum.LOGIN_ZK_PASSWORD_NOT_EXIT.getMessage());
+            }
             Session session = SecurityUtils.getSubject().getSession();
             session.setAttribute(CLIENT_NO,zkClientRespDTO.getClientNo());
             session.setAttribute(REQUEST_TYPE,zkClientRespDTO.getRequestType());
+            session.setAttribute(ZK_ACCOUNT,zkClientRespDTO.getZkAccount());
+            session.setAttribute(ZK_PASSWORD,zkClientRespDTO.getZkPassword());
             return new JSONResult<>().success(true);
         }
         return new JSONResult<>().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
@@ -315,6 +331,8 @@ public class ZkClientController {
         }
         session.removeAttribute(CLIENT_NO);
         session.removeAttribute(REQUEST_TYPE);
+        session.removeAttribute(ZK_ACCOUNT);
+        session.removeAttribute(ZK_PASSWORD);
         return new JSONResult<>().success(true);
     }
 
@@ -330,7 +348,9 @@ public class ZkClientController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Session session = SecurityUtils.getSubject().getSession();
-        if(null == session.getAttribute(CLIENT_NO)){
+        if(null == session.getAttribute(CLIENT_NO)
+                || null == session.getAttribute(ZK_ACCOUNT)
+                || null == session.getAttribute(ZK_PASSWORD)){
             return new JSONResult().fail(SysErrorCodeEnum.CALL_NOT_EXIT.getCode(),SysErrorCodeEnum.CALL_NOT_EXIT.getMessage());
         }
         callDTO.setClientNo(String.valueOf(session.getAttribute(CLIENT_NO)));
@@ -338,6 +358,8 @@ public class ZkClientController {
         callDTO.setAccountId(curLoginUser.getId());
         callDTO.setOrgId(curLoginUser.getOrgId());
         callDTO.setRequestType(String.valueOf(session.getAttribute(REQUEST_TYPE)));
+        callDTO.setZkAccount(String.valueOf(session.getAttribute(ZK_ACCOUNT)));
+        callDTO.setZkPassword(String.valueOf(session.getAttribute(ZK_PASSWORD)));
         return zkClientFeignClient.zkOutbound(callDTO);
     }
 

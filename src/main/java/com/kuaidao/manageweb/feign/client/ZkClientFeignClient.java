@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.validation.Valid;
 import java.util.List;
 
-@FeignClient(name = "callcenter-service", path = "/callcenter/zkClient", fallback = ZkClientFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "callcenter-service-wyp", path = "/callcenter/zkClient", fallback = ZkClientFeignClient.HystrixClientFallback.class)
 public interface ZkClientFeignClient {
 
 
