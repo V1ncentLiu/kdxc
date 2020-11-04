@@ -866,7 +866,7 @@ public class ClientController {
        callDTO.setBindType((String)session.getAttribute("bindType"));
        callDTO.setLoginClient((String)session.getAttribute("loginName"));
         
-        return qimoFeignClient.qimoOutboundCall(callDTO);
+        return clientFeignClient.qimoOutboundCall(callDTO);
     }
     
     /**
