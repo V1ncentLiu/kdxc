@@ -186,7 +186,6 @@ return /******/ (function(modules) { // webpackBootstrap
 								})
 								$('.sessionListFrame .layui-layer-title').html('')
 								console.log(yunXin.crtSession+'当前窗口会话id')
-								// 点击列表
 								nim.setCurrSession(yunXin.crtSession)
 							},
 							cancel:function(){
