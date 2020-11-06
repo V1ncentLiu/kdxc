@@ -173,6 +173,8 @@ return /******/ (function(modules) { // webpackBootstrap
 									'</div>'].join("")
 								$('.sessionListFrame .layui-layer-title').html(str)
 								isSessionListNum=true
+								//如果是已经存在的会话记录, 会将此会话未读数置为 0, 开发者会收到onupdatesession回调,之后此会话在收到消息之后不会更新未读数
+								nim.setCurrSession()
 							},
 							restore:function(){
 								sessionListNum=0
@@ -183,11 +185,16 @@ return /******/ (function(modules) { // webpackBootstrap
 									'height':'24px',
 								})
 								$('.sessionListFrame .layui-layer-title').html('')
+								console.log(yunXin.crtSession+'当前窗口会话id')
+								// 点击列表
+								nim.setCurrSession(yunXin.crtSession)
 							},
 							cancel:function(){
 								$('#rightPanel').css({
 									'display':'none'
 								})
+								//如果是已经存在的会话记录, 会将此会话未读数置为 0, 开发者会收到onupdatesession回调,之后此会话在收到消息之后不会更新未读数
+								nim.setCurrSession()
 							}
 						});
 						 account = target.getAttribute("data-account");
