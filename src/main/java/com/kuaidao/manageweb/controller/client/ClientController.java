@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.client;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.*;
+import com.kuaidao.manageweb.feign.client.QimoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -92,7 +93,8 @@ public class ClientController {
 
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
-
+    @Autowired
+    private QimoFeignClient qimoFeignClient;
     /**
      *  跳转天润坐席页面
      * @return
@@ -470,7 +472,7 @@ public class ClientController {
 
         }
 
-        return clientFeignClient.saveQimoClient(reqDTO);
+        return qimoFeignClient.saveQimoClient(reqDTO);
     }
 
     /**
@@ -509,7 +511,7 @@ public class ClientController {
         }
 
 
-        return clientFeignClient.updateQimoClient(reqDTO);
+        return qimoFeignClient.updateQimoClient(reqDTO);
     }
 
 
@@ -532,7 +534,7 @@ public class ClientController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         logger.info("userId{{}},delete qimo client,idList{{}}", curLoginUser.getId(), idListReq);
 
-        return clientFeignClient.deleteQimoClient(idListReq);
+        return qimoFeignClient.deleteQimoClient(idListReq);
     }
 
 
@@ -552,7 +554,7 @@ public class ClientController {
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
 
-        JSONResult<QimoClientRespDTO> qimoClientRespDTOJSONResult = clientFeignClient.queryQimoClientById(idEntity);
+        JSONResult<QimoClientRespDTO> qimoClientRespDTOJSONResult = qimoFeignClient.queryQimoClientById(idEntity);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode = CommUtil.getRoleCode(curLoginUser);
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -575,7 +577,7 @@ public class ClientController {
     public JSONResult<QimoClientRespDTO> queryQimoClientByParam(
             @RequestBody QimoClientQueryDTO queryDTO) throws Exception {
 
-        return clientFeignClient.queryQimoClientByParam(queryDTO);
+        return qimoFeignClient.queryQimoClientByParam(queryDTO);
     }
 
 
@@ -598,7 +600,7 @@ public class ClientController {
             //电销总监查他自己的组
             queryClientDTO.setOrgId(orgId);
         }
-        return clientFeignClient.listQimoClientPage(queryClientDTO);
+        return qimoFeignClient.listQimoClientPage(queryClientDTO);
     }
 
 
@@ -700,7 +702,7 @@ public class ClientController {
         // remove redis 临时数据
         redisTemplate.delete(Constants.QIMO_CLIENT_KEY + userId);
         JSONResult<List<ImportQimoClientDTO>> uploadTrClientData =
-                clientFeignClient.uploadQimoClientData(reqClientDataDTO);
+                qimoFeignClient.uploadQimoClientData(reqClientDataDTO);
         return uploadTrClientData;
     }
 
@@ -771,7 +773,7 @@ public class ClientController {
         TrAxbOutCallReqDTO trAxbOutCallReqDTO = new TrAxbOutCallReqDTO();
         trAxbOutCallReqDTO.setLoginClient(loginName);
         trAxbOutCallReqDTO.setAccountId(accountId);
-        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClient(trAxbOutCallReqDTO);
+        JSONResult<QimoClientRespDTO> qimoClientJr = qimoFeignClient.queryQimoClient(trAxbOutCallReqDTO);
        
         if(JSONResult.SUCCESS.equals(qimoClientJr.getCode())) {
             QimoClientRespDTO qimoClient = qimoClientJr.getData();
