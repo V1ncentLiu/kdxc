@@ -524,14 +524,17 @@ var SDKBridge = function(ctr, data) {
 
   // 订阅的事件，这里会用于同步多端登录状态
   function onPushEvents(param) {
+    console.info("param-param:"+param);
     // 没有开启订阅服务，忽略通知
     if (!window.CONFIG.openSubscription) {
       return;
     }
     if (param.msgEvents) {
       var msgEvents = param.msgEvents;
+      console.info("param-msgEvents:"+msgEvents);
       for (var i = 0; i < msgEvents.length; i++) {
         var msgEvent = msgEvents[i];
+        console.info("param-msgEvent:"+msgEvent);
         this.cache.updatePersonSubscribe(msgEvent);
       }
       var ctr = this.controller;
