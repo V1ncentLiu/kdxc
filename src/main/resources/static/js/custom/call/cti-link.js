@@ -106,7 +106,7 @@
 	/** 内部全局变量 */
 	var GLOBAL = {
 		ready: false,
-		debug: false,  // 是否开启debug
+		debug: true,  // 是否开启debug
 		webrtc: false,  // 是否是webrtc
 		connecting : false, //建立连接中
 		connected: false,  // 是否建立websocket连接
