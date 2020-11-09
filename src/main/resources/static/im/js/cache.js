@@ -700,6 +700,7 @@ var Cache = (function() {
               console.info("custom打印online_state"+custom);
             multiPortStatus += onlineState[custom['online_state']];
           } else {
+              console.info("custom打印online_stateelse"+custom);
             multiPortStatus += '在线';
           }
         }
