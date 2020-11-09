@@ -83,10 +83,11 @@ public class SettlementConfirmCellWriteHandler implements RowWriteHandler {
         Workbook workbook = writeSheetHolder.getSheet().getWorkbook();
 
         if (!isHead) {
-            if (row.getCell(27).getStringCellValue().equals(AggregationConstant.REFOUND_REBATE_TYPE.DATA_TYPE_REFOUND)) {
+            //从0开始
+            if (row.getCell(30).getStringCellValue().equals(AggregationConstant.REFOUND_REBATE_TYPE.DATA_TYPE_REFOUND)) {
                 bulidCellStyle(workbook, row, IndexedColors.YELLOW.getIndex());
             }
-            if (row.getCell(27).getStringCellValue().equals(AggregationConstant.REFOUND_REBATE_TYPE.DATA_TYPE_REBATE)) {
+            if (row.getCell(30).getStringCellValue().equals(AggregationConstant.REFOUND_REBATE_TYPE.DATA_TYPE_REBATE)) {
                 bulidCellStyle(workbook, row, IndexedColors.ORANGE.getIndex());
             }
         }
@@ -97,7 +98,7 @@ public class SettlementConfirmCellWriteHandler implements RowWriteHandler {
         cellStyle.setFillBackgroundColor(color);
         cellStyle.setFillForegroundColor(color);
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        for (int i = 0; i < 28; i++) {
+        for (int i = 0; i < 31; i++) {
             Cell cell = row.getCell(i);
             cell.setCellStyle(cellStyle);
         }
