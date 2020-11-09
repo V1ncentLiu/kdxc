@@ -281,7 +281,8 @@ public class ExtendClueAgendaTaskController {
                 || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
@@ -298,7 +299,7 @@ public class ExtendClueAgendaTaskController {
                 || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
+                ) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {

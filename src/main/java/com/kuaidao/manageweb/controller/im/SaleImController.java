@@ -303,7 +303,7 @@ public class SaleImController {
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
         userOrgRoleReq.setBusinessLine(businessLine);
-        if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+        if (RoleCodeEnum.DXZJ.name().equals(user.getRoleList().get(0).getRoleCode())) {
             userOrgRoleReq.setOrgId(user.getOrgId());
         }
         JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
