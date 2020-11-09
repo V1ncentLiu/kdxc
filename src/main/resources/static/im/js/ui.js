@@ -39,7 +39,9 @@ var appUI = {
    * 更新当前会话聊天面板UI
    */
   updateChatContentUI: function(msg, cache) {
-    if(isSessionListNum){
+      console.log(msg,44444444)
+
+    if(isSessionListNum&&msg.flow=="in"){
       sessionListNum=Number(sessionListNum)
       sessionListNum+=1
       var str=['<div style="display: flex;align-items: center;">',
