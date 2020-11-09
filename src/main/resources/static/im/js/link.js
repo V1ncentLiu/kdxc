@@ -18,11 +18,11 @@ var SDKBridge = function(ctr, data) {
   this.controller = ctr;
   this.cache = data;
   window.nim = ctr.nim = this.nim = SDK.NIM.getInstance({
-    //控制台日志，上线时应该关掉
+   /* //控制台日志，上线时应该关掉
     debug: true || {
        api: 'info',
        style: 'font-size:14px;color:blue;background-color:rgba(0,0,0,0.1)'
-    },
+    },*/
     db: true,
     appKey: CONFIG.appkey,
     account: userUID,
