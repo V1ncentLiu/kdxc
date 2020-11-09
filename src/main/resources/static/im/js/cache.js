@@ -688,19 +688,15 @@ var Cache = (function() {
         }
         if (custom) {
           custom = JSON.parse(custom);
-          console.info("custom打印"+custom);
           if (typeof custom['net_state'] === 'number') {
-              console.info("custom打印net_state"+custom);
             var tempNetState = netState[custom['net_state']];
             if (tempNetState) {
               multiPortStatus += '-' + tempNetState;
             }
           }
           if (typeof custom['online_state'] === 'number') {
-              console.info("custom打印online_state"+custom);
             multiPortStatus += onlineState[custom['online_state']];
           } else {
-              console.info("custom打印online_stateelse"+custom);
             multiPortStatus += '在线';
           }
         }
