@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
@@ -205,6 +206,9 @@ public class CustomerManagerController {
                     // 查看电销组下所有数据
                     dto.setTeleGorup(user.getOrgId());
 
+                }else if(roleCode.equals(RoleCodeEnum.XMWY.name())){
+                    // 查看餐盟业务线所有数据
+                    dto.setBusinessLine(BusinessLineConstant.SHANGJI);
                 }
             }
         }
