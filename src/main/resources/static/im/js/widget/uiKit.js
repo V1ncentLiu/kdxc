@@ -282,6 +282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	SessionList.prototype.update = function(data){
 		var newSession=sessionsListConcat1(data.sessions)
 		console.log(data,'渲染左测列表数据');
+		sessionListObj=newSession;
 		var html = '',
 			i,
 			unreadNum=0,

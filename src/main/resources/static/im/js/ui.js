@@ -41,9 +41,16 @@ var appUI = {
   updateChatContentUI: function(msg, cache) {
       console.log(msg,44444444)
 
-    if(isSessionListNum&&msg.flow=="in"){
-      sessionListNum=Number(sessionListNum)
-      sessionListNum+=1
+    // if(isSessionListNum&&msg.flow=="in"){
+    if(isSessionListNum){
+      for(var i=0;i<sessionListObj.length;i++){
+        if(sessionListObj[i].to==msg.from){
+          sessionListNum=Number(sessionListObj[i].unread)
+        }
+      }
+
+      // sessionListNum=Number(sessionListNum)
+      // sessionListNum+=1
       var str=['<div style="display: flex;align-items: center;">',
           '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#headImg')[0].src+'"/>',
           '<span style="margin:0 10px;">'+showLittleBit($('#nickName').text(),2)+'</span>',
