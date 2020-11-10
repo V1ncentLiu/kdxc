@@ -84,6 +84,7 @@ public interface BusinessSignFeignClient {
 	 * @param dto
 	 * @return
 	 */
+	@PostMapping("/updateSignAddress")
 	JSONResult<Boolean> updateSignAddress(@RequestBody SignParamDTO dto);
 	/**
 	 * 分配判单用户
