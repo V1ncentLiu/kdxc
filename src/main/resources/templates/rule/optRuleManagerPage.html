@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="css/base.css">
     <style>
         .dialogForm .el-form-item{margin-bottom: 5px;}
+        .backIsYellow{
+            background-color: yellow;
+        }
     </style>
 </head>
 <body>
@@ -113,6 +116,13 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="媒介:">
+                        <el-select v-model="form.source" placeholder="媒介" clearable filterable>
+                            <el-option v-for="item in mediumArry" :key="item.value" :label="item.name"
+                                       :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
@@ -135,7 +145,15 @@
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <el-table-column align="center" prop="ruleName" label="规则名称"></el-table-column>
-                <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
+                <el-table-column align="center" prop="source" label="媒介" >
+                    <template slot-scope="scope">
+                        <span v-for="(item,index) in scope.row.sourceList">
+                            <em v-if="sourceShow(item)" style="color:#ebb563;">{{transformSourceBySource(item)}}</em>
+                            <em v-else="sourceShow(item)">{{transformSourceBySource(item)}}</em>
+                            <em v-if="index<(scope.row.sourceLength-1)">,</em>
+                        </span>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory" width="80"></el-table-column>
                 <el-table-column align="center" prop="industryCategory" label="行业类别" :formatter="transformIndustry" width="80"></el-table-column>
                 <el-table-column align="center" prop="searchWordList" label="包含搜索词"  width="130">
@@ -273,6 +291,7 @@
                     {{scope.row.orgDayTimeStart}}-{{scope.row.orgDayTimeEnd}}
                 </template>
             </el-table-column>
+            <el-table-column align="center" prop="ascriptionProjectName" label="资源项目归属"></el-table-column>
         </el-table>
     </el-dialog>
 </div>
@@ -292,6 +311,7 @@
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                mediumArry: [],
                 paginationShow: false,
                 isShow:false,
                 dialogFormVisible: false,
@@ -302,6 +322,7 @@
                   pageSize: 20,
                 },
                 form: {
+                    source:"",
                   ruleName:'',
                   category:'',
                   industryCategory:'',
@@ -364,6 +385,12 @@
             },
             notSearchwordShow(val){
                 if(this.form.notSearchWord !=null && this.form.notSearchWord !="" && val.indexOf(this.form.notSearchWord)!=-1){
+                    return true;
+                }
+                return false;
+            },
+            sourceShow(val){
+                if(this.form.source !=null && this.form.source !="" && val.indexOf(this.form.source)!=-1){
                     return true;
                 }
                 return false;
@@ -536,6 +563,10 @@
                             if(table&&table.data[i].notSearchWord){
                                 ocmVM.dataTable[i].notSearchWordList=table.data[i].notSearchWord.split(",");
                                 ocmVM.dataTable[i].notSearchWordListLength = table.data[i].notSearchWord.split(",").length;
+                            }
+                            if(table&&table.data[i].source){
+                                ocmVM.dataTable[i].sourceList=table.data[i].source.split(",");
+                                ocmVM.dataTable[i].sourceLength = table.data[i].source.split(",").length;
                             }
                         }
 
@@ -774,6 +805,31 @@
                 if (!name) return
                 return window.sessionStorage.removeItem(name)
             },
+            //媒介转换方法
+            transformSourceBySource(cellValue) {
+                var text="";
+                if(mediumList&&cellValue){
+                    var array=cellValue.split(",");
+                    for(var i=0;i<array.length;i++){
+                        for(var j=0;j<mediumList.length;j++){
+                            if(array[i]==mediumList[j].value){
+                                if(i==0){
+                                    text=mediumList[j].name;
+                                }else{
+                                    text=text+","+mediumList[j].name;
+                                }
+                            }
+                        }
+                    }
+                }
+                return text;
+            },
+            isContainSource(source){
+              if(this.source !=null && this.source !="" && source!=null && source !="" && source.indexOf("3") != -1){
+                    return true;
+              }
+                return false
+            }
         },
         created(){
             // 进入页面判断有是否有存储值
@@ -791,6 +847,12 @@
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
+            //初始化媒介
+            var param = {};
+            param.groupCode = "medium";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                ocmVM.mediumArry = response.data.data;
+            });
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
