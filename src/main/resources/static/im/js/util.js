@@ -343,7 +343,7 @@ function getMessage (msg) {
                 var netcallType = msg.attach.netcallType;
                 var netcallTypeText = netcallType === Netcall.NETCALL_TYPE_VIDEO ? '视频' : '音频';
                 if (msg.attach && msg.attach.type === "netcallBill") {
-                    str ='<div style="color:#3a4a59;line-height:37px;">通话' + (msg.flow === "in" ? "接听" : "拨打") + "时长 " + getNetcallDurationText(msg.attach.duration)+'</div>';
+                    str ='<div style="color:#3a4a59;line-height:37px;">'+netcallTypeText+'通话' + (msg.flow === "in" ? "接听" : "拨打") + "时长 " + getNetcallDurationText(msg.attach.duration)+'</div>';
                 } else if (msg.attach && msg.attach.type === "netcallMiss") {
                     str = '<div style="color:#3a4a59;">未接听</div>';
                 }
