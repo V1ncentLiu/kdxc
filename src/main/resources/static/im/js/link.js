@@ -967,7 +967,7 @@ SDKBridge.prototype.markInBlacklist = function(account, isAdd, callback) {
 /*新用户更新状态为在线*/
 SDKBridge.prototype.UpdateNewSessionState = function(msgEvent) {
 
-    this._cache.updatePersonSubscribe(msgEvent);
+    _cache.updatePersonSubscribe(msgEvent);
 };
 
 /**
