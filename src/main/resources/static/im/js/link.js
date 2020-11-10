@@ -963,6 +963,12 @@ SDKBridge.prototype.markInBlacklist = function(account, isAdd, callback) {
   });
 };
 
+/*新用户更新状态为在线*/
+SDKBridge.prototype.UpdateNewSessionState = function(msgEvent) {
+
+    this.cache.updatePersonSubscribe(msgEvent);
+};
+
 /**
  * 获取用户信息（如果用户信息让SDK托管）上层限制每次拉取150条
  */
