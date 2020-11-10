@@ -731,6 +731,9 @@ var Cache = (function() {
             } else if (serverConfig.online.indexOf(64) >= 0) {
               tempData.multiPortStatus = 'Mac';
               customType = 64;
+            } else if (serverConfig.online.indexOf(-1) >= 0) {
+                tempData.multiPortStatus = '';
+                customType = -1;
             }
           }
           if (tempData.custom && Object.keys(tempData.custom).length > 0) {
