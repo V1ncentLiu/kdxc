@@ -277,13 +277,13 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否签约:" prop="isSign">
-                        <el-select v-model="form.isSign" clearable placeholder="是否签约">
+                        <el-select v-model="form.isSign" clearable placeholder="是否签约"   :disabled="disabledIsSign">
                             <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
                                        :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否补齐尾款:">
-                        <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable>
+                        <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable  :disabled="disabledIsTailMoney">
                             <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
                                        :value="item.value">
                             </el-option>
@@ -956,6 +956,10 @@
     el: '#myCustom',
     data: function() {
       return {
+          //是否签约默认可选
+          disabledIsSign:false,
+          //是否补齐尾款默认可选
+          disabledIsTailMoney:false,
           mediumArry:[],
           telemarketingLayout:telemarketingLayout,
           dialogForm: {
@@ -1941,91 +1945,89 @@
     mounted(){
       document.getElementById('myCustom').style.display = 'block';
     },
-    created(){
-      // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
-      // 进入页面判断有是否有存储值
-      if(!this.paginationShow){
-        var storeVal = this.getSessionStore("telemarketingStoreForm");
-        var otherVal = this.getSessionStore("telemarketingOtherVal");
-        if(storeVal && otherVal){
-          this.form = storeVal;
-          this.$set(this.pager,"currentPage",otherVal.currentPage);
-          this.storeId = otherVal.clueId;
-          this.scrollTop = otherVal.scrollTop;
-        }
-        // 取页数存储
-        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        if(localVal){this.pager.pageSize = localVal;}
-      };
-      if(ownOrgId){
-        this.isDXZDisabled= true;
-        param={};
-        param.orgId=ownOrgId;
-        param.roleCode="DXCYGW";
-        param.statusList =[1,3];
-        axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
-          customerManVM.busSaleArr=response.data.data;
-        });
-      }//电销总监电销组筛选按钮不可点击
-      //初始化数据列表
-      this.initTableData();
-      //客户状态
-      var param={};
-      param.groupCode="customerStatus";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-        // customerManVM.cusStatusArr=response.data.data;
-        var datas = response.data.data;
-        var arr = []
-        for(var i = 0 ; i < datas.length ; i++){
-          if(datas[i].name!='不跟进'){
-            arr.push(datas[i])
+      created() {
+          // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+          // 进入页面判断有是否有存储值
+          if (!this.paginationShow) {
+              var storeVal = this.getSessionStore("telemarketingStoreForm");
+              var otherVal = this.getSessionStore("telemarketingOtherVal");
+              if (storeVal && otherVal) {
+                  this.form = storeVal;
+                  this.$set(this.pager, "currentPage", otherVal.currentPage);
+                  this.storeId = otherVal.clueId;
+                  this.scrollTop = otherVal.scrollTop;
+              }
+              // 取页数存储
+              var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+              if (localVal) {
+                  this.pager.pageSize = localVal;
+              }
           }
-        }
-        customerManVM.cusStatusArr=arr
-      });
-      param={};
-      param.groupCode="customerLevel";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-        customerManVM.cusLevelArr=response.data.data;
-      });
-      //初始资源类别数据
-      param={};
-      param.groupCode="clueCategory";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-        customerManVM.categoryArr=response.data.data;
-      });
-      //初始化省份
-      param={};
-      param.type="0";
-      axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
-        customerManVM.provinceArr=response.data.data.data;
-      });
-        var param={};
-        param.groupCode="medium";
-        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-            customerManVM.mediumArry=response.data.data;
-        });
+          ;
+          if (ownOrgId) {
+              this.isDXZDisabled = true;
+              param = {};
+              param.orgId = ownOrgId;
+              param.roleCode = "DXCYGW";
+              param.statusList = [1, 3];
+              axios.post('/user/userManager/listByOrgAndRole', param).then(function (response) {
+                  customerManVM.busSaleArr = response.data.data;
+              });
+          }
+          //电销总监电销组筛选按钮不可点击
+          //项目专员进入初始化值
+          if (roleCode == 'DXZJ') {
+              this.form.isSign = 1;
+              this.disabledIsSign = true;
+              this.form.isTailMoney = '1';
+              this.disabledIsTailMoney = true;
+          }
+          //初始化数据列表
+          this.initTableData();
+          //客户状态
+          var param = {};
+          param.groupCode = "customerStatus";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              // customerManVM.cusStatusArr=response.data.data;
+              var datas = response.data.data;
+              var arr = []
+              for (var i = 0; i < datas.length; i++) {
+                  if (datas[i].name != '不跟进') {
+                      arr.push(datas[i])
+                  }
+              }
+              customerManVM.cusStatusArr = arr
+          });
+          param = {};
+          param.groupCode = "customerLevel";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              customerManVM.cusLevelArr = response.data.data;
+          });
+          //初始资源类别数据
+          param = {};
+          param.groupCode = "clueCategory";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              customerManVM.categoryArr = response.data.data;
+          });
+          //初始化省份
+          param = {};
+          param.type = "0";
+          axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+              customerManVM.provinceArr = response.data.data.data;
+          });
+          var param = {};
+          param.groupCode = "medium";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              customerManVM.mediumArry = response.data.data;
+          });
+          this.initColumn();
+          // 除1、5、6、10、11、12、13业务线之外不可复制
+          // if(businessLine!=1&&businessLine!=5&&businessLine!=6&&businessLine!=10&&businessLine!=11&&businessLine!=12&&businessLine!=13){
+          if (canCopy != true) {
+              document.getElementsByTagName('body')[0].className = 'noCopy'; //设置为新的
+          }
 
-      // 初始化电销人员
-      //axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
-      //   console.log(response.data.data)
-      //   customerManVM.telePerArr=response.data.data;
-      //});
-
-      // 初始化电销组
-      // axios.post('/tele/customerManager/listOrgInfo').then(function (response) {
-      //   console.log(response.data.data)
-      //  customerManVM.orgTeleArr=response.data.data;
-      // });
-
-      this.initColumn();
-      // 除1、5、6、10、11、12、13业务线之外不可复制
-        // if(businessLine!=1&&businessLine!=5&&businessLine!=6&&businessLine!=10&&businessLine!=11&&businessLine!=12&&businessLine!=13){
-        if(canCopy!=true){
-            document.getElementsByTagName('body')[0].className = 'noCopy'; //设置为新的
-        }
-
-    }
+      }
   })
 </script>
 </html>
