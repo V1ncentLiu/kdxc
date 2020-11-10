@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.kuaidao.aggregation.dto.sign.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -14,10 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
-import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -82,6 +79,12 @@ public interface BusinessSignFeignClient {
 	@RequestMapping("/updateContractTime")
 	public JSONResult<Boolean> updateContractTime(@Valid @RequestBody BusinessSignDTO dto);
 
+	/**
+	 * 更新签约单地址
+	 * @param dto
+	 * @return
+	 */
+	JSONResult<Boolean> updateSignAddress(@RequestBody SignParamDTO dto);
 	/**
 	 * 分配判单用户
 	 * @param
@@ -166,6 +169,11 @@ public interface BusinessSignFeignClient {
 		@Override
 		public JSONResult<Boolean> updateContractTime(@Valid BusinessSignDTO dto) {
 			return fallBackError("确认合同时间");
+		}
+
+		@Override
+		public JSONResult<Boolean> updateSignAddress(SignParamDTO dto) {
+			return fallBackError("更新签约单地址");
 		}
 
 		@Override
