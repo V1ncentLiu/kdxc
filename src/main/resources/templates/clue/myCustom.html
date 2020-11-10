@@ -59,7 +59,7 @@
                     <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number" class="ipt100"></el-input>
                 </el-form-item>
                 <el-form-item label="客户级别:" class="widthauto1">
-                    <el-select v-model="form.cusLevelList" placeholder="客户级别" clearable multiple>
+                    <el-select v-model="form.cusLevelList" placeholder="客户级别" clearable multiple :disabled="disabledCusLevelList">
                         <el-option
                                 v-for="item in cusLevelArr"
                                 :key="item.value"
@@ -1006,6 +1006,7 @@
         disabledIsSign:false,//是否签约默认可选
         disabledCreateTime:false,//默认可选
         disabledTeleReceiveSource:false,//默认可选
+        disabledCusLevelList:false,//默认可选
         dataUrlParam:{
             dataUrlArr:[{//0
                 isActive:false,
@@ -1081,6 +1082,16 @@
                 isActive:false,
                 name:"已签约客户",
                 url:" /tele/clueMyCustomerInfo/initmyCustomer?hJtype=4",
+                type:"hJtype"
+            },{//6
+                isActive:false,
+                name:"VIP客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=6",
+                type:"hJtype"
+            },{//7
+                isActive:false,
+                name:"重要客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=7",
                 type:"hJtype"
             }]
         },
@@ -2242,6 +2253,14 @@
                 this.form.teleReceiveSource="3";
                 this.dataUrlParamHJ.dataUrlArr[3].isActive=true;
                 this.disabledTeleReceiveSource=true;
+            }else if(hJtype==6){ //vip
+                this.dataUrlParamHJ.dataUrlArr[6].isActive=true;
+                this.form.cusLevelList.push("1");
+                this.disabledCusLevelList=true;
+            }else if(hJtype==7){ //重要客户
+                this.dataUrlParamHJ.dataUrlArr[7].isActive=true;
+                this.form.cusLevelList.push("2");
+                this.disabledCusLevelList=true;
             }
             // 默认选中当天了，只有今日新增默认选中当天
             // this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始

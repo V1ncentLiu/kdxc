@@ -119,14 +119,21 @@ public interface MyCustomerFeignClient {
     JSONResult<String> releaseClue(ReleaseClueDTO dto);
 
     /**
+     * 查询签约单对应文件
+     * @param queryDto
+     * @return
+     */
+    @RequestMapping("/findFileBySignId")
+    JSONResult<List<ClueFileDTO>> findFileBySignId(@RequestBody ClueQueryDTO queryDto);
+
+    /**
      * 查询资源文件
-     * 
+     *
      * @param dto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/findClueFile")
     JSONResult<List<ClueFileDTO>> findClueFile(ClueQueryDTO dto);
-
     /**
      * 查询资源文件
      * 
@@ -228,6 +235,11 @@ public interface MyCustomerFeignClient {
         public JSONResult<String> releaseClue(ReleaseClueDTO dto) {
             // TODO Auto-generated method stub
             return fallBackError("释放资源");
+        }
+
+        @Override
+        public JSONResult<List<ClueFileDTO>> findFileBySignId(ClueQueryDTO queryDto) {
+            return fallBackError("获取签约单上传附件");
         }
 
         @Override

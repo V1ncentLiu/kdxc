@@ -81,6 +81,14 @@
                 </el-col>
             </el-row>
         </div>
+      <div v-show="signAddressShow">
+          <div  class="marginB20 fs16 paddingT20">签约地址：</div>
+          <div class="borderbox padding20">
+              <el-row>
+                  {{signOrderBaseInfo[0].signAddress}}
+              </el-row>
+          </div>
+      </div>
     <div v-show="paymentDetailsShow">
       <div class="fs14 marginB10">全款付款明细</div>
       <el-table
@@ -250,11 +258,45 @@
         <el-table-column align="center" prop="reason" label="退款原因"></el-table-column>
       </el-table>
     </div>
+      <div  v-show="uploadFileShow">
+          <el-row>
+              <el-table ref="multipleTable" :data="tableDataC1"
+                        tooltip-effect="dark" style="width: 100%"
+                        border>
+                  <el-table-column type="selection" prop="id" width="55"         align="center">
+                  </el-table-column>
+                  <el-table-column prop="uploadUserName" label="上传人姓名" align="center">
+                  </el-table-column>
+                  <el-table-column prop="uploadTime" label="上传时间" align="center">
+                  </el-table-column>
+                  <el-table-column prop="fileName" label="文件名称" align="center">
+                  </el-table-column>
+                  <el-table-column label="操作" align="center">
+                      <template slot-scope="scope">
+                          <el-button size="mini" type="text" @click="handleOperateFn(scope.$index, scope.row)">
+                              {{scope.row.fileType !=="jpg" && scope.row.fileType !=="png" && scope.row.fileType !=="jpeg" && scope.row.fileType !=="gif" && scope.row.fileType !=="bmp"? '下载录音':'查看图片'}}
+                          </el-button>
+                      </template>
+                  </el-table-column>
+                  <el-table-column prop="delStatus" label="删除状态" align="center">
+                      <template slot-scope="scope">
+                          <div v-if="scope.row.delStatus === 0">未删除</div>
+                          <div v-else-if="scope.row.delStatus ===1" class="redcolor">已删除</div>
+                      </template>
+                  </el-table-column>
+              </el-table>
+          </el-row>
+      </div>
   </div>
  	<div  class="padding20 f-tac">
          <el-button type="primary" @click="goback()">返回</el-button>
      </div>
-
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg" width="1100px">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt="" max-width="1000px">
+        </div>
+    </el-dialog>
 
 </div>
 
@@ -262,6 +304,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
 <script th:inline="javascript">
+    var roleCode =  [[${roleCode}]];
   var type = [[${type}]];
   var vclueId = [[${clueId}]];
   var vsignId = [[${signId}]];
@@ -282,10 +325,23 @@
   var threeRepeatStatus = [[${threeRepeatStatus}]];
   var refundStatus = [[${refundStatus}]];
   var payModeItem =[[${payModeItem}]];
+  var clueFileList = [[${clueFileList}]];//上传文件
+  var ossUrl = [[${ossUrl}]];//上传文件地
+
   var one ;
   var two ;
   var three;
   var four ;
+  var signAddressShow = false;
+  var uploadFileShow =false;
+  //签约单地址是否展示
+  if (roleCode == 'GLY' && signData[0].signAddress != null){
+      signAddressShow = true;
+  }
+    //上传附件是否展示
+    if (roleCode == 'GLY' && clueFileList != null && clueFileList.length>0){
+        uploadFileShow = true;
+    }
   if(payType==1){
     one = true;
     two = false;
@@ -330,12 +386,19 @@
   var mainDivVM = new Vue({
     el: '#businessContractRecord',
     data: {
+        tableDataC1: clueFileList,//文件记录
             signOrderBaseInfo:signData,//签约单基本信息
       giveTypeList:giveTypeList,
       addSignButtonAble:false,
       addPayDetailButtonAble:false,
       shouAddVisitButton:false,
       dialogFormVisible:false,//弹窗是否显示
+        dialogFormUploadImg: false, //上传资源图片弹框
+        dialogFormUploadImgSrc: '', //上传资源图片弹框
+        //是否显示签约单地址
+        signAddressShow:signAddressShow,
+        //是否显示上传的附件
+        uploadFileShow:uploadFileShow,
       paymentDetailsShow:one,//判断全款付款明细表格是否显示
       paymentDetailsShow2:two,//判断定金付款明细表格是否显示
       paymentDetailsShow3:three,//判断二次定金付款明细表格是否显示
@@ -524,7 +587,22 @@
         }
         return valText;
       },
+        handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
 
+            if (row.fileType == 'mp3'|| row.fileType == 'mp4' || row.fileType == 'wav' || row.fileType == 'wma'|| row.fileType == '3gpp' || row.fileType == 'm4a' ||row.fileType == 'ape'|| row.fileType == 'midi' || row.fileType == 'amr'|| row.fileType == 'MP3'|| row.fileType == 'MP4' ||row.fileType == 'WAV' || row.fileType == 'WMA'|| row.fileType == '3GPP' || row.fileType == 'M4A' ||row.fileType == 'APE'|| row.fileType == 'MIDI' || row.fileType == 'AMR') {
+                var x = new XMLHttpRequest();
+                x.open("GET", row.filePath, true);
+                x.responseType = 'blob';
+                x.onload = function (e) {
+                    download(x.response, row.fileName, "audio/mp3");
+                };
+                x.send();
+            } else {
+                this.dialogFormUploadImgSrc = row.filePath;
+                this.dialogFormUploadImg = true;
+            }
+
+        },
       recordDialogClick(type){
         this.suppWrap =false; // 默认关闭 到访记录 填写部分
         if(type==1){//定金添加付款按钮点击

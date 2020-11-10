@@ -140,6 +140,8 @@ public class MyCustomerClueController {
     @Value("${oss.url.directUpload}")
     private String ossUrl;
 
+    public static final String VALIDATE_PHONE_WECHAT_MSG = "请上传资料（沟通记录录音或者聊天截图）";
+
     /**
      * 初始化我的客户
      * 
@@ -1191,7 +1193,20 @@ public class MyCustomerClueController {
                                 || user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)
                                 || user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))
                         && CollectionUtils.isEmpty(dto.getClueFiles())) {
-                    return new JSONResult<String>().fail("-1", "请上传资料（沟通记录录音或者聊天截图）");
+                    return new JSONResult<String>().fail("-1", VALIDATE_PHONE_WECHAT_MSG);
+                }
+                //小物种电销顾问和总监在新建客户／维护客户时在录入微信1，微信2必须上传资料，否则不允许进行保存
+                if(RoleCodeEnum.DXCYGW.name().equals(user.getRoleList().get(0).getRoleCode())
+                        || RoleCodeEnum.DXZJ.name().equals(user.getRoleList().get(0).getRoleCode())){
+                    if (null != user.getBusinessLine()
+                            && user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)) {
+
+                        if((StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
+                                || StringUtils.isNotBlank(dto.getClueCustomer().getWechat2()))
+                                && CollectionUtils.isEmpty(dto.getClueFiles())){
+                                return new JSONResult<String>().fail("-1", VALIDATE_PHONE_WECHAT_MSG);
+                        }
+                    }
                 }
                 if (null != user.getBusinessLine() && (user.getBusinessLine()
                         .equals(BusinessLineConstant.SHANGJI)
@@ -1441,6 +1456,15 @@ public class MyCustomerClueController {
                                 }
                             }
                         }
+                        if (null != user.getBusinessLine()) {
+                            if (user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)) {
+                                String res = validateClueFileWechat(clueCustomer, dto);
+                                //新增微信号 资料上传判断
+                                if(!"".equals(res)){
+                                    return new JSONResult<String>().fail("-3",res);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1592,15 +1616,14 @@ public class MyCustomerClueController {
         String resultStr = "";
         ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
         clueQueryDTO.setClueId(dto.getClueId());
-        JSONResult<List<ClueFileDTO>> clueFilesRes =
-                myCustomerFeignClient.findClueFile(clueQueryDTO);
+        JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
         List<ClueFileDTO> clueFiles = clueFilesRes.getData();
         // 新增
         if (StringUtils.isBlank(clueCustomer.getPhone())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1613,14 +1636,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone2())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1633,14 +1656,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone3())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1653,14 +1676,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone4())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1673,14 +1696,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone5())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1693,7 +1716,40 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
+            }
+        }
+        return resultStr;
+    }
+
+
+    /**
+     *  维护客户时在录入微信1，微信2必须上传资料，否则不允许进行保存
+     */
+    private String validateClueFileWechat(ClueCustomerDTO clueCustomer, ClueDTO dto) {
+        String resultStr = "";
+        ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
+        clueQueryDTO.setClueId(dto.getClueId());
+        JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
+        List<ClueFileDTO> clueFiles = clueFilesRes.getData();
+        if ((StringUtils.isBlank(clueCustomer.getWechat())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getWechat()))
+                ||(StringUtils.isBlank(clueCustomer.getWechat2())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getWechat2()))) {
+            if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                    || clueFiles.size() == 0) {
+                return VALIDATE_PHONE_WECHAT_MSG;
+            }
+            Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+                @Override
+                public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                    return o2.getUploadTime().compareTo(o1.getUploadTime());
+                }
+            });
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(new Date(), clueFileDTO.getUploadTime()));
+            if (diffMinuteLong > DIFF_MIN) {
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         return resultStr;
