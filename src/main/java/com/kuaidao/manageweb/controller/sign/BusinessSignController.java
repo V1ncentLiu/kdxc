@@ -661,6 +661,7 @@ public class BusinessSignController {
                     }
                 }
             }
+            request.setAttribute("roleCode", roleCode);
             request.setAttribute("allData", all);
             request.setAttribute("oneData", one);
             request.setAttribute("twoData", two);
@@ -718,16 +719,16 @@ public class BusinessSignController {
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("type", type);
         request.setAttribute("ossUrl", ossUrl);
-        if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-            //增加附件
-            // 获取已上传的文件数据
-            ClueQueryDTO fileDto = new ClueQueryDTO();
-            // 获取已上传的文件数据
-            fileDto.setSignId(Long.valueOf(signId));
-            JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findFileBySignId(fileDto);
-            if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
-                request.setAttribute("clueFileList", clueFileList.getData());
-            }
+        //增加附件
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
+        // 获取已上传的文件数据
+        fileDto.setSignId(Long.valueOf(signId));
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findFileBySignId(fileDto);
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
+            request.setAttribute("clueFileList", clueFileList.getData());
+        }
+        if (RoleCodeEnum.XMWY.name().equals(roleCode)) {
             return "clue/editSignAndFile";
         } else {
             return "clue/showSignAndPayDetail";

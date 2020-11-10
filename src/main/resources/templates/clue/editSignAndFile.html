@@ -123,13 +123,17 @@
                 </el-table-column>
             </el-table>
         </el-row>
-
-
     </div>
     <div  class="padding20 f-tac">
         <el-button type="primary" :disabled="saveDisabled" @click="submitForm('signAddressForm')">保存资料</el-button>
         <el-button type="primary" @click="goback()">取消</el-button>
     </div>
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg" width="1100px">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt="" max-width="1000px">
+        </div>
+    </el-dialog>
 </div>
 
 <!-- import common js-->
@@ -151,6 +155,8 @@
             tableDataC1: clueFileList,//文件记录
             type: type,
             saveDisabled: false,
+            dialogFormUploadImg: false, //上传资源图片弹框
+            dialogFormUploadImgSrc: '', //上传资源图片弹框
             signAddressForm: {
                 signAddress: ''
             }
@@ -190,6 +196,22 @@
                             this.saveDisabled = false;
                         }
                     });
+            },
+            handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
+
+                if (row.fileType == 'mp3'|| row.fileType == 'mp4' || row.fileType == 'wav' || row.fileType == 'wma'|| row.fileType == '3gpp' || row.fileType == 'm4a' ||row.fileType == 'ape'|| row.fileType == 'midi' || row.fileType == 'amr'|| row.fileType == 'MP3'|| row.fileType == 'MP4' ||row.fileType == 'WAV' || row.fileType == 'WMA'|| row.fileType == '3GPP' || row.fileType == 'M4A' ||row.fileType == 'APE'|| row.fileType == 'MIDI' || row.fileType == 'AMR') {
+                    var x = new XMLHttpRequest();
+                    x.open("GET", row.filePath, true);
+                    x.responseType = 'blob';
+                    x.onload = function (e) {
+                        download(x.response, row.fileName, "audio/mp3");
+                    };
+                    x.send();
+                } else {
+                    this.dialogFormUploadImgSrc = row.filePath;
+                    this.dialogFormUploadImg = true;
+                }
+
             },
             deteleClueFile() {
                 //删除上传文件
