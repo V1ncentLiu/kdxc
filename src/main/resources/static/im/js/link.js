@@ -1,7 +1,7 @@
 /**
  * SDK连接 功能相关
  */
-
+var _cache = {};
 var SDKBridge = function(ctr, data) {
   var sdktoken = readCookie('sdktoken'),
     userUID = readCookie('uid'),
@@ -17,12 +17,13 @@ var SDKBridge = function(ctr, data) {
   this.person[userUID] = true;
   this.controller = ctr;
   this.cache = data;
+  _cache = this.cache;
   window.nim = ctr.nim = this.nim = SDK.NIM.getInstance({
-    //控制台日志，上线时应该关掉
+   /* //控制台日志，上线时应该关掉
     debug: true || {
        api: 'info',
        style: 'font-size:14px;color:blue;background-color:rgba(0,0,0,0.1)'
-    },
+    },*/
     db: true,
     appKey: CONFIG.appkey,
     account: userUID,
@@ -966,7 +967,7 @@ SDKBridge.prototype.markInBlacklist = function(account, isAdd, callback) {
 /*新用户更新状态为在线*/
 SDKBridge.prototype.UpdateNewSessionState = function(msgEvent) {
 
-    this.cache.updatePersonSubscribe(msgEvent);
+    _cache.updatePersonSubscribe(msgEvent);
 };
 
 /**
