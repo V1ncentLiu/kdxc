@@ -182,8 +182,8 @@ var trafficList=[[${trafficList}]];//媒介集合
                     assignName:'',
                     startTime:'',
                     endTime:'',
-                    category:[],
-                    type:[],
+                    category:trafficAssignRule.category.split(","),
+                    type:trafficAssignRule.type.split(","),
                     searchWord:'',
                     area:'',
                     status:1,
@@ -274,6 +274,10 @@ var trafficList=[[${trafficList}]];//媒介集合
                                 }                                
                             }
                         }
+                        var category = this.form.category;
+                        var type = this.form.type;
+                        var searchWord = this.tags1;
+                        var area = this.tags2;
        	            	aorVM.submitDisabled=true;
                         var param=this.form;
                         param.id=this.form.id;
@@ -281,6 +285,18 @@ var trafficList=[[${trafficList}]];//媒介集合
                         param.endTime=this.form.endTime;
                         param.status=this.form.status;
                         param.traffcList=this.form.traffcList;
+                        if (null != category && category.length > 0) {
+                            param.category = category.join(",");
+                        }
+                        if (null != type && type.length > 0) {
+                            param.type = type.join(",");
+                        }
+                        if (null != searchWord && searchWord.length > 0) {
+                            param.searchWord = searchWord.join(",");
+                        }
+                        if (null != area && area.length > 0) {
+                            param.area = area.join(",");
+                        }
                         axios.post('/trafficAssignRule/rule/update', param)
 	       	            .then(function (response) {
 	       	            	console.info(response);
@@ -391,9 +407,17 @@ var trafficList=[[${trafficList}]];//媒介集合
             // this.form.type=this.transformType(trafficAssignRule.type);
             // this.form.category=this.transformCategory(trafficAssignRule.category);
             this.form.status=trafficAssignRule.status;
-            this.form.searchWord=trafficAssignRule.searchWord;
-            this.form.area=trafficAssignRule.area;
+            // this.form.searchWord=trafficAssignRule.searchWord;
+            // this.form.area=trafficAssignRule.area;
             this.form.traffcList=trafficAssignRule.traffcList;
+            var searchWord=  trafficAssignRule.searchWord;
+            var area = trafficAssignRule.area;
+            if(null!=searchWord && searchWord!=""){
+                this.tags1=searchWord.split(",");
+            }
+            if(null!=area && area!=""){
+                this.tags2=area.split(",");
+            }
         },
         mounted(){
             document.getElementById('addOptimizeRule').style.display = 'block';
