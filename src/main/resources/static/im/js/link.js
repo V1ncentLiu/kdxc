@@ -19,14 +19,14 @@ var SDKBridge = function(ctr, data) {
   this.cache = data;
   window.nim = ctr.nim = this.nim = SDK.NIM.getInstance({
     //控制台日志，上线时应该关掉
-    // debug: true || {
-    //   api: 'info',
-    //   style: 'font-size:14px;color:blue;background-color:rgba(0,0,0,0.1)'
-    // },
+    debug: true || {
+       api: 'info',
+       style: 'font-size:14px;color:blue;background-color:rgba(0,0,0,0.1)'
+    },
     db: true,
     appKey: CONFIG.appkey,
     account: userUID,
-    token: sdktoken, 
+    token: sdktoken,
     // 私有化配置文件
     privateConf: CONFIG.privateConf,
     //连接
@@ -573,6 +573,42 @@ var SDKBridge = function(ctr, data) {
       }
     }
   }
+};
+
+/**
+ * 触发监听在线离线事件
+ */
+SDKBridge.prototype.pushOnlineEvents = function(param) {
+    // 没有开启订阅服务，忽略通知
+    if (!window.CONFIG.openSubscription) {
+        return;
+    }
+    if (param.msgEvents) {
+        var msgEvents = param.msgEvents;
+        for (var i = 0; i < msgEvents.length; i++) {
+            var msgEvent = msgEvents[i];
+            this.cache.updatePersonSubscribe(msgEvent);
+        }
+        var ctr = this.controller;
+        ctr.buildFriends();
+        ctr.buildSessions();
+        if (/^p2p-/.test(ctr.crtSession)) {
+            var account = ctr.crtSessionAccount;
+            if (account) {
+                if (this.cache.getMultiPortStatus(account)) {
+                    $('#nickName').text(
+                        ctr.getNick(account) +
+                        ' [' +
+                        this.cache.getMultiPortStatus(account) +
+                        ']'
+                    );
+                } else {
+                    $('#nickName').text(ctr.getNick(account));
+                }
+            }
+        }
+        console.log('订阅事件', param.msgEvents);
+    }
 };
 
 /********** 这里通过原型链封装了sdk的方法，主要是为了方便快速阅读sdkAPI的使用 *********/

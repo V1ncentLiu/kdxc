@@ -173,6 +173,8 @@ return /******/ (function(modules) { // webpackBootstrap
 									'</div>'].join("")
 								$('.sessionListFrame .layui-layer-title').html(str)
 								isSessionListNum=true
+								//如果是已经存在的会话记录, 会将此会话未读数置为 0, 开发者会收到onupdatesession回调,之后此会话在收到消息之后不会更新未读数
+								nim.setCurrSession()
 							},
 							restore:function(){
 								sessionListNum=0
@@ -183,11 +185,15 @@ return /******/ (function(modules) { // webpackBootstrap
 									'height':'24px',
 								})
 								$('.sessionListFrame .layui-layer-title').html('')
+								console.log(yunXin.crtSession+'当前窗口会话id')
+								nim.setCurrSession(yunXin.crtSession)
 							},
 							cancel:function(){
 								$('#rightPanel').css({
 									'display':'none'
 								})
+								//如果是已经存在的会话记录, 会将此会话未读数置为 0, 开发者会收到onupdatesession回调,之后此会话在收到消息之后不会更新未读数
+								nim.setCurrSession()
 							}
 						});
 						 account = target.getAttribute("data-account");
@@ -218,19 +224,71 @@ return /******/ (function(modules) { // webpackBootstrap
 		injectNode.appendChild(this._body);
 	};
 
+	// 获取后端接口数据合并ws推送的数据
+	function sessionsListConcat1(sessions){
+		console.log("获取后端接口数据合并ws推送的数据",sessions)
+		if(!sessions){
+			return [];
+		}
+	    var newIdList=[]
+	    var newSessionList=[]
+
+	    for(var i=0;i<sessions.length;i++){
+	      if(sessions[i].scene=='p2p'){
+	        newIdList.push(sessions[i].to)
+	      }
+	    }
+	    console.log(newIdList,111111)
+	    var params = {idList: newIdList};
+	    $.ajax({
+	        url : '/im/brandAndIssubmit',
+	        type:'POST',
+	        data:JSON.stringify(params),
+	        async:false,
+	        contentType: "application/json; charset=utf-8",
+	        dataType:'json',
+	        success: function(result){
+	          console.log(result,'左侧请求后端接口数据');
+	          if(result.code=='0'){
+	            var data=result.data
+	            for(let i=0;i<sessions.length;i++){
+	              for(let j=0;j<data.length;j++){
+	                  if(sessions[i].to==data[j].imId&&sessions[i].scene=='p2p'){
+	                      sessions[i].accountId=data[j].accountId
+	                      sessions[i].brandName=data[j].brandName
+	                      sessions[i].clueId=data[j].clueId
+	                      sessions[i].isSubmit=data[j].isSubmit
+	                      sessions[i].nickName=data[j].nickName
+	                      newSessionList.push(sessions[i])
+	                  }
+	              }
+	            }
+	          }else{
+	            console.log(result.code)
+	          }
+	        },
+	        error:function(request){
+	          alert(request)
+	        }
+	    })
+	    return newSessionList
+  	}
+
 	/**
 	 * 更新视图
 	 * @param  {Object} data 
 	 * @return {Void}   
 	 */
 	SessionList.prototype.update = function(data){
+		var newSession=sessionsListConcat1(data.sessions)
 		console.log(data,'渲染左测列表数据');
+		sessionListObj=newSession;
 		var html = '',
 			i,
 			unreadNum=0,
 	        str,
 	        info,
-			sessions = data.sessions;
+			sessions = newSession;
 		if (sessions.length === 0) {
 			html += '<p class="empty">暂无最近联系人哦</p>';
 		}else{
