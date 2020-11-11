@@ -1330,6 +1330,7 @@
     var isSessionListNum=false  //聊天框最小化未读消息数初始化
     var chatWindow  //聊天框layer赋值，方便关闭打开
     var searchLists  //新进线消息数判断是否要请求后端接口
+    var sessionListObj
     function showLittleBit(value,num){
         if(value&&value.length>num){
             value=value.toString().slice(0,num)+'...'
@@ -1600,21 +1601,26 @@
                         },1000)
                     }
                 }else if(msg.indexOf("updateNewSessionState")!=-1){
-                    var account = msg.split(":")[1];
+                    var msgSplit = msg.split(":");
+                    var account = msgSplit[1];
+                    var idServer = msgSplit[2];
+                    var time = msgSplit[3];
                     // 更新会话列表
                     var msgEventDingyi =  {
-                            account: account,
-                            clientType: "iOS",
-                            custom: {},
-                            idClient: "62b30944-fbd9-4ecf-b3b7-1cf1205733db",
-                            dServer: "d7578eaa-389e-4162-a02a-d1170fac4ba4",
-                            serverConfig: {online:[1]},
-                            time: "1604907302760",
-                            type: "1",
-                            value: "1"
-                        };
+                        "msgEvents": [{
+                            "type": "1",
+                            "value": "1",
+                            "idClient": "1001",
+                            "time":  time ,
+                            "idServer":  idServer ,
+                            "clientType": "",
+                            "serverConfig": "{\"online\":[-1]}",
+                            "account": account,
+                            "custom": {}
+                        }]
+                    };
                     // 更新状态
-                    SDKBridge.prototype.UpdateNewSessionState(msgEventDingyi);
+                    yunXin.mysdk.pushOnlineEvents(msgEventDingyi);
                 }
             });
             
