@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -30,13 +33,6 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
-import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficParamDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficRespDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.TrafficParam;
@@ -125,6 +121,8 @@ public class PhoneTrafficController {
     RoleManagerFeignClient roleManagerFeignClient;
     @Autowired
     private AppiontmentFeignClient appiontmentFeignClient;
+    @Autowired
+    private RepeatClueRecordFeignClient repeatClueRecordFeignClient;
 
 
     @Value("${oss.url.directUpload}")
@@ -463,6 +461,17 @@ public class PhoneTrafficController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         request.setAttribute("loginUserId", user.getId());
+        RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
+        recordQueryDTO.setClueId(Long.valueOf(clueId));
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson =
+                repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode())
+                && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+            request.setAttribute("repeatClueList", repeatJson.getData());
+            request.setAttribute("repeatClueStatus", 1);
+        } else {
+            request.setAttribute("repeatClueStatus", 0);
+        }
         // 话务经理 调整到查看页
         if (RoleCodeEnum.HWJL.name().equals(user.getRoleList().get(0).getRoleCode())) {
             // return "phonetraffic/viewCustomerMaintenance";
