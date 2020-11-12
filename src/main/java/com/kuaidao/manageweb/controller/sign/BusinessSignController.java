@@ -1055,4 +1055,17 @@ public class BusinessSignController {
         }
         return businessSignFeignClient.updateSignAddress(dto);
     }
+
+    /**
+     * 查询签约单对应文件
+     * @param dto
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/findFileBySignId")
+    public JSONResult<List<ClueFileDTO>> findClueFile( @RequestBody ClueQueryDTO dto) {
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findFileBySignId(dto);
+        return  clueFileList;
+    }
+
 }
