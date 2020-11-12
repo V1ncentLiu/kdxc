@@ -226,9 +226,11 @@ public class PublicCustomerResourcesController {
      */
     @ResponseBody
     @RequestMapping("/batchReleaseClue")
+    @RequiresPermissions("customerManager:releaseClue")
+    @LogRecord(description = "总监释放", operationType = LogRecord.OperationType.RELEASE, menuName = MenuEnum.TELE_CUSTOMER_MANAGER)
     public JSONResult<String> batchReleaseClue(@RequestBody ReleasePublicClueDTO reqDTO) {
         UserInfoDTO user = CommUtil.getCurLoginUser();
-        //总监id-释放人
+        // 总监id-释放人
         reqDTO.setTeleDirectorId(user.getId());
         return publicCustomerFeignClient.batchReleaseClue(reqDTO);
 
