@@ -56,7 +56,7 @@ public class NextRecordServiceImpl implements NextRecordService {
     public Long next( Long userId , Long currentClueId){
 
         String redisCacheValue = redisTemplate.opsForValue().get(Constants.REDIS_NEXT_PREFIX + userId);
-
+        @SuppressWarnings("unchecked")
         LinkedList<Long> targetList = JSON.parseObject(redisCacheValue, LinkedList.class);
 
         if(CollectionUtils.isEmpty(targetList)){
