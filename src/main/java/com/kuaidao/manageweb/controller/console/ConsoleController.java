@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.manageweb.service.NextRecordService;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,6 +139,8 @@ public class ConsoleController {
     DashboardTeleSaleFeignClient dashboardTeleSaleFeignClient;
     @Autowired
     private DashboardTeleGroupFeignClient dashboardTeleGroupFeignClient;
+    @Autowired
+    private NextRecordService nextRecordService;
 
     /***
      * 跳转控制台页面
@@ -417,7 +421,11 @@ public class ConsoleController {
          * "2019-01-14 00:00:00", DateUtil.ymdhms));
          * queryDto.setAssignTimeEnd(DateUtil.convert2Date("2019-04-14 00:00:00", DateUtil.ymdhms));
          */
-        return myCustomerFeignClient.telelistTodayFollowClue(queryDto);
+        JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.telelistTodayFollowClue(queryDto);
+
+        nextRecordService.pushList(curLoginUser.getId() , null != jsonResult.getData() ? jsonResult.getData().getData() : null);
+
+        return jsonResult ;
     }
 
     /**

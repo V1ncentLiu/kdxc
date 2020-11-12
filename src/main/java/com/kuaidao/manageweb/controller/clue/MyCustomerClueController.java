@@ -1,16 +1,65 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.constant.ClueCirculationConstant;
+import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
+import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
+import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
 import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
+import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.*;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.SortUtils;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.call.CallRecordFeign;
+import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
+import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
 import com.kuaidao.manageweb.feign.clue.TelCreatePhoneAuditFeignClient;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.deduplicationDetail.DeduplicationDetailFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
+import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.service.NextRecordService;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -26,64 +75,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.alibaba.fastjson.JSONObject;
-import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.constant.ClueCirculationConstant;
-import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
-import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
-import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
-import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
-import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
-import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
-import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
-import com.kuaidao.common.constant.BusinessLineConstant;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.SortUtils;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.feign.call.CallRecordFeign;
-import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
-import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
-import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
-import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
-import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
-import com.kuaidao.manageweb.feign.deduplicationDetail.DeduplicationDetailFeignClient;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
-import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
-import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
-import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
-import com.kuaidao.sys.dto.customfield.UserFieldDTO;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -139,6 +139,9 @@ public class MyCustomerClueController {
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
+
+    @Autowired
+    private NextRecordService nextRecordService;
 
     public static final String VALIDATE_PHONE_WECHAT_MSG = "请上传资料（沟通记录录音或者聊天截图）";
 
@@ -243,6 +246,7 @@ public class MyCustomerClueController {
         dto.setOrgId(user.getOrgId());
         JSONResult<PageBean<CustomerClueDTO>> jsonResult =
                 myCustomerFeignClient.findTeleClueInfo(dto);
+        nextRecordService.pushList(user.getId() , null != jsonResult.getData() ? jsonResult.getData().getData() : null);
         long time2 = System.currentTimeMillis();
         logger.info("我的客户列表查询时间：" + (time2 - time1));
         return jsonResult;
@@ -1888,5 +1892,36 @@ public class MyCustomerClueController {
             }
         }
         return telemarketingLayoutDTO;
+    }
+
+
+    /**
+     * 我的客户下一条
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/next")
+    public @ResponseBody JSONResult<Long> next(@RequestBody CustomerClueQueryDTO dto){
+
+        logger.info("next-request-dto={}" , JSON.toJSONString(dto));
+
+        if(null == dto.getClueId()){
+            logger.warn("/next接口业务入参clueId为空");
+
+            return new JSONResult<Long>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode() , SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+
+        Subject subject = SecurityUtils.getSubject();
+
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+
+        if (null != user) {
+
+            Long next = nextRecordService.next(user.getId(), dto.getClueId());
+
+            return new JSONResult<Long>().success(next);
+        }
+        // session失效
+        return new JSONResult<Long>().fail(ManagerWebErrorCodeEnum.ERR_SESSION_TIMEOUT.getCode() , ManagerWebErrorCodeEnum.ERR_SESSION_TIMEOUT.getMessage());
     }
 }
