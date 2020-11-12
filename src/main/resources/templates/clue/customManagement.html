@@ -29,20 +29,23 @@
         <shiro:hasPermission name="customerManager:distribute">
             <el-button type="danger" @click="openvicemanagerForm">副总分发</el-button>
         </shiro:hasPermission>
-    </el-row>
-    <div class="mainSearchBg">
-        <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <!--     <el-form-item label="全部资源:">
-                        <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
-                            <el-option
-                                v-for="item in isTransfer"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>  -->
+        <shiro:hasPermission name="customerManager:releaseClue">
+            <el-button type="success" @click="releaseClue">释放资源</el-button>
+          </shiro:hasPermission>
+     </el-row>
+     <div class="mainSearchBg">
+         <div class="mainSearchFormBox">
+             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                 <!--     <el-form-item label="全部资源:">
+                         <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
+                             <el-option
+                                 v-for="item in isTransfer"
+                                 :key="item.value"
+                                 :label="item.label"
+                                 :value="item.value">
+                             </el-option>
+                         </el-select>
+                     </el-form-item>  -->
                 <!--  <el-form-item label="">
                      <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
                          <el-option
@@ -1940,7 +1943,45 @@
             }
             return false;
         },
-
+        releaseClue() {
+            //删除上传文件
+            var rows =  this.multseleSelection;
+            if (rows.length < 1) {
+                if (rows.length != 1) {
+                    this.$message({message: '请选择资源', type: 'warning'});
+                    return;
+                }
+            }
+            this.$confirm('是否确认释放以下'+rows.length+'条资源到公有池？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                var ids = [];
+                for (var i = 0; i < rows.length; i++) {
+                    ids.push(rows[i].clueId);
+                }
+                var param = {};
+                param.clueIds = ids;
+                console.log(param);
+                axios.post('/aggregation/publiccustomer/batchReleaseClue', param)
+                    .then(function (response) {
+                        var data = response.data;
+                        if (data.code == '0') {
+                            customerManVM.$message({
+                                message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                    customerManVM.initTableData();
+                                }
+                            });
+                        }
+                    });
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消释放'
+                });
+            });
+        },
     },
     mounted(){
       document.getElementById('myCustom').style.display = 'block';

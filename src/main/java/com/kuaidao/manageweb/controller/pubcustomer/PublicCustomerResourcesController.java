@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.aggregation.dto.clue.ReleasePublicClueDTO;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -212,6 +214,26 @@ public class PublicCustomerResourcesController {
         // System.out.println("数据字典： "+(endTime1-startTime1)+"ms");
         request.setAttribute("type", type);
         return "pubcustomer/publicCustomer";
+    }
+
+    /**
+     * @Description: 批量释放到公有池
+     * @Param:
+     * @return:
+     * @author: fanjd
+     * @date: 2020/11/12 14:10
+     * @version: V1.0
+     */
+    @ResponseBody
+    @RequestMapping("/batchReleaseClue")
+    @RequiresPermissions("customerManager:releaseClue")
+    @LogRecord(description = "总监释放", operationType = LogRecord.OperationType.RELEASE, menuName = MenuEnum.TELE_CUSTOMER_MANAGER)
+    public JSONResult<String> batchReleaseClue(@RequestBody ReleasePublicClueDTO reqDTO) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        // 总监id-释放人
+        reqDTO.setTeleDirectorId(user.getId());
+        return publicCustomerFeignClient.batchReleaseClue(reqDTO);
+
     }
 
     /**
