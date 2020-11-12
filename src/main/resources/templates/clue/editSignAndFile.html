@@ -86,8 +86,30 @@
                         type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
                 </form>
                 <div id="container" style="text-align:right;">
-                    <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
-                    <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
+                    <!-- 原来upload单个上传 -->
+                    <a id="selectfiles" href="javascript:void(0);" class='btn' style="display: none;">选择文件</a>
+                    <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn' style="display: none;">开始上传</a>
+                    <!-- element ui upload -->
+                    <el-upload
+                        class="upload-demo"
+                        :action="uploadOssHost"
+                        ref="refundApplyImgUpload"
+                        :on-preview="handlePreview"
+                        :on-remove="handleRemove"
+                        :on-success="handleSuccess"
+                        :on-error="handleError"
+                        :before-upload="handleBefore"
+                        accept=".jpg,.png,.jpeg,.gif,.bmp,.mp3,.mp4,.wav,.wma,.3gpp,.m4a,.ape,.midi,.amr,.MP3,.MP4,.WAV,.WMA,.3GPP,.M4A,.APE,.MIDI,.AMR"
+                        multiple
+                        :data="uploadParamData"
+                        :limit='3'
+                        :on-change="selectFile"
+                        :on-exceed="handleExceed"
+                        :auto-upload="false"
+                        :file-list="fileList">
+                        <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">开始上传</el-button>
+                    </el-upload>
                 </div>
                 <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
                 <span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50><pre
@@ -159,7 +181,20 @@
             dialogFormUploadImgSrc: '', //上传资源图片弹框
             signAddressForm: {
                 signAddress: ''
-            }
+            },
+            uploadOssHost:'',
+            uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'', 
+                'x:params':'',
+                'realName':''
+             },
+             fileList:[],
+             limit:3,
+             ossUrl:ossUrl,
         },
         methods: {
             formatTypeFn(value) {//
@@ -182,7 +217,6 @@
                 var param = {};
                 param.signId = signId;
                 param.signAddress = mainDivVM.signAddressForm.signAddress;
-                debugger;
                 axios.post('/businesssign/updateSignAddress', param)
                     .then(function (response) {
                         var result = response.data;
@@ -222,13 +256,6 @@
                         return;
                     }
                 }
-                for (var i = 0; i < rows.length; i++) {
-                    if (rows[i].uploadUser != this.loginUserId) {
-                        this.$message({message: '选中数据存在他人数据，不能进行编辑操作', type: 'warning'});
-                        return;
-                    }
-                }
-
                 this.$confirm('确定要删除上传文件？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -240,12 +267,12 @@
                     }
                     var param = {};
                     param.delIds = ids;
-                    param.clueId = clueId;
+                    param.signId = signId;
                     axios.post('/tele/clueMyCustomerInfo/deleteClueFile', param)
                         .then(function (response) {
                             mainDivVM.$message({
                                 message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                    axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
+                                    axios.post('/businesssign/findFileBySignId', param)
                                         .then(function (response) {
                                             mainDivVM.tableDataC1 = response.data.data;
                                         });
@@ -266,8 +293,125 @@
                 this.multipleFileSelection = val;
             },
             goback(){window.history.go(-1);},
+            // element ui upload
+            getUploadParam(){
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
+                var param={};
+                
+                 axios.get(signUrl, param)
+                .then(function (response) {
+                   // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                            dir:respData.dir,
+                            'policy': respData.policy,
+                            'OSSAccessKeyId': respData.accessid,
+                            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                            'signature': respData.signature,
+                            'x:params':params,//自定义编码，basse64编码后的字符串,
+                            'realName':''
+                   };
+                  mainDivVM.uploadParamData= new_multipart_params;
+                  mainDivVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+            },
+            selectFile(file, fileList){
+                // console.log(fileList)
+                mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
+                mainDivVM.uploadParamData.realName= file.name
+            },
+            submitUpload(){
+                //this.customUpload();
+                this.$refs.refundApplyImgUpload.submit();
+            },
+            handlePreview(file){
+             
+            },
+            handleRemove(file,fileList){
+                // this.fileList=[];
+            },
+            contains(a, obj) {
+               var i = a.length;
+                   while (i--) {
+                       if (a[i] === obj) {
+                       return i;
+                    }
+                }
+                return false;
+            },
+            handleExceed(files, fileList) {
+             //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+             this.$message.warning(`当前限制选择 3 个文件`);
+            },
+            handleSuccess(response, file, fileList) {
+                var realName = file.name;
+                var randomName = mainDivVM.uploadParamData.key;
+                var imgUrl = mainDivVM.uploadOssHost + "/" + randomName;
+                console.log(imgUrl)
+                // element ui上传成功回调回显
+                var param = {};
+                var filePath = imgUrl + ';' + realName;
+                var filePathList = new Array(filePath);
+                param.signId = signId;
+                param.filePathList = filePathList;
+                console.log(param)
+                //axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
+                axios.post('/tele/clueMyCustomerInfo/batchUploadClueFile', param).then(function (response) {
+                    mainDivVM.$message({
+                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                            axios.post('/businesssign/findFileBySignId', param)
+                                .then(function (response) {
+                                    console.log(response)
+                                    mainDivVM.tableDataC1 = response.data.data;
+                                    mainDivVM.fileList = [];
+                                });
+                        }
+                    });
+                });
+            },
+            handleError(err, file, fileList){
+                console.info(err);
+            },
+            handleBefore(file){
+                console.log(file,"文件格式打印")
+                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg' || file.type==='image/gif'|| file.type === 'audio/x-ms-wma'|| file.type === 'audio/mpeg'||file.type==='video/mp4'||file.type==='audio/wav'||file.type==='video/3gpp'||file.type==='audio/x-m4a'||file.type==='audio/mid';
+                if(!isTextComputer){
+                   this.fileList=[];
+                   this.$message.error('文件格式错误');
+                   return false;
+                }
+                if(file.size>500*1024*1024){
+                   this.fileList=[];
+                   this.$message.error('文件最大为500MB');
+                   return false;
+                }
+            },
+            random_string(len) {
+                len = len || 32;
+                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = chars.length;
+                var pwd = '';
+                for (i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return pwd;
+            },
+            get_suffix(filename) {
+                var pos = filename.lastIndexOf('.')
+                suffix = ''
+                if (pos != -1) {
+                   suffix = filename.substring(pos);
+                }
+                return suffix;
+            }
         },
         created() {
+            this.getUploadParam();
             //初始化签约单地址
             var signAddress = signData[0].signAddress;
             this.signAddressForm.signAddress =  signAddress;
@@ -292,35 +436,6 @@
 <!-- 播放錄音 js -->
 <script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
-<script type="text/javascript">
-    var result=null;
-    function clueUploadFile() {
-        result = uploadFile();
-        if (result == null) {
-            // alert("请选择上传文件");
-            mainDivVM.$message({message: '请选择上传文件', type: 'warning'});
-            return;
-        }
-    }
-    function fileUploadCallback(){
-        var param = {};
-        param.clueId = clueId;
-        param.filePath = result;
-        axios.post('/tele/clueMyCustomerInfo/uploadClueFile', param).then(function (response) {
-            mainDivVM.$message({
-                message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                    axios.post('/tele/clueMyCustomerInfo/findClueFile', param)
-                        .then(function (response) {
-                            mainDivVM.tableDataC1 = response.data.data;
-                            var ossfile = document.getElementById("ossfile");
-                            ossfile.innerHTML = "";
-                        });
-                }
-            });
-        });
-    }
-
-</script>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
     #ossfile {

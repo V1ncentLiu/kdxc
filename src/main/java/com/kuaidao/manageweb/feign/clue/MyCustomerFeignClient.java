@@ -80,7 +80,14 @@ public interface MyCustomerFeignClient {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/uploadClueFile")
     JSONResult<String> uploadClueFile(ClueFileDTO dto);
-
+    /**
+     * 批量文件上传
+     *
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/batchUploadClueFile")
+    JSONResult<String> batchUploadClueFile(@RequestBody ClueFileDTO dto);
     /**
      * 我的客户预约来访
      * 
@@ -217,6 +224,11 @@ public interface MyCustomerFeignClient {
         public JSONResult<String> uploadClueFile(ClueFileDTO dto) {
             // TODO Auto-generated method stub
             return fallBackError("上传资源文件失败");
+        }
+
+        @Override
+        public JSONResult<String> batchUploadClueFile(ClueFileDTO dto) {
+            return fallBackError("批量上传资源文件失败");
         }
 
         @Override

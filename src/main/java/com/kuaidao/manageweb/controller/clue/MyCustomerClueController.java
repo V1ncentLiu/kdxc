@@ -849,8 +849,7 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/uploadClueFile")
     @ResponseBody
-    public JSONResult<String> uploadClueFile(HttpServletRequest request,
-            @RequestBody ClueFileDTO dto) {
+    public JSONResult<String> uploadClueFile(@RequestBody ClueFileDTO dto) {
         // 获取已上传的文件数据
         if (null != dto && null != dto.getFilePath()) {
             String filepath = dto.getFilePath();
@@ -866,7 +865,22 @@ public class MyCustomerClueController {
         }
         return myCustomerFeignClient.uploadClueFile(dto);
     }
-
+    /**
+     * 批量上传资源文件
+     *
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/batchUploadClueFile")
+    public JSONResult<String> batchUploadClueFile(@RequestBody ClueFileDTO dto) {
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if (null != user) {
+            dto.setUploadUser(user.getId());
+            dto.setUploadTime(new Date());
+        }
+        return myCustomerFeignClient.batchUploadClueFile(dto);
+    }
     /**
      * 查询跟进记录数据
      * 
