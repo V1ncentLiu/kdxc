@@ -656,7 +656,7 @@
                 <el-button type="success" v-show="showConfirmButtonFlag"  :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
                 </el-button>
                 <el-button @click="rebackClue">返回</el-button>
-                <el-button type="primary" id="nextId" @click="nextRecord('form')" >下一条</el-button>
+                <el-button type="primary" :disabled="nextDisabled" id="nextId" @click="nextRecord('form')" >下一条</el-button>
             </div>
         </el-form>
     </el-row>
@@ -1119,6 +1119,7 @@
                 addBtnDisabled: false,
                 inviteBtnDisabled: false,
                 saveDisabled: false,
+                nextDisabled: false,
                 isshowPhone: false,
                 domainShow: false,//默认不显示输入同行品牌名称
                 form: {
@@ -3595,6 +3596,7 @@
             });
         }
         if (valid) {
+            parenthis.nextDisabled = true;
             parenthis.saveDisabled = true;
             //----客户基本信息---//
             var clueCustomer = {};
@@ -3686,6 +3688,7 @@
                         message: '请不要提交重复手机号',
                         type: 'warning'
                     });
+                    parenthis.nextDisabled = false;
                     parenthis.saveDisabled = false;//保存按钮可点击
                     return;
                 }
@@ -3701,6 +3704,7 @@
                                 message: '请不要提交重复手机号',
                                 type: 'warning'
                             });
+                            parenthis.nextDisabled = false;
                             parenthis.saveDisabled = false;//保存按钮可点击
                             return;
                         }
@@ -3794,6 +3798,7 @@
                                         type: 'warning'
                                     });
                                     //保存按钮可点击
+                                    parenthis.nextDisabled = false;
                                     parenthis.saveDisabled = false;
                                     return;
                                 }
@@ -3810,6 +3815,7 @@
                     type: 'warning'
                 });
                 //保存按钮可点击
+                parenthis.nextDisabled = false;
                 parenthis.saveDisabled = false;
                 return;
             }
@@ -3829,6 +3835,7 @@
                         type: 'warning'
                     });
                     //保存按钮可点击
+                    parenthis.nextDisabled = false;
                     parenthis.saveDisabled = false;
                     return;
                 }
@@ -3862,12 +3869,14 @@
             clue.clueIntention = clueIntention;
             clue.tracking = tracking;
             if (parenthis.formInline.customerStatus == '3') {//如果选择的是不跟进则弹出弹窗
+                parenthis.nextDisabled = false;
                 parenthis.saveDisabled = false;
                 parenthis.$confirm('选择不跟进，此资源将释放。', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                    parenthis.nextDisabled = true;
                     parenthis.saveDisabled = true;
                     axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
                         .then(function (response) {
@@ -3885,6 +3894,7 @@
                                 });*/
                                 nextRedirect(clueId);
                             }else{
+                                parenthis.nextDisabled = false;
                                 parenthis.saveDisabled = false;
                                 addCustomerVM.saveDisabled = false;
                                 addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
@@ -3915,6 +3925,7 @@
                             });*/
                             nextRedirect(clueId);
                         }else{
+                            parenthis.nextDisabled = false;
                             parenthis.saveDisabled = false;
                             addCustomerVM.saveDisabled = false;
                             addCustomerVM.$message({
