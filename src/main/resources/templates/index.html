@@ -510,7 +510,7 @@
             </el-table>
             <span slot="footer" class="dialog-footer" >
             <el-button type="primary" @click="updateStatusBuss(index)">我知道了</el-button>
-            <el-button type="primary" id="batchIgnore" @click="updateStatusBussAll">批量忽略</el-button>
+            <el-button type="primary" id="batchIgnore" @click="updateStatusBussAll()">批量忽略</el-button>
         </span>
         </el-dialog>
 
@@ -1485,8 +1485,12 @@
                                 homePageVM.messageCount();
                             }});
                     }).catch(function (error) {console.log(error);});
-                // 关闭全部
-                this.bussdialogVisible=false;
+
+                for(var y=this.colss.length-1;y >= 0 ;y--){
+                    this.colss[y].bussdialogVisible=false;
+                    // 删除该指定元素
+                    this.colss.splice(y, 1)
+                }
             },
             updateStatusBuss(index){
                 var param = {};
@@ -1497,9 +1501,9 @@
                                 homePageVM.messageCount();
                             }});
                     }).catch(function (error) {console.log(error);});
-
-                var cols=this.cols;
                 this.colss[index].bussdialogVisible=false;
+                // 删除该指定元素
+                this.colss.splice(index, 1)
             },
             checkMessboxStatus() {
                 var count = 0;
@@ -1589,7 +1593,12 @@
                     var title = msg.split(",")[2];
                     var ccontent = msg.split(",")[3];
                     // 批量忽略是否显示和隐藏
-                    $("#batchIgnore").attr("style",(ccontent && ccontent.indexOf("1")>=0 ) ? "display:none;" : "display:inline;");
+                    if(!bussDialogVm.colss || bussDialogVm.colss.length === 1){
+                        // 如果是单个的批量按钮不显示,否则显示
+                        $("#batchIgnore").attr("style","display:none;");
+                    }else{
+                        $("#batchIgnore").attr("style","display:inline;");
+                    }
                     // homePageVM.messageCount();
                     setTimeout(function(){homePageVM.messageCount();},1000);
                     bussDialogVm.bussRevid =bussRevid
