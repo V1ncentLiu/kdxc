@@ -21,6 +21,9 @@
             width: auto!important;
             color: #606266;
         }
+        .el-table .warning-row .cell,.el-table .warning-row .cell span{
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -332,6 +335,7 @@
                 @selection-change="handleSelectionChange"
                 @row-dblclick="customerEidt"
                 @row-click="clickRow"
+                :row-class-name="tableRowClassName"
             >
                 <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
@@ -377,7 +381,7 @@
                                  v-else-if="item.fieldCode == 'isTrack'">
                     <template slot-scope="scope">
                         <div v-if="scope.row.isTrack === 1">
-                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
+                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -1456,6 +1460,13 @@
       }
     },
     methods: {
+         tableRowClassName({row, rowIndex}) {
+            console.log(row)
+            if (row.customerStatusName === "未联系") {
+              return 'warning-row';
+            }
+            return '';
+        },
         repeatApplyChangeTwo(){
             this.repeatApplyForm.repeatClue = "";
             this.repeatApplyForm.repeatPhone="";

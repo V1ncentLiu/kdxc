@@ -510,7 +510,7 @@
             </el-table>
             <span slot="footer" class="dialog-footer" >
             <el-button type="primary" @click="updateStatusBuss(index)">我知道了</el-button>
-            <el-button type="primary" id="batchIgnore" @click="">批量忽略</el-button>
+            <el-button type="primary" id="batchIgnore" @click="updateStatusBussAll">批量忽略</el-button>
         </span>
         </el-dialog>
 
@@ -1466,6 +1466,27 @@
             typeVal:0,
         },
         methods:{
+            updateStatusBussAll(){
+                var param = {};
+                var idsStr=[];
+                for(var i=0;i<this.colss.length;i++){
+                    idsStr=this.colss[i].bussRevid
+                }
+                if(idsStr.length!=0){
+                    idsStr=idsStr.join(',')
+                }else{
+                    idsStr=""
+                }
+                param.ids = idsStr;
+                axios.post('/bussReceive/batchUpdate', param)
+                    .then(function (response) {
+                        bussDialogVm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
+                                homePageVM.messageCount();
+                            }});
+                    }).catch(function (error) {console.log(error);});
+                // 关闭全部
+                this.bussdialogVisible=false;
+            },
             updateStatusBuss(index){
                 var param = {};
                 param.ids = this.colss[index].bussRevid;
