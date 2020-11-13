@@ -496,7 +496,7 @@
         <el-dialog
                 title="消息提醒"
                 :visible.sync="cols.bussdialogVisible" width="500px" v-for="(cols,index) in colss" :modal="false"
-                custom-class="rightBottom">
+                custom-class="rightBottom" @close='bussdialogClose(index)'>
             <el-table
                     :data="cols.bussDialogTableData"
                     style="width: 100%">
@@ -509,8 +509,8 @@
                 </template>
             </el-table>
             <span slot="footer" class="dialog-footer" >
-            <el-button type="primary" @click="updateStatusBuss(index)">我知道了</el-button>
-            <el-button type="primary" id="batchIgnore" @click="updateStatusBussAll()" style="display:none;">批量忽略</el-button>
+            <el-button type="primary" name="wzdl" @click="updateStatusBuss(index)">我知道了</el-button>
+            <el-button type="primary" name="batchIgnore" @click="updateStatusBussAll()" style="display:none;">批量忽略</el-button>
         </span>
         </el-dialog>
 
@@ -1486,7 +1486,7 @@
                             }});
                     }).catch(function (error) {console.log(error);});
 
-                for(var y=this.colss.length-1;y >= 0 ;y--){
+                for(var y= this.colss.length-1;y >= 0 ;y--){
                     this.colss[y].bussdialogVisible=false;
                     // 删除该指定元素
                     this.colss.splice(y, 1)
@@ -1534,6 +1534,11 @@
                 bussDialogVm.colss.push(cols)
             },
             showOutVisiable:function(){
+            },
+            bussdialogClose:function(index){
+                this.colss[index].bussdialogVisible=false;
+                // 删除该指定元素
+                this.colss.splice(index, 1)
             }
         }
     });
@@ -1592,13 +1597,7 @@
                     var bussRevid = msg.split(",")[1];
                     var title = msg.split(",")[2];
                     var ccontent = msg.split(",")[3];
-                    // 批量忽略是否显示和隐藏
-                    if(!bussDialogVm.colss || bussDialogVm.colss.length === 0){
-                        // 如果是单个的批量按钮不显示,否则显示
-                        $("#batchIgnore").attr("style","display:none;");
-                    }else{
-                        $("#batchIgnore").attr("style","display:inline;");
-                    }
+
                     // homePageVM.messageCount();
                     setTimeout(function(){homePageVM.messageCount();},1000);
                     bussDialogVm.bussRevid =bussRevid
@@ -1608,6 +1607,17 @@
                     bussDialogVm.urlVal="";
                     // bussDialogVm.bussdialogVisible=true;
                     bussDialogVm.initDialogData(title,ccontent,bussRevid);
+                    // 窗口未打开-延迟执行
+                    setTimeout(function(){
+                        // 批量忽略是否显示和隐藏
+                        let batchIgnores =  $("[name='batchIgnore']");
+                        for(let z =  0 ; z <  batchIgnores.length ; z++ ){
+                            if( z === 0 ){
+                                $(batchIgnores[z]).attr("style","display:none;");
+                            }else{
+                                $(batchIgnores[z]).attr("style","display:inline;");
+                            }
+                        }},1000);
                 }else   if(msg.indexOf("mestoUrl") != -1){
                     var bussRevid = msg.split(",")[1];
                     var title = msg.split(",")[2];
