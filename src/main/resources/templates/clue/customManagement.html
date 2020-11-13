@@ -308,7 +308,9 @@
                     <el-form-item label="手机号归属地:">
                         <el-input v-model="form.phoneLocale" placeholder="手机号归属地" ></el-input>
                     </el-form-item>
-                    
+                    <el-form-item label="未跟访时间(天):">
+                        <el-input v-model="form.notFollowUpTime" placeholder="最长不允许超过三位数"   maxlength="3"  show-word-limit @keyup.native="number"></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -1124,7 +1126,8 @@
           isSign:0,
             phtraConversion:"",
             cusLevelList:[],
-            phoneLocale:""
+            phoneLocale:"",
+            notFollowUpTime:""
         },
         form1: {
           type: [],
@@ -1257,6 +1260,15 @@
         }
         return moment(cellValue).format("YYYY-MM");
       },
+        //只输入正整数
+        number() {
+            var pattern = /^[1-9][0-9]*$/ // 正整数的正则表达式
+            // 不符合正整数时
+            if (!pattern.test(this.form.notFollowUpTime)) {
+                // input 框绑定的内容为空
+                this.form.notFollowUpTime = ''
+            }
+        },
       //初始化页面
       initTableData(){
         var param = {};
