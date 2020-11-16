@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -41,8 +42,10 @@ public class NextRecordServiceImpl implements NextRecordService {
         }
 
         LinkedList<Long> linkedList = customerClueDTOList.stream().map(CustomerClueDTO::getClueId).collect(Collectors.toCollection(LinkedList::new));
+        // todo 四小时超时 ，key 类型
+        redisTemplate.opsForValue().set(Constants.REDIS_NEXT_PREFIX + userId , JSON.toJSONString(linkedList) );
 
-        redisTemplate.opsForValue().set(Constants.REDIS_NEXT_PREFIX + userId , JSON.toJSONString(linkedList));
+        redisTemplate.expire(Constants.REDIS_NEXT_PREFIX + userId  , 4, TimeUnit.HOURS);
     }
 
 
@@ -81,6 +84,8 @@ public class NextRecordServiceImpl implements NextRecordService {
         }
         // 再存存储
         redisTemplate.opsForValue().set(Constants.REDIS_NEXT_PREFIX + userId , JSON.toJSONString(targetList));
+
+        redisTemplate.expire(Constants.REDIS_NEXT_PREFIX + userId  , 4, TimeUnit.HOURS);
 
         Long first = targetList.getFirst();
         // 返回第一个
