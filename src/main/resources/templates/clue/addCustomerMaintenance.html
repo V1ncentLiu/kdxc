@@ -317,7 +317,7 @@
                     <el-table-column min-width="16%" prop="isCall" label="是否接通" align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isCall === 0">未接通</div>
-                            <div v-else-if="scope.row.isCall ===1">已接通</div>
+                            <div v-else-if="scope.row.isCall ===1">接通/微信沟通</div>
                         </template>
                     </el-table-column>
                     <!-- <el-table-column
@@ -374,7 +374,7 @@
                             <div style="width: 19.2%;float: left;text-align: center;">
                                     <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 100px;">
                                         <el-select v-model="formInline.isCall" placeholder="是否接通"   @change="isCallChange" :disabled="isDisabledCustomer1" style="width: 100%;display: block;margin:0 auto;" clearable>
-                                            <el-option label="是" value="1"></el-option>
+                                            <el-option label="接通/微信沟通" value="1"></el-option>
                                             <el-option label="否" value="0"></el-option>
                                         </el-select>
                                     </el-form-item>
@@ -656,6 +656,7 @@
                 <el-button type="success" v-show="showConfirmButtonFlag"  :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
                 </el-button>
                 <el-button @click="rebackClue">返回</el-button>
+                <el-button type="primary" :disabled="nextDisabled" id="nextId" @click="nextRecord('form')" >下一条</el-button>
             </div>
         </el-form>
     </el-row>
@@ -1118,6 +1119,7 @@
                 addBtnDisabled: false,
                 inviteBtnDisabled: false,
                 saveDisabled: false,
+                nextDisabled: false,
                 isshowPhone: false,
                 domainShow: false,//默认不显示输入同行品牌名称
                 form: {
@@ -2106,6 +2108,10 @@
 
                 }
                 // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+            },
+            nextRecord(form) {
+                // 保存该页信息
+                nextPreSubmitForm(this,form)
             },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -3572,5 +3578,401 @@
         });
     }
 
+    /* 下一条提示 */
+    function nextPreSubmitForm(parenthis,form) {
+        var valid = true;
+        //跟进记录校验
+        if (parenthis.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
+            parenthis.$refs['LineRuleForm'].validate((error) => {
+                valid = error;
+            });
+        }
+        if (valid) {
+            parenthis.$refs[form].validateField(["customerName"], (error) => {
+                if (error) {
+                    valid = false;
+                    parenthis.$alert('客户姓名不能为空', '提示');
+                }
+            });
+        }
+        if (valid) {
+            parenthis.nextDisabled = true;
+            parenthis.saveDisabled = true;
+            //----客户基本信息---//
+            var clueCustomer = {};
+            //客户姓名
+            var customerName = parenthis.form.customerName;
+            clueCustomer.cusName = customerName;
+            //手机号
+            if (parenthis.form.phone != null && parenthis.form.phone != '') {
+                clueCustomer.phone = parenthis.form.phone
+                clueCustomer.phoneCreateTime = new Date();
+            } else {
+                clueCustomer.phone = parenthis.form.customerPhone;
+            }
+            //性别
+            var customerSex = parenthis.form.customerSex;
+            clueCustomer.sex = customerSex;
+            //微信
+            var wechat = parenthis.form.wechat;
+            clueCustomer.wechat = wechat;
+            //微信2
+            var wechat2 = parenthis.form.wechat2;
+            clueCustomer.wechat2 = wechat2;
+            //微信二维码
+            var wechatUrl = parenthis.form.wechatUrl;
+            clueCustomer.wechatCode = wechatUrl;
+            //餐饮经验
+            var experience = parenthis.form.experience;
+            clueCustomer.hasExperience = experience;
+            //年龄
+            var customerAge = parenthis.form.customerAge;
+            clueCustomer.age = customerAge;
+            //职业
+            var customerJob = parenthis.form.customerJob;
+            clueCustomer.profession = customerJob;
+            //身份证
+            var identityCard = parenthis.form.identityCard;
+            clueCustomer.identityCard = identityCard;
+            //卡点
+            var offerEndTime = parenthis.form.offerEndTime;
+            clueCustomer.offerEndTime = offerEndTime;
+            //卡点备注
+            var offerEndRemark = parenthis.form.offerEndRemark;
+            clueCustomer.offerEndRemark = offerEndRemark;
+            //合伙人
+            var customerPartner = parenthis.form.customerPartner;
+            clueCustomer.partnerType = customerPartner;
+            //选址情况
+            var address = parenthis.form.address;
+            clueCustomer.hasAddress = address;
+            //开店紧迫性
+            var urgency = parenthis.form.urgency;
+            clueCustomer.urgentDate = urgency;
+            //客户级别
+            var customerLevel = parenthis.form.customerLevel;
+            clueCustomer.cusLevel = customerLevel;
+            //QQ
+            var qq = parenthis.form.qq;
+            clueCustomer.qq = qq;
+            //email
+            var email = parenthis.form.customerEmail;
+            clueCustomer.email = email;
+            //餐饮经验
+            var experience = parenthis.form.cateringType;
+            clueCustomer.experience = experience;
+            //合伙人姓名电话
+            var partnerNamePhone = parenthis.form.customerPartnerDetail;
+            clueCustomer.partnerNamePhone = partnerNamePhone;
+            //出资人
+            var investors = parenthis.form.sponsor;
+            clueCustomer.investors = investors;
+            //出资人姓名电话
+            var investorsNamePhone = parenthis.form.sponsorOther;
+            clueCustomer.investorsNamePhone = investorsNamePhone;
+            //决策人
+            var decide = parenthis.form.decisionMaker;
+            clueCustomer.decide = decide;
+            //决策人姓名电话
+            var decideNamePhone = parenthis.form.decisionMakerOther;
+            clueCustomer.decideNamePhone = decideNamePhone;
+            var phoneArr = parenthis.dynamicValidateForm.domains;
+            // 判断手机号重复
+            // var customerPhone = parenthis.form.customerPhone;
+            var ary = [];
+            console.log(phoneArr)
+            for (var i = 0; i < phoneArr.length; i++) {
+                // 判断弹框里的值是否与页面的手机号1重复
+                if (phoneArr[i].value == clueCustomer.phone && clueCustomer.phone!="") {
+                    parenthis.$message({
+                        message: '请不要提交重复手机号',
+                        type: 'warning'
+                    });
+                    parenthis.nextDisabled = false;
+                    parenthis.saveDisabled = false;//保存按钮可点击
+                    return;
+                }
+                // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                ary.push(phoneArr[i].value);//把输入的手机号放入一个数组
+                var s = ary.join(",") + ",";
+                console.log(ary)
+                for (var j = 0; j < ary.length; j++) {
+                    console.log(ary[j])
+                    if (ary[j] != "") {
+                        if (("," + s.replace(ary[j] + ",", "")).indexOf("," + ary[j] + ",") > -1) {
+                            parenthis.$message({
+                                message: '请不要提交重复手机号',
+                                type: 'warning'
+                            });
+                            parenthis.nextDisabled = false;
+                            parenthis.saveDisabled = false;//保存按钮可点击
+                            return;
+                        }
+                    }
+
+                }
+            }
+            // 判断手机号重复结束
+            if (phoneArr.length > 0) {
+                for (var i = 0; i < phoneArr.length; i++) {
+                    if (i == 0) {
+                        clueCustomer.phone2 = phoneArr[i].value;
+                        // if (clueCustomer.phone2) {
+                        if(parenthis.customerInfo.phone2CreateTime){
+                            clueCustomer.phone2CreateTime = phoneArr[i].key;
+                        }else{
+                            clueCustomer.phone2CreateTime = new Date();
+                        }
+
+                        // }
+                    }
+                    if (i == 1) {
+                        clueCustomer.phone3 = phoneArr[i].value;
+                        if(parenthis.customerInfo.phone3CreateTime){
+                            clueCustomer.phone3CreateTime = phoneArr[i].key;
+                        }else{
+                            clueCustomer.phone3CreateTime = new Date();
+                        }
+
+                    }
+                    if (i == 2) {
+                        clueCustomer.phone4 = phoneArr[i].value;
+                        if(parenthis.customerInfo.phone4CreateTime){
+                            clueCustomer.phone4CreateTime = phoneArr[i].key;
+                        }else{
+                            clueCustomer.phone4CreateTime = new Date();
+                        }
+
+                    }
+                    if (i == 3) {
+                        clueCustomer.phone5 = phoneArr[i].value;
+                        if(parenthis.customerInfo.phone5CreateTime){
+                            clueCustomer.phone5CreateTime = phoneArr[i].key;
+                        }else{
+                            clueCustomer.phone5CreateTime = new Date();
+                        }
+
+                    }
+                }
+            }
+            //----投资意向---//
+            var clueIntention = {};
+            //投资金额
+            var money = parenthis.form.money;
+            clueIntention.advanceAmount = money;
+            //店面大小
+            var area = parenthis.form.area;
+            clueIntention.area = area;
+            //意向品类
+            var intentionCategory = parenthis.form.intentionCategory;
+            clueIntention.purType = intentionCategory;
+            //意向项目
+            var radioProject = parenthis.form.radioProject;
+            clueIntention.purProjectType = radioProject;
+            //意向内部项目
+            var insideProject = parenthis.form.insideProject;
+            clueIntention.purInProject = insideProject;
+            //意向外部项目
+            var outsideProject = parenthis.form.outsideProject;
+            clueIntention.purOutProject = outsideProject;
+            //是否考虑同行
+            var radioSelect = parenthis.form.radioSelect;
+            clueIntention.istrade = radioSelect;
+            var  tradeProject;
+            if (radioSelect == 1) {
+                //同行业项目
+                var domains = parenthis.form.domains;
+                var ary = [];
+                for (var i = 0; i < domains.length; i++) {
+                    // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                    if(domains[i].value != ""){
+                        //把输入的品牌名称放入一个数组
+                        ary.push(domains[i].value);
+                        var s = ary.join(",") + ",";
+                        for (var j = 0; j < ary.length; j++) {
+                            console.log(ary[j])
+                            if (ary[j] != "") {
+                                if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                    parenthis.$message({
+                                        message: '请不要输入相同品牌',
+                                        type: 'warning'
+                                    });
+                                    //保存按钮可点击
+                                    parenthis.nextDisabled = false;
+                                    parenthis.saveDisabled = false;
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                tradeProject = ary.join(',');
+                clueIntention.tradeProject=tradeProject;
+            }
+            if (radioSelect == 1 && tradeProject == "") {
+                parenthis.$message({
+                    message: '请输入考虑同行业的品牌名称',
+                    type: 'warning'
+                });
+                //保存按钮可点击
+                parenthis.nextDisabled = false;
+                parenthis.saveDisabled = false;
+                return;
+            }
+            //如果是否接通，选择是.客户关注点包含关机、拒接、挂断、空号、错号、无人接听、未接、没接通，不允许提交成功资料。
+            if (parenthis.formInline.isCall==1) {
+                var focusPoint=parenthis.formInline.focusPoint;
+                if(focusPoint.includes("关机")
+                    ||focusPoint.includes("拒接")
+                    ||focusPoint.includes("挂断")
+                    ||focusPoint.includes("空号")
+                    ||focusPoint.includes("错号")
+                    ||focusPoint.includes("无人接听")
+                    ||focusPoint.includes("未接")
+                    ||focusPoint.includes("没接通")){
+                    parenthis.$message({
+                        message: '请检查跟进记录中“是否接通”是否填写错误。',
+                        type: 'warning'
+                    });
+                    //保存按钮可点击
+                    parenthis.nextDisabled = false;
+                    parenthis.saveDisabled = false;
+                    return;
+                }
+            }
+            //省
+            var province = parenthis.form.province;
+            clueIntention.province = province;
+            //市
+            var city = parenthis.form.city;
+            //区县
+            var district = parenthis.form.district;
+            if(province){
+                clueIntention.city = city
+                if(city){
+                    clueIntention.district = district;
+                }else{
+                    clueIntention.district=""
+                }
+            }else{
+                clueIntention.city = ""
+                clueIntention.district=""
+            }
+
+            // ---------------------  以上为客户的基本信息 ---------------
+            // ---------------------  下面的事儿跟跟进记录的保存/修改 ---------------------
+            var tracking = {};
+            tracking = parenthis.onConfirmAdd();
+            var clue = {};
+            clue.clueId = clueId;
+            clue.clueCustomer = clueCustomer;
+            clue.clueIntention = clueIntention;
+            clue.tracking = tracking;
+            if (parenthis.formInline.customerStatus == '3') {//如果选择的是不跟进则弹出弹窗
+                parenthis.nextDisabled = false;
+                parenthis.saveDisabled = false;
+                parenthis.$confirm('选择不跟进，此资源将释放。', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    parenthis.nextDisabled = true;
+                    parenthis.saveDisabled = true;
+                    axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
+                        .then(function (response) {
+                            var result =  response.data;
+                            if(result.code=="0"){
+                                /*addCustomerVM.$message({
+                                    message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                        if(zjFalg){
+                                            window.location.href = "/tele/customerManager/initcustomerManager";
+                                        }else{
+                                            // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                            window.history.back();  //返回上一页
+                                        }
+                                    }
+                                });*/
+                                nextRedirect(clueId);
+                            }else{
+                                parenthis.nextDisabled = false;
+                                parenthis.saveDisabled = false;
+                                addCustomerVM.saveDisabled = false;
+                                addCustomerVM.$message({ message:result.msg, type: 'error',duration: 2000,onClose:function(){
+                                        if(result.code=="-1"){
+                                            if(zjFalg){
+                                                window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                            }else{
+                                                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                            }
+                                        }
+                                    }});
+                            }
+                        });
+                })
+            } else {
+                axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
+                    .then(function (response) {
+                        var result =  response.data;
+                        if(result.code=="0"){
+                            /*addCustomerVM.$message({
+                                message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                    if(zjFalg){
+                                        window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                    }else{
+                                        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                    }
+                                }
+                            });*/
+                            nextRedirect(clueId);
+                        }else{
+                            parenthis.nextDisabled = false;
+                            parenthis.saveDisabled = false;
+                            addCustomerVM.saveDisabled = false;
+                            addCustomerVM.$message({
+                                message:result.msg, type: 'error',duration: 2000,onClose:function(){
+                                    if(result.code=="-1"){
+                                        if(zjFalg){
+                                            window.location.href='/tele/clueMyCustomerInfo/customerEditInfo?clueId='+clueId+'&zjFalg=1';
+                                        }else{
+                                            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                                        }
+                                    }
+                                }});
+                        }
+                    });
+            }
+        } else {
+            console.log('error submit!!');
+            return false;
+        }
+    }
+
+    function nextRedirect(clueId){
+        let param ={'clueId':clueId};
+        // 下一条跳转
+        axios.post('/tele/clueMyCustomerInfo/next',param).then(function (response) {
+            if(!response || !response.data){
+                addCustomerVM.$message({
+                    message: "接口调用失败",
+                    type: 'error'
+                });
+                return ;
+            }
+            if(response.data.code!=='0'){
+                addCustomerVM.$message({
+                    message: response.msg,
+                    type: 'error'
+                });
+                return ;
+            }
+            var result= response.data.data;
+            if('-1' ===  result) {
+                addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
+                return ;
+            }
+            // 跳转到下一页
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+result;
+        });
+    }
 </script>
 </html>

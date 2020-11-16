@@ -14,6 +14,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -79,6 +83,8 @@ public class OptRuleController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
 
     /***
      * 优化规则列表页
@@ -139,6 +145,13 @@ public class OptRuleController {
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("noSingProjectList", proJson.getData());
+        }
         return "rule/addOptRulePage";
     }
 
@@ -187,6 +200,13 @@ public class OptRuleController {
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("noSingProjectList", proJson.getData());
+        }
         return "rule/updateOptRulePage";
     }
 

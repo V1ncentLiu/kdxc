@@ -68,6 +68,7 @@ import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 
 /**
@@ -222,7 +223,15 @@ public class LoginController {
         if (SysConstant.YES.equals(roleInfoDTO.getIsIpLimit())) {
             List<String> ipList = roleInfoDTO.getIpList();
             logger.info("login_ip_address{{}},ipList{{}}", ipAddr, ipList);
-            if (!ipList.contains(ipAddr)) {
+            boolean isMatch = false;
+            for ( String  ip : ipList){
+                if(Pattern.matches(ip, ipAddr)){
+                    // 匹配正确
+                    isMatch = true;
+                    break ;
+                }
+            }
+            if (!isMatch) {
                 return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
                         "当前登录系统IP异常，请联系管理员");
             }

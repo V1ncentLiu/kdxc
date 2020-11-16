@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.publiccustomer;
 
+import com.kuaidao.aggregation.dto.clue.ReleasePublicClueDTO;
 import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
@@ -15,7 +16,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.web.bind.annotation.RequestMapping;
 
 
 /**
@@ -42,7 +43,16 @@ public interface PublicCustomerFeignClient {
     public JSONResult<PageBean> repeatPhones(@RequestBody PublicCustomerResourcesReqDTO dto);
     @PostMapping("/followUpRecord")
     public JSONResult<PageBean> followUpRecord(@RequestBody PublicCustomerResourcesReqDTO dto);
-
+    /**
+     * @Description: 批量释放到公有池
+     * @Param:
+     * @return:
+     * @author: fanjd
+     * @date: 2020/11/12 14:10
+     * @version: V1.0
+     */
+    @PostMapping("/batchReleaseClue")
+    JSONResult<String> batchReleaseClue(@RequestBody ReleasePublicClueDTO reqDTO);
     @Component
     static class HystrixClientFallback implements PublicCustomerFeignClient {
 
@@ -88,6 +98,11 @@ public interface PublicCustomerFeignClient {
         @Override
         public JSONResult<PageBean> followUpRecord(PublicCustomerResourcesReqDTO dto) {
             return fallBackError("跟进记录");
+        }
+
+        @Override
+        public JSONResult<String> batchReleaseClue(ReleasePublicClueDTO reqDTO) {
+            return fallBackError("总监批量释放资源到公有池");
         }
     }
 
