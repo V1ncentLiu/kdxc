@@ -225,6 +225,8 @@ public class LoginController {
             logger.info("login_ip_address{{}},ipList{{}}", ipAddr, ipList);
             boolean isMatch = false;
             for ( String  ip : ipList){
+                if( null == ip) { continue; }
+                ip = ip.trim();
                 if(Pattern.matches(ip, ipAddr)){
                     // 匹配正确
                     isMatch = true;
