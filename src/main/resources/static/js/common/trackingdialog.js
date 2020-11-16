@@ -37,7 +37,7 @@ Vue.component('dialog-tracking',{
         formatIsCall(row, column){
             //是否接通
             console.log(row)
-            return row.isCall==0?"否": row.isCall==1?"是":""
+            return row.isCall==0?"否": row.isCall==1?"接通/微信沟通":""
         },
         formatResourceStatus(row, column){
             // 资源有效

@@ -457,6 +457,7 @@ public class ExtendClueDistributionedTaskController {
                     im = "否";
                 }
                 curList.add(im);
+                curList.add(taskDTO.getAscriptionProjectName());
                 dataList.add(curList);
             }
         }

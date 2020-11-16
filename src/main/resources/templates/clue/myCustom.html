@@ -21,6 +21,9 @@
             width: auto!important;
             color: #606266;
         }
+        .el-table .warning-row .cell,.el-table .warning-row .cell span{
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -59,7 +62,7 @@
                     <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number" class="ipt100"></el-input>
                 </el-form-item>
                 <el-form-item label="客户级别:" class="widthauto1">
-                    <el-select v-model="form.cusLevelList" placeholder="客户级别" clearable multiple>
+                    <el-select v-model="form.cusLevelList" placeholder="客户级别" clearable multiple :disabled="disabledCusLevelList">
                         <el-option
                                 v-for="item in cusLevelArr"
                                 :key="item.value"
@@ -332,6 +335,7 @@
                 @selection-change="handleSelectionChange"
                 @row-dblclick="customerEidt"
                 @row-click="clickRow"
+                :row-class-name="tableRowClassName"
             >
                 <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
@@ -377,7 +381,7 @@
                                  v-else-if="item.fieldCode == 'isTrack'">
                     <template slot-scope="scope">
                         <div v-if="scope.row.isTrack === 1">
-                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
+                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -1006,6 +1010,7 @@
         disabledIsSign:false,//是否签约默认可选
         disabledCreateTime:false,//默认可选
         disabledTeleReceiveSource:false,//默认可选
+        disabledCusLevelList:false,//默认可选
         dataUrlParam:{
             dataUrlArr:[{//0
                 isActive:false,
@@ -1064,23 +1069,33 @@
                 name:"今日回访",
                 url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=1",
                 type:"hJtype"
+            },{//3
+                isActive:false,
+                name:"VIP客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=3",
+                type:"hJtype"
+            },{//4
+                isActive:false,
+                name:"重要客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=4",
+                type:"hJtype"
             },
-            {//3
+            {//5
                 isActive:false,
                 name:"今日领取",
                 url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=5",
                 type:"hJtype"
             },
-            {//4
+            {//6
                 isActive:false,
                 name:"自建客户",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=3",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=6",
                 type:"hJtype"
             },
-            {//5
+            {//7
                 isActive:false,
                 name:"已签约客户",
-                url:" /tele/clueMyCustomerInfo/initmyCustomer?hJtype=4",
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?hJtype=7",
                 type:"hJtype"
             }]
         },
@@ -1445,6 +1460,13 @@
       }
     },
     methods: {
+         tableRowClassName({row, rowIndex}) {
+            console.log(row)
+            if (row.customerStatusName === "未联系") {
+              return 'warning-row';
+            }
+            return '';
+        },
         repeatApplyChangeTwo(){
             this.repeatApplyForm.repeatClue = "";
             this.repeatApplyForm.repeatPhone="";
@@ -2225,23 +2247,31 @@
                 this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
                 this.dataUrlParamHJ.dataUrlArr[1].isActive=true;
                 this.disabledCreateTime=true;
-            }else if(hJtype==3){ //今日领取
-                this.form.teleReceiveSource="4";
+            }else if(hJtype==3){ //vip
+                this.dataUrlParamHJ.dataUrlArr[3].isActive=true;
+                this.form.cusLevelList.push("1");
+                this.disabledCusLevelList=true;
+            }else if(hJtype==4){ //重要客户
                 this.dataUrlParamHJ.dataUrlArr[4].isActive=true;
-                this.disabledTeleReceiveSource=true;
-            }else if(hJtype==4){ //自建客户
-                this.form.isSign=1;
-                this.dataUrlParamHJ.dataUrlArr[5].isActive=true;
-                this.disabledIsSign=true;
-            }else if(hJtype==5){ //已签约客户
+                this.form.cusLevelList.push("2");
+                this.disabledCusLevelList=true;
+            }else if(hJtype==5){ //今日领取
                 /* 今日领取加入 */
                 this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始
                 this.form.distributionTimeEnd=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1);//当前日期23点结束
                 this.disabledCreateTime=true;
 
                 this.form.teleReceiveSource="3";
-                this.dataUrlParamHJ.dataUrlArr[3].isActive=true;
+                this.dataUrlParamHJ.dataUrlArr[5].isActive=true;
                 this.disabledTeleReceiveSource=true;
+            }else if(hJtype==6){ //自建客户
+                this.form.teleReceiveSource="4";
+                this.dataUrlParamHJ.dataUrlArr[6].isActive=true;
+                this.disabledTeleReceiveSource=true;
+            }else if(hJtype==7){ //已签约
+                this.form.isSign=1;
+                this.dataUrlParamHJ.dataUrlArr[7].isActive=true;
+                this.disabledIsSign=true;
             }
             // 默认选中当天了，只有今日新增默认选中当天
             // this.form.distributionTimeStart=new Date(new Date(new Date().toLocaleDateString()).getTime());//当前日期零点开始

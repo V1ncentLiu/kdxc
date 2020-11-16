@@ -14,6 +14,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -155,6 +157,13 @@ public class NotOptRuleController {
         request.setAttribute("adsenseList", getDictionaryByCode(Constants.ADSENSE));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("noSingProjectList", proJson.getData());
+        }
         return "rule/addNotOptRulePage";
     }
 
@@ -205,6 +214,13 @@ public class NotOptRuleController {
         request.setAttribute("adsenseList", getDictionaryByCode(Constants.ADSENSE));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("noSingProjectList", proJson.getData());
+        }
         return "rule/updateNotOptRulePage";
     }
 

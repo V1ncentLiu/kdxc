@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
@@ -181,6 +183,13 @@ public class CustomerManagerController {
             // 当日跟进
             dto.setTrackingTime(formatter.format(new Date()));
         }
+        //计算未到访起始时间
+        if (null != dto.getNotFollowUpTime()) {
+            Date notFollowUpEndTime = new Date();
+            Date notFollowUpStartTime = DateUtil.addDays(notFollowUpEndTime,-dto.getNotFollowUpTime());
+            dto.setNotFollowUpStartTime(notFollowUpStartTime);
+            dto.setNotFollowUpEndTime(notFollowUpEndTime);
+        }
 
         // 数据权限处理
         Subject subject = SecurityUtils.getSubject();
@@ -205,6 +214,9 @@ public class CustomerManagerController {
                     // 查看电销组下所有数据
                     dto.setTeleGorup(user.getOrgId());
 
+                }else if(roleCode.equals(RoleCodeEnum.XMWY.name())){
+                    // 查看餐盟业务线所有数据
+                    dto.setBusinessLine(BusinessLineConstant.SHANGJI);
                 }
             }
         }
