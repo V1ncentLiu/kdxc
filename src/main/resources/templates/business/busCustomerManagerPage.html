@@ -61,7 +61,7 @@
                     <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
                 </el-form-item>
                 <el-form-item label="签约状态:" prop="isSign">
-                    <el-select v-model="searchForm.isSign" clearable placeholder="签约状态">
+                    <el-select v-model="searchForm.isSign" clearable placeholder="签约状态" :disabled="disabledIsSign">
                         <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
                                    :value="item.value"></el-option>
                     </el-select>
@@ -145,7 +145,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否补齐尾款:">
-                        <el-select v-model="searchForm.isTailMoney" placeholder="是否补齐尾款" clearable>
+                        <el-select v-model="searchForm.isTailMoney" placeholder="是否补齐尾款" clearable :disabled="disabledIsTailMoney">
                             <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
                                        :value="item.value">
                             </el-option>
@@ -780,10 +780,15 @@
     var ussmList = [[${ussmList}]];//投资金额
     var purTypeList = [[${purTypeList}]] // 意向品类
     var ownOrgId=[[${ownOrgId}]];//商务总监商务组
-
+    //角色编码
+    var roleCode = [[${roleCode}]];
     var customerVM = new Vue({
         el: '#clueManage',
         data: {
+            //是否签约默认可选
+            disabledIsSign:false,
+            //是否补齐尾款默认可选
+            disabledIsTailMoney:false,
             isSaleIdOther:false,
             paginationShow: false,
             isShow: false,
@@ -1835,6 +1840,13 @@
                   });
                 }//商务总监商务组筛选按钮不可点击
             };
+            //项目专员进入初始化值
+            if (roleCode == 'XMWY') {
+                this.searchForm.isSign = 1;
+                this.disabledIsSign = true;
+                this.searchForm.isTailMoney = '1';
+                this.disabledIsTailMoney = true;
+            }
             console.info("create method");
             this.searchTable();
 

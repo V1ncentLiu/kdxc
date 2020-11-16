@@ -205,6 +205,7 @@ public class BusCustomerManagerController {
         request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
         // 意向品类
         request.setAttribute("purTypeList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
+        request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         return "business/busCustomerManagerPage";
     }
 
@@ -216,8 +217,7 @@ public class BusCustomerManagerController {
     @PostMapping("/list")
     @ResponseBody
     @RequiresPermissions("business:busCustomerManager:view")
-    public JSONResult<PageBean<BusCustomerDTO>> list(@RequestBody BusCustomerPageParam pageParam,
-            HttpServletRequest request) {
+    public JSONResult<PageBean<BusCustomerDTO>> list(@RequestBody BusCustomerPageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
@@ -227,8 +227,7 @@ public class BusCustomerManagerController {
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
-        JSONResult<PageBean<BusCustomerDTO>> busCustomerList =
-                busCustomerFeignClient.busCustomerList(pageParam);
+        JSONResult<PageBean<BusCustomerDTO>> busCustomerList = busCustomerFeignClient.busCustomerList(pageParam);
 
         return busCustomerList;
     }
