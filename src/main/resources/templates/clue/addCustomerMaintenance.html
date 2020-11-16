@@ -1026,13 +1026,15 @@
     var telemarketingLayoutDTO = [[${telemarketingLayoutDTO}]];
     var clueProject = [[${clueProject}]];
     var mediumList = [[${mediumList}]];
-    var clueReceive = [[${clueReceive}]]
+    var clueReceive = [[${clueReceive}]];
+    var nextClueIds = [[${nextClueIds}]];
     var repeatStatus =false;
     var editPhone = 1;
     var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
     var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
     var  trackingRemarkFlag = false;
     var trackingRemark = null;
+
     if(repeatClueStatus == 1 ){
         repeatStatus = true;
     }
@@ -3892,7 +3894,7 @@
                                         }
                                     }
                                 });*/
-                                nextRedirect(clueId);
+                                nextRedirect();
                             }else{
                                 parenthis.nextDisabled = false;
                                 parenthis.saveDisabled = false;
@@ -3923,7 +3925,7 @@
                                     }
                                 }
                             });*/
-                            nextRedirect(clueId);
+                            nextRedirect();
                         }else{
                             parenthis.nextDisabled = false;
                             parenthis.saveDisabled = false;
@@ -3947,32 +3949,18 @@
         }
     }
 
-    function nextRedirect(clueId){
-        let param ={'clueId':clueId};
-        // 下一条跳转
-        axios.post('/tele/clueMyCustomerInfo/next',param).then(function (response) {
-            if(!response || !response.data){
-                addCustomerVM.$message({
-                    message: "接口调用失败",
-                    type: 'error'
-                });
-                return ;
-            }
-            if(response.data.code!=='0'){
-                addCustomerVM.$message({
-                    message: response.msg,
-                    type: 'error'
-                });
-                return ;
-            }
-            var result= response.data.data;
-            if('-1' ===  result) {
-                addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
-                return ;
-            }
+    /* “ 下一条 ” 跳转 */
+    function nextRedirect(){
+
+        if( nextClueIds && nextClueIds.length > 0 ){
+            let nextClueIdsArr = nextClueIds.split(",");
+            let result = nextClueIdsArr.pop();
             // 跳转到下一页
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+result;
-        });
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId=" + result + "&nextClueIds=" + tableData.join(",") ;
+        }else{
+            addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
+            return ;
+        }
     }
 </script>
 </html>
