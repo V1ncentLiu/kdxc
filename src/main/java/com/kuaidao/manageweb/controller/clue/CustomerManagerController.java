@@ -469,8 +469,9 @@ public class CustomerManagerController {
     private void handleNotFollowUpQueryTime(CustomerManagerQueryDTO dto) {
         Date now = new Date();
         if (dto.getNotFollowUpTime() > 1) {
-            Date notFollowUpEndTime = DateUtil.addDays(now, -dto.getNotFollowUpTime());
-            Date notFollowUpStartTime = DateUtil.setStartDay(notFollowUpEndTime);
+            Date startTime = DateUtil.addDays(now, -dto.getNotFollowUpTime());
+            Date notFollowUpStartTime = DateUtil.setStartDay(startTime);
+            Date notFollowUpEndTime = DateUtil.setEndDay(startTime);
             dto.setNotFollowUpStartTime(notFollowUpStartTime);
             dto.setNotFollowUpEndTime(notFollowUpEndTime);
         }else{
