@@ -222,18 +222,7 @@ public class LoginController {
         // 判断登陆IP限制
         if (SysConstant.YES.equals(roleInfoDTO.getIsIpLimit())) {
             List<String> ipList = roleInfoDTO.getIpList();
-            logger.info("login_ip_address{{}},ipList{{}}", ipAddr, ipList);
-            boolean isMatch = false;
-            for ( String  ip : ipList){
-                if( null == ip) { continue; }
-                ip = ip.trim();
-                if(Pattern.matches(ip, ipAddr)){
-                    // 匹配正确
-                    isMatch = true;
-                    break ;
-                }
-            }
-            if (!isMatch) {
+            if (ipLimit(ipAddr, ipList)){
                 return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
                         "当前登录系统IP异常，请联系管理员");
             }
@@ -473,6 +462,27 @@ public class LoginController {
         }
         return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_LOGIN_ERROR.getCode(),
                 errorMessage);
+    }
+
+    // ip 限制
+    private boolean ipLimit(String ipAddr, List<String> ipList) {
+        if( null != ipList){
+            boolean isMatch = false;
+            for ( String  ip : ipList){
+                if( null == ip) { continue; }
+                ip = ip.trim();
+                if(Pattern.matches(ip, ipAddr)){
+                    // 匹配正确
+                    isMatch = true;
+                    break ;
+                }
+            }
+            if (!isMatch) {
+                logger.warn("当前登录系统IP异常-login_ip_address{{}},ipList{{}}", ipAddr, ipList);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
