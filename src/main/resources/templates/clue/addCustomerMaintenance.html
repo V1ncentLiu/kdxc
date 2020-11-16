@@ -3894,7 +3894,7 @@
                                         }
                                     }
                                 });*/
-                                nextRedirect();
+                                nextRedirect(clueId);
                             }else{
                                 parenthis.nextDisabled = false;
                                 parenthis.saveDisabled = false;
@@ -3925,7 +3925,7 @@
                                     }
                                 }
                             });*/
-                            nextRedirect();
+                            nextRedirect(clueId);
                         }else{
                             parenthis.nextDisabled = false;
                             parenthis.saveDisabled = false;
@@ -3950,16 +3950,21 @@
     }
 
     /* “ 下一条 ” 跳转 */
-    function nextRedirect(){
-
+    function nextRedirect(clueId){
         if( nextClueIds && nextClueIds.length > 0 ){
             let nextClueIdsArr = nextClueIds.split(",");
-            let result = nextClueIdsArr.pop();
-            // 跳转到下一页
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId=" + result + "&nextClueIds=" + tableData.join(",") ;
-        }else{
-            addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
-            return ;
+            for(let i =0 ; i< nextClueIdsArr.length ; i++ ){
+                if(clueId === nextClueIdsArr[i]){
+                    if( ( i + 1 ) > ( nextClueIdsArr.length - 1 )){
+                        addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
+                        return ;
+                    }else{
+                        let result = nextClueIdsArr[ i + 1];
+                        // 跳转到下一页
+                        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId=" + result + "&nextClueIds=" + nextClueIds ;
+                    }
+                }
+            }
         }
     }
 </script>
