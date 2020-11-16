@@ -718,21 +718,8 @@ public class BusinessSignController {
         request.setAttribute("signStatus", sign.getSignStatus());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("type", type);
-        request.setAttribute("ossUrl", ossUrl);
-        //增加附件
-        // 获取已上传的文件数据
-        ClueQueryDTO fileDto = new ClueQueryDTO();
-        // 获取已上传的文件数据
-        fileDto.setSignId(Long.valueOf(signId));
-        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findFileBySignId(fileDto);
-        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
-            request.setAttribute("clueFileList", clueFileList.getData());
-        }
-        if (RoleCodeEnum.XMWY.name().equals(roleCode)) {
-            return "clue/editSignAndFile";
-        } else {
-            return "clue/showSignAndPayDetail";
-        }
+        return "clue/showSignAndPayDetail";
+
     }
 
     /**
@@ -778,7 +765,7 @@ public class BusinessSignController {
             @RequestParam String signId, @RequestParam String readyOnly,
             @RequestParam(required = false) String showSignButton,
             @RequestParam(required = false) Integer type) throws Exception {
-
+        UserInfoDTO user = getUser();
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
         SignParamDTO paramDTO = new SignParamDTO();
@@ -887,7 +874,23 @@ public class BusinessSignController {
         request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("type", type);
-        return "bus_mycustomer/showSignAndPayDetail";
+
+        request.setAttribute("ossUrl", ossUrl);
+        //增加附件
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
+        // 获取已上传的文件数据
+        fileDto.setSignId(Long.valueOf(signId));
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findFileBySignId(fileDto);
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
+            request.setAttribute("clueFileList", clueFileList.getData());
+        }
+       String   roleCode = user.getRoleList().get(0).getRoleCode();
+        if (RoleCodeEnum.XMWY.name().equals(roleCode)) {
+            return "clue/editSignAndFile";
+        } else {
+            return "bus_mycustomer/showSignAndPayDetail";
+        }
     }
 
     /**
