@@ -376,7 +376,7 @@ var mainDivVM = new Vue({
             {//2
                 isActive:true,
                 name:"今日回访",
-                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=1",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=8",
                 type:"hJtype"
             },{//3
                 isActive:false,
@@ -504,17 +504,7 @@ var mainDivVM = new Vue({
                     });
                 });
                 // 为详情页“下一条”数据拼装
-                let tableData = mainDivVM.dataTable ;
-                let clueIdPin = "";
-                if( tableData && tableData.length > 0 ){
-                    for(let i= 0 ; i< tableData.length ; i++){
-                        if( i === 0 ){
-                            clueIdPin += tableData[i].clueId ;
-                        }else{
-                            clueIdPin += "," +tableData[i].clueId ;
-                        }
-                    }
-                }
+                let clueIdPin = getClueIdPin(mainDivVM.dataTable);
                 //跳转页面
                 locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
             }
@@ -566,18 +556,8 @@ var mainDivVM = new Vue({
         this.setSessionStore("otherVal", otherVal);
 
         // 为详情页“下一条”数据拼装
-        let tableData = mainDivVM.dataTable;
-        let clueIdPin = "";
-        if( tableData && tableData.length > 0 ){
-              for(let i = 0 ; i< tableData.length ; i++){
-                  if( i === 0 ){
-                      clueIdPin += tableData[i].clueId ;
-                  }else{
-                      clueIdPin += "," +tableData[i].clueId ;
-                  }
-              }
-        }
-          locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
+        let clueIdPin = getClueIdPin(mainDivVM.dataTable);
+        locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
       },
         // 快速领取新资源
         initList(){
@@ -723,21 +703,10 @@ var mainDivVM = new Vue({
         },
         // 今日待跟进客户资源
         customerEidt(row){
-            let clueId = row.clueId
-            // 为详情页“下一条”数据拼装
-            let tableData = mainDivVM.dataTable ;
-            let clueIdPin = "";
-            if( tableData && tableData.length > 0 ){
-                for(let i= 0 ; i< tableData.length ; i++){
-                    if( i === 0 ){
-                        clueIdPin += tableData[i].clueId ;
-                    }else{
-                        clueIdPin += "," +tableData[i].clueId ;
-                    }
-                }
-            }
+            let clueId = row.clueId;
+            let clueIdPin = getClueIdPin(mainDivVM.dataTable);
             //客户维护界面
-            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":row.clueId,"nextClueIds":clueIdPin});
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
         },
         // 今日待跟进客户资源
         initTableData(){
@@ -961,25 +930,41 @@ var mainDivVM = new Vue({
     }
 });
 
-function locationPost(url, params) {
-    // 创建form元素
-    var temp_form = document.createElement("form");
-    // 设置form属性
-    temp_form .action = url;
-    temp_form .target = "_self";
-    temp_form .method = "post";
-    temp_form .style.display = "none";
-    // 处理需要传递的参数
-    for (var x in params) {
-        var opt = document.createElement("textarea");
-        opt.name = x;
-        opt.value = params[x];
-        temp_form .appendChild(opt);
+    // 数据拼装
+    function getClueIdPin(tableData){
+        let clueIdPin = "";
+        if( tableData && tableData.length > 0 ){
+            for(let i = 0 ; i< tableData.length ; i++){
+                if( i === 0 ){
+                    clueIdPin += tableData[i].clueId ;
+                }else{
+                    clueIdPin += "," +tableData[i].clueId ;
+                }
+            }
+        }
+        return clueIdPin ;
     }
-    document.body.appendChild(temp_form);
-    // 提交表单
-    temp_form .submit();
-}
+
+    /* post 请求 */
+    function locationPost(url, params) {
+        // 创建form元素
+        var temp_form = document.createElement("form");
+        // 设置form属性
+        temp_form .action = url;
+        temp_form .target = "_self";
+        temp_form .method = "post";
+        temp_form .style.display = "none";
+        // 处理需要传递的参数
+        for (var x in params) {
+            var opt = document.createElement("textarea");
+            opt.name = x;
+            opt.value = params[x];
+            temp_form .appendChild(opt);
+        }
+        document.body.appendChild(temp_form);
+        // 提交表单
+        temp_form .submit();
+    }
 </script>
 <!-- <script th:src="@{/js/custom/console/consoleTelemarketing.js?v=1.0.0}"></script> -->
 
