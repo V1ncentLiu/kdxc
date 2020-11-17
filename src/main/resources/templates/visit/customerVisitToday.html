@@ -503,8 +503,20 @@ var mainDivVM = new Vue({
                     axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
                     });
                 });
+                // 为详情页“下一条”数据拼装
+                let tableData = mainDivVM.dataTable ;
+                let clueIdPin = "";
+                if( tableData && tableData.length > 0 ){
+                    for(let i= 0 ; i< tableData.length ; i++){
+                        if( i === 0 ){
+                            clueIdPin += tableData[i].clueId ;
+                        }else{
+                            clueIdPin += "," +tableData[i].clueId ;
+                        }
+                    }
+                }
                 //跳转页面
-                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId  + "&nextClueIds=" + clueIdPin ;
             }
 
 
@@ -543,7 +555,7 @@ var mainDivVM = new Vue({
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
         },
       customerEidt(row){
-        var clueId=row.clueId;
+        let clueId=row.clueId;
         //客户维护界面
         this.setSessionStore("storeForm", this.storeForm);
         var otherVal = {
@@ -552,7 +564,20 @@ var mainDivVM = new Vue({
           "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
         }
         this.setSessionStore("otherVal", otherVal);
-        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+
+        // 为详情页“下一条”数据拼装
+        let tableData = mainDivVM.dataTable;
+        let clueIdPin = "";
+        if( tableData && tableData.length > 0 ){
+              for(let i = 0 ; i< tableData.length ; i++){
+                  if( i === 0 ){
+                      clueIdPin += tableData[i].clueId ;
+                  }else{
+                      clueIdPin += "," +tableData[i].clueId ;
+                  }
+              }
+        }
+        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId + "&nextClueIds=" + clueIdPin ;
       },
         // 快速领取新资源
         initList(){
@@ -698,8 +723,21 @@ var mainDivVM = new Vue({
         },
         // 今日待跟进客户资源
         customerEidt(row){
+            let clueId = row.clueId
+            // 为详情页“下一条”数据拼装
+            let tableData = mainDivVM.dataTable ;
+            let clueIdPin = "";
+            if( tableData && tableData.length > 0 ){
+                for(let i= 0 ; i< tableData.length ; i++){
+                    if( i === 0 ){
+                        clueIdPin += tableData[i].clueId ;
+                    }else{
+                        clueIdPin += "," +tableData[i].clueId ;
+                    }
+                }
+            }
             //客户维护界面   
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+row.clueId;
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+row.clueId + "&nextClueIds=" + clueIdPin ;
         },
         // 今日待跟进客户资源
         initTableData(){
