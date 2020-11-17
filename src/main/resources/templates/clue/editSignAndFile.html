@@ -108,7 +108,9 @@
                         :auto-upload="false"
                         :file-list="fileList">
                         <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
-                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">开始上传</el-button>
+                        <span  v-show="showUploadButton">
+                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">开始上传</el-button>
+                        </span>
                     </el-upload>
                 </div>
                 <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
@@ -173,6 +175,7 @@
     var mainDivVM = new Vue({
         el: '#editSignAndFile',
         data: {
+            showUploadButton:false,
             signOrderBaseInfo: signData,//签约单基本信息
             tableDataC1: clueFileList,//文件记录
             type: type,
@@ -321,7 +324,9 @@
                 });
             },
             selectFile(file, fileList){
-                // console.log(fileList)
+                if (fileList.length > 0){
+                    mainDivVM.showUploadButton = true;
+                }
                 mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
                 mainDivVM.uploadParamData.realName= file.name
             },
@@ -368,6 +373,7 @@
                                     console.log(response)
                                     mainDivVM.tableDataC1 = response.data.data;
                                     mainDivVM.fileList = [];
+                                    mainDivVM.showUploadButton = false;
                                 });
                         }
                     });
@@ -378,7 +384,7 @@
             },
             handleBefore(file){
                 console.log(file,"文件格式打印")
-                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg' || file.type==='image/gif'|| file.type === 'audio/x-ms-wma'|| file.type === 'audio/mpeg'||file.type==='video/mp4'||file.type==='audio/wav'||file.type==='video/3gpp'||file.type==='audio/x-m4a'||file.type==='audio/mid';
+                var isTextComputer = file.type === 'image/bmp' || file.type === 'image/png' || file.type==='image/jpeg' || file.type==='image/gif'|| file.type === 'audio/x-ms-wma'|| file.type === 'audio/mpeg'||file.type==='video/mp4'||file.type==='audio/wav'||file.type==='video/3gpp'||file.type==='audio/x-m4a'||file.type==='audio/mid';
                 if(!isTextComputer){
                    this.fileList=[];
                    this.$message.error('文件格式错误');
