@@ -1652,8 +1652,19 @@
       },
       //展现详情
       showClueDetailInfo2 (clueId) {
-        //window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
-        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+          // 为详情页“下一条”数据拼装
+          let tableData = mycustomVM.dataTable;
+          let clueIdPin = "";
+          if( tableData && tableData.length > 0 ){
+              for(let i= 0 ; i< tableData.length ; i++){
+                  if( i === 0 ){
+                      clueIdPin += tableData[i].clueId ;
+                  }else{
+                      clueIdPin += "," +tableData[i].clueId ;
+                  }
+              }
+          }
+         window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId + "&nextClueIds=" + clueIdPin ;
       },
       createClueData(){
         window.location.href='/tele/clueMyCustomerInfo/createClue';
@@ -1762,10 +1773,24 @@
         }
         this.setSessionStore("otherVal", otherVal);
         var type=getQueryString("type");
+
+       /**************************************/
+       // 为详情页“下一条”数据拼装
+       let tableData = mycustomVM.dataTable;
+       let clueIdPin = "";
+       if( tableData && tableData.length > 0 ){
+          for(let i= 0 ; i< tableData.length ; i++){
+              if( i === 0 ){
+                  clueIdPin += tableData[i].clueId ;
+              }else{
+                  clueIdPin += "," +tableData[i].clueId ;
+              }
+          }
+        }
         if(type){
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId+"&type="+type;//餐盟type=1
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId+"&type="+type + "&nextClueIds=" + clueIdPin;//餐盟type=1
         }else{
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId
+            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId + "&nextClueIds=" + clueIdPin;
         }        
       },
       submitForm(formName) {
