@@ -1652,8 +1652,19 @@
       },
       //展现详情
       showClueDetailInfo2 (clueId) {
-        //window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
-        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+          // 为详情页“下一条”数据拼装
+          let tableData = mycustomVM.dataTable;
+          let clueIdPin = "";
+          if( tableData && tableData.length > 0 ){
+              for(let i= 0 ; i< tableData.length ; i++){
+                  if( i === 0 ){
+                      clueIdPin += tableData[i].clueId ;
+                  }else{
+                      clueIdPin += "," +tableData[i].clueId ;
+                  }
+              }
+          }
+          locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
       },
       createClueData(){
         window.location.href='/tele/clueMyCustomerInfo/createClue';
@@ -1762,11 +1773,25 @@
         }
         this.setSessionStore("otherVal", otherVal);
         var type=getQueryString("type");
+
+       /**************************************/
+       // 为详情页“下一条”数据拼装
+       let tableData = mycustomVM.dataTable;
+       let clueIdPin = "";
+       if( tableData && tableData.length > 0 ){
+          for(let i= 0 ; i< tableData.length ; i++){
+              if( i === 0 ){
+                  clueIdPin += tableData[i].clueId ;
+              }else{
+                  clueIdPin += "," +tableData[i].clueId ;
+              }
+          }
+        }
         if(type){
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId+"&type="+type;//餐盟type=1
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"type":type , "nextClueIds":clueIdPin});
         }else{
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId
-        }        
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
+        }
       },
       submitForm(formName) {
         //重单提交
@@ -2298,6 +2323,26 @@
       this.initTableData();
     }
   })
+
+  function locationPost(url, params) {
+      // 创建form元素
+      var temp_form = document.createElement("form");
+      // 设置form属性
+      temp_form .action = url;
+      temp_form .target = "_self";
+      temp_form .method = "post";
+      temp_form .style.display = "none";
+      // 处理需要传递的参数
+      for (var x in params) {
+          var opt = document.createElement("textarea");
+          opt.name = x;
+          opt.value = params[x];
+          temp_form .appendChild(opt);
+      }
+      document.body.appendChild(temp_form);
+      // 提交表单
+      temp_form .submit();
+  }
 </script>
 
 

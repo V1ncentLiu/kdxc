@@ -1026,13 +1026,15 @@
     var telemarketingLayoutDTO = [[${telemarketingLayoutDTO}]];
     var clueProject = [[${clueProject}]];
     var mediumList = [[${mediumList}]];
-    var clueReceive = [[${clueReceive}]]
+    var clueReceive = [[${clueReceive}]];
+    var nextClueIds = [[${nextClueIds}]];
     var repeatStatus =false;
     var editPhone = 1;
     var telCreatePhoneAudits = [[${telCreatePhoneAudits}]];//电销创建手机号审核记录
     var telCreatePhoneAuditsFlag = false;//电销创建手机号审核记录是否显示集合
     var  trackingRemarkFlag = false;
     var trackingRemark = null;
+
     if(repeatClueStatus == 1 ){
         repeatStatus = true;
     }
@@ -3892,7 +3894,9 @@
                                         }
                                     }
                                 });*/
-                                nextRedirect(clueId);
+                                parenthis.nextDisabled = false;
+                                parenthis.saveDisabled = false;
+                                nextRedirect(clueId );
                             }else{
                                 parenthis.nextDisabled = false;
                                 parenthis.saveDisabled = false;
@@ -3923,7 +3927,9 @@
                                     }
                                 }
                             });*/
-                            nextRedirect(clueId);
+                            parenthis.nextDisabled = false;
+                            parenthis.saveDisabled = false;
+                            nextRedirect(clueId );
                         }else{
                             parenthis.nextDisabled = false;
                             parenthis.saveDisabled = false;
@@ -3947,32 +3953,43 @@
         }
     }
 
-    function nextRedirect(clueId){
-        let param ={'clueId':clueId};
-        // 下一条跳转
-        axios.post('/tele/clueMyCustomerInfo/next',param).then(function (response) {
-            if(!response || !response.data){
-                addCustomerVM.$message({
-                    message: "接口调用失败",
-                    type: 'error'
-                });
-                return ;
+    /* “ 下一条 ” 跳转 */
+    function nextRedirect(clueId ){
+        if( nextClueIds && nextClueIds.length > 0 ){
+            let nextClueIdsArr = nextClueIds.split(",");
+            for(let i =0 ; i< nextClueIdsArr.length ; i++ ){
+                if(clueId === nextClueIdsArr[i]){
+                    if( ( i + 1 ) > ( nextClueIdsArr.length - 1 )){
+                        addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
+                        return ;
+                    }else{
+                        let result = nextClueIdsArr[ i + 1];
+                        // 跳转到下一页
+                        locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":result,"nextClueIds":nextClueIds});
+                    }
+                }
             }
-            if(response.data.code!=='0'){
-                addCustomerVM.$message({
-                    message: response.msg,
-                    type: 'error'
-                });
-                return ;
-            }
-            var result= response.data.data;
-            if('-1' ===  result) {
-                addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
-                return ;
-            }
-            // 跳转到下一页
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+result;
-        });
+        }
+    }
+
+    function locationPost(url, params) {
+        // 创建form元素
+        var temp_form = document.createElement("form");
+        // 设置form属性
+        temp_form .action = url;
+        temp_form .target = "_self";
+        temp_form .method = "post";
+        temp_form .style.display = "none";
+        // 处理需要传递的参数
+        for (var x in params) {
+            var opt = document.createElement("textarea");
+            opt.name = x;
+            opt.value = params[x];
+            temp_form .appendChild(opt);
+        }
+        document.body.appendChild(temp_form);
+        // 提交表单
+        temp_form .submit();
     }
 </script>
 </html>

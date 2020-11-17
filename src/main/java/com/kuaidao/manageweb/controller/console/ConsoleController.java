@@ -1,31 +1,10 @@
 package com.kuaidao.manageweb.controller.console;
 
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.manageweb.service.NextRecordService;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
-import com.kuaidao.aggregation.dto.clue.BusPendingAllocationDTO;
-import com.kuaidao.aggregation.dto.clue.BusPendingAllocationPageParam;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
-import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
@@ -35,11 +14,7 @@ import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import com.kuaidao.common.constant.CluePhase;
-import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.*;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -78,6 +53,17 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 控制台
@@ -139,8 +125,6 @@ public class ConsoleController {
     DashboardTeleSaleFeignClient dashboardTeleSaleFeignClient;
     @Autowired
     private DashboardTeleGroupFeignClient dashboardTeleGroupFeignClient;
-    @Autowired
-    private NextRecordService nextRecordService;
 
     /***
      * 跳转控制台页面
@@ -422,8 +406,6 @@ public class ConsoleController {
          * queryDto.setAssignTimeEnd(DateUtil.convert2Date("2019-04-14 00:00:00", DateUtil.ymdhms));
          */
         JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.telelistTodayFollowClue(queryDto);
-
-        nextRecordService.pushList(curLoginUser.getId() , null != jsonResult.getData() ? jsonResult.getData().getData() : null);
 
         return jsonResult ;
     }
