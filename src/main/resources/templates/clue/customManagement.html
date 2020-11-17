@@ -31,7 +31,7 @@
             <el-button type="danger" @click="openvicemanagerForm">副总分发</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="customerManager:releaseClue">
-            <el-button type="success" @click="releaseClue">释放资源</el-button>
+            <el-button type="success" @click="releaseClue" :disabled="releaseBtnDisabled" >释放资源</el-button>
           </shiro:hasPermission>
      </el-row>
      <div class="mainSearchBg">
@@ -962,6 +962,8 @@
     el: '#myCustom',
     data: function() {
       return {
+          //释放资源按钮
+          releaseBtnDisabled:false,
           //是否签约默认可选
           disabledIsSign:false,
           //是否补齐尾款默认可选
@@ -1958,7 +1960,6 @@
             return false;
         },
         releaseClue() {
-            //删除上传文件
             var rows =  this.multseleSelection;
             if (rows.length < 1) {
                 if (rows.length != 1) {
@@ -1971,6 +1972,7 @@
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
+                customerManVM.releaseBtnDisabled = true;
                 var ids = [];
                 for (var i = 0; i < rows.length; i++) {
                     ids.push(rows[i].clueId);
@@ -1984,6 +1986,7 @@
                         if (data.code == '0') {
                             customerManVM.$message({
                                 message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                    customerManVM.releaseBtnDisabled = false;
                                     customerManVM.initTableData();
                                 }
                             });
