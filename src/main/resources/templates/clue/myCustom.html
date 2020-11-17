@@ -1068,7 +1068,7 @@
             {//2
                 isActive:false,
                 name:"今日回访",
-                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=1",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=8",
                 type:"hJtype"
             },{//3
                 isActive:false,
@@ -1653,19 +1653,11 @@
       },
       //展现详情
       showClueDetailInfo2 (clueId) {
+          var hJtype=getQueryString("hJtype");
           // 为详情页“下一条”数据拼装
-          let tableData = mycustomVM.dataTable;
-          let clueIdPin = "";
-          if( tableData && tableData.length > 0 ){
-              for(let i= 0 ; i< tableData.length ; i++){
-                  if( i === 0 ){
-                      clueIdPin += tableData[i].clueId ;
-                  }else{
-                      clueIdPin += "," +tableData[i].clueId ;
-                  }
-              }
-          }
-          locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
+          let clueIdPin = getClueIdPin(mycustomVM.dataTable);
+          // Post方式转发到到编辑页面
+          locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId, "hJtype" : hJtype , "nextClueIds":clueIdPin});
       },
       createClueData(){
         window.location.href='/tele/clueMyCustomerInfo/createClue';
@@ -1783,24 +1775,16 @@
         }
         this.setSessionStore("otherVal", otherVal);
         var type=getQueryString("type");
-
-       /**************************************/
-       // 为详情页“下一条”数据拼装
-       let tableData = mycustomVM.dataTable;
-       let clueIdPin = "";
-       if( tableData && tableData.length > 0 ){
-          for(let i= 0 ; i< tableData.length ; i++){
-              if( i === 0 ){
-                  clueIdPin += tableData[i].clueId ;
-              }else{
-                  clueIdPin += "," +tableData[i].clueId ;
-              }
-          }
-        }
+        // 获得拼接类型
+        var hJtype=getQueryString("hJtype");
+        // 为详情页“下一条”数据拼装
+        let clueIdPin = getClueIdPin(mycustomVM.dataTable);
         if(type){
-            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"type":type , "nextClueIds":clueIdPin});
+            // Post方式转发到到编辑页面
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" ,{ "clueId":clueId, "type":type, "hJtype":hJtype , "nextClueIds":clueIdPin});
         }else{
-            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
+            // Post方式转发到到编辑页面
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , { "clueId":clueId , "hJtype":hJtype , "nextClueIds":clueIdPin});
         }
       },
       submitForm(formName) {
@@ -2334,6 +2318,22 @@
     }
   })
 
+  // 数据拼装
+  function getClueIdPin(tableData){
+      let clueIdPin = "";
+      if( tableData && tableData.length > 0 ){
+          for(let i = 0 ; i< tableData.length ; i++){
+              if( i === 0 ){
+                  clueIdPin += tableData[i].clueId ;
+              }else{
+                  clueIdPin += "," +tableData[i].clueId ;
+              }
+          }
+      }
+      return clueIdPin ;
+  }
+
+  /* post 请求 */
   function locationPost(url, params) {
       // 创建form元素
       var temp_form = document.createElement("form");
@@ -2353,6 +2353,7 @@
       // 提交表单
       temp_form .submit();
   }
+
 </script>
 
 
