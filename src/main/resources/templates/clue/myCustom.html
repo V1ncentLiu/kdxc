@@ -381,7 +381,7 @@
                                  v-else-if="item.fieldCode == 'isTrack'">
                     <template slot-scope="scope">
                         <div v-if="scope.row.isTrack === 1">
-                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
+                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" @mouseover.native="openTrackingDialog(scope.row.clueId)" @mouseout.native="hideTrackingDialog()" type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -994,6 +994,7 @@
   var telemarketingLayout = [[${telemarketingLayout}]];
   //角色编码
   var roleCode = [[${roleCode}]];
+  var timer = null;
   var mycustomVM=new Vue({
     el: '#myCustom',
     data: function() {
@@ -1712,20 +1713,29 @@
         })
       },
       openTrackingDialog(cid){
-        var param = {};
-        param.clueId = cid;
-        axios.post('/aggregation/tracking/queryList', param)
-        .then(function (response) {
-          if (response.data.code == 0) {
-            mycustomVM.trackingParam.tableData = response.data.data
-            mycustomVM.trackingParam.trackingDialogVisible = true;
-          } else {
-            mycustomVM.$message.error(response.data.msg);
-          }
-        }).catch(function (error) {
-        });
+          timer = setTimeout(function(){
+              var param = {};
+              param.clueId = cid;
+              axios.post('/aggregation/tracking/queryList', param)
+                  .then(function (response) {
+                      if (response.data.code == 0) {
+                          mycustomVM.trackingParam.tableData = response.data.data
+                          mycustomVM.trackingParam.trackingDialogVisible = true;
+                      } else {
+                          mycustomVM.$message.error(response.data.msg);
+                      }
+                  }).catch(function (error) {
+              });
+          }, 500);
+
 
       },
+        hideTrackingDialog(){
+            if(timer){
+                clearTimeout(timer);
+            }
+            // this.trackingParam.trackingDialogVisible = false;
+        },
       searchRepeatClue(){
         //重单申请查询资源
         if(this.repeatApplyForm.repeatPhone==""){
