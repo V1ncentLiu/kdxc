@@ -15,6 +15,7 @@ import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.util.DateUtil;
@@ -104,85 +105,91 @@ public class BusCustomerManagerController {
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         String ownOrgId = "";
-        // 查询所有电销组
-        List<OrganizationRespDTO> teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ,null);
-        request.setAttribute("teleSaleGroupList", teleSaleGroupList);
         List<RoleInfoDTO> roleList = user.getRoleList();
+        String roleCode = roleList.get(0).getRoleCode();
+        List<OrganizationRespDTO> teleSaleGroupList = new ArrayList<>();
+        if (roleList != null && RoleCodeEnum.XMWY.name().equals(roleCode)) {
+            //项目文员查看商机盒子电销组
+            teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ, BusinessLineConstant.SHANGJI);
+        } else {
+            // 查询所有电销组
+            teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ, null);
+        }
+        request.setAttribute("teleSaleGroupList", teleSaleGroupList);
         // 获取业务线
         Integer businessLine = null;
-        if(user.getBusinessLine() != null ){
+        if (user.getBusinessLine() != null) {
             businessLine = user.getBusinessLine();
         }
         // 获取人员所在组织
-        Long orgId =user.getOrgId();
+        Long orgId = user.getOrgId();
 
-        if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+        if (roleList != null && RoleCodeEnum.GLY.name().equals(roleCode)) {
             // 管理员 可以选择所有商务组 商务总监
             // 查询所有商务组
-            List<OrganizationRespDTO> busSaleGroupList =
-                    getSaleGroupList(null, OrgTypeConstant.SWZ,null);
+            List<OrganizationRespDTO> busSaleGroupList = getSaleGroupList(null, OrgTypeConstant.SWZ, null);
             request.setAttribute("busSaleGroupList", busSaleGroupList);
             // 查询所有商务总监
-            List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null,null);
+            List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null, null);
             request.setAttribute("busDirectorList", busDirectorList);
-        }
-        else if (roleList != null
-                && (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.SWZXWY.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.BUSBIGAREAW.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))
-                || RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())) {
-
-            // 商务中心查询业务线下数据。
-            if( RoleCodeEnum.SWZXWY.name().equals(roleList.get(0).getRoleCode())){
-                orgId =null;
-            }
-
-            // 商务大区总监 可以选择本区下的商务组 商务总监
-            // 商务总监 可以选择本商务组下的商务经理
-            // 查询下属商务组
-            List<OrganizationRespDTO> busSaleGroupList =
-                    getSaleGroupList(orgId, OrgTypeConstant.SWZ,businessLine);
-            // 查询本区商务总监
-            List<UserInfoDTO> busDirectorList =
-                    getUserList(orgId, RoleCodeEnum.SWZJ.name(), null,businessLine);
-            request.setAttribute("busDirectorList", busDirectorList);
-            // 查询组织下商务经理
-            List<Integer> statusList = new ArrayList<Integer>();
-            statusList.add(SysConstant.USER_STATUS_ENABLE);
-            statusList.add(SysConstant.USER_STATUS_LOCK);
-            List<UserInfoDTO> saleList =
-                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList,businessLine);
-            request.setAttribute("busSaleList", saleList);
-
-            //商务总监固定商务组筛选条件为本组
-            if(RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode())){
-                ownOrgId = String.valueOf(user.getOrgId());
-                OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
-                if(curOrgGroupByOrgId!=null) {
-                    OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
-                    organizationRespDTO.setId(curOrgGroupByOrgId.getId());
-                    organizationRespDTO.setName(curOrgGroupByOrgId.getName());
-                    busSaleGroupList.add(organizationRespDTO);
-                }
-            }
-
+        } else  if (roleList != null && RoleCodeEnum.XMWY.name().equals(roleCode)) {
+            // 项目文员 可以选择商机盒子商务组 商务总监
+            List<OrganizationRespDTO> busSaleGroupList = getSaleGroupList(null, OrgTypeConstant.SWZ,  BusinessLineConstant.SHANGJI);
             request.setAttribute("busSaleGroupList", busSaleGroupList);
+            // 查询商机盒子商务总监
+            List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null,  BusinessLineConstant.SHANGJI);
+            request.setAttribute("busDirectorList", busDirectorList);
+        }else if (roleList != null
+                && (RoleCodeEnum.SWDQZJ.name().equals(roleCode) || RoleCodeEnum.SWZXWY.name().equals(roleCode)
+                        || RoleCodeEnum.BUSBIGAREAW.name().equals(roleCode) || RoleCodeEnum.SWZJ.name().equals(roleCode))
+                || RoleCodeEnum.SWZC.name().equals(roleCode)) {
 
-            if( RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())){
-                List<OrganizationDTO> busGroupList = getBusGroupList(user.getOrgId(),
-                    OrgTypeConstant.SWZ);
-                request.setAttribute("busSaleGroupList", busGroupList);
-            }
+                    // 商务中心查询业务线下数据。
+                    if (RoleCodeEnum.SWZXWY.name().equals(roleCode)) {
+                        orgId = null;
+                    }
 
-            request.setAttribute("ownOrgId", ownOrgId);
-        }
+                    // 商务大区总监 可以选择本区下的商务组 商务总监
+                    // 商务总监 可以选择本商务组下的商务经理
+                    // 查询下属商务组
+                    List<OrganizationRespDTO> busSaleGroupList = getSaleGroupList(orgId, OrgTypeConstant.SWZ, businessLine);
+                    // 查询本区商务总监
+                    List<UserInfoDTO> busDirectorList = getUserList(orgId, RoleCodeEnum.SWZJ.name(), null, businessLine);
+                    request.setAttribute("busDirectorList", busDirectorList);
+                    // 查询组织下商务经理
+                    List<Integer> statusList = new ArrayList<Integer>();
+                    statusList.add(SysConstant.USER_STATUS_ENABLE);
+                    statusList.add(SysConstant.USER_STATUS_LOCK);
+                    List<UserInfoDTO> saleList = getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList, businessLine);
+                    request.setAttribute("busSaleList", saleList);
+
+                    // 商务总监固定商务组筛选条件为本组
+                    if (RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode())) {
+                        ownOrgId = String.valueOf(user.getOrgId());
+                        OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(ownOrgId);
+                        if (curOrgGroupByOrgId != null) {
+                            OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                            organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                            organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                            busSaleGroupList.add(organizationRespDTO);
+                        }
+                    }
+
+                    request.setAttribute("busSaleGroupList", busSaleGroupList);
+
+                    if (RoleCodeEnum.SWZC.name().equals(roleList.get(0).getRoleCode())) {
+                        List<OrganizationDTO> busGroupList = getBusGroupList(user.getOrgId(), OrgTypeConstant.SWZ);
+                        request.setAttribute("busSaleGroupList", busGroupList);
+                    }
+
+                    request.setAttribute("ownOrgId", ownOrgId);
+                }
 
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
         // 查询所有签约项目
-        ProjectInfoPageParam param=new ProjectInfoPageParam();
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(AggregationConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
@@ -195,8 +202,7 @@ public class BusCustomerManagerController {
         // 查询字典合伙人集合
         request.setAttribute("partnerList", getDictionaryByCode(Constants.PARTNER));
         // 查询字典餐饮经验集合
-        request.setAttribute("cateringExperienceList",
-                getDictionaryByCode(Constants.CATERING_EXPERIENCE));
+        request.setAttribute("cateringExperienceList", getDictionaryByCode(Constants.CATERING_EXPERIENCE));
         // 查询字典签约店型集合
         request.setAttribute("shopTyleList", getDictionaryByCode(Constants.VISTIT_STORE_TYPE));
         // 查询字典店铺面积集合

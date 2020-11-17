@@ -885,7 +885,8 @@ public class BusinessSignController {
         if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-       String   roleCode = user.getRoleList().get(0).getRoleCode();
+        String   roleCode = user.getRoleList().get(0).getRoleCode();
+        request.setAttribute("roleCode", roleCode);
         if (RoleCodeEnum.XMWY.name().equals(roleCode)) {
             return "clue/editSignAndFile";
         } else {
