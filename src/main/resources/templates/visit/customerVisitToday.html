@@ -516,7 +516,7 @@ var mainDivVM = new Vue({
                     }
                 }
                 //跳转页面
-                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId  + "&nextClueIds=" + clueIdPin ;
+                locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
             }
 
 
@@ -577,7 +577,7 @@ var mainDivVM = new Vue({
                   }
               }
         }
-        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId + "&nextClueIds=" + clueIdPin ;
+          locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
       },
         // 快速领取新资源
         initList(){
@@ -736,8 +736,8 @@ var mainDivVM = new Vue({
                     }
                 }
             }
-            //客户维护界面   
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+row.clueId + "&nextClueIds=" + clueIdPin ;
+            //客户维护界面
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":row.clueId,"nextClueIds":clueIdPin});
         },
         // 今日待跟进客户资源
         initTableData(){
@@ -960,6 +960,26 @@ var mainDivVM = new Vue({
         document.getElementById('mainDiv').style.display = 'block';
     }
 });
+
+function locationPost(url, params) {
+    // 创建form元素
+    var temp_form = document.createElement("form");
+    // 设置form属性
+    temp_form .action = url;
+    temp_form .target = "_self";
+    temp_form .method = "post";
+    temp_form .style.display = "none";
+    // 处理需要传递的参数
+    for (var x in params) {
+        var opt = document.createElement("textarea");
+        opt.name = x;
+        opt.value = params[x];
+        temp_form .appendChild(opt);
+    }
+    document.body.appendChild(temp_form);
+    // 提交表单
+    temp_form .submit();
+}
 </script>
 <!-- <script th:src="@{/js/custom/console/consoleTelemarketing.js?v=1.0.0}"></script> -->
 

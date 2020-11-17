@@ -1664,7 +1664,7 @@
                   }
               }
           }
-         window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId + "&nextClueIds=" + clueIdPin ;
+          locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
       },
       createClueData(){
         window.location.href='/tele/clueMyCustomerInfo/createClue';
@@ -1788,10 +1788,10 @@
           }
         }
         if(type){
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId+"&type="+type + "&nextClueIds=" + clueIdPin;//餐盟type=1
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"type":type , "nextClueIds":clueIdPin});
         }else{
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId + "&nextClueIds=" + clueIdPin;
-        }        
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
+        }
       },
       submitForm(formName) {
         //重单提交
@@ -2323,6 +2323,26 @@
       this.initTableData();
     }
   })
+
+  function locationPost(url, params) {
+      // 创建form元素
+      var temp_form = document.createElement("form");
+      // 设置form属性
+      temp_form .action = url;
+      temp_form .target = "_self";
+      temp_form .method = "post";
+      temp_form .style.display = "none";
+      // 处理需要传递的参数
+      for (var x in params) {
+          var opt = document.createElement("textarea");
+          opt.name = x;
+          opt.value = params[x];
+          temp_form .appendChild(opt);
+      }
+      document.body.appendChild(temp_form);
+      // 提交表单
+      temp_form .submit();
+  }
 </script>
 
 
