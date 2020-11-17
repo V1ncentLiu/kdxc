@@ -1035,10 +1035,6 @@
     var  trackingRemarkFlag = false;
     var trackingRemark = null;
 
-    // 如果nextClueIds为空,不显示下一条按钮
-    if(!nextClueIds){
-        $("#nextId").css('display','none');
-    }
     if(repeatClueStatus == 1 ){
         repeatStatus = true;
     }
@@ -1389,7 +1385,7 @@
                 tableDataC4: circulationList,//流转记录
                 tableDataC5:telCreatePhoneAudits,//流转记录
                 pageNum2:2,
-            }           
+            }
         },
         methods: {
             isActiveFun(){
@@ -1401,25 +1397,25 @@
                 param.pageSize = 10;
                 console.log(param)
                 // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
-                axios.post('/message/im/listChatRecord', param).then(function (response) {    
+                axios.post('/message/im/listChatRecord', param).then(function (response) {
                     var recordData=response.data;
                     if(recordData){
                         var dataList=recordData.data
-                        if(dataList){                            
+                        if(dataList){
                             addCustomerVM.onlineRecordData.push(...dataList);
                             for(var i=0;i<dataList.length;i++){
                                 if(dataList[i].msgTimestamp){
                                     dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
                                 }
-                            } 
-                                                    
+                            }
+
                         }
                         // 大于一页显示更多按钮
                         if(recordData.pages>1){
                             addCustomerVM.isShowMoreBtn=true;
                         }else{
                             addCustomerVM.isShowMoreBtn=false;
-                        } 
+                        }
                         if(recordData.pages==param.pageNum){//请求页数和总页数相等
                             addCustomerVM.isShowMoreBtn=false;
                         }
@@ -1441,7 +1437,7 @@
                 param.pageNum = 1;
                 param.pageSize = 10;
                 // axios.post('/log/imLog/queryIMLogRecord', param).then(function (response) {
-                axios.post('/message/im/listChatRecord', param).then(function (response) {    
+                axios.post('/message/im/listChatRecord', param).then(function (response) {
                     var recordData=response.data;
                     if(recordData){
                         var dataList=recordData.data
@@ -1452,15 +1448,15 @@
                                 if(dataList[i].msgTimestamp){
                                     dataList[i].msgTimestamp=addCustomerVM.formatTimeFn(dataList[i].msgTimestamp);
                                 }
-                            } 
-                                                    
+                            }
+
                         }
                         // 大于一页显示更多按钮
                         if(recordData.pages>1){
                             addCustomerVM.isShowMoreBtn=true;
                         }else{
                             addCustomerVM.isShowMoreBtn=false;
-                        } 
+                        }
                     }else{
                         addCustomerVM.$message({
                             message: recordData.msg,
@@ -1891,7 +1887,7 @@
                                     }else{
                                         clueCustomer.phone2CreateTime = new Date();
                                     }
-                                    
+
                                 // }
                             }
                             if (i == 1) {
@@ -1901,7 +1897,7 @@
                                 }else{
                                     clueCustomer.phone3CreateTime = new Date();
                                 }
-                                
+
                             }
                             if (i == 2) {
                                 clueCustomer.phone4 = phoneArr[i].value;
@@ -1910,7 +1906,7 @@
                                 }else{
                                     clueCustomer.phone4CreateTime = new Date();
                                 }
-                                
+
                             }
                             if (i == 3) {
                                 clueCustomer.phone5 = phoneArr[i].value;
@@ -1919,7 +1915,7 @@
                                 }else{
                                     clueCustomer.phone5CreateTime = new Date();
                                 }
-                               
+
                             }
                         }
                     }
@@ -2051,7 +2047,8 @@
                                                     window.location.href = "/tele/customerManager/initcustomerManager";
                                                 }else{
                                                     // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                                    window.history.back();  //返回上一页
+                                                    // window.history.back();  //返回上一页
+                                                    backListPage();
                                                 }
                                             }
                                         });
@@ -2110,8 +2107,8 @@
                     window.location.href = "/tele/customerManager/initcustomerManager";
                 }else{
                     // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                    window.history.back();  //返回上一页
-
+                    //window.history.back();  //返回上一页
+                    backListPage();
                 }
                 // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
             },
@@ -2707,7 +2704,7 @@
                                     clueCustomer.phone3CreateTime = phoneArr[i].key;
                                 }else{
                                     clueCustomer.phone3CreateTime = new Date();
-                                }                                
+                                }
                             }
                             if (i == 2) {
                                 clueCustomer.phone4 = phoneArr[i].value;
@@ -2715,7 +2712,7 @@
                                     clueCustomer.phone4CreateTime = phoneArr[i].key;
                                 }else{
                                     clueCustomer.phone4CreateTime = new Date();
-                                }                                
+                                }
                             }
                             if (i == 3) {
                                 clueCustomer.phone5 = phoneArr[i].value;
@@ -2723,7 +2720,7 @@
                                     clueCustomer.phone5CreateTime = phoneArr[i].key;
                                 }else{
                                     clueCustomer.phone5CreateTime = new Date();
-                                }                                
+                                }
                             }
                         }
                     }
@@ -3179,7 +3176,7 @@
                 phone2.key = customer.phone2CreateTime;
                 if (customer.phone2==""&&customer.phone2!=null) {
                     phone2.edit = 0;
-                    phoneArr.push(phone2);                    
+                    phoneArr.push(phone2);
                 }else if(customer.phone2!=""&&customer.phone2!=null){
                     var phone2 = {};
                     phone2.value = customer.phone2;
@@ -3201,7 +3198,7 @@
                 phone3.key = customer.phone3CreateTime;
                 if (customer.phone3==""&&customer.phone3!=null) {
                     phone3.edit = 0;
-                    phoneArr.push(phone3);                    
+                    phoneArr.push(phone3);
                 }else if(customer.phone3!=""&&customer.phone3!=null){
                     var phone3 = {};
                     phone3.value = customer.phone3;
@@ -3225,7 +3222,7 @@
                 phone4.key = customer.phone4CreateTime;
                 if (customer.phone4==""&&customer.phone4!=null) {
                     phone4.edit = 0;
-                    phoneArr.push(phone4);                    
+                    phoneArr.push(phone4);
                 }else if(customer.phone4!=""&&customer.phone4!=null){
                     var phone4 = {};
                     phone4.value = customer.phone4;
@@ -3248,7 +3245,7 @@
                 phone5.key = customer.phone5CreateTime;
                 if (customer.phone5==""&&customer.phone2!=null) {
                     phone5.edit = 0;
-                    phoneArr.push(phone5);                    
+                    phoneArr.push(phone5);
                 }else if(customer.phone5!=""&&customer.phone5!=null){
                     var phone5 = {};
                     phone5.value = customer.phone5;
@@ -3513,7 +3510,7 @@
             if(type){
                 // 隐藏面包屑
                 this.isElBreadcrumb=false;
-                
+
             }
         }
     })
@@ -3967,16 +3964,18 @@
                         addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warn'});
                         return ;
                     }else{
+                        // hJtype参数
+                        let hJtype=[[${hJtype}]];
+
                         let result = nextClueIdsArr[ i + 1];
-                        // Post方式跳转到下一页
-                        locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":result,"nextClueIds":nextClueIds});
+                        // 跳转到下一页
+                        locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":result, "hJtype":hJtype,"nextClueIds":nextClueIds});
                     }
                 }
             }
         }
     }
 
-    // Post方式跳转到下一页
     function locationPost(url, params) {
         // 创建form元素
         var temp_form = document.createElement("form");
@@ -3995,6 +3994,50 @@
         document.body.appendChild(temp_form);
         // 提交表单
         temp_form .submit();
+    }
+
+    // 返回列表
+    function backListPage(){
+        let hJtype=[[${hJtype}]];
+
+        if(!hJtype){
+            window.history.back();  //返回上一页
+            return ;
+        }
+        let redirectUrl = "" ;
+        switch (hJtype) {
+            case 1:
+                redirectUrl="/tele/clueMyCustomerInfo/initmyCustomer?hJtype=1";
+                break;
+            case 2:
+                redirectUrl="/tele/clueMyCustomerInfo/initmyCustomer?hJtype=2";
+                break;
+            case 8:
+                redirectUrl="/tele/clueMyCustomerInfo/customerVisitToday?hJtype=8";
+                break;
+            case 3:
+                redirectUrl="/tele/clueMyCustomerInfo/initmyCustomer?hJtype=3";
+                break;
+            case 4:
+                redirectUrl="/tele/clueMyCustomerInfo/initmyCustomer?hJtype=4";
+                break;
+            case 5:
+                redirectUrl="/tele/clueMyCustomerInfo/initmyCustomer?hJtype=4";
+                break;
+            case 6:
+                redirectUrl="/tele/clueMyCustomerInfo/initmyCustomer?hJtype=4";
+                break;
+            case 7:
+                redirectUrl="/tele/clueMyCustomerInfo/initmyCustomer?hJtype=4";
+                break;
+            default:
+                break;
+        }
+        if( !redirectUrl){
+            window.history.back();
+            return ;
+        }
+        window.location.href = redirectUrl ;
     }
 </script>
 </html>

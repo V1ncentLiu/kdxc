@@ -501,6 +501,8 @@ public class MyCustomerClueController {
 
         // 添加“下一条”透传
         request.setAttribute("nextClueIds", request.getParameter("nextClueIds"));
+        // hJtype 参数传递
+        request.setAttribute("hJtype", request.getParameter("hJtype"));
 
         return "clue/addCustomerMaintenance";
     }
@@ -1834,6 +1836,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/customerVisitToday")
     public String customerVisitToday(HttpServletRequest request, Model model) {
+
+        request.setAttribute("hJtype",request.getParameter("hJtype"));
         return "visit/customerVisitToday";
     }
 
