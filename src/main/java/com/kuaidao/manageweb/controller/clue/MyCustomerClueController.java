@@ -968,6 +968,9 @@ public class MyCustomerClueController {
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
+        // 传递参数加入
+        request.setAttribute("hJtype", request.getParameter("hJtype"));
+        request.setAttribute("nextClueIds", request.getParameter("nextClueIds"));
         JSONResult<Integer> result =
                 clueBasicFeignClient.getIsInviteLetterById(Long.valueOf(clueId));
         if (result.getCode().equals(JSONResult.SUCCESS)) {
