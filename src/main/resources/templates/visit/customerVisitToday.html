@@ -37,7 +37,7 @@
             <el-table-column prop="isTrack" label="跟进记录"  align="center" width="120">
                     <template slot-scope="scope">
                         <div v-if="scope.row.isTrack===1"> 
-                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
+                            <el-button @click="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" @mouseleave.native="hideTrackingDialog()" type="text" size="small"> 点击查看 </el-button>
                         </div> 
                     </template>
             </el-table-column>
@@ -324,6 +324,7 @@
 <script th:inline="javascript" >
 // var dashboardTelSale =[[${dashboardTelSale}]];
 // console.log(dashboardTelSale)
+var timer=null;
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
@@ -518,19 +519,26 @@ var mainDivVM = new Vue({
             window.location.href="/aggregation/publiccustomer/listPage"; 
         },
         openTrackingDialog(cid){//跟进记录点击方法
-            var param = {};
-            param.clueId = cid;
-            axios.post('/aggregation/tracking/queryList', param)
-                .then(function (response) {
-                    if (response.data.code == 0) {
-                        mainDivVM.trackingParam.tableData = response.data.data
-                        mainDivVM.trackingParam.trackingDialogVisible = true;
-                    } else {
-                        mainDivVM.$message.error(response.data.msg);
-                    }
-                }).catch(function (error) {
-                console.log(error);
-            });
+            timer = setTimeout(function(){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/aggregation/tracking/queryList', param)
+                    .then(function (response) {
+                        if (response.data.code == 0) {
+                            mainDivVM.trackingParam.tableData = response.data.data
+                            mainDivVM.trackingParam.trackingDialogVisible = true;
+                        } else {
+                            mainDivVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            }, 500);
+        },
+        hideTrackingDialog(){
+            if(timer){
+                clearTimeout(timer);
+            }
         },
         handleSelectionChange(val) {
             this.multipleSelection = val;
