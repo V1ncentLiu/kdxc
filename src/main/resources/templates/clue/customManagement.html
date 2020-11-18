@@ -369,8 +369,8 @@
                 <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
                     <template slot-scope="scope">
                         <div v-if="scope.row.isTrack === 1">
-                            <el-button @click="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" type="text" size="small">
-                                点击查看<span style="color:red;">({{scope.row.trackNum}})</span>
+                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" @mouseleave.native="hideTrackingDialog()" type="text" size="small">
+                                点击查看2<span style="color:red;">({{scope.row.trackNum}})</span>
                             </el-button>
                         </div>
                     </template>
@@ -958,6 +958,7 @@
   // 业务线(待分配新资源页面和客户管理页面允许外包业务线复制，外包业务线编码如下：1、5、6、10、11、12、13)
   var businessLine=[[${businessLine}]];
   var canCopy=[[${canCopy}]];
+  var timer = null;
   var  customerManVM=new Vue({
     el: '#myCustom',
     data: function() {
@@ -1655,21 +1656,29 @@
             });
         },
       openTrackingDialog(cid){
-        var param = {};
-        param.clueId = cid;
-        axios.post('/aggregation/tracking/queryList', param)
-        .then(function (response) {
-          console.log(response.data)
-          if (response.data.code == 0) {
-            customerManVM.trackingParam.tableData = response.data.data
-            customerManVM.trackingParam.trackingDialogVisible = true;
-          } else {
-            customerManVM.$message.error(response.data.msg);
-          }
-        }).catch(function (error) {
-          console.log(error);
-        });
+    	    debugger;
+          timer = setTimeout(function(){
+              var param = {};
+              param.clueId = cid;
+              axios.post('/aggregation/tracking/queryList', param)
+                  .then(function (response) {
+                      console.log(response.data)
+                      if (response.data.code == 0) {
+                          customerManVM.trackingParam.tableData = response.data.data
+                          customerManVM.trackingParam.trackingDialogVisible = true;
+                      } else {
+                          customerManVM.$message.error(response.data.msg);
+                      }
+                  }).catch(function (error) {
+                  console.log(error);
+              });
+          }, 500);
 
+      },
+      hideTrackingDialog(){
+            if(timer){
+                clearTimeout(timer);
+            }
       },
       submitTransferForm(formName) {
         this.$refs[formName].validate((valid) => {
