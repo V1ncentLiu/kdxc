@@ -368,10 +368,23 @@
                 </el-table-column>
                 <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.isTrack === 1">
-                            <el-button @click.stop="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" @mouseleave.native="hideTrackingDialog()" type="text" size="small">
-                                点击查看2<span style="color:red;">({{scope.row.trackNum}})</span>
-                            </el-button>
+                        <div v-if="scope.row.isTrack === 1" @mouseenter="openTrackingDialogByhover(scope.row.clueId)">
+                            <el-popover
+                                    title="跟进记录"
+                                    placement="bottom"
+                                    width="1002"
+                                    trigger="hover">
+                                <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="recordTable">
+                                    <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
+                                    <el-table-column align="center" prop="callTime" width="170" label="跟进时间"></el-table-column>
+                                    <el-table-column align="center" prop="customerStatusName" label="客户状态" width="90"></el-table-column>
+                                    <el-table-column align="center" prop="isConnect" :formatter="formatIsCall" label="是否接通" width="100"></el-table-column>
+                                    <el-table-column align="center" prop="callDetailsName" label="客户关注点" width="300"></el-table-column>
+                                    <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="170"></el-table-column>
+                                    <el-table-column align="center" prop="createUserName" label="创建人" width="140"></el-table-column>
+                                </el-table>
+                                <el-button slot="reference" @click.stop="openTrackingDialog(scope.row.clueId)"  type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
+                            </el-popover>
                         </div>
                     </template>
                 </el-table-column>
@@ -1677,6 +1690,20 @@
           }, 500);
 
       },
+        openTrackingDialogByhover(cid){
+            var param = {};
+            param.clueId = cid;
+            axios.post('/aggregation/tracking/queryList', param)
+                .then(function (response) {
+                    if (response.data.code == 0) {
+                        customerManVM.recordTable = response.data.data
+                    } else {
+                        customerManVM.$message.error(response.data.msg);
+                    }
+                }).catch(function (error) {
+            });
+
+        },
       hideTrackingDialog(){
             if(timer){
                 clearTimeout(timer);
