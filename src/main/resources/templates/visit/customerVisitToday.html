@@ -36,9 +36,32 @@
             </el-table-column>
             <el-table-column prop="isTrack" label="跟进记录"  align="center" width="120">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.isTrack===1"> 
-                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
-                        </div> 
+                        <div v-if="scope.row.isTrack === 1" @mouseenter="openTrackingDialogByhover(scope.row.clueId)">
+                            <el-popover
+                                    title="跟进记录"
+                                    placement="top"
+                                    width="1002"
+                                    open-delay="500"
+                                    trigger="hover">
+                                <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="recordTable">
+                                    <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
+                                    <el-table-column align="center" prop="callTime" width="170" label="跟进时间"></el-table-column>
+                                    <el-table-column align="center" prop="customerStatusName" label="客户状态" width="90"></el-table-column>
+                                    <el-table-column align="center" prop="isConnect" :formatter="formatIsCall" label="是否接通" width="100"></el-table-column>
+                                    <el-table-column align="center" prop="callDetailsName" label="客户关注点" width="300">
+                                        <template slot-scope="scope">
+                                            {{scope.row.callDetailsName}}
+                                            <span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != ''">
+                                            -</span>{{scope.row.focusPoint}}
+                                        </template>
+
+                                    </el-table-column>
+                                    <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="170"></el-table-column>
+                                    <el-table-column align="center" prop="createUserName" label="创建人" width="140"></el-table-column>
+                                </el-table>
+                                <el-button slot="reference" @click.stop="openTrackingDialog(scope.row.clueId)"  type="text" size="small"> 点击查看</el-button>
+                            </el-popover>
+                        </div>
                     </template>
             </el-table-column>
             <el-table-column align="center" prop="customerStatusName" label="客户状态" width="120"></el-table-column>
@@ -324,9 +347,11 @@
 <script th:inline="javascript" >
 // var dashboardTelSale =[[${dashboardTelSale}]];
 // console.log(dashboardTelSale)
+var timer=null;
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        recordTable:[],
         dataUrlParam:{
             dataUrlArr:[{
                 name:"未签约客户",
@@ -477,6 +502,11 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+        formatIsCall(row, column){
+            //是否接通
+            console.log(row)
+            return row.isCall==0?"否": row.isCall==1?"接通/微信沟通":""
+        },
         async gettelNumberIcon(tel,clueId) {//小图标外呼并跳转到电销维护页面
             var isReturn =false;
             await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
@@ -518,19 +548,40 @@ var mainDivVM = new Vue({
             window.location.href="/aggregation/publiccustomer/listPage"; 
         },
         openTrackingDialog(cid){//跟进记录点击方法
+            timer = setTimeout(function(){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/aggregation/tracking/queryList', param)
+                    .then(function (response) {
+                        if (response.data.code == 0) {
+                            mainDivVM.trackingParam.tableData = response.data.data
+                            mainDivVM.trackingParam.trackingDialogVisible = true;
+                        } else {
+                            mainDivVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            }, 500);
+        },
+        openTrackingDialogByhover(cid){
             var param = {};
             param.clueId = cid;
             axios.post('/aggregation/tracking/queryList', param)
                 .then(function (response) {
                     if (response.data.code == 0) {
-                        mainDivVM.trackingParam.tableData = response.data.data
-                        mainDivVM.trackingParam.trackingDialogVisible = true;
+                        mainDivVM.recordTable = response.data.data
                     } else {
                         mainDivVM.$message.error(response.data.msg);
                     }
                 }).catch(function (error) {
-                console.log(error);
             });
+
+        },
+        hideTrackingDialog(){
+            if(timer){
+                clearTimeout(timer);
+            }
         },
         handleSelectionChange(val) {
             this.multipleSelection = val;
