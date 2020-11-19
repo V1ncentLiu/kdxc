@@ -172,6 +172,7 @@
     var clueFileList = [[${clueFileList}]];//上传文件
     var ossUrl = [[${ossUrl}]];//上传文件地
     var randomNameMap = new Map();
+    var uploadNum = 0;
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#editSignAndFile',
@@ -297,33 +298,7 @@
                 this.multipleFileSelection = val;
             },
             goback(){window.history.go(-1);},
-            // element ui upload
-            getUploadParam(){
-                var signUrl = this.ossUrl+"?serviceType=aggregation";
-                var param={};
 
-                 axios.get(signUrl, param)
-                .then(function (response) {
-                   // console.info(response);
-                    var respData= response.data;
-                    var host = respData.host;
-                    var params={};
-                    var new_multipart_params = {
-                            dir:respData.dir,
-                            'policy': respData.policy,
-                            'OSSAccessKeyId': respData.accessid,
-                            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
-                            'signature': respData.signature,
-                            'x:params':params,//自定义编码，basse64编码后的字符串,
-                            'realName':''
-                   };
-                  mainDivVM.uploadParamData= new_multipart_params;
-                  mainDivVM.uploadOssHost = host;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-            },
             selectFile(file, fileList){
                 if (fileList.length > 0){
                     mainDivVM.showUploadButton = true;
@@ -332,7 +307,37 @@
             },
             submitUpload(){
                 //this.customUpload();
-                this.$refs.refundApplyImgUpload.submit();
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
+                var param={};
+                axios.get(signUrl, param)
+                    .then(function (response) {
+                        // console.info(response);
+                        var respData= response.data;
+                        var host = respData.host;
+                        var params={};
+                        var new_multipart_params = {
+                            dir:respData.dir,
+                            'policy': respData.policy,
+                            'OSSAccessKeyId': respData.accessid,
+                            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                            'signature': respData.signature,
+                            'x:params':params,//自定义编码，basse64编码后的字符串,
+                            'realName':''
+                        };
+                        mainDivVM.uploadParamData= new_multipart_params;
+                        mainDivVM.uploadOssHost = host;
+                        //同步
+                        mainDivVM.$nextTick(() => {
+                            //框架上传方法
+                            mainDivVM.$refs.refundApplyImgUpload.submit()
+                        });
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message.error('上传图片接口错误');
+                    });
+
             },
             handlePreview(file){
              
@@ -353,6 +358,7 @@
              this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
             },
             handleSuccess(response, file, fileList) {
+                debugger;
                 var realName = file.name;
                 var randomName = randomNameMap.get(file.uid);
                 var imgUrl = mainDivVM.uploadOssHost + "/" + randomName;
@@ -368,13 +374,18 @@
                 axios.post('/tele/clueMyCustomerInfo/batchUploadClueFile', param).then(function (response) {
                     mainDivVM.$message({
                         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                            axios.post('/businesssign/findFileBySignId', param)
-                                .then(function (response) {
-                                    console.log(response)
-                                    mainDivVM.tableDataC1 = response.data.data;
-                                    mainDivVM.fileList = [];
-                                    mainDivVM.showUploadButton = false;
-                                });
+                            uploadNum =uploadNum +1;
+                            if (uploadNum == fileList.length){
+                                axios.post('/businesssign/findFileBySignId', param)
+                                    .then(function (response) {
+                                        console.log(response)
+                                        mainDivVM.tableDataC1 = response.data.data;
+                                        mainDivVM.fileList = [];
+                                        mainDivVM.showUploadButton = false;
+                                        uploadNum = 0;
+                                    });
+                            }
+
                         }
                     });
                 });
@@ -421,7 +432,6 @@
             }
         },
         created() {
-            this.getUploadParam();
             //初始化签约单地址
             var signAddress = signData[0].signAddress;
             this.signAddressForm.signAddress =  signAddress;
