@@ -146,4 +146,7 @@ public class Constants {
     public  static  Integer RECHARGE_WAY_ALI_PAY = 1;
     //微信
     public  static  Integer RECHARGE_WAY_WEXIN_PAY = 2;
+
+    // redis前缀 验证码MsgID
+    public static String REDIS_NEXT_PREFIX = "huiju:user:next:";
 }

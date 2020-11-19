@@ -1,31 +1,5 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-
-import com.kuaidao.aggregation.dto.clue.*;
-import com.kuaidao.manageweb.feign.clue.TelCreatePhoneAuditFeignClient;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
@@ -35,6 +9,7 @@ import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
@@ -61,6 +36,7 @@ import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
+import com.kuaidao.manageweb.feign.clue.TelCreatePhoneAuditFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.deduplicationDetail.DeduplicationDetailFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
@@ -84,6 +60,30 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -139,6 +139,8 @@ public class MyCustomerClueController {
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
+
+    public static final String VALIDATE_PHONE_WECHAT_MSG = "请上传资料（沟通记录录音或者聊天截图）";
 
     /**
      * 初始化我的客户
@@ -300,7 +302,7 @@ public class MyCustomerClueController {
      * @return
      */
     @RequestMapping("/customerEditInfo")
-    public String customerEditInfo(HttpServletRequest request, @RequestParam String clueId) {
+    public String customerEditInfo(HttpServletRequest request, @RequestParam String clueId ) {
         logger.info("customerEditInfo_clueId {{}}", clueId);
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
@@ -496,6 +498,12 @@ public class MyCustomerClueController {
             request.setAttribute("telCreatePhoneAudits", new ArrayList<>());
         }
         request.setAttribute("telemarketingLayoutDTO", telemarketingLayoutDTO);
+
+        // 添加“下一条”透传
+        request.setAttribute("nextClueIds", request.getParameter("nextClueIds"));
+        // hJtype 参数传递
+        request.setAttribute("hJtype", request.getParameter("hJtype"));
+
         return "clue/addCustomerMaintenance";
     }
 
@@ -843,8 +851,7 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/uploadClueFile")
     @ResponseBody
-    public JSONResult<String> uploadClueFile(HttpServletRequest request,
-            @RequestBody ClueFileDTO dto) {
+    public JSONResult<String> uploadClueFile(@RequestBody ClueFileDTO dto) {
         // 获取已上传的文件数据
         if (null != dto && null != dto.getFilePath()) {
             String filepath = dto.getFilePath();
@@ -860,7 +867,22 @@ public class MyCustomerClueController {
         }
         return myCustomerFeignClient.uploadClueFile(dto);
     }
-
+    /**
+     * 批量上传资源文件
+     *
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/batchUploadClueFile")
+    public JSONResult<String> batchUploadClueFile(@RequestBody ClueFileDTO dto) {
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if (null != user) {
+            dto.setUploadUser(user.getId());
+            dto.setUploadTime(new Date());
+        }
+        return myCustomerFeignClient.batchUploadClueFile(dto);
+    }
     /**
      * 查询跟进记录数据
      * 
@@ -946,6 +968,9 @@ public class MyCustomerClueController {
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
+        // 传递参数加入
+        request.setAttribute("hJtype", request.getParameter("hJtype"));
+        request.setAttribute("nextClueIds", request.getParameter("nextClueIds"));
         JSONResult<Integer> result =
                 clueBasicFeignClient.getIsInviteLetterById(Long.valueOf(clueId));
         if (result.getCode().equals(JSONResult.SUCCESS)) {
@@ -1191,7 +1216,20 @@ public class MyCustomerClueController {
                                 || user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)
                                 || user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))
                         && CollectionUtils.isEmpty(dto.getClueFiles())) {
-                    return new JSONResult<String>().fail("-1", "请上传资料（沟通记录录音或者聊天截图）");
+                    return new JSONResult<String>().fail("-1", VALIDATE_PHONE_WECHAT_MSG);
+                }
+                //小物种电销顾问和总监在新建客户／维护客户时在录入微信1，微信2必须上传资料，否则不允许进行保存
+                if(RoleCodeEnum.DXCYGW.name().equals(user.getRoleList().get(0).getRoleCode())
+                        || RoleCodeEnum.DXZJ.name().equals(user.getRoleList().get(0).getRoleCode())){
+                    if (null != user.getBusinessLine()
+                            && user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)) {
+
+                        if((StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
+                                || StringUtils.isNotBlank(dto.getClueCustomer().getWechat2()))
+                                && CollectionUtils.isEmpty(dto.getClueFiles())){
+                                return new JSONResult<String>().fail("-1", VALIDATE_PHONE_WECHAT_MSG);
+                        }
+                    }
                 }
                 if (null != user.getBusinessLine() && (user.getBusinessLine()
                         .equals(BusinessLineConstant.SHANGJI)
@@ -1441,6 +1479,15 @@ public class MyCustomerClueController {
                                 }
                             }
                         }
+                        if (null != user.getBusinessLine()) {
+                            if (user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)) {
+                                String res = validateClueFileWechat(clueCustomer, dto);
+                                //新增微信号 资料上传判断
+                                if(!"".equals(res)){
+                                    return new JSONResult<String>().fail("-3",res);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1592,15 +1639,14 @@ public class MyCustomerClueController {
         String resultStr = "";
         ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
         clueQueryDTO.setClueId(dto.getClueId());
-        JSONResult<List<ClueFileDTO>> clueFilesRes =
-                myCustomerFeignClient.findClueFile(clueQueryDTO);
+        JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
         List<ClueFileDTO> clueFiles = clueFilesRes.getData();
         // 新增
         if (StringUtils.isBlank(clueCustomer.getPhone())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1613,14 +1659,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone2())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone2())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1633,14 +1679,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone3())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone3())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1653,14 +1699,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone4())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone4())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1673,14 +1719,14 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         if (StringUtils.isBlank(clueCustomer.getPhone5())
                 && StringUtils.isNotBlank(dto.getClueCustomer().getPhone5())) {
             if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
                     || clueFiles.size() == 0) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
             Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
                 @Override
@@ -1693,7 +1739,40 @@ public class MyCustomerClueController {
             long diffMinuteLong =
                     Math.abs(DateUtil.diffMinuteLong(phoneCreateTime, clueFileDTO.getUploadTime()));
             if (diffMinuteLong > DIFF_MIN) {
-                return "请上传资料（沟通记录录音或者聊天截图）";
+                return VALIDATE_PHONE_WECHAT_MSG;
+            }
+        }
+        return resultStr;
+    }
+
+
+    /**
+     *  维护客户时在录入微信1，微信2必须上传资料，否则不允许进行保存
+     */
+    private String validateClueFileWechat(ClueCustomerDTO clueCustomer, ClueDTO dto) {
+        String resultStr = "";
+        ClueQueryDTO clueQueryDTO = new ClueQueryDTO();
+        clueQueryDTO.setClueId(dto.getClueId());
+        JSONResult<List<ClueFileDTO>> clueFilesRes = myCustomerFeignClient.findClueFile(clueQueryDTO);
+        List<ClueFileDTO> clueFiles = clueFilesRes.getData();
+        if ((StringUtils.isBlank(clueCustomer.getWechat())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getWechat()))
+                ||(StringUtils.isBlank(clueCustomer.getWechat2())
+                && StringUtils.isNotBlank(dto.getClueCustomer().getWechat2()))) {
+            if (!clueFilesRes.getCode().equals(JSONResult.SUCCESS) || null == clueFiles
+                    || clueFiles.size() == 0) {
+                return VALIDATE_PHONE_WECHAT_MSG;
+            }
+            Collections.sort(clueFiles, new Comparator<ClueFileDTO>() {
+                @Override
+                public int compare(ClueFileDTO o1, ClueFileDTO o2) {
+                    return o2.getUploadTime().compareTo(o1.getUploadTime());
+                }
+            });
+            ClueFileDTO clueFileDTO = clueFiles.get(0);
+            long diffMinuteLong = Math.abs(DateUtil.diffMinuteLong(new Date(), clueFileDTO.getUploadTime()));
+            if (diffMinuteLong > DIFF_MIN) {
+                return VALIDATE_PHONE_WECHAT_MSG;
             }
         }
         return resultStr;
@@ -1760,6 +1839,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/customerVisitToday")
     public String customerVisitToday(HttpServletRequest request, Model model) {
+
+        request.setAttribute("hJtype",request.getParameter("hJtype"));
         return "visit/customerVisitToday";
     }
 

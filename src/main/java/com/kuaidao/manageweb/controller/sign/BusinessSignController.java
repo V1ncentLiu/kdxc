@@ -10,19 +10,20 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
+import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
@@ -116,7 +117,11 @@ public class BusinessSignController {
     PayDetailFeignClient payDetailFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private MyCustomerFeignClient myCustomerFeignClient;
 
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
     /**
      * 有效性签约单确认列表页面
      *
@@ -586,17 +591,17 @@ public class BusinessSignController {
      * 跳转到 电销我的客户，客户管理签约单明细页面
      */
     @RequestMapping("/myCustomSignRecordPage")
-    public String myCustomSignRecordPage(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam String signId, @RequestParam String readyOnly,
-            @RequestParam String createUser, @RequestParam(required = false) String showSignButton,
+    public String myCustomSignRecordPage(HttpServletRequest request, @RequestParam String clueId, @RequestParam String signId,
+            @RequestParam String readyOnly, @RequestParam String createUser, @RequestParam(required = false) String showSignButton,
             @RequestParam String type) throws Exception {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        String roleCode = user.getRoleList().get(0).getRoleCode();
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
         SignParamDTO paramDTO = new SignParamDTO();
         paramDTO.setClueId(Long.valueOf(clueId));
         paramDTO.setSignId(Long.valueOf(signId));
         JSONResult<BusSignRespDTO> busSign = queryOne(paramDTO);
-
         BusSignRespDTO sign = busSign.getData();
         List<BusSignRespDTO> signData = new ArrayList();
         signData.add(sign);
@@ -609,16 +614,9 @@ public class BusinessSignController {
         if ("4".equals(sign.getPayType())) {
             readyOnly = "1";
         }
-        // if ("1".equals(sign.getPayType())) {
-        // /**
-        // * 全款时候：不存在定金 尾款 以及 追加定金的情况
-        // */
-        // request.setAttribute("PayAllData", PayAllData);
-        // } else {
         PayDetailReqDTO detailReqDTO = new PayDetailReqDTO();
         detailReqDTO.setSignId(Long.valueOf(signId));
-        JSONResult<List<PayDetailRespDTO>> resListJson =
-                payDetailFeignClient.queryList(detailReqDTO);
+        JSONResult<List<PayDetailRespDTO>> resListJson = payDetailFeignClient.queryList(detailReqDTO);
 
         boolean allRepeatStatus = false;// 全款判单是否显示
         boolean oneRepeatStatus = false;// 定金判单是否显示
@@ -663,6 +661,7 @@ public class BusinessSignController {
                     }
                 }
             }
+            request.setAttribute("roleCode", roleCode);
             request.setAttribute("allData", all);
             request.setAttribute("oneData", one);
             request.setAttribute("twoData", two);
@@ -674,8 +673,7 @@ public class BusinessSignController {
         }
         // }
         // 查询签约单退款信息
-        if (sign.getSignStatus() == 2
-                && (sign.getRefundStatus() == 4 || sign.getRefundStatus() == 6)) {
+        if (sign.getSignStatus() == 2 && (sign.getRefundStatus() == 4 || sign.getRefundStatus() == 6)) {
             Map map = new HashMap();
             map.put("signId", Long.valueOf(signId));
             map.put("type", 1);// 退款
@@ -706,7 +704,6 @@ public class BusinessSignController {
             request.setAttribute("companySelect", proJson.getData());
         }
 
-
         if (showSignButton != null) {
             request.setAttribute("showSignButton", showSignButton);
         } else {
@@ -716,11 +713,13 @@ public class BusinessSignController {
         request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         request.setAttribute("clueId", clueId);
         request.setAttribute("signId", signId);
-        request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
+        // readyOnly == 1 页面只读（没有添加按钮）
+        request.setAttribute("readyOnly", readyOnly);
         request.setAttribute("signStatus", sign.getSignStatus());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("type", type);
         return "clue/showSignAndPayDetail";
+
     }
 
     /**
@@ -766,7 +765,7 @@ public class BusinessSignController {
             @RequestParam String signId, @RequestParam String readyOnly,
             @RequestParam(required = false) String showSignButton,
             @RequestParam(required = false) Integer type) throws Exception {
-
+        UserInfoDTO user = getUser();
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
         SignParamDTO paramDTO = new SignParamDTO();
@@ -875,7 +874,24 @@ public class BusinessSignController {
         request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         request.setAttribute("type", type);
-        return "bus_mycustomer/showSignAndPayDetail";
+
+        request.setAttribute("ossUrl", ossUrl);
+        //增加附件
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
+        // 获取已上传的文件数据
+        fileDto.setSignId(Long.valueOf(signId));
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findFileBySignId(fileDto);
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode()) && clueFileList.getData() != null) {
+            request.setAttribute("clueFileList", clueFileList.getData());
+        }
+        String   roleCode = user.getRoleList().get(0).getRoleCode();
+        request.setAttribute("roleCode", roleCode);
+        if (RoleCodeEnum.XMWY.name().equals(roleCode)) {
+            return "clue/editSignAndFile";
+        } else {
+            return "bus_mycustomer/showSignAndPayDetail";
+        }
     }
 
     /**
@@ -1031,4 +1047,29 @@ public class BusinessSignController {
     public JSONResult<Boolean> updateContractTime(@RequestBody BusinessSignDTO businessSignDTO){
         return businessSignFeignClient.updateContractTime(businessSignDTO);
     }
+
+    /**
+     * 更新签约单地址
+     */
+    @ResponseBody
+    @RequestMapping("/updateSignAddress")
+    public JSONResult<Boolean> updateSignAddress(@RequestBody SignParamDTO dto) {
+        if (StringUtils.isBlank(dto.getSignAddress())) {
+            return  new JSONResult<Boolean>().success(null);
+        }
+        return businessSignFeignClient.updateSignAddress(dto);
+    }
+
+    /**
+     * 查询签约单对应文件
+     * @param dto
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/findFileBySignId")
+    public JSONResult<List<ClueFileDTO>> findClueFile( @RequestBody ClueQueryDTO dto) {
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findFileBySignId(dto);
+        return  clueFileList;
+    }
+
 }

@@ -19,7 +19,9 @@
         <div class="inforTitle">客户详情</div>
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
 
-            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}</span> </div>
+            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}</span>
+                <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息</el-button>
+            </div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
@@ -300,7 +302,7 @@
                         <template
                                 slot-scope="scope">
                             <div v-if="scope.row.isCall === 0">未接通</div>
-                            <div v-else-if="scope.row.isCall ===1">已接通</div>
+                            <div v-else-if="scope.row.isCall ===1">接通/微信沟通</div>
                         </template>
                     </el-table-column>
                     <el-table-column
@@ -434,7 +436,82 @@
             </el-form>
         </template>
     </el-dialog>
+    <el-dialog title="重复资源信息" :visible.sync="dialogFormVisible1" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB10 dialogForm" v-for="item in repeatClueList" height="600">
+            <div class="fs16 redcolor marginB20">重复时间：{{formatTimeFn(item.discoverTime)}}</div>
+            <div class="borderbox padding10">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="客户姓名：" :label-width="formLabelWidth">{{item.clueDTO.clueCustomer.cusName}}</el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="手机号：" :label-width="formLabelWidth" >{{getPhones(item.clueDTO.clueCustomer)}}</el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="微信：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.wechat}}<span @click="lookWechat(item.clueDTO.clueCustomer)" v-if="(item.clueDTO.clueCustomer.wechat2 !=null && item.clueDTO.clueCustomer.wechat2 !='')||(item.clueDTO.clueCustomer.wechatCode !=null && item.clueDTO.clueCustomer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="邮箱：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.email}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueCustomer.qq}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.typeName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                            {{formatTimeFn(item.clueDTO.clueBasic.messageTime)}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.categoryName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.searchWord}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.messagePoint}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="地域信息：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueIntention.address}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.remark}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
 
+            </div>
+        </el-form>
+    </el-dialog>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -597,6 +674,12 @@
     var ossUrl = [[${ossUrl}]];
     var callRecord = [[${callRecord}]];//通话记录
     var loginUserId=[[${loginUserId}]];
+    var repeatClueStatus=[[${repeatClueStatus}]];
+    var repeatClueList =[[${repeatClueList}]];
+    var repeatStatus =false;
+    if(repeatClueStatus == 1 ){
+        repeatStatus = true;
+    }
     function crtTimeFtt(val, row) {
         if (val != null) {
             var date = new Date(val);
@@ -753,6 +836,9 @@
         el: '#addCustomer',
         data: function () {
             return {
+                dialogFormVisible1: false,
+                repeatClueList:repeatClueList,
+                repeatStatus:repeatStatus,
                 audioShow:false,
                 isShowPhoneButton:false,
                 wechatVisible: false,//查看微信号
@@ -897,6 +983,42 @@
             }
         },
         methods: {
+            getPhones(cus){
+                var phones = '';
+                phones = cus.phone;
+                if(cus.phone2 != null && cus.phone2 != ''){
+                    if(phones != ''){
+                        phones = phones +","+cus.phone2;
+                    }else {
+                        phones = cus.phone2;
+                    }
+                }
+                if(cus.phone3 != null && cus.phone3 != ''){
+                    if(phones != ''){
+                        phones = phones +","+cus.phone3;
+                    }else {
+                        phones = cus.phone3;
+                    }
+                }
+                if(cus.phone4 != null && cus.phone4 != ''){
+                    if(phones != ''){
+                        phones = phones +","+cus.phone4;
+                    }else {
+                        phones = cus.phone4;
+                    }
+                }
+                if(cus.phone4 != null && cus.phone5 != ''){
+                    if(phones != ''){
+                        phones = phones +","+cus.phone5;
+                    }else {
+                        phones = cus.phone5;
+                    }
+                }
+                return phones;
+            },
+            repeatClueCustomers(){
+                addCustomerVM.dialogFormVisible1 =true;
+            },
             gettelNumberIcon(tel) {
                 //外呼手机
                 var param = {};

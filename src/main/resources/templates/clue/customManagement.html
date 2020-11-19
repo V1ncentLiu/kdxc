@@ -9,6 +9,7 @@
     <style>
         /*button a{color:#fff!important;}
         .el-checkbox { width: 100%; }*/
+        .mainSearchBg .el-form-item__label{width: 87px;}
     </style>
 </head>
 <body>
@@ -29,20 +30,23 @@
         <shiro:hasPermission name="customerManager:distribute">
             <el-button type="danger" @click="openvicemanagerForm">副总分发</el-button>
         </shiro:hasPermission>
-    </el-row>
-    <div class="mainSearchBg">
-        <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <!--     <el-form-item label="全部资源:">
-                        <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
-                            <el-option
-                                v-for="item in isTransfer"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>  -->
+        <shiro:hasPermission name="customerManager:releaseClue">
+            <el-button type="success" @click="releaseClue" :disabled="releaseBtnDisabled" >释放资源</el-button>
+          </shiro:hasPermission>
+     </el-row>
+     <div class="mainSearchBg">
+         <div class="mainSearchFormBox">
+             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                 <!--     <el-form-item label="全部资源:">
+                         <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
+                             <el-option
+                                 v-for="item in isTransfer"
+                                 :key="item.value"
+                                 :label="item.label"
+                                 :value="item.value">
+                             </el-option>
+                         </el-select>
+                     </el-form-item>  -->
                 <!--  <el-form-item label="">
                      <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
                          <el-option
@@ -277,13 +281,13 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否签约:" prop="isSign">
-                        <el-select v-model="form.isSign" clearable placeholder="是否签约">
+                        <el-select v-model="form.isSign" clearable placeholder="是否签约"   :disabled="disabledIsSign">
                             <el-option v-for="item in isSignOptions" :key="item.value" :label="item.name"
                                        :value="item.value"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="是否补齐尾款:">
-                        <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable>
+                        <el-select v-model="form.isTailMoney" placeholder="是否补齐尾款" clearable  :disabled="disabledIsTailMoney">
                             <el-option v-for="item in isTailMoneyArr" :key="item.value" :label="item.label"
                                        :value="item.value">
                             </el-option>
@@ -305,7 +309,9 @@
                     <el-form-item label="手机号归属地:">
                         <el-input v-model="form.phoneLocale" placeholder="手机号归属地" ></el-input>
                     </el-form-item>
-                    
+                    <el-form-item label="未跟访时间(天):">
+                        <el-input v-model="form.notFollowUpTime" placeholder="最长不允许超过三位数"   maxlength="3"  show-word-limit @keyup.native="number"></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -362,10 +368,31 @@
                 </el-table-column>
                 <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.isTrack === 1">
-                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
-                                点击查看<span style="color:red;">({{scope.row.trackNum}})</span>
-                            </el-button>
+                        <div v-if="scope.row.isTrack === 1" @mouseenter="openTrackingDialogByhover(scope.row.clueId)">
+                            <el-popover
+                                    title="跟进记录"
+                                    placement="top"
+                                    width="1002"
+                                    open-delay="500"
+                                    trigger="hover">
+                                <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="recordTable">
+                                    <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
+                                    <el-table-column align="center" prop="callTime" width="170" label="跟进时间"></el-table-column>
+                                    <el-table-column align="center" prop="customerStatusName" label="客户状态" width="90"></el-table-column>
+                                    <el-table-column align="center" prop="isConnect" :formatter="formatIsCall" label="是否接通" width="100"></el-table-column>
+                                    <el-table-column align="center" prop="callDetailsName" label="客户关注点" width="300">
+                                        <template slot-scope="scope">
+                                            {{scope.row.callDetailsName}}
+                                            <span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != ''">
+                                            -</span>{{scope.row.focusPoint}}
+                                        </template>
+
+                                    </el-table-column>
+                                    <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="170"></el-table-column>
+                                    <el-table-column align="center" prop="createUserName" label="创建人" width="140"></el-table-column>
+                                </el-table>
+                                <el-button slot="reference" @click.stop="openTrackingDialog(scope.row.clueId)"  type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
+                            </el-popover>
                         </div>
                     </template>
                 </el-table-column>
@@ -720,7 +747,7 @@
                 { required: true, message: '请选择活动区域电销总监', trigger: 'change' }
             ]"
                 :label-width="formLabelWidth">
-                <el-select v-model="formTransfer.salesDirector" placeholder="请选择" style="width: 80%;">
+                <el-select v-model="formTransfer.salesDirector" placeholder="请选择" style="width: 80%;" filterable>
                     <el-option
                         v-for="item in saleGroupList"
                         :key="item.id"
@@ -952,10 +979,17 @@
   // 业务线(待分配新资源页面和客户管理页面允许外包业务线复制，外包业务线编码如下：1、5、6、10、11、12、13)
   var businessLine=[[${businessLine}]];
   var canCopy=[[${canCopy}]];
+  var timer = null;
   var  customerManVM=new Vue({
     el: '#myCustom',
     data: function() {
       return {
+          //释放资源按钮
+          releaseBtnDisabled:false,
+          //是否签约默认可选
+          disabledIsSign:false,
+          //是否补齐尾款默认可选
+          disabledIsTailMoney:false,
           mediumArry:[],
           telemarketingLayout:telemarketingLayout,
           dialogForm: {
@@ -1117,7 +1151,8 @@
           isSign:0,
             phtraConversion:"",
             cusLevelList:[],
-            phoneLocale:""
+            phoneLocale:"",
+            notFollowUpTime:""
         },
         form1: {
           type: [],
@@ -1203,6 +1238,11 @@
       }
     },
     methods: {
+        formatIsCall(row, column){
+            //是否接通
+            console.log(row)
+            return row.isCall==0?"否": row.isCall==1?"接通/微信沟通":""
+        },
     	async gettelNumberIcon(tel,clueId) {
     	  var isReturn =false;
       	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
@@ -1250,6 +1290,15 @@
         }
         return moment(cellValue).format("YYYY-MM");
       },
+        //只输入正整数
+        number() {
+            var pattern = /^[1-9][0-9]*$/ // 正整数的正则表达式
+            // 不符合正整数时
+            if (!pattern.test(this.form.notFollowUpTime)) {
+                // input 框绑定的内容为空
+                this.form.notFollowUpTime = ''
+            }
+        },
       //初始化页面
       initTableData(){
         var param = {};
@@ -1328,6 +1377,7 @@
           });
           return;
         }
+          param.notFollowUpTime = this.form.notFollowUpTime;
         axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
           var resobj= response.data;
           var pageData=resobj.data;
@@ -1634,21 +1684,43 @@
             });
         },
       openTrackingDialog(cid){
-        var param = {};
-        param.clueId = cid;
-        axios.post('/aggregation/tracking/queryList', param)
-        .then(function (response) {
-          console.log(response.data)
-          if (response.data.code == 0) {
-            customerManVM.trackingParam.tableData = response.data.data
-            customerManVM.trackingParam.trackingDialogVisible = true;
-          } else {
-            customerManVM.$message.error(response.data.msg);
-          }
-        }).catch(function (error) {
-          console.log(error);
-        });
+    	    debugger;
+          timer = setTimeout(function(){
+              var param = {};
+              param.clueId = cid;
+              axios.post('/aggregation/tracking/queryList', param)
+                  .then(function (response) {
+                      console.log(response.data)
+                      if (response.data.code == 0) {
+                          customerManVM.trackingParam.tableData = response.data.data
+                          customerManVM.trackingParam.trackingDialogVisible = true;
+                      } else {
+                          customerManVM.$message.error(response.data.msg);
+                      }
+                  }).catch(function (error) {
+                  console.log(error);
+              });
+          }, 500);
 
+      },
+        openTrackingDialogByhover(cid){
+            var param = {};
+            param.clueId = cid;
+            axios.post('/aggregation/tracking/queryList', param)
+                .then(function (response) {
+                    if (response.data.code == 0) {
+                        customerManVM.recordTable = response.data.data
+                    } else {
+                        customerManVM.$message.error(response.data.msg);
+                    }
+                }).catch(function (error) {
+            });
+
+        },
+      hideTrackingDialog(){
+            if(timer){
+                clearTimeout(timer);
+            }
       },
       submitTransferForm(formName) {
         this.$refs[formName].validate((valid) => {
@@ -1936,96 +2008,133 @@
             }
             return false;
         },
-
+        releaseClue() {
+            var rows =  this.multseleSelection;
+            if (rows.length < 1) {
+                if (rows.length != 1) {
+                    this.$message({message: '请选择资源', type: 'warning'});
+                    return;
+                }
+            }
+            this.$confirm('是否确认释放以下'+rows.length+'条资源到公有池？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                customerManVM.releaseBtnDisabled = true;
+                var ids = [];
+                for (var i = 0; i < rows.length; i++) {
+                    ids.push(rows[i].clueId);
+                }
+                var param = {};
+                param.clueIds = ids;
+                console.log(param);
+                axios.post('/aggregation/publiccustomer/batchReleaseClue', param)
+                    .then(function (response) {
+                        var data = response.data;
+                        if (data.code == '0') {
+                            customerManVM.$message({
+                                message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                    customerManVM.releaseBtnDisabled = false;
+                                    customerManVM.initTableData();
+                                }
+                            });
+                        }
+                    });
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消释放'
+                });
+            });
+        },
     },
     mounted(){
       document.getElementById('myCustom').style.display = 'block';
     },
-    created(){
-      // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
-      // 进入页面判断有是否有存储值
-      if(!this.paginationShow){
-        var storeVal = this.getSessionStore("telemarketingStoreForm");
-        var otherVal = this.getSessionStore("telemarketingOtherVal");
-        if(storeVal && otherVal){
-          this.form = storeVal;
-          this.$set(this.pager,"currentPage",otherVal.currentPage);
-          this.storeId = otherVal.clueId;
-          this.scrollTop = otherVal.scrollTop;
-        }
-        // 取页数存储
-        var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        if(localVal){this.pager.pageSize = localVal;}
-      };
-      if(ownOrgId){
-        this.isDXZDisabled= true;
-        param={};
-        param.orgId=ownOrgId;
-        param.roleCode="DXCYGW";
-        param.statusList =[1,3];
-        axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
-          customerManVM.busSaleArr=response.data.data;
-        });
-      }//电销总监电销组筛选按钮不可点击
-      //初始化数据列表
-      this.initTableData();
-      //客户状态
-      var param={};
-      param.groupCode="customerStatus";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-        // customerManVM.cusStatusArr=response.data.data;
-        var datas = response.data.data;
-        var arr = []
-        for(var i = 0 ; i < datas.length ; i++){
-          if(datas[i].name!='不跟进'){
-            arr.push(datas[i])
+      created() {
+          // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+          // 进入页面判断有是否有存储值
+          if (!this.paginationShow) {
+              var storeVal = this.getSessionStore("telemarketingStoreForm");
+              var otherVal = this.getSessionStore("telemarketingOtherVal");
+              if (storeVal && otherVal) {
+                  this.form = storeVal;
+                  this.$set(this.pager, "currentPage", otherVal.currentPage);
+                  this.storeId = otherVal.clueId;
+                  this.scrollTop = otherVal.scrollTop;
+              }
+              // 取页数存储
+              var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+              if (localVal) {
+                  this.pager.pageSize = localVal;
+              }
           }
-        }
-        customerManVM.cusStatusArr=arr
-      });
-      param={};
-      param.groupCode="customerLevel";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-        customerManVM.cusLevelArr=response.data.data;
-      });
-      //初始资源类别数据
-      param={};
-      param.groupCode="clueCategory";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-        customerManVM.categoryArr=response.data.data;
-      });
-      //初始化省份
-      param={};
-      param.type="0";
-      axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
-        customerManVM.provinceArr=response.data.data.data;
-      });
-        var param={};
-        param.groupCode="medium";
-        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-            customerManVM.mediumArry=response.data.data;
-        });
+          ;
+          if (ownOrgId) {
+              this.isDXZDisabled = true;
+              param = {};
+              param.orgId = ownOrgId;
+              param.roleCode = "DXCYGW";
+              param.statusList = [1, 3];
+              axios.post('/user/userManager/listByOrgAndRole', param).then(function (response) {
+                  customerManVM.busSaleArr = response.data.data;
+              });
+          }
+          //电销总监电销组筛选按钮不可点击
+          //项目专员进入初始化值
+          if (roleCode == 'XMWY') {
+              this.form.isSign = 1;
+              this.disabledIsSign = true;
+              this.form.isTailMoney = '1';
+              this.disabledIsTailMoney = true;
+          }
+          //初始化数据列表
+          this.initTableData();
+          //客户状态
+          var param = {};
+          param.groupCode = "customerStatus";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              // customerManVM.cusStatusArr=response.data.data;
+              var datas = response.data.data;
+              var arr = []
+              for (var i = 0; i < datas.length; i++) {
+                  if (datas[i].name != '不跟进') {
+                      arr.push(datas[i])
+                  }
+              }
+              customerManVM.cusStatusArr = arr
+          });
+          param = {};
+          param.groupCode = "customerLevel";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              customerManVM.cusLevelArr = response.data.data;
+          });
+          //初始资源类别数据
+          param = {};
+          param.groupCode = "clueCategory";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              customerManVM.categoryArr = response.data.data;
+          });
+          //初始化省份
+          param = {};
+          param.type = "0";
+          axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+              customerManVM.provinceArr = response.data.data.data;
+          });
+          var param = {};
+          param.groupCode = "medium";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+              customerManVM.mediumArry = response.data.data;
+          });
+          this.initColumn();
+          // 除1、5、6、10、11、12、13业务线之外不可复制
+          // if(businessLine!=1&&businessLine!=5&&businessLine!=6&&businessLine!=10&&businessLine!=11&&businessLine!=12&&businessLine!=13){
+          if (canCopy != true) {
+              document.getElementsByTagName('body')[0].className = 'noCopy'; //设置为新的
+          }
 
-      // 初始化电销人员
-      //axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
-      //   console.log(response.data.data)
-      //   customerManVM.telePerArr=response.data.data;
-      //});
-
-      // 初始化电销组
-      // axios.post('/tele/customerManager/listOrgInfo').then(function (response) {
-      //   console.log(response.data.data)
-      //  customerManVM.orgTeleArr=response.data.data;
-      // });
-
-      this.initColumn();
-      // 除1、5、6、10、11、12、13业务线之外不可复制
-        // if(businessLine!=1&&businessLine!=5&&businessLine!=6&&businessLine!=10&&businessLine!=11&&businessLine!=12&&businessLine!=13){
-        if(canCopy!=true){
-            document.getElementsByTagName('body')[0].className = 'noCopy'; //设置为新的
-        }
-
-    }
+      }
   })
 </script>
 </html>

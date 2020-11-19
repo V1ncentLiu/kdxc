@@ -286,6 +286,20 @@
                         </el-form-item>
                     </template>
                 </el-table-column>
+                <el-table-column align="center" prop="ascriptionProjectId" label="资源项目归属">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.ascriptionProjectId'"  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-select filterable clearable v-model="scope.row.ascriptionProjectId" placeholder="请选择">
+                                <el-option
+                                        v-for="item in noSingProjectList"
+                                        :key="item.id"
+                                        :label="item.projectName"
+                                        :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" label="操作" width="70">
                     <template slot-scope="scope">
                         <el-button @click.native.prevent="deleteRow(scope.$index, form.teleRuleTeamList)" type="text" size="small">删除</el-button>
@@ -363,6 +377,7 @@
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
+    var noSingProjectList =[[${noSingProjectList}]];
 var clueAssignRule=[[${clueAssignRule}]];//规则信息
 var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
 var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
@@ -512,6 +527,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         { required: true, message: '请选择有效日内时间范围', trigger: 'blur' }
                     ],
                 },
+                noSingProjectList:noSingProjectList,
                 submitDisabled:false,
                 trafficOptions:trafficList,
                 businessLineOptions:businessLineList,
