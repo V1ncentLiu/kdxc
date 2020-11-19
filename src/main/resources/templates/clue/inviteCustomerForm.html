@@ -199,6 +199,8 @@
   var cusName=[[${cusName}]];
   var cusPhone=[[${cusPhone}]];
   var isInviteLetter = [[${isInviteLetter}]]+"";
+  var hJtype = [[${hJtype}]]+"";
+  var nextClueIds = [[${nextClueIds}]]+"";
   if(isInviteLetter == '' || isInviteLetter == null || isInviteLetter == 'null'){
       isInviteLetter = '1';
   }
@@ -375,7 +377,10 @@
                 });
             },
              rebackClue(){
-            	  window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
+
+                 locationPost("/tele/clueMyCustomerInfo/customerEditInfo" ,  {"clueId":clueId, "hJtype":hJtype,"nextClueIds":nextClueIds});
+
+                 // window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
             },
              currentBusGroup(seleVal){
                 //初始化商务组
@@ -422,5 +427,27 @@
             
     	}
     })
+
+  /* 跳转页面 */
+  function locationPost(url, params) {
+      // 创建form元素
+      var temp_form = document.createElement("form");
+      // 设置form属性
+      temp_form .action = url;
+      temp_form .target = "_self";
+      temp_form .method = "post";
+      temp_form .style.display = "none";
+      // 处理需要传递的参数
+      for (var x in params) {
+          var opt = document.createElement("textarea");
+          opt.name = x;
+          opt.value = params[x];
+          temp_form .appendChild(opt);
+      }
+      document.body.appendChild(temp_form);
+      // 提交表单
+      temp_form .submit();
+  }
+
 </script>
 </html>

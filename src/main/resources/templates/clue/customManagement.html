@@ -368,10 +368,31 @@
                 </el-table-column>
                 <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.isTrack === 1">
-                            <el-button @click="openTrackingDialog(scope.row.clueId)" @mouseenter.native="openTrackingDialog(scope.row.clueId)" type="text" size="small">
-                                点击查看<span style="color:red;">({{scope.row.trackNum}})</span>
-                            </el-button>
+                        <div v-if="scope.row.isTrack === 1" @mouseenter="openTrackingDialogByhover(scope.row.clueId)">
+                            <el-popover
+                                    title="跟进记录"
+                                    placement="top"
+                                    width="1002"
+                                    open-delay="500"
+                                    trigger="hover">
+                                <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="recordTable">
+                                    <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
+                                    <el-table-column align="center" prop="callTime" width="170" label="跟进时间"></el-table-column>
+                                    <el-table-column align="center" prop="customerStatusName" label="客户状态" width="90"></el-table-column>
+                                    <el-table-column align="center" prop="isConnect" :formatter="formatIsCall" label="是否接通" width="100"></el-table-column>
+                                    <el-table-column align="center" prop="callDetailsName" label="客户关注点" width="300">
+                                        <template slot-scope="scope">
+                                            {{scope.row.callDetailsName}}
+                                            <span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != ''">
+                                            -</span>{{scope.row.focusPoint}}
+                                        </template>
+
+                                    </el-table-column>
+                                    <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="170"></el-table-column>
+                                    <el-table-column align="center" prop="createUserName" label="创建人" width="140"></el-table-column>
+                                </el-table>
+                                <el-button slot="reference" @click.stop="openTrackingDialog(scope.row.clueId)"  type="text" size="small"> 点击查看<span style="color:red;">({{scope.row.trackNum}})</span> </el-button>
+                            </el-popover>
                         </div>
                     </template>
                 </el-table-column>
@@ -958,6 +979,7 @@
   // 业务线(待分配新资源页面和客户管理页面允许外包业务线复制，外包业务线编码如下：1、5、6、10、11、12、13)
   var businessLine=[[${businessLine}]];
   var canCopy=[[${canCopy}]];
+  var timer = null;
   var  customerManVM=new Vue({
     el: '#myCustom',
     data: function() {
@@ -1216,6 +1238,11 @@
       }
     },
     methods: {
+        formatIsCall(row, column){
+            //是否接通
+            console.log(row)
+            return row.isCall==0?"否": row.isCall==1?"接通/微信沟通":""
+        },
     	async gettelNumberIcon(tel,clueId) {
     	  var isReturn =false;
       	await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
@@ -1657,21 +1684,43 @@
             });
         },
       openTrackingDialog(cid){
-        var param = {};
-        param.clueId = cid;
-        axios.post('/aggregation/tracking/queryList', param)
-        .then(function (response) {
-          console.log(response.data)
-          if (response.data.code == 0) {
-            customerManVM.trackingParam.tableData = response.data.data
-            customerManVM.trackingParam.trackingDialogVisible = true;
-          } else {
-            customerManVM.$message.error(response.data.msg);
-          }
-        }).catch(function (error) {
-          console.log(error);
-        });
+    	    debugger;
+          timer = setTimeout(function(){
+              var param = {};
+              param.clueId = cid;
+              axios.post('/aggregation/tracking/queryList', param)
+                  .then(function (response) {
+                      console.log(response.data)
+                      if (response.data.code == 0) {
+                          customerManVM.trackingParam.tableData = response.data.data
+                          customerManVM.trackingParam.trackingDialogVisible = true;
+                      } else {
+                          customerManVM.$message.error(response.data.msg);
+                      }
+                  }).catch(function (error) {
+                  console.log(error);
+              });
+          }, 500);
 
+      },
+        openTrackingDialogByhover(cid){
+            var param = {};
+            param.clueId = cid;
+            axios.post('/aggregation/tracking/queryList', param)
+                .then(function (response) {
+                    if (response.data.code == 0) {
+                        customerManVM.recordTable = response.data.data
+                    } else {
+                        customerManVM.$message.error(response.data.msg);
+                    }
+                }).catch(function (error) {
+            });
+
+        },
+      hideTrackingDialog(){
+            if(timer){
+                clearTimeout(timer);
+            }
       },
       submitTransferForm(formName) {
         this.$refs[formName].validate((valid) => {
