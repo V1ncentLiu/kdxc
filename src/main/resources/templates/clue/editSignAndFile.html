@@ -171,6 +171,7 @@
     var signData = [[${signData}]];
     var clueFileList = [[${clueFileList}]];//上传文件
     var ossUrl = [[${ossUrl}]];//上传文件地
+    var randomNameMap = new Map();
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#editSignAndFile',
@@ -300,7 +301,7 @@
             getUploadParam(){
                 var signUrl = this.ossUrl+"?serviceType=aggregation";
                 var param={};
-                
+
                  axios.get(signUrl, param)
                 .then(function (response) {
                    // console.info(response);
@@ -327,8 +328,7 @@
                 if (fileList.length > 0){
                     mainDivVM.showUploadButton = true;
                 }
-                mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
-                mainDivVM.uploadParamData.realName= file.name
+
             },
             submitUpload(){
                 //this.customUpload();
@@ -354,7 +354,7 @@
             },
             handleSuccess(response, file, fileList) {
                 var realName = file.name;
-                var randomName = mainDivVM.uploadParamData.key;
+                var randomName = randomNameMap.get(file.uid);
                 var imgUrl = mainDivVM.uploadOssHost + "/" + randomName;
                 console.log(imgUrl)
                 // element ui上传成功回调回显
@@ -381,6 +381,7 @@
             },
             handleError(err, file, fileList){
                 console.info(err);
+                this.$message.error('上传图片出现错误');
             },
             handleBefore(file){
                 console.log(file,"文件格式打印")
@@ -395,6 +396,10 @@
                    this.$message.error('文件最大为500MB');
                    return false;
                 }
+                var randomName = mainDivVM.uploadParamData.dir + mainDivVM.random_string(10) + mainDivVM.get_suffix(file.name);
+                mainDivVM.uploadParamData.key = randomName;
+                mainDivVM.uploadParamData.realName = file.name;
+                randomNameMap.set(file.uid,randomName)
             },
             random_string(len) {
                 len = len || 32;
