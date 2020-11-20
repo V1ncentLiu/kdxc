@@ -106,11 +106,11 @@ input[type="number"] {
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress3">
-					<el-input @keyup.native="number3" maxlength="3" v-model="ipAddForm.ipAddress3" style="width: 80px;"></el-input>
+					<el-input @keyup.native="number3"  maxlength="3"  v-model="ipAddForm.ipAddress3" style="width: 80px;"></el-input>
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress4">
-					<el-input @keyup.native="number4" maxlength="3" v-model="ipAddForm.ipAddress4" style="width: 80px;"></el-input> 
+					<el-input @keyup.native="number4" maxlength="3"  v-model="ipAddForm.ipAddress4" style="width: 80px;"></el-input>
 				</el-form-item> 
 			</el-form> 
 			<div slot="footer" class="dialog-footer" style="text-align:center;"> 
@@ -268,12 +268,34 @@ var ipManagerVM = new Vue({
 	    	ipAddress3:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-                {  min: 1, message: '最少1个字符', trigger: 'blur' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        if(/(^\s+)|(\s+$)|\s+/g.test(value)){
+                            callback(new Error("有空格!"));
+                        }
+                        if(/^[0-9*]*$/.test(value) === false){
+                            callback(new Error("非法字符!"));
+                        }else{
+                            callback();
+                        }
+                        callback();
+                    }, trigger: 'blur'}
 	    	],
 	    	ipAddress4:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'blur' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        if(/(^\s+)|(\s+$)|\s+/g.test(value)){
+                            callback(new Error("有空格!"));
+                        }
+                        if(/^[0-9*]*$/.test(value) === false){
+                            callback(new Error("非法字符!"));
+                        }else{
+                            callback();
+                        }
+                        callback();
+                    }, trigger: 'blur'}
 	    	]
         },
     	ipAddForm:{
