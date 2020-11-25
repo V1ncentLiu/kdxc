@@ -80,7 +80,14 @@ public interface MyCustomerFeignClient {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/uploadClueFile")
     JSONResult<String> uploadClueFile(ClueFileDTO dto);
-
+    /**
+     * 批量文件上传
+     *
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/batchUploadClueFile")
+    JSONResult<String> batchUploadClueFile(@RequestBody ClueFileDTO dto);
     /**
      * 我的客户预约来访
      * 
@@ -119,14 +126,21 @@ public interface MyCustomerFeignClient {
     JSONResult<String> releaseClue(ReleaseClueDTO dto);
 
     /**
+     * 查询签约单对应文件
+     * @param queryDto
+     * @return
+     */
+    @RequestMapping("/findFileBySignId")
+    JSONResult<List<ClueFileDTO>> findFileBySignId(@RequestBody ClueQueryDTO queryDto);
+
+    /**
      * 查询资源文件
-     * 
+     *
      * @param dto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/findClueFile")
     JSONResult<List<ClueFileDTO>> findClueFile(ClueQueryDTO dto);
-
     /**
      * 查询资源文件
      * 
@@ -213,6 +227,11 @@ public interface MyCustomerFeignClient {
         }
 
         @Override
+        public JSONResult<String> batchUploadClueFile(ClueFileDTO dto) {
+            return fallBackError("批量上传资源文件失败");
+        }
+
+        @Override
         public JSONResult<String> saveAppiontment(ClueAppiontmentDTO dto) {
             // TODO Auto-generated method stub
             return fallBackError("保存预约来访");
@@ -228,6 +247,11 @@ public interface MyCustomerFeignClient {
         public JSONResult<String> releaseClue(ReleaseClueDTO dto) {
             // TODO Auto-generated method stub
             return fallBackError("释放资源");
+        }
+
+        @Override
+        public JSONResult<List<ClueFileDTO>> findFileBySignId(ClueQueryDTO queryDto) {
+            return fallBackError("获取签约单上传附件");
         }
 
         @Override

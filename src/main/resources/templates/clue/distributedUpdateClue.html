@@ -45,7 +45,7 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row>
+                <el-row v-show="isShowPhone">
                     <el-col :span="12">
                         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -62px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
@@ -74,7 +74,7 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row>
+                <el-row v-show="isShowPhone">
                 	<el-col :span="12">
                         <el-form-item label="QQ：" prop="qq" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -45px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
@@ -87,8 +87,8 @@
                             <el-input v-model.trim="form.email" autocomplete="off" maxLength="100" style="width: 260px;" @keyup.native="form.email = form.email.replace(/\s+/g,'')"></el-input>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row><p style="padding-left: 120px;font-size: 14px;color: red;padding-bottom: 10px;">（手机、微信、QQ、邮箱至少填一项）</p></el-row>
+                </el-row >
+                <el-row v-show="isShowPhone"><p style="padding-left: 120px;font-size: 14px;color: red;padding-bottom: 10px;">（手机、微信、QQ、邮箱至少填一项）</p></el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth">
@@ -384,7 +384,7 @@
                     <el-col :span="12">
                         <el-form-item label="性别：" :label-width="formLabelWidth"> {{viewForm.sexName}}</el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col :span="12" v-show="isShowPhone">
                         <el-form-item class="redLabel" v-if="viewForm.phoneEdit == 1" label="手机号：" :label-width="formLabelWidth">
                             <span v-show="viewForm.phoneEdit == 1" style="color: red">{{viewForm.phone}}</span>
                         </el-form-item>
@@ -392,7 +392,7 @@
                             {{viewForm.phone}}
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12" v-for="(domain, index) in dynamicValidateForm.domains">
+                    <el-col :span="12" v-for="(domain, index) in dynamicValidateForm.domains" v-show="isShowPhone">
                         <el-form-item class="redLabel" v-if="domain.value && domain.edit == 1" :label="'手机号' + (parseInt(index)+2) + '：'" :label-width="formLabelWidth">
                             <span v-show="domain.edit == 1" style="color: red">{{domain.value}}</span>
                         </el-form-item>
@@ -400,18 +400,18 @@
                             <span v-show="domain.edit == 0">{{domain.value}}</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col :span="12" v-show="isShowPhone">
                         <el-form-item label="微信：" :label-width="formLabelWidth"> {{viewForm.wechat}}
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col :span="12" v-show="isShowPhone">
                         <el-form-item v-if="viewForm.wechat2" label="微信2：" :label-width="formLabelWidth"> {{viewForm.wechat2}}
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col :span="12" v-show="isShowPhone">
                         <el-form-item label="QQ：" :label-width="formLabelWidth"> {{viewForm.qq}} </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col :span="12" v-show="isShowPhone">
                         <el-form-item label="邮箱：" :label-width="formLabelWidth"> {{viewForm.email}}</el-form-item>
                     </el-col>
                     <el-col :span="12"> 
@@ -488,6 +488,7 @@
     var clueInfo = [[${clueInfo}]];//资源信息
     var optList = [[${optList}]];//优化资源类别
     var notOptList = [[${notOptList}]];//非优化资源类别
+    var roleCode = [[${roleCode}]];//角色编码
     var opt=[];
     var notOpt=[];
     if(optList){
@@ -495,6 +496,10 @@
     }
     if(notOptList){
         notOpt=notOptList.split(',');
+    }
+    var isShowPhone =true;
+    if(roleCode=='TGZY'){
+    	isShowPhone =false;
     }
     var addClueVM=   new Vue({
         el: '#addCustomer',
@@ -509,6 +514,7 @@
                 chooseVisible: false,//选择模板
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
+                isShowPhone:isShowPhone,//是否展示联系方式
                 loading:false,
                 confirmBtnDisabled:false,//提交按钮 是否禁用
                 phone:'',

@@ -45,27 +45,66 @@
                 <el-row class="resourceRow">
                     <el-col :span="12">
                         <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
-                            {{form.category}}
+                            <!--{{form.category}}-->
+                            <el-checkbox-group v-model="form.category">
+                                <el-checkbox v-for="item in categoryOptions" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="资源类型：" prop="type" :label-width="formLabelWidth">
-                            {{form.type}}
+                            <!--{{form.type}}-->
+                            <el-checkbox-group v-model="form.type">
+                                <el-checkbox v-for="item in typeOptions" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
                         </el-form-item>
                     </el-col>
                 </el-row>
             </div>
             <div class="inforTitle1">选填项</div>
             <div class="borderbox padding20">
+                <!-- 显示新增的标签 -->
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth" style="float: left;">
-                        	{{form.searchWord}}
+                        <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
+                            <el-tag
+                                    v-for="tag in tags1"
+                                    :key="tag"
+                                    closable
+                                    @close="deleteFun1(tag)"
+                                    style="margin-right: 10px;">
+                                {{tag}}
+                            </el-tag>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12" style="float: right;">
+                        <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
+                            <el-tag
+                                    v-for="tag in tags2"
+                                    :key="tag"
+                                    closable
+                                    @close="deleteFun2(tag)"
+                                    style="margin-right: 10px;">
+                                {{tag}}
+                            </el-tag>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="包含搜索词：" :label-width="formLabelWidth" style="float: left;">
+                            <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50" style="width: 226px;margin-right: 6px;"></el-input>
+                        </el-form-item>
+                        <el-form-item style="float: left;">
+                            <el-button type="primary" @click="addFun1">添加</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="地区：" :label-width="formLabelWidth" style="float: left;">
-                        	{{form.area}}
+                            <el-input v-model="form.area" autocomplete="off"  maxlength="50" style="width: 226px;margin-right: 6px;"></el-input>
+                        </el-form-item>
+                        <el-form-item style="float: left;">
+                            <el-button type="primary" @click="addFun2">添加</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -136,13 +175,15 @@ var trafficList=[[${trafficList}]];//媒介集合
         el: '#addOptimizeRule',
         data: function() {
             return {
+                tags1:[],
+                tags2:[],
                 form: {
                     id:'',
                     assignName:'',
                     startTime:'',
                     endTime:'',
-                    category:'',
-                    type:'',
+                    category:trafficAssignRule.category.split(","),
+                    type:trafficAssignRule.type.split(","),
                     searchWord:'',
                     area:'',
                     status:1,
@@ -188,6 +229,8 @@ var trafficList=[[${trafficList}]];//媒介集合
                 },
                 submitDisabled:false,
                 trafficOptions:trafficList,
+                categoryOptions:clueCategoryList,
+                typeOptions:clueTypeList,
                 statusOptions: [{
                     value: 1,
                     name: '启用'
@@ -231,6 +274,10 @@ var trafficList=[[${trafficList}]];//媒介集合
                                 }                                
                             }
                         }
+                        var category = this.form.category;
+                        var type = this.form.type;
+                        var searchWord = this.tags1;
+                        var area = this.tags2;
        	            	aorVM.submitDisabled=true;
                         var param=this.form;
                         param.id=this.form.id;
@@ -238,6 +285,18 @@ var trafficList=[[${trafficList}]];//媒介集合
                         param.endTime=this.form.endTime;
                         param.status=this.form.status;
                         param.traffcList=this.form.traffcList;
+                        if (null != category && category.length > 0) {
+                            param.category = category.join(",");
+                        }
+                        if (null != type && type.length > 0) {
+                            param.type = type.join(",");
+                        }
+                        if (null != searchWord && searchWord.length > 0) {
+                            param.searchWord = searchWord.join(",");
+                        }
+                        if (null != area && area.length > 0) {
+                            param.area = area.join(",");
+                        }
                         axios.post('/trafficAssignRule/rule/update', param)
 	       	            .then(function (response) {
 	       	            	console.info(response);
@@ -264,6 +323,26 @@ var trafficList=[[${trafficList}]];//媒介集合
             },
             deleteRow(index, rows) {//删除一行表格
                 rows.splice(index, 1);
+            },
+            addFun1() {//添加搜索词
+                let searchWord = this.form.searchWord;
+                if (searchWord) {
+                    this.tags1.push(searchWord);
+                }
+                this.form.searchWord = '';
+            },
+            deleteFun1(tag) {//删除搜索词
+                this.tags1.splice(this.tags1.indexOf(tag), 1);
+            },
+            addFun2() {//添加地区
+                let area = this.form.area;
+                if (area) {
+                    this.tags2.push(area);
+                }
+                this.form.area = '';
+            },
+            deleteFun2(tag) {//删除地区
+                this.tags2.splice(this.tags2.indexOf(tag), 1);
             },
             addDomain() {
                 this.form.traffcList.push({
@@ -325,12 +404,20 @@ var trafficList=[[${trafficList}]];//媒介集合
             this.form.assignName=trafficAssignRule.assignName;
             this.form.startTime=trafficAssignRule.startTime;
             this.form.endTime=trafficAssignRule.endTime;
-            this.form.type=this.transformType(trafficAssignRule.type);
-            this.form.category=this.transformCategory(trafficAssignRule.category);
+            // this.form.type=this.transformType(trafficAssignRule.type);
+            // this.form.category=this.transformCategory(trafficAssignRule.category);
             this.form.status=trafficAssignRule.status;
-            this.form.searchWord=trafficAssignRule.searchWord;
-            this.form.area=trafficAssignRule.area;
+            // this.form.searchWord=trafficAssignRule.searchWord;
+            // this.form.area=trafficAssignRule.area;
             this.form.traffcList=trafficAssignRule.traffcList;
+            var searchWord=  trafficAssignRule.searchWord;
+            var area = trafficAssignRule.area;
+            if(null!=searchWord && searchWord!=""){
+                this.tags1=searchWord.split(",");
+            }
+            if(null!=area && area!=""){
+                this.tags2=area.split(",");
+            }
         },
         mounted(){
             document.getElementById('addOptimizeRule').style.display = 'block';

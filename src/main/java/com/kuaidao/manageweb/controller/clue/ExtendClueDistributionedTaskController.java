@@ -4,13 +4,12 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.kuaidao.common.entity.*;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
@@ -36,6 +36,11 @@ import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.ClueCommunicateExportModel;
+import com.kuaidao.common.entity.ClueCommunicatePhtraExportModel;
+import com.kuaidao.common.entity.ClueExportModel;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -87,7 +92,6 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 初始化已审核列表数据
-     *
      * @param request
      * @param model
      * @return
@@ -104,70 +108,55 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userList = this.queryUserByRole(user);
 
         request.setAttribute("userList", userList);
-        //话务员集合
-        List<UserInfoDTO> hwzyUserList =  queryUserByRole(RoleCodeEnum.HWY.name());
+        // 话务员集合
+        List<UserInfoDTO> hwzyUserList = queryUserByRole(RoleCodeEnum.HWY.name());
         request.setAttribute("hwzyUserList", hwzyUserList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("DistributiveResource");
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setMenuCode("DistributiveResource");
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "clue/distributiveResource";
     }
 
     @RequestMapping("/queryPageDistributionedTask")
     @ResponseBody
-    public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(
-            HttpServletRequest request, @RequestBody ClueDistributionedTaskQueryDTO queryDto) {
+    public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(HttpServletRequest request,
+            @RequestBody ClueDistributionedTaskQueryDTO queryDto) {
         UserInfoDTO user = getUser();
         queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
-        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
-        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
                 idList.add(userInfoDTO.getId());
             }
-        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {
@@ -184,34 +173,31 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         } else {
-            return new JSONResult<PageBean<ClueDistributionedTaskDTO>>()
-                    .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
+            return new JSONResult<PageBean<ClueDistributionedTaskDTO>>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
-        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
-        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setOperatorIdList(idList);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
-        JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult =
-                extendClueFeignClient.queryPageDistributionedTask(queryDto);
+        JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult = extendClueFeignClient.queryPageDistributionedTask(queryDto);
         return pageBeanJSONResult;
     }
 
     /**
      * 跳转编辑资源
-     *
      * @param request
      * @param model
      * @return
      */
     @RequestMapping("/toUpdatePage")
     public String toUpdatePage(@RequestParam long id, HttpServletRequest request, Model model) {
+        UserInfoDTO user = getUser();
+        RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
         queryDTO.setClueId(id);
@@ -224,8 +210,7 @@ public class ExtendClueDistributionedTaskController {
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
         // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        request.setAttribute("clueCategoryList", getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(DicCodeEnum.CLUETYPE.getCode()));
         // 查询字典广告位集合
@@ -233,11 +218,9 @@ public class ExtendClueDistributionedTaskController {
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
         // 查询字典行业类别集合
-        request.setAttribute("industryCategoryList",
-                getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        request.setAttribute("industryCategoryList", getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 查询字典账户名称集合
-        request.setAttribute("accountNameList",
-                getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+        request.setAttribute("accountNameList", getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         request.setAttribute("ossUrl", ossUrl);
         // 系统参数优化资源类别
         String optList = getSysSetting(SysConstant.OPT_CATEGORY);
@@ -245,21 +228,19 @@ public class ExtendClueDistributionedTaskController {
         // 系统参数非优化资源类别
         String notOptList = getSysSetting(SysConstant.NOPT_CATEGORY);
         request.setAttribute("notOptList", notOptList);
+        request.setAttribute("roleCode", roleInfoDTO.getRoleCode());
         return "clue/distributedUpdateClue";
     }
 
     /**
      * 编辑资源
-     *
      * @param request
      * @return
      */
     @RequestMapping("/distributedUpdateClue")
     @ResponseBody
-    @LogRecord(description = "编辑资源", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
-    public JSONResult<String> updateClue(HttpServletRequest request,
-            @RequestBody PushClueReq pushClueReq) {
+    @LogRecord(description = "编辑资源", operationType = OperationType.UPDATE, menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    public JSONResult<String> updateClue(HttpServletRequest request, @RequestBody PushClueReq pushClueReq) {
         UserInfoDTO user = getUser();
         pushClueReq.setUpdateUser(user.getId());
         JSONResult<String> clueInfo = extendClueFeignClient.distributedUpdateClue(pushClueReq);
@@ -271,49 +252,36 @@ public class ExtendClueDistributionedTaskController {
      * 导出资源情况
      */
     // @RequiresPermissions("aggregation:truckingOrder:export")
-    @LogRecord(description = "导出资源情况", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    @LogRecord(description = "导出资源情况", operationType = OperationType.EXPORT, menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findClues")
-    public void findClues(HttpServletRequest request, HttpServletResponse response,
-            @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
+    public void findClues(HttpServletRequest request, HttpServletResponse response, @RequestBody ClueDistributionedTaskQueryDTO queryDto)
+            throws Exception {
         UserInfoDTO user = getUser();
         queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
-        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
-        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
                 idList.add(userInfoDTO.getId());
             }
-        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {
@@ -330,33 +298,27 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
-        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
-        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setOperatorIdList(idList);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
-        JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
-                extendClueFeignClient.findClues(queryDto);
+        JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult = extendClueFeignClient.findClues(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         // dataList.add(getHeadTitleList());
-        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
-                && listJSONResult.getData().size() != 0) {
-            List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
-                    getDictionaryByCode(DicCodeEnum.PHASE.getCode());
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null && listJSONResult.getData().size() != 0) {
+            List<DictionaryItemRespDTO> dictionaryItemRespDTOs = getDictionaryByCode(DicCodeEnum.PHASE.getCode());
             List<ClueDistributionedTaskDTO> orderList = listJSONResult.getData();
             int size = orderList.size();
             for (int i = 0; i < size; i++) {
                 ClueDistributionedTaskDTO taskDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(taskDTO.getClueId() + ""); // 资源ID
-                curList.add(
-                        DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss")); // 创建时间
+                curList.add(DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss")); // 创建时间
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
                 curList.add(taskDTO.getTypeName()); // 资源类型
@@ -372,8 +334,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getWechat()); // 微信1
                 curList.add(taskDTO.getWechat2()); // 微信2
                 curList.add(taskDTO.getAddress()); // 地址
-                curList.add(
-                        DateUtil.convert2String(taskDTO.getMessageTime(), "yyyy/MM/dd HH:mm:ss")); // 留言时间
+                curList.add(DateUtil.convert2String(taskDTO.getMessageTime(), "yyyy/MM/dd HH:mm:ss")); // 留言时间
                 curList.add(taskDTO.getMessagePoint()); // 留言内容
                 curList.add(taskDTO.getSearchWord()); // 搜索词
                 curList.add(taskDTO.getOperationName()); // 资源专员
@@ -426,8 +387,7 @@ public class ExtendClueDistributionedTaskController {
                 if (taskDTO.getPhase() != null) {
                     if (dictionaryItemRespDTOs != null && dictionaryItemRespDTOs.size() > 0) {
                         for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
-                            if (dictionaryItemRespDTO.getValue()
-                                    .equals(taskDTO.getPhase().toString())) {
+                            if (dictionaryItemRespDTO.getValue().equals(taskDTO.getPhase().toString())) {
                                 phase = dictionaryItemRespDTO.getName();
                             }
                         }
@@ -450,13 +410,14 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(phstatus);
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
-                String im ;
+                String im;
                 if (taskDTO.getInputType() == 5) {
                     im = "是";
                 } else {
                     im = "否";
                 }
                 curList.add(im);
+                curList.add(taskDTO.getAscriptionProjectName());
                 dataList.add(curList);
             }
         }
@@ -464,8 +425,7 @@ public class ExtendClueDistributionedTaskController {
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             // XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
             String name = "资源情况" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-            response.addHeader("Content-Disposition",
-                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = EasyExcel.write(outputStream, ClueExportModel.class).build();
@@ -483,52 +443,38 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
-     * 
      * @TODOif判断修改
      */
-    @LogRecord(description = "导出资源沟通情况", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    @LogRecord(description = "导出资源沟通情况", operationType = OperationType.EXPORT, menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @PostMapping("/findCommunicateRecords")
-    public void findCommunicateRecords(HttpServletRequest request, HttpServletResponse response,
-            @RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
+    public void findCommunicateRecords(HttpServletRequest request, HttpServletResponse response, @RequestBody ClueDistributionedTaskQueryDTO queryDto)
+            throws Exception {
         UserInfoDTO user = getUser();
         queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
-        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
-        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
                 idList.add(userInfoDTO.getId());
             }
-        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {
@@ -545,27 +491,22 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
-        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
-        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setOperatorIdList(idList);
         }
         queryDto.setResourceDirectorList(idList);
         queryDto.setUserDataAuthList(user.getUserDataAuthList());
         // 查询资源沟通情况集合
-        JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
-                extendClueFeignClient.findCommunicateRecords(queryDto);
+        JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult = extendClueFeignClient.findCommunicateRecords(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         // 获取资源导出情况Excel表头
         // dataList.add(getCommunicateRecordsHeadTitleList());
 
-
-        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null
-                && listJSONResult.getData().size() != 0) {
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode()) && listJSONResult.getData() != null && listJSONResult.getData().size() != 0) {
 
             List<ClueDistributionedTaskDTO> orderList = listJSONResult.getData();
             int size = orderList.size();
@@ -577,11 +518,10 @@ public class ExtendClueDistributionedTaskController {
                 // 客户级别
                 curList.add(taskDTO.getCusLevelName());
                 // 创建时间
-                curList.add(
-                        DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 资源类别
                 curList.add(taskDTO.getCategoryName());
-                //资源类型
+                // 资源类型
                 curList.add(taskDTO.getTypeName());
                 // 媒介
                 curList.add(taskDTO.getSourceName());
@@ -608,7 +548,7 @@ public class ExtendClueDistributionedTaskController {
                     curList.add(taskDTO.getPhtraDirectorName());
                     // 首次分配话务员
                     curList.add(taskDTO.getOperatorName());
-                }else{
+                } else {
                     // 首次分配电销组
                     curList.add(taskDTO.getFirstAsssignTeleGroupName());
                     // 首次分配电销总监
@@ -625,8 +565,8 @@ public class ExtendClueDistributionedTaskController {
                 String isCall = null;
                 Integer call;
                 if (queryDto.getPhtraExport()) {
-                    call =  taskDTO.getPhtraIsCall();
-                }else{
+                    call = taskDTO.getPhtraIsCall();
+                } else {
                     call = taskDTO.getIsCall();
                 }
                 if (null != call && AggregationConstant.YES.equals(call)) {
@@ -639,8 +579,8 @@ public class ExtendClueDistributionedTaskController {
                 String statusStr = null;
                 Integer status;
                 if (queryDto.getPhtraExport()) {
-                    status =  taskDTO.getPhstatus();
-                }else{
+                    status = taskDTO.getPhstatus();
+                } else {
                     status = taskDTO.getStatus();
                 }
                 if (null != status && AggregationConstant.YES.equals(status)) {
@@ -652,32 +592,26 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(statusStr);
                 if (queryDto.getPhtraExport()) {
                     // 第一次拨打时间
-                    curList.add(
-                            DateUtil.convert2String(taskDTO.getPhtraFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
-                }else{
+                    curList.add(DateUtil.convert2String(taskDTO.getPhtraFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                } else {
                     // 第一次拨打时间
-                    curList.add(
-                            DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
+                    curList.add(DateUtil.convert2String(taskDTO.getFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
                 }
 
                 // 第一次沟通时间
-                curList.add(DateUtil.convert2String(taskDTO.getFirstCommunicateTime(),
-                        "yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getFirstCommunicateTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 第一次沟通内容
                 curList.add(taskDTO.getFirstCommunicateContent());
                 // 第二次沟通时间
-                curList.add(DateUtil.convert2String(taskDTO.getSecondCommunicateTime(),
-                        "yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getSecondCommunicateTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 第二次沟通内容
                 curList.add(taskDTO.getSecondCommunicateContent());
                 // 第三次沟通时间
-                curList.add(DateUtil.convert2String(taskDTO.getThreeCommunicateTime(),
-                        "yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getThreeCommunicateTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 第三次沟通内容
                 curList.add(taskDTO.getThreeCommunicateContent());
                 // 留言时间
-                curList.add(
-                        DateUtil.convert2String(taskDTO.getMessageTime(), "yyyy/MM/dd HH:mm:ss"));
+                curList.add(DateUtil.convert2String(taskDTO.getMessageTime(), "yyyy/MM/dd HH:mm:ss"));
                 // 资源专员
                 curList.add(taskDTO.getOperationName());
                 // 所属组
@@ -689,65 +623,62 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     isSelfBuild = "否";
                 }
-                if(!queryDto.getPhtraExport()){
+                if (!queryDto.getPhtraExport()) {
                     // 是否自建
                     curList.add(isSelfBuild);
                 }
                 // ip
                 curList.add(taskDTO.getIp());
-                //手机号1异常标签
+                // 手机号1异常标签
                 curList.add(taskDTO.getPhone1AbnormalLabel());
-                //手机号2异常标签
+                // 手机号2异常标签
                 curList.add(taskDTO.getPhone2AbnormalLabel());
-                //投资金额
+                // 投资金额
                 curList.add(taskDTO.getAdvanceAmountValue());
-                //是否重复
-               Integer isRepeatPhone =  taskDTO.getIsRepeatPhone();
-               String repeatPhone ="";
+                // 是否重复
+                Integer isRepeatPhone = taskDTO.getIsRepeatPhone();
+                String repeatPhone = "";
                 if (null != isRepeatPhone && isRepeatPhone == 1) {
                     repeatPhone = "是";
-                }else {
+                } else {
                     repeatPhone = "否";
                 }
                 curList.add(repeatPhone);
-                String im ;
+                String im;
                 if (taskDTO.getInputType() == 5) {
                     im = "是";
                 } else {
                     im = "否";
                 }
-                if(!queryDto.getPhtraExport()){
+                if (!queryDto.getPhtraExport()) {
                     curList.add(im);
                 }
-                //url地址
+                // url地址
                 curList.add(taskDTO.getUrlAddress());
                 dataList.add(curList);
             }
         }
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             String title = "";
-            if(queryDto !=null && queryDto.getPhtraExport() !=null){
-                if(queryDto.getPhtraExport()){
+            if (queryDto != null && queryDto.getPhtraExport() != null) {
+                if (queryDto.getPhtraExport()) {
                     title = "话务";
-                }else{
+                } else {
                     title = "电销";
                 }
             }
-            String name =
-                    title+ "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
-            response.addHeader("Content-Disposition",
-                    "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            String name = title + "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = null;
             if (queryDto.getPhtraExport()) {
                 excelWriter = EasyExcel.write(outputStream, ClueCommunicatePhtraExportModel.class).build();
-            }else{
+            } else {
                 excelWriter = EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
             }
 
-
-            if(CollectionUtils.isNotEmpty(dataList)){
+            if (CollectionUtils.isNotEmpty(dataList)) {
                 List<List<List<Object>>> partition = Lists.partition(dataList, 50000);
                 for (int i = 0; i < partition.size(); i++) {
                     // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
@@ -755,9 +686,9 @@ public class ExtendClueDistributionedTaskController {
                     // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
                     excelWriter.write(partition.get(i), writeSheet);
                 }
-            }else{
-                //实例化表单
-                WriteSheet writeSheet = EasyExcel.writerSheet(0, "Sheet" ).build();
+            } else {
+                // 实例化表单
+                WriteSheet writeSheet = EasyExcel.writerSheet(0, "Sheet").build();
                 excelWriter.write(dataList, writeSheet);
             }
             excelWriter.finish();
@@ -766,7 +697,6 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源沟通情况
-     * 
      * @return
      */
     private List<Object> getCommunicateRecordsHeadTitleList() {
@@ -804,7 +734,6 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 导出资源情况
-     *
      * @return
      */
     private List<Object> getHeadTitleList() {
@@ -852,7 +781,6 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 查询所有资源专员
-     *
      * @return
      */
 
@@ -864,8 +792,7 @@ public class ExtendClueDistributionedTaskController {
         if (RoleCodeEnum.HWY.name().equals(roleCode)) {
             userList.add(user);
             return userList;
-        } else if (RoleCodeEnum.GLY.name().equals(roleCode)
-                || RoleCodeEnum.YWGLY.name().equals(roleCode)
+        } else if (RoleCodeEnum.GLY.name().equals(roleCode) || RoleCodeEnum.YWGLY.name().equals(roleCode)
                 || RoleCodeEnum.TGZJ.name().equals(roleCode)) {
             userRole.setBusinessLine(BusinessLineConstant.TGZX);
         } else {
@@ -879,8 +806,7 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userAdminList = new ArrayList<UserInfoDTO>();
         UserOrgRoleReq userRoleAdmin = new UserOrgRoleReq();
         userRoleAdmin.setRoleCode(RoleCodeEnum.GLY.name());
-        JSONResult<List<UserInfoDTO>> userAdminJson =
-                userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
+        JSONResult<List<UserInfoDTO>> userAdminJson = userInfoFeignClient.listByOrgAndRole(userRoleAdmin);
         if (JSONResult.SUCCESS.equals(userAdminJson.getCode()) && null != userAdminJson.getData()) {
             userAdminList = userAdminJson.getData();
         }
@@ -891,7 +817,6 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 获取当前登录账号
-     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -902,7 +827,6 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 根据机构和角色类型获取用户
-     *
      * @return
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
@@ -910,14 +834,12 @@ public class ExtendClueDistributionedTaskController {
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
-        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
     }
 
     /**
      * 获取所有组织组
-     *
      * @return
      */
     private List<OrganizationRespDTO> getGroupList(Long parentId, Integer type) {
@@ -925,23 +847,19 @@ public class ExtendClueDistributionedTaskController {
         queryDTO.setParentId(parentId);
         queryDTO.setOrgType(type);
         // 查询所有组织
-        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(queryDTO);
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam = organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
     }
 
     /**
      * 查询字典表
-     *
      * @param code
      * @return
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
-        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
-        if (queryDicItemsByGroupCode != null
-                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
@@ -949,7 +867,6 @@ public class ExtendClueDistributionedTaskController {
 
     /**
      * 查询系统参数
-     *
      * @param code
      * @return
      */
@@ -969,46 +886,33 @@ public class ExtendClueDistributionedTaskController {
     // @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/findCluesCount")
     @ResponseBody
-    public JSONResult<Long> findCluesCount(@RequestBody ClueDistributionedTaskQueryDTO queryDto)
-            throws Exception {
+    public JSONResult<Long> findCluesCount(@RequestBody ClueDistributionedTaskQueryDTO queryDto) throws Exception {
         UserInfoDTO user = getUser();
         queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
-        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
-        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
+        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
                 idList.add(userInfoDTO.getId());
             }
-        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.WLYHZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.TGFZC.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {
@@ -1025,13 +929,11 @@ public class ExtendClueDistributionedTaskController {
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
-        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setShowTrafficClue(true);
         }
-        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
+        if (RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWJL.name().equals(roleInfoDTO.getRoleCode())) {
             queryDto.setOperatorIdList(idList);
         }
         queryDto.setResourceDirectorList(idList);

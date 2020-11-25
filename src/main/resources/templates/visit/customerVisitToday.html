@@ -36,9 +36,32 @@
             </el-table-column>
             <el-table-column prop="isTrack" label="跟进记录"  align="center" width="120">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.isTrack===1"> 
-                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
-                        </div> 
+                        <div v-if="scope.row.isTrack === 1" @mouseenter="openTrackingDialogByhover(scope.row.clueId)">
+                            <el-popover
+                                    title="跟进记录"
+                                    placement="top"
+                                    width="1002"
+                                    open-delay="500"
+                                    trigger="hover">
+                                <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="recordTable">
+                                    <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
+                                    <el-table-column align="center" prop="callTime" width="170" label="跟进时间"></el-table-column>
+                                    <el-table-column align="center" prop="customerStatusName" label="客户状态" width="90"></el-table-column>
+                                    <el-table-column align="center" prop="isConnect" :formatter="formatIsCall" label="是否接通" width="100"></el-table-column>
+                                    <el-table-column align="center" prop="callDetailsName" label="客户关注点" width="300">
+                                        <template slot-scope="scope">
+                                            {{scope.row.callDetailsName}}
+                                            <span v-if="scope.row.callDetailsName != null && scope.row.callDetailsName != ''">
+                                            -</span>{{scope.row.focusPoint}}
+                                        </template>
+
+                                    </el-table-column>
+                                    <el-table-column align="center" prop="nextVisitTime" label="下次回访时间" width="170"></el-table-column>
+                                    <el-table-column align="center" prop="createUserName" label="创建人" width="140"></el-table-column>
+                                </el-table>
+                                <el-button slot="reference" @click.stop="openTrackingDialog(scope.row.clueId)"  type="text" size="small"> 点击查看</el-button>
+                            </el-popover>
+                        </div>
                     </template>
             </el-table-column>
             <el-table-column align="center" prop="customerStatusName" label="客户状态" width="120"></el-table-column>
@@ -324,9 +347,11 @@
 <script th:inline="javascript" >
 // var dashboardTelSale =[[${dashboardTelSale}]];
 // console.log(dashboardTelSale)
+var timer=null;
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        recordTable:[],
         dataUrlParam:{
             dataUrlArr:[{
                 name:"未签约客户",
@@ -376,25 +401,35 @@ var mainDivVM = new Vue({
             {//2
                 isActive:true,
                 name:"今日回访",
-                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=1",
+                url:"/tele/clueMyCustomerInfo/customerVisitToday?hJtype=8",
+                type:"hJtype"
+            },{//3
+                isActive:false,
+                name:"VIP客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=3",
+                type:"hJtype"
+            },{//4
+                isActive:false,
+                name:"重要客户",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=4",
                 type:"hJtype"
             },
-            {//3
+            {//5
                 isActive:false,
                 name:"今日领取",
                 url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=5",
                 type:"hJtype"
             },
-            {//4
+            {//6
                 isActive:false,
                 name:"自建客户",
-                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=3",
+                url:"/tele/clueMyCustomerInfo/initmyCustomer?hJtype=6",
                 type:"hJtype"
             },
-            {//5
+            {//7
                 isActive:false,
                 name:"已签约客户",
-                url:" /tele/clueMyCustomerInfo/initmyCustomer?hJtype=4",
+                url:" /tele/clueMyCustomerInfo/initmyCustomer?hJtype=7",
                 type:"hJtype"
             }]
         },
@@ -467,6 +502,11 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+        formatIsCall(row, column){
+            //是否接通
+            console.log(row)
+            return row.isCall==0?"否": row.isCall==1?"接通/微信沟通":""
+        },
         async gettelNumberIcon(tel,clueId) {//小图标外呼并跳转到电销维护页面
             var isReturn =false;
             await axios.post('/call/callRecord/missedCalPhone?phone='+tel, {})
@@ -493,8 +533,10 @@ var mainDivVM = new Vue({
                     axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
                     });
                 });
+                // 为详情页“下一条”数据拼装
+                let clueIdPin = getClueIdPin(mainDivVM.dataTable);
                 //跳转页面
-                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+                locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
             }
 
 
@@ -506,19 +548,40 @@ var mainDivVM = new Vue({
             window.location.href="/aggregation/publiccustomer/listPage"; 
         },
         openTrackingDialog(cid){//跟进记录点击方法
+            timer = setTimeout(function(){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/aggregation/tracking/queryList', param)
+                    .then(function (response) {
+                        if (response.data.code == 0) {
+                            mainDivVM.trackingParam.tableData = response.data.data
+                            mainDivVM.trackingParam.trackingDialogVisible = true;
+                        } else {
+                            mainDivVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            }, 500);
+        },
+        openTrackingDialogByhover(cid){
             var param = {};
             param.clueId = cid;
             axios.post('/aggregation/tracking/queryList', param)
                 .then(function (response) {
                     if (response.data.code == 0) {
-                        mainDivVM.trackingParam.tableData = response.data.data
-                        mainDivVM.trackingParam.trackingDialogVisible = true;
+                        mainDivVM.recordTable = response.data.data
                     } else {
                         mainDivVM.$message.error(response.data.msg);
                     }
                 }).catch(function (error) {
-                console.log(error);
             });
+
+        },
+        hideTrackingDialog(){
+            if(timer){
+                clearTimeout(timer);
+            }
         },
         handleSelectionChange(val) {
             this.multipleSelection = val;
@@ -533,7 +596,7 @@ var mainDivVM = new Vue({
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
         },
       customerEidt(row){
-        var clueId=row.clueId;
+        let clueId=row.clueId;
         //客户维护界面
         this.setSessionStore("storeForm", this.storeForm);
         var otherVal = {
@@ -542,7 +605,10 @@ var mainDivVM = new Vue({
           "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
         }
         this.setSessionStore("otherVal", otherVal);
-        window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId;
+
+        // 为详情页“下一条”数据拼装
+        let clueIdPin = getClueIdPin(mainDivVM.dataTable);
+        locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
       },
         // 快速领取新资源
         initList(){
@@ -688,8 +754,10 @@ var mainDivVM = new Vue({
         },
         // 今日待跟进客户资源
         customerEidt(row){
-            //客户维护界面   
-            window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+row.clueId;
+            let clueId = row.clueId;
+            let clueIdPin = getClueIdPin(mainDivVM.dataTable);
+            //客户维护界面
+            locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
         },
         // 今日待跟进客户资源
         initTableData(){
@@ -912,6 +980,42 @@ var mainDivVM = new Vue({
         document.getElementById('mainDiv').style.display = 'block';
     }
 });
+
+    // 数据拼装
+    function getClueIdPin(tableData){
+        let clueIdPin = "";
+        if( tableData && tableData.length > 0 ){
+            for(let i = 0 ; i< tableData.length ; i++){
+                if( i === 0 ){
+                    clueIdPin += tableData[i].clueId ;
+                }else{
+                    clueIdPin += "," +tableData[i].clueId ;
+                }
+            }
+        }
+        return clueIdPin ;
+    }
+
+    /* post 请求 */
+    function locationPost(url, params) {
+        // 创建form元素
+        var temp_form = document.createElement("form");
+        // 设置form属性
+        temp_form .action = url;
+        temp_form .target = "_self";
+        temp_form .method = "post";
+        temp_form .style.display = "none";
+        // 处理需要传递的参数
+        for (var x in params) {
+            var opt = document.createElement("textarea");
+            opt.name = x;
+            opt.value = params[x];
+            temp_form .appendChild(opt);
+        }
+        document.body.appendChild(temp_form);
+        // 提交表单
+        temp_form .submit();
+    }
 </script>
 <!-- <script th:src="@{/js/custom/console/consoleTelemarketing.js?v=1.0.0}"></script> -->
 

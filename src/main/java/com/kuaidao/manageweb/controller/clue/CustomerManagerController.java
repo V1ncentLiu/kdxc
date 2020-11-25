@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
@@ -170,8 +172,7 @@ public class CustomerManagerController {
 
     @RequestMapping("/findcustomerManagerPage")
     @ResponseBody
-    public JSONResult<PageBean<CustomerManagerDTO>> findTeleClueInfo(HttpServletRequest request,
-                                                                     @RequestBody CustomerManagerQueryDTO dto) {
+    public JSONResult<PageBean<CustomerManagerDTO>> findTeleClueInfo(@RequestBody CustomerManagerQueryDTO dto) {
         java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (null != dto && null != dto.getDayTel()) {
             // 当日拨打电话
@@ -181,7 +182,10 @@ public class CustomerManagerController {
             // 当日跟进
             dto.setTrackingTime(formatter.format(new Date()));
         }
-
+        // 计算未到访起始时间
+        if (null != dto.getNotFollowUpTime()) {
+            handleNotFollowUpQueryTime(dto);
+        }
         // 数据权限处理
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -205,12 +209,14 @@ public class CustomerManagerController {
                     // 查看电销组下所有数据
                     dto.setTeleGorup(user.getOrgId());
 
+                } else if (roleCode.equals(RoleCodeEnum.XMWY.name())) {
+                    // 查看餐盟业务线所有数据
+                    dto.setBusinessLine(BusinessLineConstant.SHANGJI);
                 }
             }
         }
         dto.setOrgId(user.getOrgId());
-        JSONResult<PageBean<CustomerManagerDTO>> jsonResult =
-                customerManagerFeignClient.findcustomerPage(dto);
+        JSONResult<PageBean<CustomerManagerDTO>> jsonResult = customerManagerFeignClient.findcustomerPage(dto);
         return jsonResult;
     }
 
@@ -451,4 +457,29 @@ public class CustomerManagerController {
         }
         return telemarketingLayoutDTO;
     }
+
+    /**
+     * @Description:处理未跟访的查询时间
+     * @Param:
+     * @return:
+     * @author: fanjd
+     * @date: 2020/11/16 18:59
+     * @version: V1.0
+     */
+    private void handleNotFollowUpQueryTime(CustomerManagerQueryDTO dto) {
+        Date now = new Date();
+        if (dto.getNotFollowUpTime() > 1) {
+            Date startTime = DateUtil.addDays(now, -dto.getNotFollowUpTime());
+            Date notFollowUpStartTime = DateUtil.setStartDay(startTime);
+            Date notFollowUpEndTime = DateUtil.setEndDay(startTime);
+            dto.setNotFollowUpStartTime(notFollowUpStartTime);
+            dto.setNotFollowUpEndTime(notFollowUpEndTime);
+        }else{
+            Date notFollowUpStartTime = DateUtil.addDays(now,-dto.getNotFollowUpTime());
+            dto.setNotFollowUpStartTime(notFollowUpStartTime);
+            dto.setNotFollowUpEndTime(now);
+        }
+
+    }
+
 }
