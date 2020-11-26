@@ -532,21 +532,22 @@ public class BalanceAccountController {
 
             String payMode1 = accountDTO.getPayMode();
             String payMode = "";
+            StringBuilder payModeBuilder = new StringBuilder();
             if (StringUtils.isNotBlank(payMode1)) {
                 String[] split = payMode1.split(",");
                 for (int i = 0; i < split.length; i++) {
                     for (DictionaryItemRespDTO item : payModeItem) {
                         if (item.getValue().equals(split[i])) {
                             if (i == 0) {
-                                payMode = item.getName();
+                                payModeBuilder.append(item.getName());
                             } else {
-                                payMode = payMode + "," + item.getName();
+                                payModeBuilder.append("," + item.getName());
                             }
                         }
                     }
                 }
             }
-
+            payMode = payModeBuilder.toString();
             // if (accountDTO.getPayMode() == 1) {
             // payMode = "现金";
             // } else if (accountDTO.getPayMode() == 2) {
@@ -722,21 +723,22 @@ public class BalanceAccountController {
 
             String payMode1 = accountDTO.getPayMode();
             String payMode = "";
+            StringBuilder payModeBuilder = new StringBuilder();
             if (StringUtils.isNotBlank(payMode1)) {
                 String[] split = payMode1.split(",");
                 for (int i = 0; i < split.length; i++) {
                     for (DictionaryItemRespDTO item : payModeItem) {
                         if (item.getValue().equals(split[i])) {
                             if (i == 0) {
-                                payMode = item.getName();
+                                payModeBuilder.append(item.getName());
                             } else {
-                                payMode = payMode + "," + item.getName();
+                                payModeBuilder.append("," + item.getName());
                             }
                         }
                     }
                 }
             }
-
+            payMode = payModeBuilder.toString();
             // String payMode = "";
             // if (accountDTO.getPayMode() == 1) {
             // payMode = "现金";
