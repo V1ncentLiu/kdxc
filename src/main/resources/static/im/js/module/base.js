@@ -291,9 +291,9 @@ YX.fn.getUserInfo = function(accountId) {
             data.coupon.discountAmount?'<span>'+data.coupon.discountAmount+'元</span>|':'',
             data.coupon.expiredTime?'<span>'+data.coupon.expiredTime+'到期</span>|':'',
             ].join("");
-          // var couponInfoStr='<img th:src="@{/im/images/newImages/icon_yycopy@3x.png}"><span>'+data.coupon.couponName+'</span><span>'+data.coupon.discountAmount+'元</span><span>'+data.coupon.expiredTime+'到期</span>';
+          // var couponInfoStr='<img src=""><span>'+data.coupon.couponName+'</span><span>'+data.coupon.discountAmount+'元</span><span>'+data.coupon.expiredTime+'到期</span>';
           if(data.coupon){
-            $('#couponInfo').html('<img th:src="@{/im/images/newImages/icon_yycopy@3x.png}">'+couponInfoStr);
+            $('#couponInfo').html('<img src="images/myPhone.png}">'+couponInfoStr);
           }else{
             $('#couponInfo').html("");
           }          

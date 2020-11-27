@@ -105,6 +105,8 @@ YX.fn.newSessionsListConcat =function(value) {
                       sessions[i].clueId=data[j].clueId
                       sessions[i].isSubmit=data[j].isSubmit
                       sessions[i].nickName=data[j].nickName
+                      // 新增优惠券
+                      sessions[i].hasCoupon=data[j].hasCoupon
                   }
               }
             }
