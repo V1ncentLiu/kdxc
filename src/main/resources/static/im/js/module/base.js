@@ -285,6 +285,19 @@ YX.fn.getUserInfo = function(accountId) {
         console.log(data,'个人信息请求后端接口');
         if(data.data){
           var data=data.data
+          // 新增券
+          var couponInfoStr=[,
+            data.coupon.couponName?'<span>'+data.coupon.couponName+'</span>':'',
+            data.coupon.discountAmount?'<span>'+data.coupon.discountAmount+'元</span>|':'',
+            data.coupon.expiredTime?'<span>'+data.coupon.expiredTime+'到期</span>|':'',
+            ].join("");
+          // var couponInfoStr='<img th:src="@{/im/images/newImages/icon_yycopy@3x.png}"><span>'+data.coupon.couponName+'</span><span>'+data.coupon.discountAmount+'元</span><span>'+data.coupon.expiredTime+'到期</span>';
+          if(data.coupon){
+            $('#couponInfo').html('<img th:src="@{/im/images/newImages/icon_yycopy@3x.png}">'+couponInfoStr);
+          }else{
+            $('#couponInfo').html("");
+          }          
+
           var str=[,
             data.createDateStr?'<span>注册时间：'+data.createDateStr+'</span>':'',
             data.age?'<span>'+data.age+'</span>|':'',
@@ -316,6 +329,7 @@ YX.fn.getUserInfo = function(accountId) {
         
         }else{
             $('#otherInformation').html('')
+            $('#couponInfo').html('')
         }
       },
       error: function() {
