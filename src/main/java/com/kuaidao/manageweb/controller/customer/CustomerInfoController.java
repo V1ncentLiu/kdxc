@@ -106,8 +106,16 @@ public class CustomerInfoController {
             return new Coupon();
         }
         logger.info("dddddddddddd:{}",jsonObject);
-        Coupon remoteData = JSONObject.parseObject(
+        List<JSONObject> list = JSONObject.parseObject(
                 null == jsonObject.get("data") ? null :jsonObject.get("data").toString(),
+                List.class);
+
+        if(CollectionUtils.isEmpty(list)){
+            return new Coupon();
+        }
+
+        Coupon remoteData = JSONObject.parseObject(
+                null ==  list.get(0) ? null : list.get(0).toString(),
                 Coupon.class);
 
         return remoteData;
