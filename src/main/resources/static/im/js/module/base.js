@@ -293,7 +293,7 @@ YX.fn.getUserInfo = function(accountId) {
             ].join("");
           // var couponInfoStr='<img src=""><span>'+data.coupon.couponName+'</span><span>'+data.coupon.discountAmount+'元</span><span>'+data.coupon.expiredTime+'到期</span>';
           if(data.coupon){
-            $('#couponInfo').html('<img src="images/myPhone.png}">'+couponInfoStr);
+            $('#couponInfo').html('<img src="images/newImages/coupon.png}">'+couponInfoStr);
           }else{
             $('#couponInfo').html("");
           }          
