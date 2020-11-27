@@ -70,7 +70,11 @@ public class CustomerInfoController {
             //查询客户名称
             this.setCusName(idEntity,data);
             //设置优惠券信息
+            logger.info("222222222222222222222222222");
+            logger.info("wewewewewewewe:{}",data);
+            logger.info("wewewewewewewe:{}",(String)data.get("phoneNumber"));
             this.setCouponInfo((String)data.get("phoneNumber"),data);
+            logger.info("222222333333333333333333333");
 
             return new JSONResult<>().success(data);
         } catch (RuntimeException e) {
@@ -94,15 +98,24 @@ public class CustomerInfoController {
         if (StringUtils.isEmpty(phone)) {
             return new Coupon();
         }
-
+        logger.info("dddddddddddd2222222222222222");
         Map map = new HashMap();
         map.put("phoneNumber", phone);
         JSONObject jsonObject = HttpClientUtils.httpPost(kuaidaoGroupActivityadDomain + "/v1.0/app/newUserInfo/info", map);
         if(jsonObject == null){
             return new Coupon();
         }
-        Coupon remoteData = JSONObject.parseObject(
+        logger.info("dddddddddddd:{}",jsonObject);
+        List<JSONObject> list = JSONObject.parseObject(
                 null == jsonObject.get("data") ? null :jsonObject.get("data").toString(),
+                List.class);
+
+        if(CollectionUtils.isEmpty(list)){
+            return new Coupon();
+        }
+
+        Coupon remoteData = JSONObject.parseObject(
+                null ==  list.get(0) ? null : list.get(0).toString(),
                 Coupon.class);
 
         return remoteData;
