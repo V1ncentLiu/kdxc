@@ -98,13 +98,14 @@ public class CustomerInfoController {
         if (StringUtils.isEmpty(phone)) {
             return new Coupon();
         }
-
+        logger.info("dddddddddddd2222222222222222");
         Map map = new HashMap();
         map.put("phoneNumber", phone);
         JSONObject jsonObject = HttpClientUtils.httpPost(kuaidaoGroupActivityadDomain + "/v1.0/app/newUserInfo/info", map);
         if(jsonObject == null){
             return new Coupon();
         }
+        logger.info("dddddddddddd:{}",jsonObject);
         Coupon remoteData = JSONObject.parseObject(
                 null == jsonObject.get("data") ? null :jsonObject.get("data").toString(),
                 Coupon.class);
