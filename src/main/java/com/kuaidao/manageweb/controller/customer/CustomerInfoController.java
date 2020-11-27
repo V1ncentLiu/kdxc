@@ -71,6 +71,7 @@ public class CustomerInfoController {
             this.setCusName(idEntity,data);
             //设置优惠券信息
             logger.info("222222222222222222222222222");
+            logger.info("wewewewewewewe:{}",data);
             logger.info("wewewewewewewe:{}",(String)data.get("phoneNumber"));
             this.setCouponInfo((String)data.get("phoneNumber"),data);
             logger.info("222222333333333333333333333");
