@@ -298,13 +298,13 @@ YX.fn.getUserInfo = function(accountId) {
           var data=data.data
           // 新增券
           var couponInfoStr=[,
-            data.coupon.couponName?'<span>'+data.coupon.couponName+'</span>':'',
-            data.coupon.discountAmount?'<span>'+data.coupon.discountAmount+'元 </span>':'',
+            data.coupon.couponName?'<span style="margin: 0 10px;">'+data.coupon.couponName+'</span>':'',
+            data.coupon.discountAmount?'<span style="margin-right:10px;">'+data.coupon.discountAmount+'元 </span>':'',
             data.coupon.expiredTime?'<span>'+getdate(data.coupon.expiredTime)+'到期</span>':'',
             ].join("");
           // var couponInfoStr='<img src=""><span>'+data.coupon.couponName+'</span><span>'+data.coupon.discountAmount+'元</span><span>'+data.coupon.expiredTime+'到期</span>';
           if(data.coupon&&couponInfoStr){
-              $('#couponInfo').html('<img style="width: 13px;height: 10px;float: none;" src="/im/images/newImages/coupon.png">'+couponInfoStr);
+              $('#couponInfo').html('<img style="width: 13px;height: 10px;float: none;margin-right: 0;" src="/im/images/newImages/coupon.png">'+couponInfoStr);
           }else{
             $('#couponInfo').html("");
           }          
