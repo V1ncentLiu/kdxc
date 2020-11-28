@@ -304,7 +304,9 @@ YX.fn.getUserInfo = function(accountId) {
             ].join("");
           // var couponInfoStr='<img src=""><span>'+data.coupon.couponName+'</span><span>'+data.coupon.discountAmount+'元</span><span>'+data.coupon.expiredTime+'到期</span>';
           if(data.coupon){
-            $('#couponInfo').html('<img style="width: 13px;height: 10px;float: none;" src="/im/images/newImages/coupon.png">'+couponInfoStr);
+              if(couponInfoStr){
+                  $('#couponInfo').html('<img style="width: 13px;height: 10px;float: none;" src="/im/images/newImages/coupon.png">'+couponInfoStr);
+              }
           }else{
             $('#couponInfo').html("");
           }          
