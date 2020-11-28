@@ -25,10 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.persistence.Id;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 接口层 Created on 2020-8-28 16:35:05
@@ -117,6 +114,10 @@ public class CustomerInfoController {
         Coupon remoteData = JSONObject.parseObject(
                 null ==  list.get(0) ? null : list.get(0).toString(),
                 Coupon.class);
+
+        if(remoteData.getExpiredTime()==null||remoteData.getExpiredTime().getTime()<new Date().getTime()){
+            return new  Coupon();
+        }
 
         return remoteData;
     }
