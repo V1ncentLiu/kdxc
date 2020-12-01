@@ -14,7 +14,7 @@ public class LogServiceImpl  implements LogService {
 	@Autowired
 	LogMgtFeignClient logMgtFeignClient;
 
-	@Async("taskExecutor")
+	@Async("asyncTaskExecutor")
 	@Override
 	public JSONResult insertLogRecord(AccessLogReqDTO logReqDTO) {
 		return logMgtFeignClient.insertLogRecord(logReqDTO);

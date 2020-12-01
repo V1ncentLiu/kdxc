@@ -11,9 +11,10 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author admin
  */
 @Configuration
-public class ThreadTaskPoolConfig {
+public class ThreadPoolConfig {
 
-    @Bean("taskExecutor")
+    @SuppressWarnings("all")
+    @Bean("asyncTaskExecutor")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(Runtime.getRuntime().availableProcessors());
