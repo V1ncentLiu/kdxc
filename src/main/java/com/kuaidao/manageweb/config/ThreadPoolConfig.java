@@ -21,7 +21,7 @@ public class ThreadPoolConfig {
         executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 2 );
         executor.setQueueCapacity(200);
         executor.setKeepAliveSeconds(60);
-        executor.setThreadNamePrefix("taskExecutor-");
+        executor.setThreadNamePrefix("asyncTaskExecutor-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         // 设置线程池关闭的时候等待所有任务都完成再继续销毁其他的Bean
         executor.setWaitForTasksToCompleteOnShutdown(true);
