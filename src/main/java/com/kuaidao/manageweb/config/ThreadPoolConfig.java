@@ -15,7 +15,7 @@ public class ThreadPoolConfig {
 
     @SuppressWarnings("all")
     @Bean("asyncTaskExecutor")
-    public Executor taskExecutor() {
+    public Executor asyncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(Runtime.getRuntime().availableProcessors());
         executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 2 );
