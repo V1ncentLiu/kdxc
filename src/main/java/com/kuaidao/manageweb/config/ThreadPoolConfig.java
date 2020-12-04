@@ -21,7 +21,7 @@ public class ThreadPoolConfig {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() + 1 );
         executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 2 + 1 );
-        executor.setQueueCapacity(1500);
+        executor.setQueueCapacity(2000);
         executor.setKeepAliveSeconds(60);
         executor.setThreadNamePrefix("asyncTaskExecutor-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy(){
