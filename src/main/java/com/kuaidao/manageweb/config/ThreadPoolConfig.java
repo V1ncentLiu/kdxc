@@ -16,14 +16,21 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ThreadPoolConfig {
 
     @SuppressWarnings("all")
-    @Bean("asyncTaskExecutor")
-    public Executor asyncTaskExecutor() {
+    @Bean("threadPoolExecutor")
+    public Executor threadPoolExecutor() {
+
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() + 1 );
-        executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 2 + 1 );
+        // 核心线程数
+        executor.setCorePoolSize(30);
+        // 最大线程池数
+        executor.setMaxPoolSize(100);
+        // 阻塞队列大小
         executor.setQueueCapacity(2000);
+        // 空闲时间
         executor.setKeepAliveSeconds(60);
-        executor.setThreadNamePrefix("asyncTaskExecutor-");
+        // 线程池名称前缀
+        executor.setThreadNamePrefix("threadPoolExecutor-");
+        // 饱和策略
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy(){
             @Override
             public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {

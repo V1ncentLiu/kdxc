@@ -30,7 +30,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
     @Autowired
     private AmqpTemplate amqpTemplate;
 
-    @Async("asyncTaskExecutor")
+    @Async("threadPoolExecutor")
     @Override
     public void sendMessage(AnnouncementAddAndUpdateDTO dto) {
         long startTime = System.currentTimeMillis();
