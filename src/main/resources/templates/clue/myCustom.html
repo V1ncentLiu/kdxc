@@ -1682,19 +1682,12 @@
             //展现详情
             showClueDetailInfo2 (clueId) {
                 // 为详情页“下一条”数据拼装
-                let tableData = mycustomVM.dataTable;
-                let clueIdPin = "";
-                if( tableData && tableData.length > 0 ){
-                    for(let i= 0 ; i< tableData.length ; i++){
-                        if( i === 0 ){
-                            clueIdPin += tableData[i].clueId ;
-                        }else{
-                            clueIdPin += "," +tableData[i].clueId ;
-                        }
-                    }
-                }
+                var clueIdPin = mycustomVM.dataTable.map(function(obj,index){
+                    return obj.clueId;
+                }).join(",");
+                var hJtype=getQueryString("hJtype");
                 // Post方式调转到编辑页面
-                locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
+                locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"hJtype":hJtype , "nextClueIds":clueIdPin});
             },
             createClueData(){
                 window.location.href='/tele/clueMyCustomerInfo/createClue';
@@ -1817,26 +1810,19 @@
                 }
                 this.setSessionStore("otherVal", otherVal);
                 var type=getQueryString("type");
+                var hJtype=getQueryString("hJtype");
 
                 /**************************************/
                 // 为详情页“下一条”数据拼装
-                let tableData = mycustomVM.dataTable;
-                let clueIdPin = "";
-                if( tableData && tableData.length > 0 ){
-                    for(let i= 0 ; i< tableData.length ; i++){
-                        if( i === 0 ){
-                            clueIdPin += tableData[i].clueId ;
-                        }else{
-                            clueIdPin += "," +tableData[i].clueId ;
-                        }
-                    }
-                }
+                var clueIdPin = mycustomVM.dataTable.map(function(obj,index){
+                    return obj.clueId;
+                }).join(",");
                 if(type){
                     // Post方式调转到编辑页面
                     locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"type":type , "nextClueIds":clueIdPin});
                 }else{
                     // Post方式调转到编辑页面
-                    locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"nextClueIds":clueIdPin});
+                    locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":clueId,"hJtype":hJtype , "nextClueIds":clueIdPin});
                 }
             },
             submitForm(formName) {
@@ -2370,25 +2356,13 @@
         }
     })
 
-    // Post方式调转到编辑页面
     function locationPost(url, params) {
-        // 创建form元素
-        var temp_form = document.createElement("form");
-        // 设置form属性
-        temp_form .action = url;
-        temp_form .target = "_self";
-        temp_form .method = "post";
-        temp_form .style.display = "none";
-        // 处理需要传递的参数
-        for (var x in params) {
-            var opt = document.createElement("textarea");
-            opt.name = x;
-            opt.value = params[x];
-            temp_form .appendChild(opt);
+        document.write("<form action="+url+" method=post name=form1 style='display:none'>");
+        for (let x in params) {
+            document.write("<input type=hidden name="+x+" value='"+params[x]+"'></input>");
         }
-        document.body.appendChild(temp_form);
-        // 提交表单
-        temp_form .submit();
+        document.write("</form>");
+        document.form1.submit();
     }
 </script>
 

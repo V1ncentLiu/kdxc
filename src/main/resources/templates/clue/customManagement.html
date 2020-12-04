@@ -321,7 +321,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo1">
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo1" v-loading="loading">
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'cusName'">
@@ -984,6 +984,7 @@
     el: '#myCustom',
     data: function() {
       return {
+        loading:false,
           //释放资源按钮
           releaseBtnDisabled:false,
           //是否签约默认可选
@@ -1378,6 +1379,7 @@
           return;
         }
           param.notFollowUpTime = this.form.notFollowUpTime;
+          this.loading=true;
         axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
           var resobj= response.data;
           var pageData=resobj.data;
@@ -1389,6 +1391,7 @@
           customerManVM.pager.currentPage = pageData.currentPage;
           customerManVM.pager.pageSize = pageData.pageSize;
           customerManVM.dataTable =pageData.data;
+          customerManVM.loading=false;
 
           // 取出存储的id
           if(!customerManVM.paginationShow){

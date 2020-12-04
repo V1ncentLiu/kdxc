@@ -259,6 +259,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                      sessions[i].clueId=data[j].clueId
 	                      sessions[i].isSubmit=data[j].isSubmit
 	                      sessions[i].nickName=data[j].nickName
+	                      // 新增优惠券
+	                      sessions[i].hasCoupon=data[j].hasCoupon
 	                      newSessionList.push(sessions[i])
 	                  }
 	              }
@@ -323,6 +325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 										'<span class="panel_nick">',
 										sessions[i].isSubmit&&sessions[i].brandName?(sessions[i].nickName?sessions[i].nickName: info.nick).slice(0,6):(sessions[i].nickName?sessions[i].nickName: info.nick),
 										// info.nick ,
+										sessions[i].hasCoupon==1?'<img style="width: 13px;height: 10px;display:inline-block;margin-left: 5px;" src="/im/images/newImages/coupon.png" />':'',
 										 sessions[i].isSubmit?'<b class="panel_customer">我的客户</b> ':'',
 										 sessions[i].brandName?'<b class="panel_brand">'+(sessions[i].isSubmit?sessions[i].brandName.slice(0,4):sessions[i].brandName.slice(0,9))+'</b>':'',
 										 '</span>',

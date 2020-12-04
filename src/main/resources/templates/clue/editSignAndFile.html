@@ -77,7 +77,7 @@
         <el-row class="marginB10">
             <el-col :span="8">
                 <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
-                <el-button type="text" disabled>只允许上传图片／音频文件，支持格式：jpg,png,jpeg,gif,bmp,mp3,mp4,wav,wma,3gpp,m4a,ape,midi,amr。不允许超过500MB。</el-button>
+                <el-button type="text" disabled>只允许上传图片／音频文件，支持格式：jpg,png,jpeg,gif,bmp,mp3,mp4,wav,wma,3gpp,m4a,midi。不允许超过500MB。</el-button>
             </el-col>
             <el-col :span="4" class="f-fr">
                 <form name=theform v-show="false">
@@ -171,10 +171,13 @@
     var signData = [[${signData}]];
     var clueFileList = [[${clueFileList}]];//上传文件
     var ossUrl = [[${ossUrl}]];//上传文件地
+    var randomNameMap = new Map();
+    var uploadNum = 0;
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#editSignAndFile',
         data: {
+            multipleFileSelection: [],
             showUploadButton:false,
             signOrderBaseInfo: signData,//签约单基本信息
             tableDataC1: clueFileList,//文件记录
@@ -296,18 +299,24 @@
                 this.multipleFileSelection = val;
             },
             goback(){window.history.go(-1);},
-            // element ui upload
-            getUploadParam(){
+
+            selectFile(file, fileList){
+                if (fileList.length > 0){
+                    mainDivVM.showUploadButton = true;
+                }
+
+            },
+            submitUpload(){
+                //this.customUpload();
                 var signUrl = this.ossUrl+"?serviceType=aggregation";
                 var param={};
-                
-                 axios.get(signUrl, param)
-                .then(function (response) {
-                   // console.info(response);
-                    var respData= response.data;
-                    var host = respData.host;
-                    var params={};
-                    var new_multipart_params = {
+                axios.get(signUrl, param)
+                    .then(function (response) {
+                        // console.info(response);
+                        var respData= response.data;
+                        var host = respData.host;
+                        var params={};
+                        var new_multipart_params = {
                             dir:respData.dir,
                             'policy': respData.policy,
                             'OSSAccessKeyId': respData.accessid,
@@ -315,24 +324,21 @@
                             'signature': respData.signature,
                             'x:params':params,//自定义编码，basse64编码后的字符串,
                             'realName':''
-                   };
-                  mainDivVM.uploadParamData= new_multipart_params;
-                  mainDivVM.uploadOssHost = host;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-            },
-            selectFile(file, fileList){
-                if (fileList.length > 0){
-                    mainDivVM.showUploadButton = true;
-                }
-                mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
-                mainDivVM.uploadParamData.realName= file.name
-            },
-            submitUpload(){
-                //this.customUpload();
-                this.$refs.refundApplyImgUpload.submit();
+                        };
+                        mainDivVM.uploadParamData= new_multipart_params;
+                        mainDivVM.uploadOssHost = host;
+                        //同步
+                        mainDivVM.$nextTick(() => {
+                            //框架上传方法
+                            mainDivVM.$refs.refundApplyImgUpload.submit()
+                        });
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message.error('上传图片接口错误');
+                    });
+
             },
             handlePreview(file){
              
@@ -353,8 +359,9 @@
              this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
             },
             handleSuccess(response, file, fileList) {
+                debugger;
                 var realName = file.name;
-                var randomName = mainDivVM.uploadParamData.key;
+                var randomName = randomNameMap.get(file.uid);
                 var imgUrl = mainDivVM.uploadOssHost + "/" + randomName;
                 console.log(imgUrl)
                 // element ui上传成功回调回显
@@ -368,23 +375,29 @@
                 axios.post('/tele/clueMyCustomerInfo/batchUploadClueFile', param).then(function (response) {
                     mainDivVM.$message({
                         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                            axios.post('/businesssign/findFileBySignId', param)
-                                .then(function (response) {
-                                    console.log(response)
-                                    mainDivVM.tableDataC1 = response.data.data;
-                                    mainDivVM.fileList = [];
-                                    mainDivVM.showUploadButton = false;
-                                });
+                            uploadNum =uploadNum +1;
+                            if (uploadNum == fileList.length){
+                                axios.post('/businesssign/findFileBySignId', param)
+                                    .then(function (response) {
+                                        console.log(response)
+                                        mainDivVM.tableDataC1 = response.data.data;
+                                        mainDivVM.fileList = [];
+                                        mainDivVM.showUploadButton = false;
+                                        uploadNum = 0;
+                                    });
+                            }
+
                         }
                     });
                 });
             },
             handleError(err, file, fileList){
                 console.info(err);
+                this.$message.error('上传图片出现错误');
             },
             handleBefore(file){
                 console.log(file,"文件格式打印")
-                var isTextComputer = file.type === 'image/bmp' || file.type === 'image/png' || file.type==='image/jpeg' || file.type==='image/gif'|| file.type === 'audio/x-ms-wma'|| file.type === 'audio/mpeg'||file.type==='video/mp4'||file.type==='audio/wav'||file.type==='video/3gpp'||file.type==='audio/x-m4a'||file.type==='audio/mid';
+                var isTextComputer = file.type === 'image/bmp' ||file.type === 'audio/mp3' || file.type === 'image/png' || file.type==='image/jpeg' || file.type==='image/gif'|| file.type === 'audio/x-ms-wma'|| file.type === 'audio/mpeg'||file.type==='video/mp4'||file.type==='audio/wav'||file.type==='video/3gpp'||file.type==='audio/x-m4a'||file.type==='audio/mid';
                 if(!isTextComputer){
                    this.fileList=[];
                    this.$message.error('文件格式错误');
@@ -395,6 +408,10 @@
                    this.$message.error('文件最大为500MB');
                    return false;
                 }
+                var randomName = mainDivVM.uploadParamData.dir + mainDivVM.random_string(10) + mainDivVM.get_suffix(file.name);
+                mainDivVM.uploadParamData.key = randomName;
+                mainDivVM.uploadParamData.realName = file.name;
+                randomNameMap.set(file.uid,randomName)
             },
             random_string(len) {
                 len = len || 32;
@@ -416,7 +433,6 @@
             }
         },
         created() {
-            this.getUploadParam();
             //初始化签约单地址
             var signAddress = signData[0].signAddress;
             this.signAddressForm.signAddress =  signAddress;

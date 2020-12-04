@@ -270,12 +270,23 @@ YX.fn.openChatBox = function(account, scene) {
   this.getHistoryMsgs(scene, account);
 };
 
+
+
 YX.fn.getUserInfo = function(accountId) {
   var that=this
   console.log(accountId,'聊天面板id');
     var params = {
       id:accountId
     };
+
+    function getdate(time) {
+      var now = new Date(parseInt(time)),
+          y = now.getFullYear(),
+          m = now.getMonth() + 1,
+          d = now.getDate();
+      return y + "." + (m < 10 ? "0" + m : m) + "." + (d < 10 ? "0" + d : d);
+    }
+
     $.ajax({
       url:'/customerInfo/customerInfoByIm',
       type: 'POST',
@@ -285,6 +296,19 @@ YX.fn.getUserInfo = function(accountId) {
         console.log(data,'个人信息请求后端接口');
         if(data.data){
           var data=data.data
+          // 新增券
+          var couponInfoStr=[,
+            data.coupon.couponName?'<span style="margin: 0 10px;">'+data.coupon.couponName+'</span>':'',
+            data.coupon.discountAmount?'<span style="margin-right:10px;">'+data.coupon.discountAmount+'元 </span>':'',
+            data.coupon.expiredTime?'<span>'+getdate(data.coupon.expiredTime)+'到期</span>':'',
+            ].join("");
+          // var couponInfoStr='<img src=""><span>'+data.coupon.couponName+'</span><span>'+data.coupon.discountAmount+'元</span><span>'+data.coupon.expiredTime+'到期</span>';
+          if(data.coupon&&couponInfoStr){
+              $('#couponInfo').html('<img style="width: 13px;height: 10px;float: none;margin-right: 0;" src="/im/images/newImages/coupon.png">'+couponInfoStr);
+          }else{
+            $('#couponInfo').html("");
+          }          
+
           var str=[,
             data.createDateStr?'<span>注册时间：'+data.createDateStr+'</span>':'',
             data.age?'<span>'+data.age+'</span>|':'',
@@ -316,6 +340,7 @@ YX.fn.getUserInfo = function(accountId) {
         
         }else{
             $('#otherInformation').html('')
+            $('#couponInfo').html('')
         }
       },
       error: function() {

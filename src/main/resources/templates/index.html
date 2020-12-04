@@ -499,11 +499,15 @@
                 custom-class="rightBottom" @close='bussdialogClose(index)'>
             <el-table
                     :data="cols.bussDialogTableData"
-                    style="width: 100%">
+                    style="width: 100%;">
                 <template v-for="(col ,index) in cols.cols">
                     <el-table-column :prop="col.prop" :label="col.label" header-align="center">
                         <template slot-scope="scope">
-                            <span style="white-space: pre-wrap">{{scope.row.content_ }}</span><el-button style="margin-left:10px;" type="primary" size="mini" v-if="col.typeVal=='1'"><a style="color:#fff;" :href="col.urlVal" target="_blank">点击查看详情</a></el-button>
+                            <span style="display:inline">{{scope.row.content_ }}
+                                <em  v-if="col.typeVal=='1'">
+                                    <a style="color:blue;" :href="col.urlVal" target="_blank">点击查看详情</a>
+                                </em>
+                            </span>
                         </template>
                     </el-table-column>
                 </template>
@@ -680,8 +684,9 @@
 								<span id="nickName" style="font-size:14px;color:#333;">张三</span>
 								<span id="isOnline"> <b></b> 在线</span>
 								<!--<span>正在输入...</span> -->
+                                <span id="couponInfo"><img style="width: 13px;height: 10px;float: none;" th:src="@{/im/images/newImages/coupon.png}"><span>品牌形象店新人专享券</span><span>12888元</span><span>2020.12.26到期</span></span>
 							</span>
-                        <span id="otherInformation" class="otherInformation">
+                            <span id="otherInformation" class="otherInformation">
 								<span>注册时间：2020-08-14</span>
 								<span>20-30岁</span>|
 								<span>女</span>|
@@ -1665,6 +1670,11 @@
                     };
                     // 更新状态
                     yunXin.mysdk.pushOnlineEvents(msgEventDingyi);
+                }else if(msg.indexOf("onlineLeaveStatus")!=-1){
+                    var msgSplit = msg.split(":");
+                    var type = msgSplit[1];
+                    // 更新在线状态
+                    
                 }
             });
             
