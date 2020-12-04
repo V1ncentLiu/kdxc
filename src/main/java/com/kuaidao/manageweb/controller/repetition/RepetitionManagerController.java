@@ -253,15 +253,16 @@ public class RepetitionManagerController {
                 }
 
                 if (islegal && telemarketingLayoutDTO2.getProjects() != null) {
+                    StringBuilder projectIdsStringBuilder = new StringBuilder();
                     String[] projects = telemarketingLayoutDTO2.getProjects().split(",");
                     for (int i = 0; i < projects.length; i++) {
                         int isCanUser = 1;// 是否能用0 可用 1不可用
                         for (ProjectInfoDTO projectInfoDTO : listNoPage.getData()) {
                             if (projectInfoDTO.getProjectName().equals(projects[i].trim())) {
-                                if ("".equals(projectIds)) {
-                                    projectIds = projectInfoDTO.getId() + "";
+                                if (projectIdsStringBuilder.length()==0) {
+                                    projectIdsStringBuilder.append(projectInfoDTO.getId() + "");
                                 } else {
-                                    projectIds = projectIds + "," + projectInfoDTO.getId() + "";
+                                    projectIdsStringBuilder.append("," + projectInfoDTO.getId() + "");
                                 }
                                 isCanUser = 0;
                                 break;
@@ -272,6 +273,7 @@ public class RepetitionManagerController {
                             break;
                         }
                     }
+                    projectIds = projectIdsStringBuilder.toString();
                 } else {
                     islegal = false;
                 }
