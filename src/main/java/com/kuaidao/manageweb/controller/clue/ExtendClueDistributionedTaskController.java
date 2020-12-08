@@ -410,13 +410,16 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(phstatus);
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
-                String im;
-                if (taskDTO.getInputType() == 5) {
-                    im = "是";
-                } else {
-                    im = "否";
+                String sourceFrom = "";
+                //合并代码后替换成枚举类
+                if (taskDTO.getSourceFrom().equals(6)) {
+                    sourceFrom = "餐盟（IM顾问提交）";
+                } else if(taskDTO.getSourceFrom().equals(7)) {
+                    sourceFrom = "餐盟（自动推送）";
+                }else if(taskDTO.getSourceFrom().equals(8)) {
+                    sourceFrom = "餐盟（咨询后自动推送）";
                 }
-                curList.add(im);
+                curList.add(sourceFrom);
                 curList.add(taskDTO.getAscriptionProjectName());
                 curList.add(taskDTO.getRootWord());
                 if(null != taskDTO.getConsultProjectIsShow() && taskDTO.getConsultProjectIsShow().equals("1")){
@@ -649,14 +652,17 @@ public class ExtendClueDistributionedTaskController {
                     repeatPhone = "否";
                 }
                 curList.add(repeatPhone);
-                String im;
-                if (taskDTO.getInputType() == 5) {
-                    im = "是";
-                } else {
-                    im = "否";
+                String sourceFrom = "";
+                //合并代码后替换成枚举类
+                if (taskDTO.getSourceFrom().equals(6)) {
+                    sourceFrom = "餐盟（IM顾问提交）";
+                } else if(taskDTO.getSourceFrom().equals(7)) {
+                    sourceFrom = "餐盟（自动推送）";
+                }else if(taskDTO.getSourceFrom().equals(8)) {
+                    sourceFrom = "餐盟（咨询后自动推送）";
                 }
                 if (!queryDto.getPhtraExport()) {
-                    curList.add(im);
+                    curList.add(sourceFrom);
                 }
                 // url地址
                 curList.add(taskDTO.getUrlAddress());
