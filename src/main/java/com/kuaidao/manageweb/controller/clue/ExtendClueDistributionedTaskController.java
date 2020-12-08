@@ -418,6 +418,11 @@ public class ExtendClueDistributionedTaskController {
                 }
                 curList.add(im);
                 curList.add(taskDTO.getAscriptionProjectName());
+                curList.add(taskDTO.getRootWord());
+                if(null != taskDTO.getConsultProjectIsShow() && taskDTO.getConsultProjectIsShow().equals("1")){
+                    curList.add(taskDTO.getConsultProjectTurn());
+                }
+
                 dataList.add(curList);
             }
         }
@@ -655,6 +660,14 @@ public class ExtendClueDistributionedTaskController {
                 }
                 // url地址
                 curList.add(taskDTO.getUrlAddress());
+                if (!queryDto.getPhtraExport()) {
+                    //词根
+                    curList.add(taskDTO.getRootWord());
+                    //咨询项目
+                    if(null != taskDTO.getConsultProjectIsShow() && taskDTO.getConsultProjectIsShow().equals("1")){
+                        curList.add(taskDTO.getConsultProjectTurn());
+                    }
+                }
                 dataList.add(curList);
             }
         }
