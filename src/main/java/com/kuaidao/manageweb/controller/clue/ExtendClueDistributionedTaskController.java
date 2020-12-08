@@ -411,14 +411,16 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
                 String sourceFrom = "";
-                //合并代码后替换成枚举类
-                if (taskDTO.getSourceFrom().equals(6)) {
-                    sourceFrom = "餐盟（IM顾问提交）";
-                } else if(taskDTO.getSourceFrom().equals(7)) {
-                    sourceFrom = "餐盟（自动推送）";
-                }else if(taskDTO.getSourceFrom().equals(8)) {
-                    sourceFrom = "餐盟（咨询后自动推送）";
+                if(null != taskDTO.getSourceFrom()){
+                    if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
+                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
+                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
+                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
+                    }
                 }
+
                 curList.add(sourceFrom);
                 curList.add(taskDTO.getAscriptionProjectName());
                 curList.add(taskDTO.getRootWord());
@@ -654,12 +656,14 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(repeatPhone);
                 String sourceFrom = "";
                 //合并代码后替换成枚举类
-                if (taskDTO.getSourceFrom().equals(6)) {
-                    sourceFrom = "餐盟（IM顾问提交）";
-                } else if(taskDTO.getSourceFrom().equals(7)) {
-                    sourceFrom = "餐盟（自动推送）";
-                }else if(taskDTO.getSourceFrom().equals(8)) {
-                    sourceFrom = "餐盟（咨询后自动推送）";
+                if(null != taskDTO.getSourceFrom()){
+                    if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
+                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
+                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
+                    }
                 }
                 if (!queryDto.getPhtraExport()) {
                     curList.add(sourceFrom);
