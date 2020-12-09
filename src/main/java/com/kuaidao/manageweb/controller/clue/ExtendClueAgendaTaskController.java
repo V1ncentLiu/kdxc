@@ -520,21 +520,23 @@ public class ExtendClueAgendaTaskController {
                     rowDto.setMessagePoint(value);
                 } else if (j == 16) {// 搜索词
                     rowDto.setSearchWord(value);
-                } else if (j == 17) {// 行业类别
+                }else if (j == 17) {// 词根
+                    rowDto.setRootWord(value);
+                } else if (j == 18) {// 行业类别
                     rowDto.setIndustryCategoryName(value);
-                } else if (j == 18) {// 备注
+                } else if (j == 19) {// 备注
                     rowDto.setRemark(value);
-                } else if (j == 19) {// 微信2
+                } else if (j == 20) {// 微信2
                     rowDto.setWechat2(value);
-                } else if (j == 20) {// 预约回访时间
+                } else if (j == 21) {// 预约回访时间
                     rowDto.setReserveTime1(value);
-                } else if (j == 21) {// url地址
+                } else if (j == 22) {// url地址
                     rowDto.setUrlAddress(value);
-                } else if (j == 22) {// 账户名称
+                } else if (j == 23) {// 账户名称
                     rowDto.setAccountName(value);
-                } else if (j == 23) {// 性别
+                } else if (j == 24) {// 性别
                     rowDto.setSex1(value);
-                } else if (j == 24) {// 年龄
+                } else if (j == 25) {// 年龄
                     rowDto.setAge1(value);
                 }
             } // inner foreach end
