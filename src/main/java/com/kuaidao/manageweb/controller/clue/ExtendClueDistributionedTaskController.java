@@ -424,7 +424,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(sourceFrom);
                 curList.add(taskDTO.getAscriptionProjectName());
                 curList.add(taskDTO.getRootWord());
-                if(null != taskDTO.getConsultProjectIsShow() && taskDTO.getConsultProjectIsShow().equals("1")){
+                if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
                     curList.add(taskDTO.getConsultProjectTurn());
                 }
 
@@ -674,7 +674,7 @@ public class ExtendClueDistributionedTaskController {
                     //词根
                     curList.add(taskDTO.getRootWord());
                     //咨询项目
-                    if(null != taskDTO.getConsultProjectIsShow() && taskDTO.getConsultProjectIsShow().equals("1")){
+                    if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
                         curList.add(taskDTO.getConsultProjectTurn());
                     }
                 }
