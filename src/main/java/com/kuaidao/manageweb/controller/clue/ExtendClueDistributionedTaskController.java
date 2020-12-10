@@ -410,14 +410,24 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(phstatus);
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
-                String im;
-                if (taskDTO.getInputType() == 5) {
-                    im = "是";
-                } else {
-                    im = "否";
+                String sourceFrom = "";
+                if(null != taskDTO.getSourceFrom()){
+                    if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
+                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
+                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
+                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
+                    }
                 }
-                curList.add(im);
+
+                curList.add(sourceFrom);
                 curList.add(taskDTO.getAscriptionProjectName());
+                curList.add(taskDTO.getRootWord());
+                if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                    curList.add(taskDTO.getConsultProjectTurn());
+                }
+
                 dataList.add(curList);
             }
         }
@@ -644,17 +654,30 @@ public class ExtendClueDistributionedTaskController {
                     repeatPhone = "否";
                 }
                 curList.add(repeatPhone);
-                String im;
-                if (taskDTO.getInputType() == 5) {
-                    im = "是";
-                } else {
-                    im = "否";
+                String sourceFrom = "";
+                //合并代码后替换成枚举类
+                if(null != taskDTO.getSourceFrom()){
+                    if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
+                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
+                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
+                    }
                 }
                 if (!queryDto.getPhtraExport()) {
-                    curList.add(im);
+                    curList.add(sourceFrom);
                 }
                 // url地址
                 curList.add(taskDTO.getUrlAddress());
+                if (!queryDto.getPhtraExport()) {
+                    //词根
+                    curList.add(taskDTO.getRootWord());
+                    //咨询项目
+                    if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                        curList.add(taskDTO.getConsultProjectTurn());
+                    }
+                }
                 dataList.add(curList);
             }
         }
