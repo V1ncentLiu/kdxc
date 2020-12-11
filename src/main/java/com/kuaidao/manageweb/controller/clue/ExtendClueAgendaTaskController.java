@@ -1037,6 +1037,7 @@ public class ExtendClueAgendaTaskController {
                     }
                     // 推广所属公司 为当前账号所在机构的推广所属公司
                     pushClueReq.setPromotionCompany(user.getPromotionCompany());
+                    pushClueReq.setRootWord(clueAgendaTaskDTOReq.getRootWord());
                     list1.add(pushClueReq);
                 } else {
                     clueAgendaTaskDTOReq.setImportFailReason(failReason.toString());
