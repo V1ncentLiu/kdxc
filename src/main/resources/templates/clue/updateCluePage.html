@@ -14,6 +14,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>待分配资源</el-breadcrumb-item>
         <el-breadcrumb-item>编辑资源</el-breadcrumb-item>
     </el-breadcrumb>
 
@@ -111,8 +112,15 @@
                         </el-form-item>
                     </el-col>
                 	<el-col :span="12">
+                        <el-form-item label="词根：" :label-width="formLabelWidth" prop="rootWord" >
+                           <el-input  v-model="form.rootWord" autocomplete="off" maxLength="50" style="width: 260px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
                         <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark" >
-                           <el-input  v-model="form.remark" autocomplete="off" maxLength="50" style="width: 260px;"></el-input>
+                            <el-input  v-model="form.remark" autocomplete="off" maxLength="50" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -458,7 +466,10 @@
                     </el-col>                 
                     <el-col :span="12"> 
                         <el-form-item label="搜索词：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.searchWord}}</span></el-form-item> 
-                    </el-col> 
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="词根：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.rootWord}}</span></el-form-item>
+                    </el-col>
                     <el-col :span="12"> 
                         <el-form-item label="备注：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{viewForm.remark}}</span></el-form-item> 
                     </el-col> 
@@ -579,6 +590,7 @@
                     category:'',
                     projectId:'',
                     searchWord:'',
+                    rootWord:'',
                     accountName:'',
                     urlAddress:'',
                     industryCategory:'',
@@ -606,6 +618,7 @@
                     categoryName:'',
                     projectIdName:'',
                     searchWord:'',
+                    rootWord:'',
                     accountNameName:'',
                     urlAddress:'',
                     industryCategoryName:'',
@@ -1049,6 +1062,7 @@
                     }
                 }
                 param.searchWord=this.form.searchWord;
+                param.rootWord=this.form.rootWord;
                 param.messagePoint=this.form.messagePoint;
                 param.messageTime=this.form.messageTime;
                 param.accountName=this.form.accountName;
@@ -1256,13 +1270,19 @@
                 var domains=this.dynamicValidateForm.domains
                 for(var i=0;i<domains.length;i++){
                     domains[i].value=""
+                    // 4、按钮变化
+                    if(domains[i].value==""){
+                        this.buttonType='A';
+                    }else{
+                        this.buttonType='B';
+                    }                   
                 }
                 // 2、重置表单
                 this.$refs['dynamicValidateForm'].resetFields()
                 // 3、关闭弹窗
                 this.dialogFormVisible = false;
                 // 4、按钮变化
-                this.buttonType='A';
+                // this.buttonType='A';
             },
             number(){
     　　　     	this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
@@ -1464,6 +1484,7 @@
                     this.categoryChange(this.form.category);
                 }
                 this.form.searchWord=clueInfo.clueBasic.searchWord;
+                this.form.rootWord=clueInfo.clueBasic.rootWord;
                 this.form.messagePoint=clueInfo.clueBasic.messagePoint;
                 this.form.messageTime=clueInfo.clueBasic.messageTime;
                 if(clueInfo.clueBasic.industryCategory){
