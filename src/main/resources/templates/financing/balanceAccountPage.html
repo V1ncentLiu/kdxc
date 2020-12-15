@@ -236,8 +236,8 @@
         </template>
     </el-dialog>
     <!-- 查看签约/开店图片 -->
-    <el-dialog title="签约/开店图片" :visible.sync="showReviewImagesDialog" width="1000px">
-        <el-table ref="multipleTable" :data="tableDataC1" tooltip-effect="dark" style="width: 100%" border>
+    <el-dialog title="签约/开店图片" :visible.sync="showReviewImagesDialog" width="1000px"  v-loading="loading">
+        <el-table ref="multipleTable" :data="tableDataC1" tooltip-effect="dark" style="width: 100%" border  v-loadi>
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
             <el-table-column prop="uploadUserName" label="上传人姓名" align="center"></el-table-column>
             <el-table-column prop="uploadTime" label="上传时间" align="center"></el-table-column>
@@ -378,6 +378,7 @@ var clueVM = new Vue({
             isShow:false,
             lowestCommissionShow: false,
             btnDisabled: false,
+            loading:false,
         	searchForm: {
         		teleCompanyId:'',
   	       		busAreaId: '',
@@ -557,11 +558,13 @@ var clueVM = new Vue({
         },
         methods: {
             showReviewImageClick(row) {
-                this.showReviewImagesDialog = true;
+                clueVM.showReviewImagesDialog = true;
                 var param = {};
                 param.signId = row.signId;
+                clueVM.loading = true;
                 axios.post('/businesssign/findFileBySignId', param).then(function (response) {
                     clueVM.tableDataC1 = response.data.data;
+                    clueVM.loading = false;
                 })  .catch(function (error) {
                     console.log(error);
                 });
