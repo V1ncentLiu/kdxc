@@ -3925,7 +3925,7 @@
                                         }
                                     }
                                 });*/
-                                nextRedirect(clueId );
+                                nextRedirect(clueId , parenthis.formInline ? parenthis.formInline.callTime : null  );
                             }else{
                                 parenthis.nextDisabled = false;
                                 parenthis.saveDisabled = false;
@@ -3959,7 +3959,7 @@
                                     }
                                 }
                             });*/
-                            nextRedirect(clueId );
+                            nextRedirect(clueId , parenthis.formInline ? parenthis.formInline.callTime : null );
                         }else{
                             parenthis.nextDisabled = false;
                             parenthis.saveDisabled = false;
@@ -3986,14 +3986,23 @@
     }
 
     /* “ 下一条 ” 跳转 */
-    function nextRedirect(clueId ){
+    function nextRedirect(clueId , form){
         if( nextClueIds && nextClueIds.length > 0 ){
             let nextClueIdsArr = nextClueIds.split(",");
             for(let i =0 ; i< nextClueIdsArr.length ; i++ ){
                 if(clueId === nextClueIdsArr[i]){
                     if( ( i + 1 ) > ( nextClueIdsArr.length - 1 )){
-                        addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warning'});
-                        return ;
+                        if(form){
+                            addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warning'});
+                            let result = nextClueIdsArr[ i ];
+                            setTimeout(function(){
+                                locationPost("/tele/clueMyCustomerInfo/customerEditInfo" , {"clueId":result, "hJtype":hJtype,"nextClueIds":nextClueIds});
+                            },1000);
+                        }else{
+                            addCustomerVM.$message({message: '本页最后一条客户信息', type: 'warning'});
+                            return ;
+                        }
+
                     }else{
                         let result = nextClueIdsArr[ i + 1];
                         // 跳转到下一页
