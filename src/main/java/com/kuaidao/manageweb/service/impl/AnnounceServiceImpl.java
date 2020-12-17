@@ -1,11 +1,5 @@
 package com.kuaidao.manageweb.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
@@ -15,6 +9,13 @@ import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -29,7 +30,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
     @Autowired
     private AmqpTemplate amqpTemplate;
 
-    @Async
+    @Async("threadPoolExecutor")
     @Override
     public void sendMessage(AnnouncementAddAndUpdateDTO dto) {
         long startTime = System.currentTimeMillis();

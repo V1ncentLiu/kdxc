@@ -403,16 +403,18 @@ public class InviteAreaController {
                 boolean islegal = true;// true合法 false不合法
                 String provinceIds = "";
                 String projectIds = "";
+                StringBuilder provinceIdsStringBuilder = new StringBuilder();
+                StringBuilder projectIdsStringBuilder = new StringBuilder();
                 if (inviteAreaDTO2.getProvinces() != null) {
                     String[] provinces = inviteAreaDTO2.getProvinces().split(",");
                     for (int i = 0; i < provinces.length; i++) {
                         int isCanUser = 1;// 是否能用0 可用 1不可用
                         for (SysRegionDTO sysRegionDTO : proviceslist) {
                             if (sysRegionDTO.getName().equals(provinces[i].trim())) {
-                                if ("".equals(provinceIds)) {
-                                    provinceIds = sysRegionDTO.getId() + "";
+                                if (provinceIdsStringBuilder.length() ==0) {
+                                    provinceIdsStringBuilder.append(sysRegionDTO.getId() + "");
                                 } else {
-                                    provinceIds = provinceIds + "," + sysRegionDTO.getId() + "";
+                                    provinceIdsStringBuilder.append("," + sysRegionDTO.getId());
                                 }
                                 isCanUser = 0;
                                 break;
@@ -427,6 +429,7 @@ public class InviteAreaController {
                 } else {
                     islegal = false;
                 }
+                provinceIds = provinceIdsStringBuilder.toString();
                 Integer busLine = null;//标记商务组所在业务线
                 if (islegal && inviteAreaDTO2.getBusinessGroup() != null) {
                     islegal = false;
@@ -469,10 +472,10 @@ public class InviteAreaController {
                         int isCanUser = 1;// 是否能用0 可用 1不可用
                         for (ProjectInfoDTO projectInfoDTO : allProject.getData()) {
                             if (projectInfoDTO.getProjectName().equals(projects[i].trim())) {
-                                if ("".equals(projectIds)) {
-                                    projectIds = projectInfoDTO.getId() + "";
+                                if (projectIdsStringBuilder.length() ==0) {
+                                    projectIdsStringBuilder.append(projectInfoDTO.getId() + "");
                                 } else {
-                                    projectIds = projectIds + "," + projectInfoDTO.getId() + "";
+                                    projectIdsStringBuilder.append("," + projectInfoDTO.getId() + "");
                                 }
                                 isCanUser = 0;
                                 break;
@@ -486,6 +489,7 @@ public class InviteAreaController {
                 } else {
                     islegal = false;
                 }
+                projectIds = projectIdsStringBuilder.toString();
                 if (islegal) {
                     inviteAreaDTO2.setProjectIds(projectIds);
                     inviteAreaDTO2.setCreateTime(new Date());
