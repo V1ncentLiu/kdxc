@@ -509,18 +509,30 @@ var homePageVM=new Vue({
 	   	handleCommand(command) {//点击下拉菜单
 	        if(command=='modifyPwd'){//修改密码
 	        	this.modifyPwd();
-	        }else if(command=='logout'){//退出
-	        	this.logout();
+	        }else if(command=='setBusyStatus'){//设为忙碌状态
+	        	this.setBusyStatus();
+          }else if(command=='cancelBusyStatus'){//取消忙碌状态
+            this.cancelBusyStatus();
+          }else if(command=='logout'){//退出
+            this.logout();
 	        }else{
-                this.gotoUserInfo();
-            }
-	     },
-         gotoUserInfo(){
-            var dataUrl = "/merchant/userManager/userInfo";
-            $("#iframeBox").attr({
-                "src":dataUrl //设置ifream地址
-            });
-         },
+              this.gotoUserInfo();
+          }
+	    },
+      gotoUserInfo(){
+          var dataUrl = "/merchant/userManager/userInfo";
+          $("#iframeBox").attr({
+              "src":dataUrl //设置ifream地址
+          });
+      },
+      setBusyStatus(){
+        this.isBusyButton=false;
+        this.isBusyStatus=true;
+      },
+      cancelBusyStatus(){
+        this.isBusyButton=true;
+        this.isBusyStatus=false;
+      },
 	     modifyPwd(){//修改密码
 	    	 //重置表单
 	    	 this.dialogModifyPwdVisible=true;
