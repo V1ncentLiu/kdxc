@@ -1,9 +1,6 @@
 
 package com.kuaidao.manageweb;
 
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
@@ -20,6 +17,10 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 @SpringBootApplication
 @EnableEurekaClient
 @EnableFeignClients
@@ -27,7 +28,6 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties
 @EnableAsync
 public class ManageWebApplication {
-
 
     public static void main(String[] args) {
         SpringApplication.run(ManageWebApplication.class, args);
@@ -39,19 +39,15 @@ public class ManageWebApplication {
      */
     @Bean("jackson2ObjectMapperBuilderCustomizer")
     public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
-        Jackson2ObjectMapperBuilderCustomizer customizer =
-                new Jackson2ObjectMapperBuilderCustomizer() {
-                    @Override
-                    public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
-                        jacksonObjectMapperBuilder
-                                .serializerByType(Long.class, ToStringSerializer.instance)
-                                .serializerByType(Long.TYPE, ToStringSerializer.instance);
-                    }
-                };
+        Jackson2ObjectMapperBuilderCustomizer customizer = new Jackson2ObjectMapperBuilderCustomizer() {
+            @Override
+            public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
+                jacksonObjectMapperBuilder.serializerByType(Long.class, ToStringSerializer.instance).serializerByType(Long.TYPE,
+                                                                                                                      ToStringSerializer.instance);
+            }
+        };
         return customizer;
     }
-
-
 
     /**
      * redistemplate 修改序列化方式
@@ -59,18 +55,15 @@ public class ManageWebApplication {
      * @return
      */
     @Bean
-    public RedisTemplate<Object, Object> redisTemplate(
-            RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
         // 使用Jackson2JsonRedisSerialize 替换默认序列化
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer =
-                new Jackson2JsonRedisSerializer(Object.class);
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL,
-                com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY);
+        objectMapper.setVisibility(PropertyAccessor.ALL, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY);
         objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 
         jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
@@ -88,10 +81,8 @@ public class ManageWebApplication {
         return redisTemplate;
     }
 
-
     /**
      * restTemplate
-     * 
      * @return
      */
     @Bean
