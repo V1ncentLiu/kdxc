@@ -307,6 +307,8 @@ var homePageVM=new Vue({
           isTipbgShow:false,//默认不显示提示框图片2
           isCurrent:true,//首页按钮默认高亮
           issearchLoading:false,
+          isBusyStatus:false,//默认不显示忙碌
+          isBusyButton:true,//默认显示设置忙碌状态
 	    }
 	},
  	methods: {
