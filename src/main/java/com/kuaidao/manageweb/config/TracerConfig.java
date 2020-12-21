@@ -42,7 +42,7 @@ public class TracerConfig {
 
     @Bean
     public io.opentracing.Tracer tracer() {
-        io.jaegertracing.Configuration config = new io.jaegertracing.Configuration(application + active);
+        io.jaegertracing.Configuration config = new io.jaegertracing.Configuration(application +"-" +active);
         io.jaegertracing.Configuration.SenderConfiguration sender = new io.jaegertracing.Configuration.SenderConfiguration();
         sender.withEndpoint("http://tracing-analysis-dc-bj.aliyuncs.com/adapt_f4llc3cjtx@7a8150c3b98dc19_f4llc3cjtx@53df7ad2afe8301/api/traces");
         config.withSampler(new io.jaegertracing.Configuration.SamplerConfiguration().withType(RemoteControlledSampler.TYPE)
