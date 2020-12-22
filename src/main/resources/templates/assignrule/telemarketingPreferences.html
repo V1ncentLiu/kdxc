@@ -14,6 +14,11 @@
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item>顾问偏好状态设置</el-breadcrumb-item>
     </el-breadcrumb>  
+    <el-row class="marginB20">
+        <!-- <shiro:hasPermission name="sys:scheduleManager:add"> -->
+            <el-button type="primary" @click="toSetTime">设置非接收资源时间</el-button>
+        <!-- </shiro:hasPermission> -->
+    </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
@@ -37,18 +42,25 @@
                         </el-option>
                     </el-select>
                 </el-form-item>  
-                <el-form-item label="授权状态:">  
-                    <el-select v-model="form.imAuthorizeStatus" placeholder="全部" style="width: 100%;" clearable filterable>
+                <el-form-item label="项目:">  
+                    <el-select v-model="form.teleSaleId" placeholder="项目" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in isAuthorizeArr"
+                            v-for="item in teleSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>  
-                <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
-                    
+                <el-form-item label="统计截止日期：">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="——" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
+                </el-form-item>  
             </el-form>
         </div>
         <el-row>
@@ -59,12 +71,24 @@
                 border
                 :data="tableData"
                 v-loading="loading">
-                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="teleGroupName" align="center" label="电销组">
-                </el-table-column>
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
                 <el-table-column prop="teleSaleName" align="center" label="电销顾问">
                 </el-table-column>
-                <el-table-column prop="imStatus" align="center" label="IM状态">
+                <el-table-column prop="teleSaleName" align="center" label="新老员工">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="非接收资源时间段">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="项目">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="品类">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="地域">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="媒介">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="词根">
+                </el-table-column>
+                <el-table-column prop="imStatus" align="center" label="顾问状态">
                     <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
                     <template slot-scope="scope">
                         <div v-if="scope.row.imStatus === 1">
@@ -78,35 +102,19 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="imAuthorizeStatus" align="center" label="授权状态">
-                    <!-- 授权状态 1-已授权、2-未授权 -->
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.imAuthorizeStatus === 1">
-                            已授权
-                        </div>                    
-                        <div v-else-if="scope.row.imAuthorizeStatus === 2">
-                            未授权
-                        </div>
-                    </template>
                 </el-table-column>
                 <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
                     <template slot-scope="scope">
-                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="updateStatus(scope.row.teleSaleId)" type="primary"  size="small" style="width: 90px;">IM授权修改</el-button>
-                        <el-button  v-else-if="scope.row.imAuthorizeStatus === 2" @click="updateStatus(scope.row.teleSaleId)"  type="success"  size="small" style="width: 90px;">IM授权</el-button>
-                        
-                        <el-button  v-if="scope.row.imAuthorizeStatus === 1" @click="untie(scope.row.id,scope.row.teleSaleId)" type="danger"  size="small" style="width: 90px;">解绑IM</el-button>
-                        
-                        <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">名片设置</el-button>
-                        
-                        <el-button v-else-if="scope.row.teleCardStatus === 1" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="success" style="margin-left: 10px;">修改名片</el-button>
+                        <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">设置</el-button>                        
+                        <el-button v-else-if="scope.row.teleCardStatus === 1" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="success" style="margin-left: 10px;">修改</el-button>
                     </template>
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
-    <!-- 名片弹窗 -->
-    <el-dialog title="名片" :visible.sync="cardVisible" width="540px" @close="cardCancel">
+    <!-- 设置顾问偏好弹窗 -->
+    <el-dialog title="设置顾问偏好" :visible.sync="cardVisible" width="540px" @close="cardCancel">
         <template>
             <el-form :model="cardForm" ref="cardForm" :rules="cardFormRules">
                 <el-form-item label="姓名："  label-width="180px">
@@ -148,6 +156,25 @@
             </div>
         </template>
     </el-dialog>
+    <!-- 设置非接收资源时间弹窗 -->
+    <el-dialog title="批量设置非接收资源分配接收时间" :visible.sync="timeVisible" width="800px" @close="timeCancel">
+        <template>
+            批量设定选中的顾问资源分配非接收时间
+            <el-form :inline="true" :model="timeForm" ref="timeForm" :rules="timeFormRules">
+                <el-form-item label="非接收时间段：" label-width="100px" style="position: relative;">
+                    <span style="color: red;position: absolute;left: -100px;top: 0;">*</span>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.startTime" type="datetime" placeholder="开始时间"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="——" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.endTime" type="datetime" placeholder="结束时间"></el-date-picker>
+                </el-form-item>               
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="timeSubmit('cardForm')">确 定</el-button>
+                <el-button  @click="timeCancel">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
 </div>
 
 <!-- import common js-->
@@ -186,16 +213,6 @@
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
                 teleSaleArr: teleSaleArr, // 顾问
-                isAuthorizeArr:[{
-                    id:"",
-                    name:'全部'
-                },{
-                    id:1,
-                    name:'已授权'
-                },{
-                    id:2,
-                    name:'未授权'
-                }], 
                 cardVisible:false,//名片
                 cardForm: {
                     teleSaleId:'',
@@ -210,9 +227,67 @@
                 cardFormRules:{},
                 cardTeleSale:'',
                 editId:'',
+
+                timeVisible:false,//批量设置非接收资源分配接收时间弹窗
+                timeForm:{
+                    startTime:'',
+                    endTime:'',
+                },
+                timeFormRules:{},
             }             
         },
-        methods: {  
+        methods: { 
+            toSetTime(){
+                this.timeVisible=true;
+            },
+            timeCancel(){
+                this.timeVisible=false;
+                this.timeForm.startTime="";
+                this.timeForm.endTime="";
+            },
+            timeSubmit(){
+                var startTime = this.timeForm.startTime;
+                var endTime = this.timeForm.endTime;
+                if(!startTime){
+                    this.$message({
+                        message: '开始时间不能为空',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                if(!endTime){
+                    this.$message({
+                        message: '结束时间不能为空',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                if(endTime && startTime) {
+                    beginTimes = new Date(this.timeForm.startTime);
+                    endTimes = new Date(this.timeForm.endTime);
+                    if (beginTimes > endTimes) {
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                // var param = {};
+                // param.startTime = this.timeForm.startTime;
+                // param.endTime = this.timeForm.endTime;
+                // axios.post('/saleCard/saveOrUpdate',param).then(function (response) { 
+                    // console.log(response)
+                    this.timeVisible=false;
+                    
+                // }).catch(function (error) {
+                //     mainDivVM.loading = false;
+                //     mainDivVM.$message({
+                //         message: "请求失败，请稍后重试",
+                //         type: "error"
+                //     });
+                // });
+            },
             changeTeleGroup(selectedValue) {//改变电销组
                 this.teleSaleArr = [];
                 if (!selectedValue) {
@@ -303,40 +378,6 @@
                 this.cardForm.serviceNum='3523';
                 this.editId="";//编辑id清空
             },
-            updateStatus(id) {
-                //状态调整
-                window.location.href="/custservice/saleIm/initUpdatePage?teleSaleId="+id                
-            }, 
-            untie(id,teleSaleId) {
-            	this.$confirm('确定将此顾问进行解绑吗？', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                //解绑
-            	 var param = {};
-                 param.id=id;
-                 param.teleSaleId=teleSaleId;
-                 var url="/custservice/saleIm/untie";
-                 axios.post(url, param)
-                 .then(function (response) {
-                   var result =  response.data;
-                   if(result.code=="0"){
-                	   mainDivVM.$message({message:'解绑成功',type:'success',duration:1000,onClose:function(){
-                		   mainDivVM.searchTable();
-             	      }});
-                     
-                   }else{
-                     mainDivVM.$message.error("解绑失败");
-                   }
-                 })
-                 .catch(function (error) {
-                   console.log(error);
-                 });         
-                }).catch(() => {
-                    
-                });
-            }, 
             cardSubmit(){
                 var param = {};
                 if(this.editId){
