@@ -90,7 +90,7 @@
                 </el-table-column>
                 <el-table-column prop="teleSaleName" align="center" label="词根">
                 </el-table-column>
-                <el-table-column prop="imStatus" align="center" label="顾问状态">
+                <el-table-column prop="imStatus" align="center" label="顾问状态" width="90">
                     <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
                     <template slot-scope="scope">
                         <div v-if="scope.row.imStatus === 1">
@@ -105,7 +105,7 @@
                     </template>
                 </el-table-column>
                 </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作">
+                <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作" width="100">
                     <template slot-scope="scope">
                         <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">设置</el-button>                        
                         <el-button v-else-if="scope.row.teleCardStatus === 1" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="success" style="margin-left: 10px;">修改</el-button>
@@ -118,39 +118,67 @@
     <!-- 设置顾问偏好弹窗 -->
     <el-dialog title="设置顾问偏好" :visible.sync="cardVisible" width="540px" @close="cardCancel">
         <template>
-            <el-form :model="cardForm" ref="cardForm" :rules="cardFormRules">
-                <el-form-item label="姓名："  label-width="180px">
+            <el-form :inline="true" :model="cardForm" ref="cardForm" :rules="cardFormRules">
+                <el-form-item label="顾问姓名："  :label-width="formLabelWidth" style="position: relative;width: 100%;">
+                    <span style="color: red;position: absolute;left: -75px;top: 0;">*</span>                    
                     <span>{{cardTeleSale?cardTeleSale:""}}</span>
                 </el-form-item>
-                <el-form-item label="职级："  label-width="180px"  prop="rank">
-                    <el-select v-model="cardForm.dictionaryRankId" placeholder="全部"  style="width: 180px;margin-right: 10px;" clearable filterable>
+                <el-form-item label="非接收时间段：" :label-width="formLabelWidth" style="position: relative;">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.startTime" type="datetime" placeholder="开始时间" style="width: 150px;"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="——" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.endTime" type="datetime" placeholder="结束时间" style="width: 150px;"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="项目：" prop="projectId" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="timeForm.projectId" :reserve-keyword=true multiple clearable filterable placeholder="请选择" style="width: 333px;">
                         <el-option
-                            v-for="item in rankArr"
+                            v-for="item in projectOptions"
                             :key="item.id"
-                            :label="item.name"
+                            :label="item.projectName"
                             :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="客户评价："  label-width="180px"  prop="judge">
-                    <el-select v-model="cardForm.dictionaryEvaluationId" placeholder="全部" style="width: 180px;margin-right: 10px;" clearable multiple filterable>
+                <el-form-item label="品类：" prop="industryCategory" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="timeForm.industryCategory" :reserve-keyword=true placeholder="品类" filterable multiple  style="width: 333px;">
                         <el-option
-                            v-for="item in judgeArr"
-                            :key="item.id"
+                            v-for="item in industryCategoryArr"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="工作年限："  label-width="180px"  prop="remark">
-                    <el-input-number v-model="cardForm.workYear" controls-position="right" :min="0.1" :max="100" :step="0.1"></el-input-number>
+                <el-form-item label="媒介：" prop="source" :label-width="formLabelWidth">
+                    <el-select v-model="form.source" :reserve-keyword=true filterable multiple placeholder="请选择" style="width: 333px;">
+                        <el-option
+                            v-for="item in sourceOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
-                <el-form-item label="综合评分："  label-width="180px"  prop="remark">
-                    <el-input-number v-model="cardForm.serviceScore" controls-position="right" :min="0.1" :max="5" :step="0.1"></el-input-number>
+                <!-- 显示新增的标签 -->
+                <el-form-item label="" :label-width="formLabelWidth" style="margin-bottom: 0;">
+                    <el-tag
+                        v-for="tag in tags1"
+                        :key="tag"
+                        closable
+                        @close="deleteFun1(tag)"
+                        style="margin-right: 10px;">
+                        {{tag}}
+                    </el-tag>
                 </el-form-item>
-                <el-form-item label="服务人数："  label-width="180px"  prop="remark">
-                    <el-input v-model="cardForm.serviceNum" placeholder="服务人数" style="width: 180px;margin-right: 10px;"></el-input>人
-                </el-form-item>
+                <el-col :span="24">
+                    <el-form-item label="包含搜索词：" :label-width="formLabelWidth" style="float: left;">
+                        <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50" style="width: 265px;margin-right: 10px;"></el-input>                            
+                    </el-form-item>
+                    <el-form-item style="float: left;">
+                        <el-button type="primary" @click="addFun1">添加</el-button>           
+                    </el-form-item>
+                </el-col>
+                    
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="cardSubmit('cardForm')">提 交</el-button>
@@ -190,6 +218,8 @@
     var teleGroupId='';
     var teleSaleArr=[];
     var teleGroupDisabled=false;
+    var mediumList=[[${mediumList}]];//媒介集合
+    var projectList=[[${projectList}]];//项目集合
     if(roleCode=='DXZJ'){
     	teleGroupId=orgId;
     	teleSaleArr=teleSale;
@@ -199,6 +229,11 @@
         el: '#maindiv',
         data: function() {
             return {
+                sourceOptions:mediumList,
+                industryCategoryArr:[],
+                tags1: [],//词根
+                formLabelWidth: '100px',
+                projectOptions:projectList ,
                 loading: false,
                 isDisabled: false,
                 teleGroupDisabled:teleGroupDisabled,
@@ -215,17 +250,10 @@
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
                 teleSaleArr: teleSaleArr, // 顾问
-                cardVisible:false,//名片
+                cardVisible:true,//设置顾问偏好
                 cardForm: {
-                    teleSaleId:'',
-                    dictionaryRankId: '',
-                    dictionaryEvaluationId: [],
-                    workYear: 3,
-                    serviceScore: 4.5,
-                    serviceNum:'3523',
+                    
                 },
-                rankArr:[],
-                judgeArr:[],
                 cardFormRules:{},
                 cardTeleSale:'',
                 editId:'',
@@ -240,6 +268,16 @@
             }             
         },
         methods: { 
+            addFun1() {//添加包含搜索词
+                let searchWord = this.form.searchWord;
+                if (searchWord) {
+                    this.tags1.push(searchWord);
+                }
+                this.form.searchWord = '';
+            },
+            deleteFun1(tag) {//删除包含搜索词
+                this.tags1.splice(this.tags1.indexOf(tag), 1);
+            },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
@@ -318,30 +356,6 @@
                         console.log(error);
                     });
             }, 
-            getRanklist(){// 职级
-                axios.get("/saleCard/getDictionaryRank")
-                .then(function (response) {
-                    console.log(response);
-                    var table=response.data;
-                    mainDivVM.rankArr=table.data;
-                })
-                .catch(function (error) {
-                    // handle error
-                    console.log(error);
-                });
-            },
-            getJudgelist(){// 职级
-                axios.get("/saleCard/getDictionaryEvaluation")
-                .then(function (response) {
-                    console.log(response);
-                    var table=response.data;
-                    mainDivVM.judgeArr=table.data;
-                })
-                .catch(function (error) {
-                    // handle error
-                    console.log(error);
-                });
-            },
             openCard(id,name){// 打开名片
                 this.editId="";//编辑id清空                
                 this.cardVisible=true;
@@ -452,8 +466,6 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
-            this.getRanklist();
-            this.getJudgelist();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
