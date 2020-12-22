@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
+    <title>资源释放领取规则管理</title>
+    <style type="text/css">
+        .el-input__inner{height: 32px;line-height:32px;width: 150px;}
+        #tableBox{border-collapse:collapse;border:1px solid #eaecf3;width: 100%}
+        #tableBox th{background:#ecedf2; border:1px solid #eaecf3;padding: 12px 0;text-align: center;}
+        #tableBox td{border:1px solid #eaecf3;padding: 14px 0;text-align: center;}
+        #tableBox td .el-form-item{margin-bottom: 2px}
+        #tableBox .el-form-item__error{top: 100%;left: -50%;width: 200%;}
+        .selectIpt .el-input__inner{width: 200px;}
+        /*不显示input的number样式*/
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+        input[type="number"]{
+            -moz-appearance: textfield;
+        }
+        .el-form--inline .el-form-item__label{}
+    </style>
+</head>
+<body>
+<div id="releaseRule" class="releaseRule mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>自动匹配模型配置</el-breadcrumb-item>
+    </el-breadcrumb> 
+    
+    <el-row class="mainWhiteBg">
+        <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
+            <el-row>
+                <el-checkbox v-model="checked1" class="marginR10 paddingT8"></el-checkbox>
+                <el-form-item label="春节期间" prop="startTime">                         
+                    <el-date-picker
+                        style='width: 150px'
+                        v-model="form.startTime"
+                        type="date"
+                        placeholder="选择开始时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="至" prop="endTime">                          
+                    <el-date-picker
+                        style='width: 150px'
+                        v-model="form.endTime"
+                        type="date"
+                        placeholder="选择结束时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="时间内不走任何规则限制。"></el-form-item>
+            </el-row>
+            <el-row>
+               <!--  <el-checkbox v-model="checked3" class="marginR10 paddingT8"></el-checkbox> -->
+                    <el-form-item label="客户释放到公有池，提前释放提醒时间为提前" style="margin-bottom: 0" prop="number13">    
+                        <el-input v-model="form.number13" placeholder="0-10以内整数" maxLength="2" type="number" min="0" max="10"></el-input>
+                    </el-form-item>
+                <el-form-item label="小时。" style="margin-bottom: 0"></el-form-item>
+            </el-row>
+
+            <div class="fs16 marginB20 paddingT20">电销顾问手中持有未签约上线设置</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-checkbox v-model="checked9" class="marginR10 paddingT8"></el-checkbox>
+                    <el-form-item  prop="number22">
+                        <span slot="label">本业务线内电销顾问手中持有<span style="color:red">未签约资源</span>上限为</span>
+                        <el-input v-model="form.number22" placeholder="1-2000以内整数" maxLength="4" type="number" min="1" max="2000"></el-input>
+                    </el-form-item>
+                    <el-form-item label="个资源。顾问手中持有超过上限则不再给予(任何途径的分发/分配)资源给此顾问。"></el-form-item>
+                </el-row>
+            </div>
+            <el-row>
+                <el-checkbox v-model="checked2" class="marginR10 paddingT8"></el-checkbox><el-form-item label="自动释放规则"></el-form-item>
+            </el-row>
+            <div class="borderbox padding20">
+                <table id="tableBox" class="marginB20">
+                    <tr>
+                        <th style="width:4%">序号</th>
+                        <th style="width:16%">客户状态</th>
+                        <th style="width:20%">超多长时间释放（天）</th>
+                        <th style="width:20%">保留次数</th>
+                        <th style="width:20%">每次保留时间（天）</th>
+                        <th style="width:20%">是否释放提醒</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>未联系</td>
+                        <td>
+                            <el-form-item prop="number1">  
+                                <el-input v-model="form.number1" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50" ></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number2">   
+                                <el-input v-model="form.number2" placeholder="0-5以内整数" maxLength="1" type="number" min="0" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number3">  
+                                <el-input v-model="form.number3" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-select v-model="form.remindValue1" filterable placeholder="否">
+                                <el-option
+                                    v-for="item in remindOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>跟进</td>
+                        <td>
+                            <el-form-item prop="number4">  
+                                <el-input v-model="form.number4" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number5">  
+                                <el-input v-model="form.number5" placeholder="0-5以内整数" maxLength="1" type="number" min="1" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number6">  
+                                <el-input v-model="form.number6" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-select v-model="form.remindValue2" filterable placeholder="否">
+                                <el-option
+                                    v-for="item in remindOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>不跟进</td>
+                        <td colspan="4">顾问选择客户状态为不跟进的客户将直接释放到公有池</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>邀约</td>
+                         <td>
+                            <el-form-item prop="number19">  
+                                <el-input v-model="form.number19" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number20">  
+                                <el-input v-model="form.number20" placeholder="0-5以内整数" maxLength="1" type="number" min="0" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number21">  
+                                <el-input v-model="form.number21" placeholder="0-50数字" maxLength="1" type="number" min="1" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-select v-model="form.remindValue5" filterable placeholder="否">
+                                <el-option
+                                    v-for="item in remindOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>未到访</td>
+                        <td>
+                            <el-form-item prop="number7">  
+                                <el-input v-model="form.number7" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number8">  
+                                <el-input v-model="form.number8" placeholder="0-5以内整数" maxLength="1" type="number" min="0" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number9">  
+                                <el-input v-model="form.number9" placeholder="0-50数字" maxLength="1" type="number" min="1" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-select v-model="form.remindValue3" filterable placeholder="否">
+                                <el-option
+                                    v-for="item in remindOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>到访未签约</td>
+                        <td>
+                            <el-form-item prop="number10">  
+                                <el-input v-model="form.number10" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number11">  
+                                <el-input v-model="form.number11" placeholder="0-5以内整数" maxLength="1" type="number" min="0" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number12">  
+                                <el-input v-model="form.number12" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-select v-model="form.remindValue4" filterable placeholder="否">
+                                <el-option
+                                    v-for="item in remindOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>已签约</td>
+                        <td colspan="4">恭喜顾客签约成功，坐等奖励</td>
+                    </tr>
+                </table>
+          
+            </div>
+            <div class="fs16 marginB20 paddingT20">客户强制回收</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-checkbox v-model="checked4" class="marginR10 paddingT8"></el-checkbox>
+                        <el-form-item label="电销离职后，总监在" prop="number14">  
+                            <el-input v-model="form.number14" placeholder="1-3以内整数" maxLength="1" type="number" min="1" max="3"></el-input>
+                        </el-form-item>
+                    <el-form-item label="天内未将员工资源进行重新分配，则离职电销下的资源自动释放到公有池。"></el-form-item>
+                </el-row>
+                <el-row>
+                    <el-checkbox v-model="checked5" class="marginR10 paddingT8"></el-checkbox>
+                        <el-form-item label="电销人员" prop="number15">  
+                            <el-input v-model="form.number15" placeholder="1-100以内整数" maxLength="3" type="number" min="1" max="100"></el-input>
+                        </el-form-item>
+                    <el-form-item label="天以上未进行资源跟踪记录的填写，将自动将资源释放到公有池。"></el-form-item>
+                </el-row>
+            </div>
+            <div class="fs16 marginB20 paddingT20">公有池领取规则</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-checkbox v-model="checked6" class="marginR10 paddingT8" @change="checked6Change"></el-checkbox>
+                    <el-form-item label="电销总监每人每日在公有池中领取90天以上老资源不允许超过" prop="number16">  
+                        <el-input v-model="form.number16" placeholder="1-1000以内整数" maxLength="4" type="number" min="1" max="1000"></el-input>
+                    </el-form-item>
+                    <el-form-item label="条资源。"></el-form-item>
+                </el-row>
+                <el-row>
+                    <el-button class="f-fl marginR10 f-tdu bluecolor cursorP blueBtnText" @click="addDomains" :disabled="isAddAble" style="border: none;height: 25px;line-height: 25px;padding: 0;background: none">添加设置电销总监的特殊限制</el-button>
+                    <!-- <span class="f-fl marginR10 f-tdu bluecolor cursorP" @click="addDomains">添加设置电销总监的特殊限制</span> -->
+                    <span class="f-fl" v-if="isShow">
+                        <el-button class="f-fl marginR10" type="primary" size="small" @click="addDomain"><i class="el-icon-plus mrgRightNone"></i></el-button>
+                        <span class="f-fl">
+                            <div v-for="(domain, index) in form.domains" :key="domain.key">
+                                <el-form-item  
+                                    class="selectIpt" 
+                                    style="margin-top: -3px;"                          
+                                    :prop="'domains.' + index + '.teleDirectorId'"
+                                    :rules='rules.domainsValue1'
+                                    >
+                                    <el-select v-model="domain.teleDirectorId" filterable placeholder="电销总监姓名（所属组）">
+                                        <el-option
+                                            v-for="item in options"
+                                            :key="item.id"
+                                            :label="item.name"
+                                            :value="item.id">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item 
+                                    style="margin-top: -3px;"                            
+                                    :prop="'domains.' + index + '.limitNum'"
+                                    :rules='rules.domainsValue2'
+                                    >                            
+                                    <el-input v-model="domain.limitNum" placeholder="1-5000以内整数" maxLength="4" type="number" min="1" max="5000" ></el-input>
+                                </el-form-item>
+                                <el-button type="danger" size="small" @click.prevent="removeDomain(domain)">删除</el-button>
+                            </div>
+                        </span>
+                    </span>
+                </el-row>
+                <el-row>
+                    <el-checkbox v-model="checked7" class="marginR10 paddingT8"></el-checkbox>
+                        <el-form-item label="电销顾问每人每日在公有池中领取90天(含)以内新资源不允许超过" prop="number17">
+                            <el-input v-model="form.number17" placeholder="1-50以内整数" maxLength="2" type="number" min="1" max="50"></el-input>
+                        </el-form-item>
+                    <el-form-item label="条资源。"></el-form-item>
+                </el-row>
+                <el-row>
+                    <el-checkbox v-model="checked8" class="marginR10 paddingT8"></el-checkbox>
+                        <el-form-item label="总监在客户管理再次分配资源到顾问的时候，组内换频次数不允许超过" prop="number18">  
+                            <el-input v-model="form.number18" placeholder="1-5以内整数" maxLength="1" type="number" min="1" max="5"></el-input>
+                        </el-form-item>
+                    <el-form-item label="次以上换频。"></el-form-item>
+                </el-row>
+            </div>
+            <div class="padding20 f-tac">     
+                <shiro:hasPermission name="aggregation:clueRule:add">       
+                   <el-button type="primary" @click="submitForm('form')" :disabled="clueRuleSubmitBtnDiabled">提交</el-button>
+                </shiro:hasPermission>
+                <el-button @click="cancel">取 消</el-button>
+            </div> 
+        </el-form> 
+    </el-row>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var accountList = [[${accountList}]];
+    var businessLineName = [[${businessLineName}]];
+    var businessLine = [[${businessLine}]];
+</script>
+<script>
+    var releaseRuleVM=new Vue({
+        el: '#releaseRule',
+        data: function() {
+            return { 
+            	clueRuleSubmitBtnDiabled:false,
+                isAddAble:true,
+                isShow:false,           
+                businessLineName:businessLineName,
+                checked1:0,
+                checked2:0,     
+                checked3:0,     
+                checked4:0,     
+                checked5:0,     
+                checked6:0,     
+                checked7:0,     
+                checked8:0,
+                checked9:0,
+                form: {   
+                    startTime:'',
+                    endTime:'',
+                    number1:'',
+                    number2:'',
+                    number3:'',
+                    number4:'',
+                    number5:'',
+                    number6:'',
+                    number7:'',
+                    number8:'',
+                    number9:'',
+                    number10:'',
+                    number11:'',
+                    number12:'',
+                    number13:'',
+                    number14:'',
+                    number15:'',
+                    number16:'',
+                    number17:'',
+                    number18:'',
+                    number19:'',
+                    number20:'',
+                    number21:'',
+                    number22:'',
+                    remindValue1:0,
+                    remindValue2:0,
+                    remindValue3:0,
+                    remindValue4:0,
+                    remindValue5:0,
+                    id1:'',
+                    id2:'',
+                    id3:'',
+                    id4:'',
+                    id5:'',
+                    id6:'',
+                    id7:'',
+                    id8:'',
+                    id9:'',
+                    id10:'',
+                    id11:'',
+                    id12:'',
+                    domains: []                    
+                },
+                rules:{
+                    domainsValue1:[
+                        { required: true, message: '请选择电销总监', trigger: 'blur' }
+                    ],
+                    // 1-5000以内整数
+                    domainsValue2:[
+                        /* { required: true, message: '请输入数字', trigger: 'blur' }, */
+                        { validator:function(rule,value,callback){
+                            if(value.length!=0){
+                                if(/^[0-9]*$/.test(value) == false || value > 5000 || value == 0){
+                                    callback(new Error("请输入1-5000以内整数"));
+                                    return
+                                }else{
+                                    callback();
+                                } 
+                            }else{
+                                callback(new Error("请输入数字"));
+                                return
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    startTime: [
+                        { validator:function(rule,value,callback){                       
+                            if(releaseRuleVM.checked1==true){
+                                if(releaseRuleVM.form.startTime==""||releaseRuleVM.form.startTime==null){
+                                    callback(new Error('请选择开始时间'))
+                                    return
+                                }
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    endTime: [
+                        { validator:function(rule,value,callback){   
+                            if(releaseRuleVM.checked1==true){
+                                if(releaseRuleVM.form.endTime==""||releaseRuleVM.form.endTime==null){
+                                    callback(new Error('请选择结束时间'))
+                                    return
+                                }
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 0-5以内整数
+                    number2:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 5){
+                                        callback(new Error("请输入0-5以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number5:[
+                        { validator:function(rule,value,callback){ 
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 5){
+                                        callback(new Error("请输入0-5以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number8:[
+                        { validator:function(rule,value,callback){ 
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 5){
+                                        callback(new Error("请输入0-5以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number11:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 5){
+                                        callback(new Error("请输入0-5以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 0-50数字(保留一位小数)
+                    number1:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number3:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number4:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number6:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number7:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number9:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number10:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number12:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 0-10以内整数
+                    number13:[
+                        { validator:function(rule,value,callback){   
+                           /*  if(releaseRuleVM.checked3==true){ */
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 10){
+                                        callback(new Error("请输入0-10以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                           // }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 1-3以内整数
+                    number14:[
+                        { validator:function(rule,value,callback){   
+                            if(releaseRuleVM.checked4==true){
+                                if(value.length!=0){
+                                    if(/^[1-9]*$/.test(value) == false || value > 3){
+                                        callback(new Error("请输入1-3以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 1-30以内整数
+                    number15:[
+                        { validator:function(rule,value,callback){   
+                            if(releaseRuleVM.checked5==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 100 || value == 0){
+                                        callback(new Error("请输入1-100以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 1-1000以内整数
+                    number16:[
+                        { validator:function(rule,value,callback){   
+                            if(releaseRuleVM.checked6==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 1000 || value == 0){
+                                        callback(new Error("请输入1-1000以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 1-50以内整数
+                    number17:[
+                        { validator:function(rule,value,callback){   
+                            if(releaseRuleVM.checked7==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 50 || value == 0){
+                                        callback(new Error("请输入0-50以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    // 1-5以内整数
+                    number18:[
+                        { validator:function(rule,value,callback){   
+                            if(releaseRuleVM.checked8==true){
+                                if(value.length!=0){
+                                    if(/^[1-9]*$/.test(value) == false || value > 5){
+                                        callback(new Error("请输入1-5以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }else{
+                             callback();
+                            }
+                        }, trigger: 'blur'}   
+                    ],
+                    number19:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number21:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    //1-2000数字
+                    number22: [
+                        {
+                            validator: function (rule, value, callback) {
+                                if (releaseRuleVM.checked9 == true) {
+                                    if (value.length != 0) {
+                                        if (/^[0-9]*$/.test(value) == false || value > 2000 || value == 0) {
+                                            callback(new Error("请输入1-2000以内整数"));
+                                            return
+                                        } else {
+                                            callback();
+                                        }
+                                    } else {
+                                        callback(new Error("请输入数字"));
+                                        return
+                                    }
+
+                                }
+                                callback();
+                            }, trigger: 'blur'
+                        }
+                    ],
+                    number20:[
+                        { validator:function(rule,value,callback){ 
+                            if(releaseRuleVM.checked2==true){
+                                if(value.length!=0){
+                                    if(/^[0-9]*$/.test(value) == false || value > 5){
+                                        callback(new Error("请输入0-5以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    
+
+
+                },
+                options: accountList,
+                remindOptions: [{
+                    value: 0,
+                    label: '否'
+                }, {
+                    value: 1,
+                    label: '是'
+                }],
+            }             
+        },
+        methods: {
+            submitForm(form) {
+                this.clueRuleSubmitBtnDiabled = true;
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        var startTime=releaseRuleVM.form.startTime;
+                        var endTime=releaseRuleVM.form.endTime;
+                        if(startTime&&endTime){
+                            if(startTime>endTime){
+                                this.$message({
+                                    message: '结束时间不允许早于开始时间',
+                                    type: 'warning'
+                                });
+                                this.clueRuleSubmitBtnDiabled=false;
+                                return;
+                            }
+                        }
+                       
+               
+                         var param = {};
+                         var form = this.form;
+                         var festivalRuleIsEnabled = this.checked1==true?1:0;
+                         var isFestivalRuleBl=false;
+                         if(!festivalRuleIsEnabled){//未启用
+                        	 var festivalRuleId = form.id10;
+                        	 if(festivalRuleId){
+                        		 var festivalRule ={};
+                                 festivalRule.id=festivalRuleId;
+                                 festivalRule.isEnabled=festivalRuleIsEnabled;
+                                 festivalRule.businessLine=businessLine;
+                                 isFestivalRuleBl=true;
+                                 param.festivalRule= festivalRule;
+                        	 }
+                        	 
+                         }else{
+                        	 var festivalRule ={};
+                        	 festivalRule.id=form.id10;
+                        	 festivalRule.startTime=startTime;
+                        	 festivalRule.endTime=endTime;
+                        	 festivalRule.isEnabled=festivalRuleIsEnabled;
+                        	 festivalRule.businessLine=businessLine;
+                        	 isFestivalRuleBl=true;
+                        	 param.festivalRule= festivalRule;
+                         }
+                         //电销顾问未签约资源上线规则
+                        var unSignRuleIsEnabled = this.checked9 == true ? 1 : 0;
+                        var unSignLimitRuleBl = false;
+                        if (!unSignRuleIsEnabled) {//未启用
+                            var unSignLimitId = form.id12;
+                            if (unSignLimitId) {
+                                var teleUnsignLimitRule = {};
+                                teleUnsignLimitRule.id = unSignLimitId;
+                                teleUnsignLimitRule.isEnabled = unSignRuleIsEnabled;
+                                teleUnsignLimitRule.limitNum = this.form.number22;
+                                unSignLimitRuleBl = true;
+                                param.teleUnsignLimitRule = teleUnsignLimitRule;
+                            }
+
+                        } else {
+                            var teleUnsignLimitRule = {};
+                            teleUnsignLimitRule.id = form.id12;
+                            teleUnsignLimitRule.isEnabled = unSignRuleIsEnabled;
+                            teleUnsignLimitRule.limitNum = this.form.number22;
+                            unSignLimitRuleBl = true;
+                            param.teleUnsignLimitRule = teleUnsignLimitRule;
+                        }
+                         //自动释放规则
+                         var autoReleaseRule = new Array();
+                         var autoReleaseRuleIsEnabled = this.checked2==true?1:0;
+                         var isAutoReleaseBl = false;
+                         if(!autoReleaseRuleIsEnabled){//未启用
+                        	 var noFollowId = form.id1;
+                             if(noFollowId){
+                            	 var noFollow = {};
+                            	 noFollow.id=noFollowId;
+                            	 noFollow.isEnabled=autoReleaseRuleIsEnabled;
+                            	 noFollow.businessLine=businessLine;
+                            	 isAutoReleaseBl=true;
+                            	 autoReleaseRule.push(noFollow);
+                             }
+                             var followId = form.id2;
+                             if(followId){
+                            	  var follow={};
+                                  follow.id=followId;
+                                  follow.isEnabled=autoReleaseRuleIsEnabled;
+                                  follow.businessLine=businessLine;
+                                  isAutoReleaseBl=true;
+                                  autoReleaseRule.push(follow);
+                             }
+                             var noVisitId=form.id3;
+                             if(noVisitId){
+                            	 var notVisit={};
+                                 notVisit.id=noVisitId;
+                                 notVisit.isEnabled=autoReleaseRuleIsEnabled;
+                                 notVisit.businessLine=businessLine;
+                                 isAutoReleaseBl=true;
+                                 autoReleaseRule.push(notVisit);
+                             }
+                             var unSignId = form.id4;
+                             if(unSignId){
+                            	 var unSign={};
+                            	 unSign.id=unSignId;
+                                 unSign.isEnabled=autoReleaseRuleIsEnabled;
+                                 unSign.businessLine=businessLine;
+                                 isAutoReleaseBl=true;
+                                 autoReleaseRule.push(unSign);
+                             }
+                             
+                             var inviteId = form.id11;
+                             if(inviteId){
+                            	 var invite = {};
+                            	 invite.id = inviteId;
+                            	 invite.isEnabled=autoReleaseRuleIsEnabled;
+                            	 invite.businessLine=businessLine;
+                                 isAutoReleaseBl=true;
+                                 autoReleaseRule.push(invite);
+                             }
+                             
+                        	 
+                         }else{
+                        	isAutoReleaseBl = true;
+                            var noFollow = {};
+                             //1. 
+                            noFollow.id=form.id1;
+                            noFollow.isEnabled=autoReleaseRuleIsEnabled;
+                            noFollow.customerStatus=1;
+                            noFollow.timeoutRelease=form.number1;
+                            noFollow.retentionTimes=form.number2;
+                            noFollow.retentionDay = form.number3;
+                            noFollow.isReleaseRemind = form.remindValue1;
+                            noFollow.remindTime = form.number13;
+                            noFollow.businessLine = businessLine;
+                            autoReleaseRule.push(noFollow);
+                            //2.
+                            var follow={};
+                            follow.id=form.id2;
+                            follow.isEnabled=autoReleaseRuleIsEnabled;
+                            follow.customerStatus=2;
+                            follow.timeoutRelease=form.number4;
+                            follow.retentionTimes=form.number5;
+                            follow.retentionDay = form.number6;
+                            follow.isReleaseRemind = form.remindValue2;
+                            follow.remindTime = form.number13;
+                            follow.businessLine = businessLine;
+                            autoReleaseRule.push(follow);
+                            //4.invite
+                            var invite={};
+                            invite.id=form.id11;
+                            invite.isEnabled=autoReleaseRuleIsEnabled;
+                            invite.businessLine=businessLine;
+                            invite.customerStatus=4;
+                            invite.timeoutRelease=form.number19;
+                            invite.retentionTimes=form.number20;
+                            invite.retentionDay = form.number21;
+                            invite.isReleaseRemind = form.remindValue5;
+                            invite.remindTime = form.number13;
+                            autoReleaseRule.push(invite);
+                            
+                            
+                            
+                            //5
+                            var notVisit={};
+                            notVisit.id=form.id3;
+                            notVisit.isEnabled=autoReleaseRuleIsEnabled;
+                            notVisit.businessLine=businessLine;
+                            notVisit.customerStatus=5;
+                            notVisit.timeoutRelease=form.number7;
+                            notVisit.retentionTimes=form.number8;
+                            notVisit.retentionDay = form.number9;
+                            notVisit.isReleaseRemind = form.remindValue3;
+                            notVisit.remindTime = form.number13;
+                            autoReleaseRule.push(notVisit);
+                            //6.到访未签约
+                            var  unSign={};
+                            unSign.id=form.id4;
+                            unSign.isEnabled=autoReleaseRuleIsEnabled;
+                            unSign.businessLine=businessLine;
+                            unSign.customerStatus=6;
+                            unSign.timeoutRelease=form.number10;
+                            unSign.retentionTimes=form.number11;
+                            unSign.retentionDay = form.number12;
+                            unSign.isReleaseRemind = form.remindValue4;
+                            unSign.remindTime = form.number13;
+                            autoReleaseRule.push(unSign);
+                            
+                         }
+                        	param.autoReleRuleList = autoReleaseRule;
+                         
+                         
+                         
+                         //强制回收
+                          var forceRuleList = new Array();
+                          var isDismissionBl = false;
+                          var dismissionTeleRuleIsEnabled=this.checked4==true?1:0;
+                          if(!dismissionTeleRuleIsEnabled){
+                        	  var dismissionId = form.id5;
+                        	  if(dismissionId){
+                        		  var dismissionTeleRule ={};
+                                  dismissionTeleRule.id=dismissionId;
+                                  dismissionTeleRule.isEnabled=dismissionTeleRuleIsEnabled;
+                                  dismissionTeleRule.businessLine=businessLine;
+                                  dismissionTeleRule.remindTime = form.number13;
+                                  forceRuleList.push(dismissionTeleRule);
+                                  isDismissionBl=true;
+                        	  }
+                        	  
+                          }else{
+                        	  var dismissionTeleRule ={};
+                              dismissionTeleRule.id=form.id5;
+                              dismissionTeleRule.isEnabled=dismissionTeleRuleIsEnabled;
+                              dismissionTeleRule.businessLine=businessLine;
+                              dismissionTeleRule.days=form.number14;
+                              dismissionTeleRule.recycleType=1;
+                              dismissionTeleRule.remindTime = form.number13;
+                              isDismissionBl=true;
+                              forceRuleList.push(dismissionTeleRule);
+                          }
+                          
+                          var isTeleForceRule = false;
+                          var isTeleForceRuleIsEnabled = this.checked5==true?1:0;
+                          if(!isTeleForceRuleIsEnabled){
+                        	  var teleForceRuleId = form.id6;
+                        	  if(teleForceRuleId){
+                        		  var teleRule ={};
+                                  teleRule.id=teleForceRuleId;
+                                  teleRule.isEnabled=isTeleForceRuleIsEnabled;
+                                  teleRule.businessLine=businessLine;
+                                  teleRule.remindTime = form.number13;
+                                  forceRuleList.push(teleRule);
+                                  isTeleForceRule = true;
+                        	  }
+                        	  
+                          }else{
+                        	  var teleRule ={};
+                              teleRule.id=form.id6;
+                              teleRule.isEnabled=isTeleForceRuleIsEnabled;
+                              teleRule.businessLine=businessLine;
+                              teleRule.days=form.number15;
+                              teleRule.remindTime = form.number13;
+                              teleRule.recycleType=2;
+                              forceRuleList.push(teleRule);
+                              isTeleForceRule = true;
+                          }
+                          var isForceRcycleRuleListBl = false;
+                          if(forceRuleList.length>0){
+                        	    isForceRcycleRuleListBl = true;
+                        	    param.forceRecycleRuleList = forceRuleList;
+                          }
+                          
+                          //
+                        
+                         //公有池领取规则
+                         //1.电销总监领取规则
+                         var publicPoolRuleList = new Array();
+                         var teleDirectorRuleIsEnabled=this.checked6==true?1:0;
+                         var isTeleDirectorRuleBl = false;
+                         if(!teleDirectorRuleIsEnabled){
+                        	 var teleDirectorRuleId = form.id7;
+                        	 if(teleDirectorRuleId){
+                        		 var teleDirectorRule={};
+                                 teleDirectorRule.id=form.id7;
+                                 teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
+                                 teleDirectorRule.businessLine=businessLine;
+                                 publicPoolRuleList.push(teleDirectorRule);
+                                 isTeleDirectorRuleBl=true;
+                        	 }
+                        	 
+                         }else{
+                        	  //添加 电销规则
+                             var teleDirectorRule={};
+                             teleDirectorRule.id=form.id7;
+                             teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
+                             teleDirectorRule.businessLine=businessLine;
+                             teleDirectorRule.limitNum=form.number16;
+                             teleDirectorRule.type=1;
+                             publicPoolRuleList.push(teleDirectorRule);
+                             isTeleDirectorRuleBl=true;
+                        	 
+                        	var telDirecotrArr =  this.form.domains;
+                         	if(telDirecotrArr.length==0) {
+                         		 isTeleDirectorRuleBl=true;
+                        	} else{
+                        		var telDirectorIdArr = {};
+                        		var isExistsSameId = true;
+                        		for(var i=0;i<telDirecotrArr.length;i++){
+                        			var curId = telDirecotrArr[i].teleDirectorId;
+                        			if(telDirectorIdArr["id"+curId]){
+                        				isExistsSameId =false;
+                        				this.$message({message:"为相同的电销总监设置了限制领取资源数",type:'warning'});
+                        				break;
+                        			}else{
+                        				telDirectorIdArr["id"+curId] = curId;
+                        			}
+                        		}
+                        		
+                        		if(!isExistsSameId){
+                        			this.clueRuleSubmitBtnDiabled=false;
+                        			return;
+                        		}
+                        		
+                                  param.teleDirectorReceiveRuleList = telDirecotrArr;
+                                  
+                        	}
+                           
+                         }
+                         
+                         //2电销顾问领取规则
+                         var telRuleIsEnabled=this.checked7==true?1:0;
+                         var isTelRuleBl = false;
+                         if(!telRuleIsEnabled){
+                        	 var teleRuleId = form.id8;
+                        	 if(teleRuleId){
+                        		  var teleRule={};
+                                  teleRule.id=form.id8;
+                                  teleRule.isEnabled=telRuleIsEnabled;
+                                  teleRule.businessLine=businessLine;
+                                  publicPoolRuleList.push(teleRule);
+                                  isTelRuleBl = true;
+                        	 }
+                         }else{
+                        	   var teleRule={};
+                               teleRule.id=form.id8;
+                               teleRule.isEnabled=telRuleIsEnabled;
+                               teleRule.businessLine=businessLine;
+                               teleRule.limitNum=form.number17;
+                               teleRule.type=2;
+                               publicPoolRuleList.push(teleRule);
+                               isTelRuleBl = true;
+                         }
+                       //3.
+                         var busGroupRuleIsEnabled=this.checked8==true?1:0;
+                         var isBusGroupRuleBl = false;
+                         if(!busGroupRuleIsEnabled){
+                        	 var busGroupRuleId = form.id9;
+                        	 if(busGroupRuleId){
+                        		 var busGroupRule={};
+                                 busGroupRule.id=form.id9;
+                                 busGroupRule.isEnabled=busGroupRuleIsEnabled;
+                                 busGroupRule.businessLine=businessLine;
+                                 publicPoolRuleList.push(busGroupRule);
+                                 isBusGroupRuleBl = true;
+                        	 }
+                        	 
+                         }else{
+                        	 var busGroupRule={};
+                             busGroupRule.id=form.id9;
+                             busGroupRule.isEnabled=busGroupRuleIsEnabled;
+                             busGroupRule.businessLine=businessLine;
+                             busGroupRule.limitNum=form.number18;
+                             busGroupRule.type=3;
+                             publicPoolRuleList.push(busGroupRule);
+                             isBusGroupRuleBl = true;
+                         }
+                         var isPublicPoolRuleBl = false;
+                         if(publicPoolRuleList.length>0){
+                        	  isPublicPoolRuleBl = true;
+                        	  param.publicPoolReceiveRuleList=publicPoolRuleList;
+                         }
+                        debugger;
+                        if(!isFestivalRuleBl&& !unSignLimitRuleBl && !isAutoReleaseBl && !isForceRcycleRuleListBl && !isPublicPoolRuleBl){
+                        	console.info("未选择数据");
+                        	  this.clueRuleSubmitBtnDiabled=false;
+                        	return ;
+                        }
+                        param.businessLine=businessLine;
+                        axios.post('/cluerule/clueRule/insertAndUpdateClueRule',param)
+                        .then(function (response) {
+                            var data =  response.data
+                            if(data.code=='0'){
+                               var resData = data.data;
+                                
+                               releaseRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            	   //releaseRuleVM.initClueRule();
+                                   releaseRuleVM.clueRuleSubmitBtnDiabled=false;
+                            	   location.reload();
+                            	   
+                               }});  ;  
+                            }else{
+                            	releaseRuleVM.$message({message:data.msg,type:'error'});
+                                releaseRuleVM.clueRuleSubmitBtnDiabled=false;
+                                // console.error(data);
+                            }
+                        
+                        })
+                        .catch(function (error) {
+                            releaseRuleVM.clueRuleSubmitBtnDiabled=false;
+                            console.log(error);
+                        });
+                        
+
+                    } else {
+                        console.log('error submit!!');
+                        this.clueRuleSubmitBtnDiabled=false;
+                        return false;
+                    }
+                });
+            },
+            number(){
+		    　　　      this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+		                this.form.customerPhone=this.form.customerPhone.replace('.','');
+		        　　},
+              removeDomain(item) {
+		        	
+        	   var id = item.id;
+                if(!id){
+                	 var index = this.form.domains.indexOf(item)
+                     if (index !== -1) {
+                         this.form.domains.splice(index, 1)
+                     }
+                    return;
+                }
+               
+          
+              
+                var param={};
+                param.id=id;
+                axios.post('/cluerule/clueRule/deleteTeleDirectorRuleById', param)
+                .then(function (response) {
+                    var resData = response.data;
+                    if(resData.code=='0'){
+                    	releaseRuleVM.$message({message:'刪除成功',type:'success',duration:2000,onClose:function(){
+                    		releaseRuleVM.initClueRule();
+                          }});                     
+                    }else{
+                    	releaseRuleVM.$message({message:resData.msg,type:'error'});
+                        console.error(resData);
+                    }
+                
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+             },
+            addDomain() {
+                this.form.domains.push({
+                	teleDirectorId:'',
+                	limitNum: '',
+                	businessLine: businessLine,
+                    key: Date.now()
+                });
+            },
+            addDomains(){
+                this.isShow=true
+            },
+            cancel(){//取消
+            	location.reload();
+            },
+            checked6Change(value){
+                if(value==false){
+                    releaseRuleVM.isShow=false
+                    releaseRuleVM.isAddAble=true//按钮不可点击
+                }else{
+                    releaseRuleVM.isAddAble=false//按钮可点击
+                }
+            },
+            initClueRule(){
+            	
+            	 axios.post('/cluerule/clueRule/queryAllClueRule',null)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                        var resData = data.data;
+                        //春节规则
+                        var festivalRule = resData.festivalRule;
+                        if(festivalRule){
+                        	releaseRuleVM.form.id10=festivalRule.id;
+                        	releaseRuleVM.form.startTime=festivalRule.startTime;
+                        	releaseRuleVM.form.endTime=festivalRule.endTime;
+                        	releaseRuleVM.checked1=festivalRule.isEnabled==0?false:true;
+                        }
+                         //电销顾问资源未签约上限
+                         var unSignLimitRule = resData.teleUnsignLimitRule;
+                         if (unSignLimitRule) {
+                             releaseRuleVM.form.id12 = unSignLimitRule.id;
+                             releaseRuleVM.checked9 = unSignLimitRule.isEnabled == 0 ? false : true;
+                             releaseRuleVM.form.number22 = unSignLimitRule.limitNum;
+                             debugger;
+                         }
+                        //自动释放规则
+                        var autoReleRuleList = resData.autoReleRuleList;
+                        for(var i=0;i<autoReleRuleList.length;i++){
+                        	var autoReleRule = autoReleRuleList[i];
+                        	if(i==0){
+                        		releaseRuleVM.checked2=autoReleRule.isEnabled==0?false:true;
+                        		releaseRuleVM.form.number13=autoReleRule.remindTime;
+                        	}
+                        	if(autoReleRule.customerStatus==1){//未联系
+                        		releaseRuleVM.form.id1=autoReleRule.id;
+                        		releaseRuleVM.form.number1=autoReleRule.timeoutRelease;
+                        		releaseRuleVM.form.number2=autoReleRule.retentionTimes;
+                        		releaseRuleVM.form.number3=autoReleRule.retentionDay;
+                        		releaseRuleVM.form.remindValue1=autoReleRule.isReleaseRemind;
+                        		if(autoReleRule.isReleaseRemind==1){
+                        			releaseRuleVM.checked3=true;
+                        		}
+                        		
+                        	}else if(autoReleRule.customerStatus==2){//gen jin
+                        		releaseRuleVM.form.id2=autoReleRule.id;
+                                releaseRuleVM.form.number4=autoReleRule.timeoutRelease;
+                                releaseRuleVM.form.number5=autoReleRule.retentionTimes;
+                                releaseRuleVM.form.number6=autoReleRule.retentionDay;
+                                releaseRuleVM.form.remindValue2=autoReleRule.isReleaseRemind;
+                                if(autoReleRule.isReleaseRemind==1){
+                                    releaseRuleVM.checked3=true;
+                                }
+                        	}else if(autoReleRule.customerStatus==5){//未到访
+                        		releaseRuleVM.form.id3=autoReleRule.id;
+                                releaseRuleVM.form.number7=autoReleRule.timeoutRelease;
+                                releaseRuleVM.form.number8=autoReleRule.retentionTimes;
+                                releaseRuleVM.form.number9=autoReleRule.retentionDay;
+                                releaseRuleVM.form.remindValue3=autoReleRule.isReleaseRemind;
+                                if(autoReleRule.isReleaseRemind==1){
+                                    releaseRuleVM.checked3=true;
+                                }
+                        	}else if(autoReleRule.customerStatus==6){//到访未到访
+                        		releaseRuleVM.form.id4=autoReleRule.id;
+                                releaseRuleVM.form.number10=autoReleRule.timeoutRelease;
+                                releaseRuleVM.form.number11=autoReleRule.retentionTimes;
+                                releaseRuleVM.form.number12=autoReleRule.retentionDay;
+                                releaseRuleVM.form.remindValue4=autoReleRule.isReleaseRemind;
+                                if(autoReleRule.isReleaseRemind==1){
+                                    releaseRuleVM.checked3=true;
+                                }
+                        	}else if(autoReleRule.customerStatus==4){//yao yue
+                        		releaseRuleVM.form.id11=autoReleRule.id;
+                                releaseRuleVM.form.number19=autoReleRule.timeoutRelease;
+                                releaseRuleVM.form.number20=autoReleRule.retentionTimes;
+                                releaseRuleVM.form.number21=autoReleRule.retentionDay;
+                                releaseRuleVM.form.remindValue5=autoReleRule.isReleaseRemind;
+                                if(autoReleRule.isReleaseRemind==1){
+                                    releaseRuleVM.checked3=true;
+                                }
+                        	}
+                        	
+                        }
+                        //强制回收
+                        var forceRecycleRuleList =  resData.forceRecycleRuleList;
+                        for(var i=0;i<forceRecycleRuleList.length;i++){
+                        	var forceRecycleRule = forceRecycleRuleList[i];
+                        	var type = forceRecycleRule.recycleType;
+                        	if(type==1){
+                        		releaseRuleVM.form.id5=forceRecycleRule.id;
+                        		releaseRuleVM.checked4=forceRecycleRule.isEnabled==0?false:true;
+                        		releaseRuleVM.form.number14=forceRecycleRule.days;
+                        		
+                        	}else if(type==2){
+                        		releaseRuleVM.form.id6=forceRecycleRule.id;
+                                releaseRuleVM.checked5=forceRecycleRule.isEnabled==0?false:true;
+                                releaseRuleVM.form.number15=forceRecycleRule.days;
+                        	}
+                        	if(forceRecycleRule.remindTime){
+                                //提醒时间
+                                if(!releaseRuleVM.form.number13){
+                                    releaseRuleVM.form.number13 = forceRecycleRule.remindTime;
+                                }
+                            }
+                        }
+                        //公有池
+                        var publicPoolReceiveRuleList = resData.publicPoolReceiveRuleList;
+                        for(var i=0;i<publicPoolReceiveRuleList.length;i++){
+                        	var publicPoolRule = publicPoolReceiveRuleList[i];
+                        	var type = publicPoolRule.type;
+                        	if(type==1){
+                        		releaseRuleVM.form.id7=publicPoolRule.id;
+                        		releaseRuleVM.form.number16=publicPoolRule.limitNum;
+                        		releaseRuleVM.checked6=publicPoolRule.isEnabled==0?false:true;
+                        		releaseRuleVM.isAddAble=publicPoolRule.isEnabled==0?true:false;
+                        		releaseRuleVM.isShow=publicPoolRule.isEnabled==0?false:true;
+                        		 var teleDirectorReceiveRuleList = resData.teleDirectorReceiveRuleList;
+                        		 releaseRuleVM.form.domains = teleDirectorReceiveRuleList;
+                        	}else if(type==2){
+                        		releaseRuleVM.form.id8=publicPoolRule.id;
+                                releaseRuleVM.form.number17=publicPoolRule.limitNum;
+                                releaseRuleVM.checked7=publicPoolRule.isEnabled==0?false:true;
+                        	}else if(type==3){
+                        		releaseRuleVM.form.id9=publicPoolRule.id;
+                                releaseRuleVM.form.number18=publicPoolRule.limitNum;
+                                releaseRuleVM.checked8=publicPoolRule.isEnabled==0?false:true;
+                        	}
+                        	
+                        }
+                        
+                         
+                     }else{
+                    	 releaseRuleVM.$message({message:data.msg,type:'error'});
+                         console.error(data);
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+            }
+            
+        },
+        mounted(){
+            document.getElementById('releaseRule').style.display = 'block';
+        },
+        created(){
+        	this.initClueRule();
+        }
+    })
+</script>
+</html>
