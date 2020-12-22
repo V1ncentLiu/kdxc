@@ -70,7 +70,9 @@
                 style="width: 100%"
                 border
                 :data="tableData"
-                v-loading="loading">
+                v-loading="loading"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
                 <el-table-column prop="teleSaleName" align="center" label="电销顾问">
                 </el-table-column>
@@ -234,10 +236,19 @@
                     endTime:'',
                 },
                 timeFormRules:{},
+                multipleSelection:[],
             }             
         },
         methods: { 
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
             toSetTime(){
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({message: '请选择数据', type: 'warning'});
+                    return false;
+                }
                 this.timeVisible=true;
             },
             timeCancel(){
@@ -276,8 +287,10 @@
                 // var param = {};
                 // param.startTime = this.timeForm.startTime;
                 // param.endTime = this.timeForm.endTime;
+                // mainDivVM.loading = true;
                 // axios.post('/saleCard/saveOrUpdate',param).then(function (response) { 
                     // console.log(response)
+                    // mainDivVM.loading = false;
                     this.timeVisible=false;
                     
                 // }).catch(function (error) {
