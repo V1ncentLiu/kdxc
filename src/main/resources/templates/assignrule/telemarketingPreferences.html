@@ -126,13 +126,13 @@
                     <span>{{cardTeleSale?cardTeleSale:""}}</span>
                 </el-form-item>
                 <el-form-item label="非接收时间段：" :label-width="formLabelWidth" style="position: relative;">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.startTime" type="datetime" placeholder="开始时间" style="width: 150px;"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="cardForm.startTime" type="datetime" placeholder="开始时间" style="width: 150px;"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="——" class="widthauto">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.endTime" type="datetime" placeholder="结束时间" style="width: 150px;"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="cardForm.endTime" type="datetime" placeholder="结束时间" style="width: 150px;"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="项目：" prop="projectId" :label-width="formLabelWidth" style="width: 100%;">
-                    <el-select v-model="timeForm.projectId" :reserve-keyword=true multiple clearable filterable placeholder="请选择" style="width: 333px;">
+                    <el-select v-model="cardForm.projectId" :reserve-keyword=true multiple clearable filterable placeholder="请选择" style="width: 333px;">
                         <el-option
                             v-for="item in projectOptions"
                             :key="item.id"
@@ -142,7 +142,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="品类：" prop="industryCategory" :label-width="formLabelWidth" style="width: 100%;">
-                    <el-select v-model="timeForm.industryCategory" :reserve-keyword=true placeholder="品类" filterable multiple  style="width: 333px;">
+                    <el-select v-model="cardForm.industryCategory" :reserve-keyword=true placeholder="品类" filterable multiple  style="width: 333px;">
                         <el-option
                             v-for="item in industryCategoryArr"
                             :key="item.value"
@@ -152,7 +152,7 @@
                     </el-select>
                 </el-form-item>
                 <!-- 显示新增的省市 -->
-                <el-form-item label="" :label-width="formLabelWidth" style="margin-bottom: 0;">
+                <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
                     <el-tag
                         v-for="tag in tags2"
                         :key="tag"
@@ -161,16 +161,23 @@
                         style="margin-right: 10px;">
                         {{tag}}
                     </el-tag>
-                </el-form-item>
-                <el-form-item label="地域：" prop="industryCategory" :label-width="formLabelWidth" style="width: 100%;">
-                    <div class="distpicker" data-toggle="distpicker" id="distpicker">
-                        <select class="form-group" id="dataProvince" data-province="全部省"></select>
-                        <select class="form-group" id="dataCity" data-city="全部市"></select>
-                    </div>
-                    <el-button type="primary" @click="addFun2">添加</el-button>
-                </el-form-item>
+                </div>
+                <div style="width: 100%;">
+                    <el-form-item label="地域：" :label-width="formLabelWidth" prop="province">
+                        <el-select filterable v-model="cardForm.province" placeholder="省" style="width: 160px;margin-right: 10px;" @change="currentProvince" clearable>
+                            <el-option v-for="item in provinceArr" :key="item.name" :label="item.name"
+                                       :value="item.name"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="" prop="city">
+                        <el-select filterable v-model="cardForm.city" placeholder="市" style="width: 160px;margin-right: 10px;" clearable>
+                            <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                        </el-select>
+                        <el-button type="primary" @click="addFun2">添加</el-button>
+                    </el-form-item>
+                </div>
                 <el-form-item label="媒介：" prop="source" :label-width="formLabelWidth">
-                    <el-select v-model="timeForm.source" :reserve-keyword=true filterable multiple placeholder="请选择" style="width: 333px;">
+                    <el-select v-model="cardForm.source" :reserve-keyword=true filterable multiple placeholder="请选择" style="width: 333px;">
                         <el-option
                             v-for="item in sourceOptions"
                             :key="item.value"
@@ -180,7 +187,7 @@
                     </el-select>
                 </el-form-item>
                 <!-- 显示新增的标签 -->
-                <el-form-item label="" :label-width="formLabelWidth" style="margin-bottom: 0;width: 480px;">
+                <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
                     <el-tag
                         v-for="tag in tags1"
                         :key="tag"
@@ -189,19 +196,19 @@
                         style="margin-right: 10px;">
                         {{tag}}
                     </el-tag>
-                </el-form-item>
+                </div>
                 <el-col :span="24">
-                    <el-form-item label="词根：" :label-width="formLabelWidth" style="float: left;">
-                        <el-input v-model="timeForm.searchWord" autocomplete="off"  maxlength="50" style="width: 265px;margin-right: 10px;"></el-input>                            
+                    <el-form-item label="词根：" :label-width="formLabelWidth" style="">
+                        <el-input v-model="cardForm.searchWord" autocomplete="off"  maxlength="50" style="width: 265px;margin-right: 10px;"></el-input>                            
                     </el-form-item>
-                    <el-form-item style="float: left;">
+                    <el-form-item>
                         <el-button type="primary" @click="addFun1">添加</el-button>           
                     </el-form-item>
                 </el-col>
                 <el-form-item label="顾问状态：" :label-width="formLabelWidth">
-                    <el-radio v-model="timeForm.radio" label="1">优</el-radio>
-                    <el-radio v-model="timeForm.radio" label="2">正常</el-radio>
-                    <el-radio v-model="timeForm.radio" label="3">差</el-radio>
+                    <el-radio v-model="cardForm.radio" label="1">优</el-radio>
+                    <el-radio v-model="cardForm.radio" label="2">正常</el-radio>
+                    <el-radio v-model="cardForm.radio" label="3">差</el-radio>
                 </el-form-item>  
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -275,9 +282,15 @@
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
                 teleSaleArr: teleSaleArr, // 顾问
-                cardVisible:true,//设置顾问偏好
+                cardVisible:false,//设置顾问偏好
                 cardForm: {
-                    
+                    projectId:[],
+                    industryCategory:[],
+                    source:[],
+                    searchWord:'',
+                    radio:'',
+                    province:'',
+                    city:'',
                 },
                 cardFormRules:{},
                 cardTeleSale:'',
@@ -286,31 +299,28 @@
                 timeVisible:false,//批量设置非接收资源分配接收时间弹窗
                 timeForm:{
                     startTime:'',
-                    endTime:'',
-                    projectId:[],
-                    industryCategory:[],
-                    source:[],
-                    searchWord:'',
-                    radio:'',
+                    endTime:'',                    
                 },
                 timeFormRules:{},
                 multipleSelection:[],
+                provinceArr:[],
+                cityArr:[],
             }             
         },
         methods: { 
             addFun1() {//添加包含搜索词
-                let searchWord = this.timeForm.searchWord;
+                let searchWord = this.cardForm.searchWord;
                 if (searchWord) {
                     this.tags1.push(searchWord);
                 }
-                this.timeForm.searchWord = '';
+                this.cardForm.searchWord = '';
             },
             deleteFun1(tag) {//删除包含搜索词
                 this.tags1.splice(this.tags1.indexOf(tag), 1);
             },
             addFun2() {//添加包含搜索词
-                let dataProvince = $("#dataProvince").val();
-                let dataCity = $("#dataCity").val();
+                let dataProvince = this.cardForm.province;
+                let dataCity = this.cardForm.city;
 
                 if (dataProvince&&!dataCity) {
                     this.tags2.push(dataProvince);
@@ -454,13 +464,25 @@
                 this.editId="";//编辑id清空
             },
             cardSubmit(){
+                var startTime = this.cardForm.startTime;
+                var endTime = this.cardForm.endTime;
+                if(endTime && startTime) {
+                    beginTimes = new Date(this.cardForm.startTime);
+                    endTimes = new Date(this.cardForm.endTime);
+                    if (beginTimes > endTimes) {
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
                 var param = {};
                 if(this.editId){
                     param.id=this.editId;
                 }
                 param.teleSaleId = this.cardForm.teleSaleId;
                 param.dictionaryRankId = this.cardForm.dictionaryRankId;
-                param.dictionaryEvaluationId = this.cardForm.dictionaryEvaluationId.join(',');
                 param.workYear = this.cardForm.workYear;
                 param.serviceScore = this.cardForm.serviceScore;
                 param.serviceNum = this.cardForm.serviceNum;
@@ -470,7 +492,7 @@
                     mainDivVM.loading = false;
                     console.log(response)
                     // mainDivVM.cardVisible=false;
-                    window.location.href="/custservice/saleIm/initListPage"
+                    window.location.href="/preference/listPage"
                 }).catch(function (error) {
                     mainDivVM.loading = false;
                     mainDivVM.$message({
@@ -508,12 +530,31 @@
                     });
                 });
             },
+            currentProvince(selVal) {
+                //动态获取城市
+                var param = {};
+                param.type = "1";
+                param.name = selVal;
+                if (this.cardForm.city != null && this.cardForm.city != '') {
+                    this.cardForm.city = null;
+                }
+                this.$refs['cardForm'].clearValidate();
+                axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                    mainDivVM.cityArr = response.data.data.data;
+                });
+            },
         },
         created(){
             // 取页数存储
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
+            //获取省
+            param = {};
+            param.type = "0";
+            axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                mainDivVM.provinceArr = response.data.data.data;
+            });
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
