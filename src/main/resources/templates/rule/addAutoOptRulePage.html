@@ -240,7 +240,7 @@
                 <el-table-column align="center" prop="isPrior" label="是否自动分配*" width="330">
                     <template slot-scope="scope">
                             <el-form-item :prop="'buslinessList.' + scope.$index + '.isAuto'" :rules='rules.isAuto' style="width: 100px;margin:0 auto;height: 57px;">
-                            <el-select v-model="scope.row.isAuto" placeholder="请选择">
+                            <el-select v-model="scope.row.isAuto" placeholder="请选择" @change="checkisAuto(scope.$index,buslinessList)">
                                 <el-option
                                     v-for="item in autoOptions"
                                     :key="item.value"
@@ -502,7 +502,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     for(var i=0;i<this.buslinessList.length;i++){
                         if(this.buslinessList[i] !=null && this.buslinessList[i].businessLine !=null && this.buslinessList[i].isAuto !=null && this.buslinessList[i].isAuto==1){
                             isCanAdd =true;
-                            showBuslineList.push(this.buslinessList[i].businessLine);
+                       //     aorVM.showBuslineList.push(this.buslinessList[i].businessLine);
                         }
                     }
                     if(!isCanAdd){
@@ -516,7 +516,8 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     });
                     return;
                 }
-                this.form.teleRuleTeamList.push({
+                this.getTeleGroupList();
+                aorVM.form.teleRuleTeamList.push({
                     orgId: '',
                 });
             },
@@ -766,11 +767,18 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     rows[index].businessLine =null;
                     return;
                 }
-                this.allBuslinessLineList.push(line);
+                this.allBuslinessLineList =[];
+                this.showBuslineList =[];
+                for(var i=0;i<rows.length;i++){
+                    this.allBuslinessLineList.push(rows[i].businessLine);
+                    if(rows[i].isAuto !=null && rows[i].isAuto==1){
+                        this.showBuslineList.push(rows[i].businessLine);
+                    }
+                }
+                this.checkisAuto(index,rows)
             },
           //根据电销组查询电销总监
-            getTeleGroupList(index,rows) {
-              rows[index].orgId= '';
+            getTeleGroupList() {
           	  var param ={};
           	  param.systemCode = "HUIJU";
           	  param.orgType = 1;
@@ -787,6 +795,21 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                      console.log(error);
                 });
             },
+            checkisAuto(index ,rows){
+                var isAuto = rows[index].isAuto;
+                var line = rows[index].businessLine;
+                if(line !=null && isAuto !=null && isAuto==1 && this.showBuslineList !=null &&  this.showBuslineList.indexOf(line) ==-1){
+                    aorVM.showBuslineList.push(line);
+                }else if(line !=null && isAuto !=null && isAuto==0 && this.showBuslineList !=null &&  this.showBuslineList.indexOf(line) !=-1){
+                    aorVM.showBuslineList.splice(this.showBuslineList.indexOf(line),1);
+                }
+                if(aorVM.showBuslineList !=null && aorVM.showBuslineList.length>0){
+                    this.getTeleGroupList();
+                }else{
+                    aorVM.teleGroupList=[];
+                }
+
+            }
         },
         mounted(){
             document.getElementById('addOptimizeRule').style.display = 'block';
