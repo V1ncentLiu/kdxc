@@ -5,6 +5,8 @@
     <style>
     .el-input-number.is-controls-right .el-input-number__decrease, .el-input-number.is-controls-right .el-input-number__increase{    line-height: 14px;}
     .el-input-number__decrease, .el-input-number__increase{top:4px;}
+    .distpicker .form-group{width: 157px;}
+    .distpicker{width:350px;}
     </style>
 </head>
 <body>
@@ -116,7 +118,7 @@
         </el-row>
     </div>
     <!-- 设置顾问偏好弹窗 -->
-    <el-dialog title="设置顾问偏好" :visible.sync="cardVisible" width="540px" @close="cardCancel">
+    <el-dialog title="设置顾问偏好" :visible.sync="cardVisible" width="600px" @close="cardCancel">
         <template>
             <el-form :inline="true" :model="cardForm" ref="cardForm" :rules="cardFormRules">
                 <el-form-item label="顾问姓名："  :label-width="formLabelWidth" style="position: relative;width: 100%;">
@@ -149,6 +151,24 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <!-- 显示新增的省市 -->
+                <el-form-item label="" :label-width="formLabelWidth" style="margin-bottom: 0;">
+                    <el-tag
+                        v-for="tag in tags2"
+                        :key="tag"
+                        closable
+                        @close="deleteFun2(tag)"
+                        style="margin-right: 10px;">
+                        {{tag}}
+                    </el-tag>
+                </el-form-item>
+                <el-form-item label="地域：" prop="industryCategory" :label-width="formLabelWidth" style="width: 100%;">
+                    <div class="distpicker" data-toggle="distpicker" id="distpicker">
+                        <select class="form-group" id="dataProvince" data-province="全部省"></select>
+                        <select class="form-group" id="dataCity" data-city="全部市"></select>
+                    </div>
+                    <el-button type="primary" @click="addFun2">添加</el-button>
+                </el-form-item>
                 <el-form-item label="媒介：" prop="source" :label-width="formLabelWidth">
                     <el-select v-model="timeForm.source" :reserve-keyword=true filterable multiple placeholder="请选择" style="width: 333px;">
                         <el-option
@@ -160,7 +180,7 @@
                     </el-select>
                 </el-form-item>
                 <!-- 显示新增的标签 -->
-                <el-form-item label="" :label-width="formLabelWidth" style="margin-bottom: 0;">
+                <el-form-item label="" :label-width="formLabelWidth" style="margin-bottom: 0;width: 480px;">
                     <el-tag
                         v-for="tag in tags1"
                         :key="tag"
@@ -236,6 +256,7 @@
                 sourceOptions:mediumList,
                 industryCategoryArr:[],
                 tags1: [],//词根
+                tags2: [],//词根
                 formLabelWidth: '100px',
                 projectOptions:projectList ,
                 loading: false,
@@ -278,14 +299,29 @@
         },
         methods: { 
             addFun1() {//添加包含搜索词
-                let searchWord = this.form.searchWord;
+                let searchWord = this.timeForm.searchWord;
                 if (searchWord) {
                     this.tags1.push(searchWord);
                 }
-                this.form.searchWord = '';
+                this.timeForm.searchWord = '';
             },
             deleteFun1(tag) {//删除包含搜索词
                 this.tags1.splice(this.tags1.indexOf(tag), 1);
+            },
+            addFun2() {//添加包含搜索词
+                let dataProvince = $("#dataProvince").val();
+                let dataCity = $("#dataCity").val();
+
+                if (dataProvince&&!dataCity) {
+                    this.tags2.push(dataProvince);
+                }
+                if(dataCity){
+                    this.tags2.push(dataProvince+'-'+dataCity);
+                }
+                console.log(this.tags2);
+            },
+            deleteFun2(tag) {//删除包含搜索词
+                this.tags2.splice(this.tags2.indexOf(tag), 1);
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -297,6 +333,9 @@
                     return false;
                 }
                 this.timeVisible=true;
+                setTimeout(function(){
+                    $("#distpicker").distpicker('reset');
+                },0)
             },
             timeCancel(){
                 this.timeVisible=false;
