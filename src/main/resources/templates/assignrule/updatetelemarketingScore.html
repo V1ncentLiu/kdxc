@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
-	<title>后台管理系统</title>
+    <title>后台管理系统</title>
     <meta charset="UTF-8">
     <style>
         .dayTimeEnd .el-form-item__label:before{display: none;}
@@ -15,7 +15,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>资源管理</el-breadcrumb-item>
-        <el-breadcrumb-item>优化分配规则管理1</el-breadcrumb-item>
+        <el-breadcrumb-item>优化分配规则管理</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="inforTitle">编辑优化分配规则</div> 
     <el-form :model="form" :rules="rules" ref="form">
@@ -304,7 +304,7 @@
                     <template slot-scope="scope">
                         <el-button @click.native.prevent="deleteRow(scope.$index, form.teleRuleTeamList)" type="text" size="small">删除</el-button>
                     </template>
-            	</el-table-column>
+                </el-table-column>
             </el-table>
             <el-form-item label="选择话务组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
                 <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
@@ -364,7 +364,7 @@
                     <template slot-scope="scope">
                         <el-button @click.native.prevent="deleteRow(scope.$index, form.trafficRuleTeamList)" type="text" size="small">删除</el-button>
                     </template>
-            	</el-table-column>
+                </el-table-column>
             </el-table>
             <div class="padding20 f-tac">            
                 <el-button type="primary" :disabled="submitDisabled" @click="submitForm('form')">确认</el-button>
@@ -389,7 +389,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
         data: function() {
             return {                
                 form: {
-                	id:'',
+                    id:'',
                     ruleName:'',
                     startTime:'',
                     endTime:'',
@@ -412,7 +412,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                        //      unlimitedShow:false,//是否显示不限input
                        // }
                    ],
-               		trafficRuleTeamList: [
+                    trafficRuleTeamList: [
                        // {
                        //      orgId:'',
                        //      proportion:'',
@@ -552,7 +552,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                 tags2: [],//不包含搜索词
                 tags3: [],//包含省
                 tags4: [],//不包含省
-            }        	  
+            }             
         },
         methods: {
             changeDays(val){
@@ -584,8 +584,8 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             submitForm(form) {
                 this.$refs[form].validate((valid) => {                    
                     if (valid) {
-                    	var form = JSON.parse(JSON.stringify(this.form)); 
-                    	// 开始时间不能大约结束时间
+                        var form = JSON.parse(JSON.stringify(this.form)); 
+                        // 开始时间不能大约结束时间
                         var  startTime=form.startTime;
                         var  endTime=form.endTime;
                         var  start=new Date(startTime).getTime();
@@ -613,9 +613,9 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         var orgIdChoose=form.teleRuleTeamList; 
                         var ary=[];                   
                         for(var i=0;i<orgIdChoose.length;i++){
-                        	var split=orgIdChoose[i].orgId.split(",");
-                        	orgIdChoose[i].orgId=split[0];
-                        	orgIdChoose[i].orgType=split[1];
+                            var split=orgIdChoose[i].orgId.split(",");
+                            orgIdChoose[i].orgId=split[0];
+                            orgIdChoose[i].orgType=split[1];
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
                             var s = ary.join(",")+","; 
                             for(var j=0;j<ary.length;j++) {
@@ -634,9 +634,9 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         orgIdChoose=form.trafficRuleTeamList; 
                         var ary=[];
                         for(var i=0;i<orgIdChoose.length;i++){
-                        	var split=orgIdChoose[i].orgId.split(",");
-                        	orgIdChoose[i].orgId=split[0];
-                        	orgIdChoose[i].orgType=split[1];
+                            var split=orgIdChoose[i].orgId.split(",");
+                            orgIdChoose[i].orgId=split[0];
+                            orgIdChoose[i].orgType=split[1];
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
                             var s = ary.join(",")+","; 
                             for(var j=0;j<ary.length;j++) {
@@ -690,22 +690,22 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                           }
                         aorVM.submitDisabled=true;
                         axios.post('/clueAssignRule/optRule/update', param)
-	       	            .then(function (response) {
-	       	            	var data =response.data;
-	       	            	if(data.code!="0"){
+                        .then(function (response) {
+                            var data =response.data;
+                            if(data.code!="0"){
                                 aorVM.$message(data.msg);
                                 aorVM.submitDisabled=false;
-	       	            	}else{
-	       	            		aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                            }else{
+                                aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
                                     aorVM.submitDisabled=false;
-		       	                	document.location.href='/clueAssignRule/optRule/initRuleList';
-	                      	    }});
-	       	            	}
-	       	            })
-	       	            .catch(function (error) {
-	       	            	aorVM.submitDisabled=false;
+                                    document.location.href='/clueAssignRule/optRule/initRuleList';
+                                }});
+                            }
+                        })
+                        .catch(function (error) {
+                            aorVM.submitDisabled=false;
                             console.log(error);
-	       	            });
+                        });
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -756,16 +756,16 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                 this.tags4.splice(this.tags4.indexOf(tag), 1);
               },
             addDomain() {
-                console.log(businessLineList)
+                // console.log(businessLineList)
                 // 取第一条
                 var first=null;
-                for(var i=0;i<businessLineList.length;i++){
-                    first=businessLineList[0].businessLine;
-                }
+                // for(var i=0;i<businessLineList.length;i++){
+                //     first=businessLineList[0].businessLine;
+                // }
                 var param ={};
-            	  param.systemCode = "HUIJU";
-            	  param.orgType = 1;
-            	  param.businessLine = first;
+                  param.systemCode = "HUIJU";
+                  param.orgType = 1;
+                  param.businessLine = first;
                   console.info(param);
                   axios.post('/organization/organization/queryOrgByBusinessline', param)
                   .then(function (response) {
@@ -812,26 +812,26 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             },
             resourceMaxNumber(index, rows){
                 for(var i=0;i<rows.length;i++){                    
-        　　      	  			rows[i].proportion=rows[i].proportion.replace(/[^\.\d]/g,'');
+        　　                      rows[i].proportion=rows[i].proportion.replace(/[^\.\d]/g,'');
                     rows[i].proportion=rows[i].proportion.replace('.','');                    
                 }
-        　　		},
+        　　      },
             resourceMaxNumber1(index, rows){
                 for(var i=0;i<rows.length;i++){                    
-        　　        				rows[i].resourceMaxNum=rows[i].resourceMaxNum.replace(/[^\.\d]/g,'');
+        　　                      rows[i].resourceMaxNum=rows[i].resourceMaxNum.replace(/[^\.\d]/g,'');
                     rows[i].resourceMaxNum=rows[i].resourceMaxNum.replace('.','');                    
                 }
-        　　		},
-      		cancelForm(){
-            	document.location.href='/clueAssignRule/optRule/initRuleList';
+        　　      },
+            cancelForm(){
+                document.location.href='/clueAssignRule/optRule/initRuleList';
             },
           //根据电销组查询电销总监
             getTeleGroupList(index,rows) {
-            	rows[index].orgId= '';
-          	  var param ={};
-          	  param.systemCode = "HUIJU";
-          	  param.orgType = 1;
-          	  param.businessLine = rows[index].businessLine;
+                rows[index].orgId= '';
+              var param ={};
+              param.systemCode = "HUIJU";
+              param.orgType = 1;
+              param.businessLine = rows[index].businessLine;
                 console.info(param);
                 axios.post('/organization/organization/queryOrgByBusinessline', param)
                 .then(function (response) {
@@ -872,28 +872,28 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             this.form.status=clueAssignRule.status;
             var teleRuleTeamList=clueAssignRule.teleList;
             for(var i=0;i<teleRuleTeamList.length;i++){
-            	teleRuleTeamList[i].orgId=teleRuleTeamList[i].orgId+","+teleRuleTeamList[i].orgType;
-            	if(teleRuleTeamList[i].resourceMaxNum==-1){
-            		this.unlimitedBtn(i,teleRuleTeamList);
-            	}
+                teleRuleTeamList[i].orgId=teleRuleTeamList[i].orgId+","+teleRuleTeamList[i].orgType;
+                if(teleRuleTeamList[i].resourceMaxNum==-1){
+                    this.unlimitedBtn(i,teleRuleTeamList);
+                }
             }
             this.form.teleRuleTeamList=teleRuleTeamList;
             
             var trafficRuleTeamList=clueAssignRule.trafficList;
             for(var i=0;i<trafficRuleTeamList.length;i++){
-            	trafficRuleTeamList[i].orgId=trafficRuleTeamList[i].orgId+","+trafficRuleTeamList[i].orgType;
-            	if(trafficRuleTeamList[i].resourceMaxNum==-1){
-            		this.unlimitedBtn(i,trafficRuleTeamList);
-            	}
+                trafficRuleTeamList[i].orgId=trafficRuleTeamList[i].orgId+","+trafficRuleTeamList[i].orgType;
+                if(trafficRuleTeamList[i].resourceMaxNum==-1){
+                    this.unlimitedBtn(i,trafficRuleTeamList);
+                }
             }
             this.form.trafficRuleTeamList=trafficRuleTeamList;
             
             
             if(clueAssignRule.searchWord){
-	            this.tags1=clueAssignRule.searchWord.split(',');
+                this.tags1=clueAssignRule.searchWord.split(',');
             }
             if(clueAssignRule.notSearchWord){
-	            this.tags2=clueAssignRule.notSearchWord.split(',');
+                this.tags2=clueAssignRule.notSearchWord.split(',');
             }
             // this.form.province=clueAssignRule.province;
             // this.form.notProvince=clueAssignRule.notProvince;

@@ -15,361 +15,49 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>资源管理</el-breadcrumb-item>
-        <el-breadcrumb-item>优化分配规则管理1</el-breadcrumb-item>
+        <el-breadcrumb-item>顾问得分规则明细</el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="inforTitle">新建优化分配规则</div> 
-    <el-form :model="form" :rules="rules" ref="form">
+    <div class="inforTitle">顾问得分规则明细</div> 
+    <el-form :model="form" ref="form">
         <div class="borderbox padding20">
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="规则名称：" prop="ruleName" :label-width="formLabelWidth">
-                        <el-input v-model="form.ruleName" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
+                        <span></span>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="行业类别：" prop="industryCategory" :label-width="formLabelWidth">
-                        <el-select v-model="form.industryCategory" reserve-keyword=true filterable   multiple placeholder="请选择" style="width: 300px;">
-                            <el-option
-                                v-for="item in industryOptions"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
+                    <el-form-item label="业务线：" prop="industryCategory" :label-width="formLabelWidth">
+                        <span></span>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>                
                 <el-col :span="12">
                     <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                        <span></span>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                        <span></span>
                     </el-form-item>
                 </el-col>
             </el-row>
-            <el-row>                
-                <el-col :span="12">   
-                    <el-form-item label="周期内设定有效日：" :label-width="formLabelWidth" class="days" style="float: left;">
-                        <em class="requiredRed" style="left: -120px;">*</em>
-                        <el-radio v-model="form.radio" label="0" @change="changeDays">每天</el-radio>
-                        <el-radio v-model="form.radio" label="1" @change="changeDays" style="margin: 0 10px 0 15px;">特殊设定</el-radio>
-                    </el-form-item>             
-                    <el-form-item label="" prop="days" :label-width="0" v-show="showDays" style="float: left;">
-                        <el-select v-model="form.days"  filterable  multiple placeholder="请选择" style="width: 135px;">
-                            <el-option
-                                v-for="item in weeksOptions"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="有效日内时间范围：" prop="dayTimeStart" :label-width="formLabelWidth" style="width: 318px;float: left;">
-                        <el-time-picker type="datetime" placeholder="选择时间" v-model="form.dayTimeStart" style="width: 135px;" format="HH:mm:ss" value-format="HH:mm:ss"></el-time-picker>
-                    </el-form-item>
-                    <span class="timeToLine">——</span>
-                    <el-form-item label="" prop="dayTimeEnd" class="dayTimeEnd" style="width: 175px;float: left;">
-                        <el-time-picker type="datetime" placeholder="选择时间" v-model="form.dayTimeEnd" style="width: 135px;" format="HH:mm:ss" value-format="HH:mm:ss"></el-time-picker>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="媒介：" prop="source" :label-width="formLabelWidth">
-                        <el-select v-model="form.source" reserve-keyword=true filterable  multiple placeholder="请选择" style="width: 300px;" @change="changeSource">
-                            <el-option
-                                v-for="item in sourceOptions"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
-                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
-                            <el-option
-                                v-for="item in categoryOptions"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <!-- 显示新增的标签 -->
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
-                        <el-tag
-                            v-for="tag in tags1"
-                            :key="tag"
-                            closable
-                            @close="deleteFun1(tag)"
-                            style="margin-right: 10px;">
-                            {{tag}}
-                        </el-tag>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12" style="float: right;">
-                    <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
-                        <el-tag
-                            v-for="tag in tags2"
-                            :key="tag"
-                            closable
-                            @close="deleteFun2(tag)"
-                            style="margin-right: 10px;">
-                            {{tag}}
-                        </el-tag>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="包含搜索词：" :label-width="formLabelWidth" style="float: left;">
-                        <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50" style="width: 224px;margin-right: 6px;"></el-input>                            
-                    </el-form-item>
-                    <el-form-item style="float: left;">
-                        <el-button type="primary" @click="addFun1">添加</el-button>           
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="不包含搜索词：" :label-width="formLabelWidth" style="float: left;">
-                        <el-input v-model="form.notSearchWord" autocomplete="off"  maxlength="50" style="width: 224px;margin-right: 6px;"></el-input>
-                    </el-form-item>
-                    <el-form-item style="float: left;">
-                        <el-button type="primary" @click="addFun2">添加</el-button>           
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <!-- 显示新增的标签 -->
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
-                        <el-tag
-                            v-for="tag in tags3"
-                            :key="tag"
-                            closable
-                            @close="deleteFun3(tag)"
-                            style="margin-right: 10px;">
-                            {{tag}}
-                        </el-tag>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12" style="float: right;">
-                    <el-form-item label="" :label-width="formLabelWidth" style="    margin-bottom: 0;">
-                        <el-tag
-                            v-for="tag in tags4"
-                            :key="tag"
-                            closable
-                            @close="deleteFun4(tag)"
-                            style="margin-right: 10px;">
-                            {{tag}}
-                        </el-tag>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="包含省：" :label-width="formLabelWidth" style="float: left;">
-                        <el-input v-model="form.province" autocomplete="off"  maxlength="50" style="width: 224px;margin-right: 6px;"></el-input>                            
-                    </el-form-item>
-                    <el-form-item style="float: left;">
-                        <el-button type="primary" @click="addFun3">添加</el-button>           
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="不包含省：" :label-width="formLabelWidth" style="float: left;">
-                        <el-input v-model="form.notProvince" autocomplete="off"  maxlength="50" style="width: 224px;margin-right: 6px;"></el-input>
-                    </el-form-item>
-                    <el-form-item style="float: left;">
-                        <el-button type="primary" @click="addFun4">添加</el-button>           
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-form-item label="是否启用：" prop="isUse" :label-width="formLabelWidth">
-                    <el-select v-model="form.status" placeholder="请选择" style="width:300px;">
-                        <el-option
-                            v-for="item in statusOptions"
-                            :key="item.value"
-                            :label="item.name"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-            </el-row>   
-            <el-form-item label="选择电销组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
-                <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
-                <el-button type="primary" @click="addDomain">添加电销组</el-button>
-            </el-form-item>
             <el-table :data="form.teleRuleTeamList" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="businessLine" label="业务线*">
-                    <template slot-scope="scope">
-                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.businessLine'" :rules='rules.businessLine' style="width: 160px;margin:0 auto;height: 57px;">
-                            <el-select filterable v-model="scope.row.businessLine" placeholder="请选择" @change="getTeleGroupList(scope.$index, form.teleRuleTeamList)">
-                                <el-option
-                                    v-for="item in businessLineOptions"
-                                    :key="item.businessLine"
-                                    :label="item.name"
-                                    :value="item.businessLine">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </template>
+                <el-table-column align="center" prop="orgId" label="指标名称">
+                    
                 </el-table-column>
-                <el-table-column align="center" prop="orgId" label="电销组*">
-                    <template slot-scope="scope">
-                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 160px;margin:0 auto;height: 57px;">
-                            <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
-                                <el-option
-                                    v-for="item in scope.row.teleOptions"
-                                    :key="item.id+','+item.orgType"
-                                    :label="item.name"
-                                    :value="item.id+','+item.orgType">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </template>
+                <el-table-column align="center" prop="resourceMaxNum" label="指标范围" width="160">
+                    
                 </el-table-column>
-                <el-table-column align="center" prop="proportion" label="比例*" width="130">
-                    <span style="color: #f56c6c;">*</span>
-                    <template slot-scope="scope">
-                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.proportion'" :rules='rules.proportion' style="width: 100px;margin:0 auto;height: 57px;">
-                            <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.teleRuleTeamList)" v-model="scope.row.proportion"></el-input>
-                        </el-form-item>
-                    </template>
+                <el-table-column align="center" prop="isPrior" label="得分" width="130">
+                    
                 </el-table-column>
-                <el-table-column align="center" prop="resourceMaxNum" label="资源条数*" width="160">
-                    <template slot-scope="scope">
-                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 130px;margin:0 auto;height: 57px;">
-                            <!-- input值 -->
-                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.teleRuleTeamList)" v-model="scope.row.resourceMaxNum" ></el-input>
-                            <!-- 不限按钮    -->
-                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.teleRuleTeamList)" >不限</el-button>
-                            <!-- 不限input -->
-                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.teleRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
-                        </el-form-item>
-                    </template>
+                <el-table-column align="center" label="指标值时间范围">
+                    
                 </el-table-column>
-                <el-table-column align="center" prop="isPrior" label="优先分配*" width="130">
-                    <template slot-scope="scope">
-                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.isPrior'" :rules='rules.isPrior' style="width: 100px;margin:0 auto;height: 57px;">
-                            <el-select v-model="scope.row.isPrior" placeholder="请选择">
-                                <el-option
-                                    v-for="item in priorOptions"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" label="接收时间段">
-                    <template slot-scope="scope">
-                        <el-form-item label="" :prop="'teleRuleTeamList.' + scope.$index + '.orgDayTimeStart'" label-width="0" style="width: 70px;display: inline-block;">
-                            <el-time-picker type="datetime" placeholder="选择时间" v-model="scope.row.orgDayTimeStart" style="width: 70px;" format="HH:mm:ss" value-format="HH:mm:ss" :editable="false" :clearable="false"></el-time-picker>
-                        </el-form-item>
-                        <span>—</span>
-                        <el-form-item label="" :prop="'teleRuleTeamList.' + scope.$index + '.orgDayTimeEnd'" style="width: 70px;display: inline-block;">
-                            <el-time-picker type="datetime" placeholder="选择时间" v-model="scope.row.orgDayTimeEnd" style="width: 70px;" format="HH:mm:ss" value-format="HH:mm:ss" :editable="false" :clearable="false"></el-time-picker>
-                        </el-form-item>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="projectId" label="资源项目归属">
-                    <template slot-scope="scope">
-                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.ascriptionProjectId'" :rules='rules.projectId' style="width: 160px;margin:0 auto;height: 57px;">
-                            <el-select filterable clearable v-model="scope.row.ascriptionProjectId" placeholder="请选择">
-                                <el-option
-                                        v-for="item in noSingProjectList"
-                                        :key="item.id"
-                                        :label="item.projectName"
-                                        :value="item.id">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" label="操作" width="70">
-                    <template slot-scope="scope">
-                        <el-button @click.native.prevent="deleteRow(scope.$index, form.teleRuleTeamList)" type="text" size="small">删除</el-button>
-                    </template>
-            	</el-table-column>
-            </el-table>
-            <el-form-item label="选择话务组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
-                <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
-                <el-button type="primary" @click="addDomainTraffic">添加话务组</el-button>
-            </el-form-item>
-            <el-table :data="form.trafficRuleTeamList" style="width: 100%" border>
-                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="orgId" label="话务组*">
-                    <template slot-scope="scope">
-                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
-                                <el-option
-                                    v-for="item in trafficOptions"
-                                    :key="item.id+','+item.orgType"
-                                    :label="item.name"
-                                    :value="item.id+','+item.orgType">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="proportion" label="比例*">
-                    <span style="color: #f56c6c;">*</span>
-                    <template slot-scope="scope">
-                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.proportion'" :rules='rules.proportion' style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.teleRuleTeamList)" v-model="scope.row.proportion"></el-input>
-                        </el-form-item>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="resourceMaxNum" label="资源条数*">
-                    <template slot-scope="scope">
-                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 200px;margin:0 auto;height: 57px;">
-                            <!-- input值 -->
-                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.trafficRuleTeamList)" v-model="scope.row.resourceMaxNum" ></el-input>
-                            <!-- 不限按钮    -->
-                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.trafficRuleTeamList)" >不限</el-button>
-                            <!-- 不限input -->
-                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.trafficRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
-                        </el-form-item>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="isPrior" label="优先分配*">
-                    <template slot-scope="scope">
-                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.isPrior'" :rules='rules.isPrior' style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-select v-model="scope.row.isPrior" placeholder="请选择">
-                                <el-option
-                                    v-for="item in priorOptions"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" label="操作" width="120">
-                    <template slot-scope="scope">
-                        <el-button @click.native.prevent="deleteRow(scope.$index, form.trafficRuleTeamList)" type="text" size="small">删除</el-button>
-                    </template>
-            	</el-table-column>
-            </el-table>
-            <div class="padding20 f-tac">            
-                <el-button type="primary" :disabled="submitDisabled" @click="submitForm('form')">确认</el-button>
-                <el-button @click="cancelForm()">取 消</el-button>
-            </div> 
         </div>        
     </el-form>  
 </div>
