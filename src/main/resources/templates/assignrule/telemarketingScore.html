@@ -30,18 +30,14 @@
         <shiro:hasPermission name="clueAssignRule:optRuleManager:delete">
             <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
         </shiro:hasPermission>
-        	<el-button type="primary" @click="copyFun"><i class="el-icon-edit"></i>复制规则</el-button>
-        <shiro:hasPermission name="clueAssignRule:optRuleManager:export">
-            <el-button type="warning" @click="exportFun"><i ></i>导出规则</el-button>
-        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <el-form-item label="规则名称:">
+                <el-form-item label="顾问得分规则名称:">
                     <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
                 </el-form-item>
-                <el-form-item label="选择资源类别:">
+                <el-form-item label="业务线:">
                     <el-select v-model="form.category" clearable placeholder="选择资源类别">
                         <el-option
                             v-for="item in categoryOptions"
@@ -51,84 +47,19 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="选择行业类别:">
-                    <el-select v-model="form.industryCategory" filterable  clearable placeholder="选择行业类别">
+                <el-form-item label="规则状态:">
+                    <el-select v-model="form.status" clearable placeholder="状态">
                         <el-option
-                            v-for="item in industryCategoryOptions"
+                            v-for="item in statusOptions"
                             :key="item.value"
                             :label="item.name"
                             :value="item.value">
                         </el-option>
                     </el-select>
-                </el-form-item>
-                <el-form-item label="规则有效时间:">
-                    <el-date-picker
-                        v-model="form.searchStartTime"
-                        type="datetime"
-                        placeholder="选择日期时间">
-                    </el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                    <el-date-picker
-                        v-model="form.searchEndTime"
-                        type="datetime"
-                        placeholder="选择日期时间">
-                    </el-date-picker>
-                </el-form-item>
-                <el-row v-show="isShow">
-                    <el-form-item label="状态:">
-                        <el-select v-model="form.status" clearable placeholder="状态">
-                            <el-option
-                                v-for="item in statusOptions"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="包含搜索词:">
-	                    <el-input v-model="form.searchWord" placeholder="包含搜索词"></el-input>
-	                </el-form-item>
-                    <el-form-item label="不包含搜索词:">
-	                    <el-input v-model="form.notSearchWord" placeholder="不包含搜索词"></el-input>
-	                </el-form-item>
-                    <el-form-item label="最后编辑时间:">
-                        <el-date-picker
-                            v-model="form.updateTimeBegin"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker
-                            v-model="form.updateTimeEnd"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="分配电销组:">
-                        <el-select v-model="form.teleorg" placeholder="选择分配电销组" style="width: 100%;" clearable  filterable>
-                            <el-option
-                                v-for="item in orgTeleArr"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="媒介:">
-                        <el-select v-model="form.source" placeholder="媒介" clearable filterable>
-                            <el-option v-for="item in mediumArry" :key="item.value" :label="item.name"
-                                       :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-row>
-                <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
-                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-                </div>
+                </el-form-item>  
+                <el-form-item label="" label-width="0">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item> 
             </el-form>
         </div>
         <el-row>
@@ -144,45 +75,15 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="ruleName" label="规则名称"></el-table-column>
-                <el-table-column align="center" prop="source" label="媒介" >
-                    <template slot-scope="scope">
-                        <span v-for="(item,index) in scope.row.sourceList">
-                            <em v-if="sourceShow(item)" style="color:#ebb563;">{{transformSourceBySource(item)}}</em>
-                            <em v-else="sourceShow(item)">{{transformSourceBySource(item)}}</em>
-                            <em v-if="index<(scope.row.sourceLength-1)">,</em>
-                        </span>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory" width="80"></el-table-column>
-                <el-table-column align="center" prop="industryCategory" label="行业类别" :formatter="transformIndustry" width="80"></el-table-column>
-                <el-table-column align="center" prop="searchWordList" label="包含搜索词"  width="130">
-                    <template slot-scope="scope">
-                        <span v-for="(item,index) in scope.row.searchWordList">
-                            <em v-if="searchwordShow(item)" style="color:#ebb563;">{{item}}</em>
-                            <em v-else="searchwordShow(item)">{{item}}</em>
-                            <em v-if="index<(scope.row.searchWordListLength-1)">,</em>
-                        </span>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="notSearchWord" label="不包含搜索词" width="150">
-                    <template slot-scope="scope">
-                        <span v-for="(item,index) in scope.row.notSearchWordList">
-                            <em v-if="notSearchwordShow(item)" style="color:#ebb563;">{{item}}</em>
-                            <em v-else="notSearchwordShow(item)">{{item}}</em>
-                            <em v-if="index<(scope.row.notSearchWordListLength-1)">,</em>
-                        </span>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="province" label="包含省份" width="90"></el-table-column>
-                <el-table-column align="center" prop="notProvince" label="不包含省份" width="90" ></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="最后编辑时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="ruleName" label="顾问得分规则名称"></el-table-column>
+                <el-table-column align="center" prop="category" label="业务线" :formatter="transformCategory" width="80"></el-table-column>
+                <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="startTime" label="规则有效开始时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="endTime" label="规则有效结束时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="createUserName" label="创建人" width="90"></el-table-column>
-                <el-table-column align="center" prop="updateUserName" label="最后编辑人" width="90"></el-table-column>
-                <el-table-column align="center" prop="teamName" label="分配电销组"  width="200"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="修改时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="updateUserName" label="修改人" width="90"></el-table-column>
+                <el-table-column align="center" prop="status" label="状态" width="80" :formatter="transformStatus"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status == '0'">
@@ -193,7 +94,6 @@
                         </span>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="status" label="状态" width="80" :formatter="transformStatus"></el-table-column>
             </el-table>
             <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -419,92 +319,37 @@
                 }
                 var rowNames = [];
                 var rowIds = [];
-                for(var i=0;i<rows.length;i++){
-             	   var curRow = rows[i];
-             	   if(roleCode=="YHWY"||roleCode=="YHZG"){
-             		   
-             	   }else if(curRow.createUser+""!=userId){
-             		  this.$message({
-                          message: '不允许删除非本人创建的规则',
-                          type: 'warning'
-                        });
-                       return;
-             	   }
-                   rowIds.push(curRow.id);
-                   rowNames.push("【"+curRow.ruleName+"】");
-                }
-             this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning'
-             }).then(() => {
-             	  //删除
-             	var param  = {idList:rowIds};
-                 axios.post('/clueAssignRule/optRule/delete',param)
-                 .then(function (response) {
-                     var data =  response.data;
-                     if(data.code=='0'){
-                    	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
-                     		ocmVM.searchTable();
-                 	    }});
-                         
-                     }else{
-                    	 ocmVM.$message({
-                             message: "接口调用失败",
-                             type: 'error'
-                           }); 
-                     }
-                 })
-                 .catch(function (error) {
-                   console.log(error);
-                 })
-                 .then(function () {
-                 	
-                 });
-             }).catch(() => {
-                    
-             });
-            },
-            copyFun() {
-            	var rows = this.multipleSelection;
-                if(rows.length!=1){
-                    this.$message({
-                       message: '请选择一条数据操作',
-                       type: 'warning'
+                this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                 	  //删除
+                 	var param  = {idList:rowIds};
+                     axios.post('/clueAssignRule/optRule/delete',param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                        	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                         		ocmVM.searchTable();
+                     	    }});
+                             
+                         }else{
+                        	 ocmVM.$message({
+                                 message: "接口调用失败",
+                                 type: 'error'
+                               }); 
+                         }
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                     	
                      });
-                    return;
-                }
-             this.$confirm('确定要复制此规则吗？', '提示', {
-                 confirmButtonText: '确定',
-                 cancelButtonText: '取消',
-                 type: 'warning'
-             }).then(() => {
-             	  //复制
-             	var param  = {id:rows[0].id};
-                 axios.post('/clueAssignRule/optRule/copy',param)
-                 .then(function (response) {
-                     var data =  response.data;
-                     if(data.code=='0'){
-                    	 ocmVM.$message({message:'复制成功',type:'success',duration:1000,onClose:function(){
-                     		ocmVM.searchTable();
-                 	    }});
-                         
-                     }else{
-                    	 ocmVM.$message({
-                             message: "接口调用失败",
-                             type: 'error'
-                           }); 
-                     }
-                 })
-                 .catch(function (error) {
-                   console.log(error);
-                 })
-                 .then(function () {
-                 	
+                 }).catch(() => {
+                        
                  });
-             }).catch(() => {
-                    
-             });
             },
             //修改状态
             updateStatus(id,status,msg) {
@@ -648,24 +493,6 @@
                     // 存储选中信息--end
                 	document.location.href='/clueAssignRule/optRule/initUpdate?id='+clueId;
                 }                
-            },
-            exportFun(){
-                var param = this.form;
-                param.pageNum='';
-                param.pageSize='';
-                axios.post('/clueAssignRule/optRule/export',param,{responseType:'blob'})
-                .then(function (response) {
-                    console.log(response)
-                    var data =  response.data;
-                    var fileName = response.headers.filename;
-                        saveAs(data,decodeURI(fileName));
-                })
-                .catch(function (error) {
-                    console.log(error);
-                }).then(function(){
-                	ocmVM.loading=false;
-                });                     	
-            	
             },
           //状态转换方法
             transformStatus(row, column, cellValue, index) {
