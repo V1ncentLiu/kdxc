@@ -239,7 +239,7 @@
 
                 <el-table-column align="center" prop="isPrior" label="是否自动分配*" width="330">
                     <template slot-scope="scope">
-                            <el-form-item :prop="'buslinessList.' + scope.$index + '.isAuto'" :rules='rules.isAuto' style="width: 100px;margin:0 auto;height: 57px;">
+                            <el-form-item :prop="'buslinessList.' + scope.$index + '.isAuto'"  style="width: 100px;margin:0 auto;height: 57px;">
                             <el-select v-model="scope.row.isAuto" placeholder="请选择" @change="checkisAuto(scope.$index,buslinessList)">
                                 <el-option
                                     v-for="item in autoOptions"
@@ -516,24 +516,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     this.showDays=true;
                 }
             },
-            unlimitedBtn(index, rows){
-                rows[index].unlimitedShow=true;
-                rows[index].unlimited="不限";
-                rows[index].unlimitedVal="-1";
-                rows[index].resourceMaxNum="0"; //为了不让校验而赋的无用的值
-                console.log(rows[index].unlimited);
-                console.log(rows[index].unlimitedVal);
-                console.log(rows[index].resourceMaxNum);
-            },
-            unlimitedIpt(index, rows){//点击不限input
-                rows[index].unlimitedShow=false
-                rows[index].unlimited="";
-                rows[index].unlimitedVal="";
-                rows[index].resourceMaxNum="";
-                console.log(rows[index].unlimited);
-                console.log(rows[index].unlimitedVal);
-                console.log(rows[index].resourceMaxNum);
-            },
+
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     // 开始时间不能大于结束时间
@@ -732,15 +715,10 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                             orgId: '',
                         //    businessLine: first,//业务线取第一条
                             teleOptions:table,
-                            orgType: '',
                             proportion:'',
                             resourceMaxNum:'',
-                            isPrior: 0,//默认非优先
-                            orgDayTimeStart:'00:00:00',//新增时间段
-                            orgDayTimeEnd:'23:59:59',//新增时间段
-                            unlimited:'',//不限层
-                            unlimitedVal:'',//不限层取值
-                            unlimitedShow:false,//默认不显示
+                            isAuto: 1,//默认非优先
+
                         });
                   })
                   .catch(function (error) {
@@ -748,24 +726,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                   });
 
             },
-            addDomainTraffic() {
-                console.log(trafficList)
-                // 取第一条
-                var first="";
-                for(var i=0;i<trafficList.length;i++){
-                    first=trafficList[0].id+","+trafficList[0].orgType;
-                }
-                this.form.trafficRuleTeamList.push({
-                    orgId: first,
-                    orgType: '',
-                    proportion:'',
-                    resourceMaxNum:'',
-                    isPrior: 0,//默认非优先
-                    unlimited:'',//不限层
-                    unlimitedVal:'',//不限层取值
-                    unlimitedShow:false,//默认不显示
-                });
-            },
+
             resourceMaxNumber(index, rows){
                 for(var i=0;i<rows.length;i++){
         　　      	  			rows[i].proportion=rows[i].proportion.replace(/[^\.\d]/g,'');
