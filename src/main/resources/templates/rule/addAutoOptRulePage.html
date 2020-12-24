@@ -258,8 +258,7 @@
                     </template>
             	</el-table-column>
             </el-table>
-            <el-form-item label="选择自动分配电销组：" prop="chooseTeam" :label-width="formLabelWidth" class="marginBottom15">
-                <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
+            <el-form-item label="选择自动分配电销组："  :label-width="formLabelWidth" class="marginBottom15">
                 <el-button type="primary" @click="addTeleGroup">添加电销组</el-button>
             </el-form-item>
             <el-table :data="form.teleRuleTeamList" style="width: 100%;margin-bottom: 20px" border>
@@ -411,35 +410,19 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     ],
                     chooseTeam: [
                                  { validator:function(rule,value,callback){
-                                     if(aorVM.form.teleRuleTeamList.length==0&&aorVM.form.trafficRuleTeamList.length==0){
-                                         callback(new Error("请添加电销组或话务组"));
+                                     if(aorVM.buslinessList.length==0){
+                                         callback(new Error("请添加业务线"));
                                          return;
                                      }
                                      callback();
                                  }, trigger: 'change'}
                              ],
-                    orgId: [
-                        { required: true, required: true, message: '请选择电销组', trigger: 'change' }
-                    ],
-                    isAuto:[
-                        { required: true, required: true, message: '请选择是否自动分配', trigger: 'change' }
-                    ],
+
                     businessLine: [
                                    { required: true, required: true, message: '请选择业务线', trigger: 'change' }
                                ],
                     proportion: [
                         { required: true, required: true, message: '请输入比例', trigger: 'change'},
-                        { validator:function(rule,value,callback){
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数数字"));
-                            }else{
-                               callback();
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ],
-                    resourceMaxNum: [
-                        { required: true, required: true, message: '请添加资源条数', trigger: 'change' },
                         { validator:function(rule,value,callback){
                             if(/^[0-9]*$/.test(value) == false){
                                callback(new Error("请输入整数数字"));
@@ -556,6 +539,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     // 开始时间不能大于结束时间
                     var startTime=this.form.startTime;
                     var endTime=this.form.endTime;
+                    var buslinessList = this.buslinessList;
                     if(endTime && startTime>endTime){
                         this.$message({
                             message: '结束时间不允许选择早于开始时间',
@@ -574,8 +558,48 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         return;
                     }
                     if (valid) {
-                    	var form = JSON.parse(JSON.stringify(this.form));
 
+                    	var form = JSON.parse(JSON.stringify(this.form));
+                        var teamList = form.teleRuleTeamList;
+                        var ruleDetailList = [];
+                        if(buslinessList !=null && buslinessList.length>0){
+                            for(var i=0;i<buslinessList.length;i++){
+                                var line = buslinessList[i];
+                                if(line.isAuto !=null && line.isAuto==1){
+                                    var isAddGroup = false;
+                                    for(var k=0;k<teamList.length;k++){
+                                        var team = teamList[k];
+                                        if(team.orgId !=null){
+                                            var teams = team.split(",");
+                                            if(teams[1] ==line){
+                                                isAddGroup = true;
+                                                var obj ={};
+                                                obj.isAuto = 1;
+                                                obj.orgId = teams[0];
+                                                obj.ascriptionProjectId = team.ascriptionProjectId;
+                                                obj.buslinessList = line.businessLine;
+                                                obj.proportion = line.proportion;
+                                                ruleDetailList.push(obj);
+                                            }
+                                        }
+                                    }
+                                    if(!isAddGroup){
+                                        this.$message({
+                                            message: '有业务线自动分配未选择电销组',
+                                            type: 'warning'
+                                        });
+                                      return ;
+                                    }
+                                }else{
+                                    var obj ={};
+                                    obj.isAuto = 0;
+                                    obj.buslinessList = line.businessLine;
+                                    obj.proportion = line.proportion;
+                                    ruleDetailList.push(obj);
+                                }
+
+                            }
+                        }
                         // 不能选择重复电销组
                         var orgIdChoose=form.teleRuleTeamList;
                         var ary=[];
