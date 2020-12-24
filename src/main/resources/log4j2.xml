@@ -11,7 +11,7 @@
     <appenders>  
         <!-- 定义控制台输出 -->  
         <Console name="console" target="SYSTEM_OUT" follow="true">  
-            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} %level [%thread][%file:%line][%X{MSG_ID}] - %msg%n" />  
+            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} %level [%logger{50}:%L][%X{traceId}/%X{spanId}] [%thread][%X{MSG_ID}] - %msg%n" />
         </Console>  
         
         <RollingRandomAccessFile name="serviceLog" fileName="${LOG_HOME}/${SERVER_NAME}-${SERVICE_LOG}.log"  
@@ -36,15 +36,21 @@
 	<loggers>
 		<!-- 3rdparty Loggers -->
 		
-		<logger name="serverLog" level="INFO" includeLocation="true"
+		<!-- <logger name="serverLog" level="INFO" includeLocation="true"
 			additivity="false">
 			<appender-ref ref="serverLog" />
-		</logger>
+		</logger> -->
 		<!-- Root Logger -->
-		<root level="INFO">
+		<!-- <root level="INFO">
 			<appender-ref ref="console" />
-		</root>
-
+		</root> -->
+		<!-- 去掉无关紧要的默认日志 -->
+	   <AsyncLogger name="springfox" level="OFF"></AsyncLogger>
+    	<!--  includeLocatio输出行号，有性能开销 -->
+        <AsyncRoot level="INFO" includeLocation="true" >
+            <AppenderRef ref="serviceLog" />
+            <AppenderRef ref="console" />
+        </AsyncRoot>
 
 	</loggers>  
 </configuration>
