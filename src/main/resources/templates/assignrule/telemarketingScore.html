@@ -77,7 +77,8 @@
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <el-table-column align="center" prop="ruleName" label="顾问得分规则名称">
                     <template slot-scope="scope">
-                        <el-button size="mini" type="text" @click="gotoInfo(scope.row.id)">{{scope.row.ruleName}}</el-button>
+                        <!-- <el-button size="mini" type="text" @click="gotoInfo(scope.row.id)">{{scope.row.ruleName}}</el-button> -->
+                        <el-button size="mini" type="text" @click="rowDblClick(scope.row)">{{scope.row.ruleName}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="category" label="业务线" :formatter="transformCategory" width="80"></el-table-column>
@@ -113,89 +114,34 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="行业类别：" :label-width="formLabelWidth">
+                        <el-form-item label="业务线：" :label-width="formLabelWidth">
                             {{dialogForm.industryCategory}}
                         </el-form-item>
                     </el-col>
-                </el-row>
+                </el-row>                
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="媒介：" :label-width="formLabelWidth">
-                            {{dialogForm.source}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            {{dialogForm.category}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="包含搜索词：" :label-width="formLabelWidth">
-                            {{dialogForm.searchWord}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="不包含搜索词：" :label-width="formLabelWidth">
-                            {{dialogForm.notSearchWord}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="包含省份：" :label-width="formLabelWidth">
-                            {{dialogForm.province}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="不包含省份：" :label-width="formLabelWidth">
-                            {{dialogForm.notProvince}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="生效开始时间：" :label-width="formLabelWidth">
+                        <el-form-item label="规则开始时间：" :label-width="formLabelWidth">
                             {{dialogForm.startTime}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="生效结束时间：" :label-width="formLabelWidth">
+                        <el-form-item label="规则结束时间：" :label-width="formLabelWidth">
                             {{dialogForm.endTime}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="周期内有效日：" :label-width="formLabelWidth">
-                            {{dialogForm.days}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="有效日内时间范围：" :label-width="formLabelWidth">
-                            {{dialogForm.dayTimeStart}}-{{dialogForm.dayTimeEnd}}
                         </el-form-item>
                     </el-col>
                 </el-row>
             </div>
         </el-form>
         <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
-            <el-table-column align="center" prop="orgName" label="电销小组"></el-table-column>
-            <el-table-column align="center" prop="proportion" label="比例" width="120"></el-table-column>
-            <el-table-column align="center" prop="resourceMaxNum" label="资源条数" :formatter="transformNum" width="120"></el-table-column>
-            <el-table-column align="center" prop="isPrior" label="是否优先分配" width="150">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.isPrior == 1">优先</span>
-                    <span v-else-if="scope.row.isPrior == 0">非优先</span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="" label="接收时间段">
+            <el-table-column align="center" prop="orgName" label="指标名称"></el-table-column>
+            <el-table-column align="center" prop="" label="指标值范围">
                 <template slot-scope="scope">
                     {{scope.row.orgDayTimeStart}}-{{scope.row.orgDayTimeEnd}}
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="ascriptionProjectName" label="资源项目归属"></el-table-column>
+            <el-table-column align="center" prop="resourceMaxNum" label="得分" :formatter="transformNum" width="120"></el-table-column>
+            <el-table-column align="center" prop="ascriptionProjectName" label="指标值时间范围"></el-table-column>
         </el-table>
     </el-dialog>
 </div>
