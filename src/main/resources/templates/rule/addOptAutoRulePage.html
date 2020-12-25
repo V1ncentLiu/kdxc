@@ -430,15 +430,15 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         { required: true, required: true, message: '请选择业务线', trigger: 'change' },
                         { validator:function(rule,value,callback){
                                 if(aorVM.form.businessLineRuleTeamList.length !=null && aorVM.form.businessLineRuleTeamList.length>0){
+                                    var k=0;
                                     for(var i=0;i<aorVM.form.businessLineRuleTeamList.length;i++){
                                         if(aorVM.form.businessLineRuleTeamList[i].businessLine ==value){
-                                            if(k>0){
-                                                aorVM.form.businessLineRuleTeamList[i].businessLine=null;
-                                                callback(new Error("同意业务线只能选择一次"));
-                                                return;
-                                            }
                                             k++;
                                         }
+                                    }
+                                    if(k>1){
+                                        callback(new Error("同意业务线只能选择一次"));
+                                        return;
                                     }
                                 }
                                 callback();
