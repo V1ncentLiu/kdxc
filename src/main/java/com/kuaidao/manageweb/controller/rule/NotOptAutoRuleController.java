@@ -65,9 +65,9 @@ import java.util.*;
  */
 
 @Controller
-@RequestMapping("/clueAutoAssignRule/notAutoOptRule")
-public class NotAutoOptRuleController {
-    private static Logger logger = LoggerFactory.getLogger(NotAutoOptRuleController.class);
+@RequestMapping("/clueAutoAssignRule/notOptAutoRule")
+public class NotOptAutoRuleController {
+    private static Logger logger = LoggerFactory.getLogger(NotOptAutoRuleController.class);
     @Autowired
     private ClueAssignRuleFeignClient clueAssignRuleFeignClient;
     @Autowired
@@ -85,7 +85,7 @@ public class NotAutoOptRuleController {
      * @return
      */
     @RequestMapping("/initRuleList")
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:view")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有项目
@@ -124,7 +124,7 @@ public class NotAutoOptRuleController {
      * @return
      */
     @RequestMapping("/initCreate")
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:add")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
         // 查询话务组
         List<OrganizationRespDTO> orgList = getTrafficGroup();
@@ -156,7 +156,7 @@ public class NotAutoOptRuleController {
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("noSingProjectList", proJson.getData());
         }
-        return "rule/addNotOptRulePage";
+        return "rule/addNotOptAutoRulePage";
     }
 
     /***
@@ -165,7 +165,7 @@ public class NotAutoOptRuleController {
      * @return
      */
     @RequestMapping("/initUpdate")
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:edit")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
     public String initUpdateProject(@RequestParam Long id, HttpServletRequest request) {
         // 查询优化规则信息
         JSONResult<ClueAssignRuleDTO> jsonResult =
@@ -213,7 +213,7 @@ public class NotAutoOptRuleController {
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("noSingProjectList", proJson.getData());
         }
-        return "rule/updateNotOptRulePage";
+        return "rule/updateNotOptAutoRulePage";
     }
 
     /***
@@ -223,7 +223,7 @@ public class NotAutoOptRuleController {
      */
     @PostMapping("/list")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:view")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:view")
     public JSONResult<PageBean<ClueAssignRuleDTO>> list(
             @RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
@@ -248,16 +248,16 @@ public class NotAutoOptRuleController {
     /**
      * 保存非优化规则
      * 
-     * @param orgDTO
+     * @param
      * @return
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
     @PostMapping("/save")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:add")
-    @LogRecord(description = "新增非优化规则", operationType = OperationType.INSERT,
-            menuName = MenuEnum.NOT_OPT_RULE_MANAGEMENT)
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:add")
+    @LogRecord(description = "新增非自动优化规则", operationType = OperationType.INSERT,
+            menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
     public JSONResult save(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
         if (result.hasErrors()) {
@@ -278,14 +278,14 @@ public class NotAutoOptRuleController {
     /**
      * 修改非优化规则
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
     @PostMapping("/update")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:edit")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
     @LogRecord(description = "修改非优化规则信息", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.NOT_OPT_RULE_MANAGEMENT)
+            menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
     public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
 
@@ -306,14 +306,14 @@ public class NotAutoOptRuleController {
     /**
      * 启用规则
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
     @PostMapping("/updateStatusEnable")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:edit")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
     @LogRecord(description = "启用非优化规则", operationType = OperationType.ENABLE,
-            menuName = MenuEnum.NOT_OPT_RULE_MANAGEMENT)
+            menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
     public JSONResult updateStatusEnable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
 
@@ -332,14 +332,14 @@ public class NotAutoOptRuleController {
     /**
      * 禁用规则
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
     @PostMapping("/updateStatusDisable")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:edit")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
     @LogRecord(description = "禁用非优化规则", operationType = OperationType.DISABLE,
-            menuName = MenuEnum.NOT_OPT_RULE_MANAGEMENT)
+            menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
     public JSONResult updateStatusDisable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
 
@@ -359,14 +359,14 @@ public class NotAutoOptRuleController {
     /**
      * 删除非优化规则
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
     @PostMapping("/delete")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:delete")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:delete")
     @LogRecord(description = "删除规则", operationType = OperationType.DELETE,
-            menuName = MenuEnum.NOT_OPT_RULE_MANAGEMENT)
+            menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
 
         return clueAssignRuleFeignClient.delete(idList);
@@ -375,13 +375,13 @@ public class NotAutoOptRuleController {
     /**
      * 导出
      * 
-     * @param reqDTO
+     * @param
      * @return
      */
-    @RequiresPermissions("clueAssignRule:notOptRuleManager:export")
+    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:export")
     @PostMapping("/export")
     @LogRecord(description = "非优化规则导出", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.NOT_OPT_RULE_MANAGEMENT)
+            menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
     public void export(@RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         logger.debug("list param{}", pageParam);
@@ -502,7 +502,7 @@ public class NotAutoOptRuleController {
     /**
      * 获取当前登录账号
      * 
-     * @param orgDTO
+     * @param
      * @return
      */
     private UserInfoDTO getUser() {
@@ -530,7 +530,7 @@ public class NotAutoOptRuleController {
     /**
      * 查询系统参数非优化资源类别
      * 
-     * @param code
+     * @param
      * @return
      */
     private List<DictionaryItemRespDTO> getNotOptCategory() {

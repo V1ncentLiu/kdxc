@@ -6,10 +6,7 @@ package com.kuaidao.manageweb.controller.rule;
 import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import com.kuaidao.businessconfig.dto.rule.AssignRuleTeamDTO;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleDTO;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRulePageParam;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleReq;
+import com.kuaidao.businessconfig.dto.rule.*;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -28,6 +25,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
+import com.kuaidao.manageweb.feign.rule.ClueAutoAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -68,7 +66,7 @@ import java.util.*;
 public class OptAutoRuleController {
     private static Logger logger = LoggerFactory.getLogger(OptAutoRuleController.class);
     @Autowired
-    private ClueAssignRuleFeignClient clueAssignRuleFeignClient;
+    private ClueAutoAssignRuleFeignClient clueAutoAssignRuleFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
@@ -144,7 +142,7 @@ public class OptAutoRuleController {
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("noSingProjectList", proJson.getData());
         }
-        return "rule/addAutoOptRulePage";
+        return "rule/addOptAutoRulePage";
     }
 
     /***
@@ -152,55 +150,55 @@ public class OptAutoRuleController {
      *
      * @return
      */
-    @RequestMapping("/initUpdate")
-    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-    public String initUpdateProject(@RequestParam Long id, HttpServletRequest request) {
-        // 查询优化规则信息
-        JSONResult<ClueAssignRuleDTO> jsonResult =
-                clueAssignRuleFeignClient.get(new IdEntityLong(id));
-        ClueAssignRuleDTO data = jsonResult.getData();
-        if (data != null && data.getTeleList() != null) {
-            List<AssignRuleTeamDTO> teleList = data.getTeleList();
-            for (AssignRuleTeamDTO assignRuleTeamDTO : teleList) {
-                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-                queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-                queryDTO.setOrgType(OrgTypeConstant.DXZ);
-                queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
-                JSONResult<List<OrganizationRespDTO>> orgList =
-                        organizationFeignClient.queryOrgByParam(queryDTO);
-                List<OrganizationRespDTO> dxzList = orgList.getData();
-                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
-                assignRuleTeamDTO.setTeleOptions(dxzList);
-            }
-        }
-
-
-        request.setAttribute("clueAssignRule", data);
-        // 查询话务组
-        List<OrganizationRespDTO> orgList = getTrafficGroup();
-        Collections.sort(orgList,
-                Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
-        request.setAttribute("trafficList", orgList);
-        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
-                organizationFeignClient.listBusinessLineOrg();
-        // 查询所有业务线
-        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
-        // 查询优化类资源类别集合
-        request.setAttribute("clueCategoryList", getOptCategory());
-        // 查询字典行业类别集合
-        request.setAttribute("industryCategoryList",
-                getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
-        // 查询字典媒介集合
-        request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
-        // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(-1);
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-            request.setAttribute("noSingProjectList", proJson.getData());
-        }
-        return "rule/updateOptRulePage";
-    }
+//    @RequestMapping("/initUpdate")
+//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+//    public String initUpdateProject(@RequestParam Long id, HttpServletRequest request) {
+//        // 查询优化规则信息
+//        JSONResult<ClueAutoAssignRuleDTO> jsonResult =
+//                clueAutoAssignRuleFeignClient.get(new IdEntityLong(id));
+//        ClueAutoAssignRuleDTO data = jsonResult.getData();
+//        if (data != null && data.getTeleList() != null) {
+//            List<AutoAssignRuleTeamDTO> teleList = data.getTeleList();
+//            for (AutoAssignRuleTeamDTO assignRuleTeamDTO : teleList) {
+//                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+//                queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+//                queryDTO.setOrgType(OrgTypeConstant.DXZ);
+//                queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
+//                JSONResult<List<OrganizationRespDTO>> orgList =
+//                        organizationFeignClient.queryOrgByParam(queryDTO);
+//                List<OrganizationRespDTO> dxzList = orgList.getData();
+//                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
+//                assignRuleTeamDTO.setTeleOptions(dxzList);
+//            }
+//        }
+//
+//
+//        request.setAttribute("clueAssignRule", data);
+//        // 查询话务组
+//        List<OrganizationRespDTO> orgList = getTrafficGroup();
+//        Collections.sort(orgList,
+//                Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+//        request.setAttribute("trafficList", orgList);
+//        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+//                organizationFeignClient.listBusinessLineOrg();
+//        // 查询所有业务线
+//        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
+//        // 查询优化类资源类别集合
+//        request.setAttribute("clueCategoryList", getOptCategory());
+//        // 查询字典行业类别集合
+//        request.setAttribute("industryCategoryList",
+//                getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
+//        // 查询字典媒介集合
+//        request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+//        // 项目
+//        ProjectInfoPageParam param = new ProjectInfoPageParam();
+//        param.setIsNotSign(-1);
+//        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+//        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+//            request.setAttribute("noSingProjectList", proJson.getData());
+//        }
+//        return "rule/updateOptRulePage";
+//    }
 
     /***
      * 优化规则列表
@@ -210,7 +208,7 @@ public class OptAutoRuleController {
     @PostMapping("/list")
     @ResponseBody
     @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:view")
-    public JSONResult<PageBean<ClueAssignRuleDTO>> list(
+    public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(
             @RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
@@ -224,7 +222,7 @@ public class OptAutoRuleController {
         }
         // 优化规则
         pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
-        JSONResult<PageBean<ClueAssignRuleDTO>> list = clueAssignRuleFeignClient.list(pageParam);
+        JSONResult<PageBean<ClueAutoAssignRuleDTO>> list = clueAutoAssignRuleFeignClient.list(pageParam);
 
         return list;
     }
@@ -238,27 +236,27 @@ public class OptAutoRuleController {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    @PostMapping("/save")
-    @ResponseBody
-    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:add")
-    @LogRecord(description = "新增优化规则", operationType = OperationType.INSERT,
-            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-    public JSONResult save(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            return CommonUtil.validateParam(result);
-        }
-        // 插入创建人信息
-        UserInfoDTO user = getUser();
-        clueAssignRuleReq.setCreateUser(user.getId());
-        clueAssignRuleReq.setUpdateUser(user.getId());
-        clueAssignRuleReq.setOrgId(user.getOrgId());
-        // 推广所属公司 为当前账号所在机构的推广所属公司
-        clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
-        // 插入类型为优化
-        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
-        return clueAssignRuleFeignClient.create(clueAssignRuleReq);
-    }
+//    @PostMapping("/save")
+//    @ResponseBody
+//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:add")
+//    @LogRecord(description = "新增自动优化规则", operationType = OperationType.INSERT,
+//            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
+//    public JSONResult save(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+//            BindingResult result) {
+//        if (result.hasErrors()) {
+//            return CommonUtil.validateParam(result);
+//        }
+//        // 插入创建人信息
+//        UserInfoDTO user = getUser();
+//        clueAssignRuleReq.setCreateUser(user.getId());
+//        clueAssignRuleReq.setUpdateUser(user.getId());
+//        clueAssignRuleReq.setOrgId(user.getOrgId());
+//        // 推广所属公司 为当前账号所在机构的推广所属公司
+//        clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
+//        // 插入类型为优化
+//        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+//        return clueAutoAssignRuleFeignClient.create(clueAssignRuleReq);
+//    }
 
     /**
      * 修改优化规则
@@ -266,26 +264,26 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-    @PostMapping("/update")
-    @ResponseBody
-    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-    @LogRecord(description = "修改优化规则信息", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-    public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            return CommonUtil.validateParam(result);
-        }
-        // 插入修改人信息
-        UserInfoDTO user = getUser();
-        clueAssignRuleReq.setUpdateUser(user.getId());
-        Long id = clueAssignRuleReq.getId();
-        if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
-        }
-        return clueAssignRuleFeignClient.update(clueAssignRuleReq);
-    }
+//    @PostMapping("/update")
+//    @ResponseBody
+//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+//    @LogRecord(description = "修改优化规则信息", operationType = OperationType.UPDATE,
+//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+//    public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+//            BindingResult result) {
+//        if (result.hasErrors()) {
+//            return CommonUtil.validateParam(result);
+//        }
+//        // 插入修改人信息
+//        UserInfoDTO user = getUser();
+//        clueAssignRuleReq.setUpdateUser(user.getId());
+//        Long id = clueAssignRuleReq.getId();
+//        if (id == null) {
+//            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+//                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+//        }
+//        return clueAutoAssignRuleFeignClient.update(clueAssignRuleReq);
+//    }
 
     /**
      * 启用规则
@@ -293,24 +291,24 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-    @PostMapping("/updateStatusEnable")
-    @ResponseBody
-    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-    @LogRecord(description = "启用优化规则", operationType = OperationType.ENABLE,
-            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-    public JSONResult updateStatusEnable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            return CommonUtil.validateParam(result);
-        }
-
-        Long id = clueAssignRuleReq.getId();
-        if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
-        }
-        return clueAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
-    }
+//    @PostMapping("/updateStatusEnable")
+//    @ResponseBody
+//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+//    @LogRecord(description = "启用优化规则", operationType = OperationType.ENABLE,
+//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+//    public JSONResult updateStatusEnable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+//            BindingResult result) {
+//        if (result.hasErrors()) {
+//            return CommonUtil.validateParam(result);
+//        }
+//
+//        Long id = clueAssignRuleReq.getId();
+//        if (id == null) {
+//            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+//                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+//        }
+//        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
+//    }
 
     /**
      * 禁用规则
@@ -318,23 +316,23 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-    @PostMapping("/updateStatusDisable")
-    @ResponseBody
-    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-    @LogRecord(description = "禁用优化规则", operationType = OperationType.DISABLE,
-            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-    public JSONResult updateStatusDisable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-            BindingResult result) {
-        if (result.hasErrors()) {
-            return CommonUtil.validateParam(result);
-        }
-        Long id = clueAssignRuleReq.getId();
-        if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
-        }
-        return clueAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
-    }
+//    @PostMapping("/updateStatusDisable")
+//    @ResponseBody
+//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+//    @LogRecord(description = "禁用优化规则", operationType = OperationType.DISABLE,
+//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+//    public JSONResult updateStatusDisable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+//            BindingResult result) {
+//        if (result.hasErrors()) {
+//            return CommonUtil.validateParam(result);
+//        }
+//        Long id = clueAssignRuleReq.getId();
+//        if (id == null) {
+//            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+//                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+//        }
+//        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
+//    }
 
 
     /**
@@ -349,7 +347,7 @@ public class OptAutoRuleController {
     @LogRecord(description = "删除规则", operationType = OperationType.DELETE,
             menuName = MenuEnum.OPT_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
-        return clueAssignRuleFeignClient.delete(idList);
+        return clueAutoAssignRuleFeignClient.delete(idList);
     }
 
     /**
@@ -358,15 +356,15 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-    @PostMapping("/copy")
-    @ResponseBody
-    @LogRecord(description = "复制规则", operationType = OperationType.DELETE,
-            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-    public JSONResult copy(@RequestBody ClueAssignRuleReq clueAssignRuleReq) {
-        UserInfoDTO user = getUser();
-        clueAssignRuleReq.setCreateUser(user.getId());
-        return clueAssignRuleFeignClient.copy(clueAssignRuleReq);
-    }
+//    @PostMapping("/copy")
+//    @ResponseBody
+//    @LogRecord(description = "复制规则", operationType = OperationType.DELETE,
+//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+//    public JSONResult copy(@RequestBody ClueAssignRuleReq clueAssignRuleReq) {
+//        UserInfoDTO user = getUser();
+//        clueAssignRuleReq.setCreateUser(user.getId());
+//        return clueAutoAssignRuleFeignClient.copy(clueAssignRuleReq);
+//    }
 
     /**
      * 导出
@@ -393,37 +391,37 @@ public class OptAutoRuleController {
         // 优化规则
         pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
         // 查询规则数据不分页
-        JSONResult<List<ClueAssignRuleDTO>> listNoPage =
-                clueAssignRuleFeignClient.listNoPage(pageParam);
+        JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage =
+                clueAutoAssignRuleFeignClient.listNoPage(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
 
         if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
                 && listNoPage.getData().size() != 0) {
 
-            List<ClueAssignRuleDTO> resultList = listNoPage.getData();
+            List<ClueAutoAssignRuleDTO> resultList = listNoPage.getData();
             int size = resultList.size();
 
             for (int i = 0; i < size; i++) {
-                ClueAssignRuleDTO clueAssignRuleDTO = resultList.get(i);
+                ClueAutoAssignRuleDTO ClueAutoAssignRuleDTO = resultList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(i + 1);
-                curList.add(clueAssignRuleDTO.getRuleName());
-                curList.add(clueAssignRuleDTO.getSourceName());
-                curList.add(clueAssignRuleDTO.getCategoryName());
-                curList.add(clueAssignRuleDTO.getIndustryCategoryName());
-                curList.add(clueAssignRuleDTO.getSearchWord());
-                curList.add(clueAssignRuleDTO.getNotSearchWord());
-                curList.add(clueAssignRuleDTO.getProvince());
-                curList.add(clueAssignRuleDTO.getNotProvince());
-                curList.add(getTimeStr(clueAssignRuleDTO.getUpdateTime()));
-                curList.add(getTimeStr(clueAssignRuleDTO.getCreateTime()));
-                curList.add(getTimeStr(clueAssignRuleDTO.getStartTime()));
-                curList.add(getTimeStr(clueAssignRuleDTO.getEndTime()));
-                curList.add(clueAssignRuleDTO.getCreateUserName());
-                curList.add(clueAssignRuleDTO.getUpdateUserName());
-                curList.add(clueAssignRuleDTO.getTeamName());
-                curList.add(clueAssignRuleDTO.getStatusName());
+                curList.add(ClueAutoAssignRuleDTO.getRuleName());
+                curList.add(ClueAutoAssignRuleDTO.getSourceName());
+                curList.add(ClueAutoAssignRuleDTO.getCategoryName());
+                curList.add(ClueAutoAssignRuleDTO.getIndustryCategoryName());
+                curList.add(ClueAutoAssignRuleDTO.getSearchWord());
+                curList.add(ClueAutoAssignRuleDTO.getNotSearchWord());
+                curList.add(ClueAutoAssignRuleDTO.getProvince());
+                curList.add(ClueAutoAssignRuleDTO.getNotProvince());
+                curList.add(getTimeStr(ClueAutoAssignRuleDTO.getUpdateTime()));
+                curList.add(getTimeStr(ClueAutoAssignRuleDTO.getCreateTime()));
+                curList.add(getTimeStr(ClueAutoAssignRuleDTO.getStartTime()));
+                curList.add(getTimeStr(ClueAutoAssignRuleDTO.getEndTime()));
+                curList.add(ClueAutoAssignRuleDTO.getCreateUserName());
+                curList.add(ClueAutoAssignRuleDTO.getUpdateUserName());
+                curList.add(ClueAutoAssignRuleDTO.getTeamName());
+                curList.add(ClueAutoAssignRuleDTO.getStatusName());
                 dataList.add(curList);
             }
 
