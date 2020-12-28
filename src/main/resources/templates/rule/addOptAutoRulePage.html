@@ -570,7 +570,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         for(var i=0;i<orgIdChoose.length;i++){
                         	var split=orgIdChoose[i].orgId.split(",");
                         	orgIdChoose[i].orgId=split[0];
-                        	orgIdChoose[i].orgType=split[1];
+                        	orgIdChoose[i].businessLine=split[1];
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
                             var s = ary.join(",")+","; 
                             for(var j=0;j<ary.length;j++) {
@@ -578,27 +578,6 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                                     if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
                                         this.$message({
                                             message: '请不要选择相同的电销组',
-                                            type: 'warning'
-                                        });
-                                        return;
-                                    }
-                                }                                
-                            }
-                        }
-                        // 不能选择重复话务组
-                        orgIdChoose=form.trafficRuleTeamList; 
-                        var ary=[];
-                        for(var i=0;i<orgIdChoose.length;i++){
-                        	var split=orgIdChoose[i].orgId.split(",");
-                        	orgIdChoose[i].orgId=split[0];
-                        	orgIdChoose[i].orgType=split[1];
-                            ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
-                            var s = ary.join(",")+","; 
-                            for(var j=0;j<ary.length;j++) {
-                                if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要选择相同的话务组',
                                             type: 'warning'
                                         });
                                         return;
@@ -618,8 +597,8 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         param.dayTimeStart=form.dayTimeStart;
                         param.dayTimeEnd=form.dayTimeEnd;
                         param.status=form.status;
-                        param.teleList=form.teleRuleTeamList;
-                        param.trafficList=form.trafficRuleTeamList;
+                        param.teleDetailList = form.teleRuleTeamList
+                        param.teleList=form.businessLineRuleTeamList;
                         param.source=form.source.join(',');
                         param.industryCategory=form.industryCategory.join(',');
                         param.category=this.form.category.join(',');
@@ -628,7 +607,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         param.province=this.tags3.join(',');
                         param.notProvince=this.tags4.join(',');                        
                         aorVM.submitDisabled=true;
-                        axios.post('/clueAssignRule/optRule/save', param)
+                        axios.post('/clueAutoAssignRule/optAutoRule/save', param)
 	       	            .then(function (response) {
                                console.info(response);
 	       	            	var data =response.data;
@@ -638,7 +617,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
 	       	            	}else{
 	       	            		aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
                                     aorVM.submitDisabled=false;
-		       	                	document.location.href='/clueAssignRule/optRule/initRuleList';
+		       	                	document.location.href='/clueAutoAssignRule/optAutoRule/initRuleList';
 	                      	    }});
 	       	            	}
 	       	            })

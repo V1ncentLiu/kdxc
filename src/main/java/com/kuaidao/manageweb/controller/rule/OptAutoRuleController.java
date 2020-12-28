@@ -236,27 +236,27 @@ public class OptAutoRuleController {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-//    @PostMapping("/save")
-//    @ResponseBody
-//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:add")
-//    @LogRecord(description = "新增自动优化规则", operationType = OperationType.INSERT,
-//            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
-//    public JSONResult save(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-//            BindingResult result) {
-//        if (result.hasErrors()) {
-//            return CommonUtil.validateParam(result);
-//        }
-//        // 插入创建人信息
-//        UserInfoDTO user = getUser();
-//        clueAssignRuleReq.setCreateUser(user.getId());
-//        clueAssignRuleReq.setUpdateUser(user.getId());
-//        clueAssignRuleReq.setOrgId(user.getOrgId());
-//        // 推广所属公司 为当前账号所在机构的推广所属公司
-//        clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
-//        // 插入类型为优化
-//        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
-//        return clueAutoAssignRuleFeignClient.create(clueAssignRuleReq);
-//    }
+    @PostMapping("/save")
+    @ResponseBody
+    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:add")
+    @LogRecord(description = "新增自动优化规则", operationType = OperationType.INSERT,
+            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
+    public JSONResult save(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        // 插入创建人信息
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setCreateUser(user.getId());
+        clueAssignRuleReq.setUpdateUser(user.getId());
+        clueAssignRuleReq.setOrgId(user.getOrgId());
+        // 推广所属公司 为当前账号所在机构的推广所属公司
+        clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
+        // 插入类型为优化
+        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        return clueAutoAssignRuleFeignClient.create(clueAssignRuleReq);
+    }
 
     /**
      * 修改优化规则
@@ -268,7 +268,7 @@ public class OptAutoRuleController {
 //    @ResponseBody
 //    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
 //    @LogRecord(description = "修改优化规则信息", operationType = OperationType.UPDATE,
-//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+//            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
 //    public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
 //            BindingResult result) {
 //        if (result.hasErrors()) {
@@ -291,24 +291,24 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-//    @PostMapping("/updateStatusEnable")
-//    @ResponseBody
-//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-//    @LogRecord(description = "启用优化规则", operationType = OperationType.ENABLE,
-//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-//    public JSONResult updateStatusEnable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-//            BindingResult result) {
-//        if (result.hasErrors()) {
-//            return CommonUtil.validateParam(result);
-//        }
-//
-//        Long id = clueAssignRuleReq.getId();
-//        if (id == null) {
-//            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-//                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
-//        }
-//        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
-//    }
+    @PostMapping("/updateStatusEnable")
+    @ResponseBody
+    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+    @LogRecord(description = "启用优化规则", operationType = OperationType.ENABLE,
+            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
+    public JSONResult updateStatusEnable(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+
+        Long id = clueAssignRuleReq.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
+    }
 
     /**
      * 禁用规则
@@ -316,23 +316,23 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-//    @PostMapping("/updateStatusDisable")
-//    @ResponseBody
-//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-//    @LogRecord(description = "禁用优化规则", operationType = OperationType.DISABLE,
-//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-//    public JSONResult updateStatusDisable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-//            BindingResult result) {
-//        if (result.hasErrors()) {
-//            return CommonUtil.validateParam(result);
-//        }
-//        Long id = clueAssignRuleReq.getId();
-//        if (id == null) {
-//            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-//                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
-//        }
-//        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
-//    }
+    @PostMapping("/updateStatusDisable")
+    @ResponseBody
+    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+    @LogRecord(description = "禁用优化规则", operationType = OperationType.DISABLE,
+            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
+    public JSONResult updateStatusDisable(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        Long id = clueAssignRuleReq.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
+    }
 
 
     /**
@@ -345,7 +345,7 @@ public class OptAutoRuleController {
     @ResponseBody
     @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:delete")
     @LogRecord(description = "删除规则", operationType = OperationType.DELETE,
-            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
         return clueAutoAssignRuleFeignClient.delete(idList);
     }
@@ -356,15 +356,15 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-//    @PostMapping("/copy")
-//    @ResponseBody
-//    @LogRecord(description = "复制规则", operationType = OperationType.DELETE,
-//            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
-//    public JSONResult copy(@RequestBody ClueAssignRuleReq clueAssignRuleReq) {
-//        UserInfoDTO user = getUser();
-//        clueAssignRuleReq.setCreateUser(user.getId());
-//        return clueAutoAssignRuleFeignClient.copy(clueAssignRuleReq);
-//    }
+    @PostMapping("/copy")
+    @ResponseBody
+    @LogRecord(description = "复制规则", operationType = OperationType.DELETE,
+            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
+    public JSONResult copy(@RequestBody ClueAutoAssignRuleReq clueAssignRuleReq) {
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setCreateUser(user.getId());
+        return clueAutoAssignRuleFeignClient.copy(clueAssignRuleReq);
+    }
 
     /**
      * 导出
@@ -375,7 +375,7 @@ public class OptAutoRuleController {
     @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:export")
     @PostMapping("/export")
     @LogRecord(description = "优化规则导出", operationType = OperationType.EXPORT,
-            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
     public void export(@RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         logger.debug("list param{}", pageParam);
@@ -445,7 +445,7 @@ public class OptAutoRuleController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
 
-        String name = "优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
+        String name = "自动优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
