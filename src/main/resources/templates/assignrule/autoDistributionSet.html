@@ -50,13 +50,13 @@
             <div class="fs14 marginB20 leftLine">{{bussinessLineTitle}}匹配模型：</div>
             <el-row  class="marginB20">
                 <el-form-item label="新员工是按照创建账号起" style="margin-bottom: 0" prop="createDay">    
-                    <el-input v-model="form.createDay" placeholder="请输入正整数" type="number" min="0"></el-input>
+                    <el-input v-model="form.createDay" placeholder="请输入正整数" type="number" ></el-input>
                 </el-form-item>
                 <el-form-item label="天内为新员工。" style="margin-bottom: 0"></el-form-item>
             </el-row>
             <el-row  class="marginB20">
                 <el-form-item label="新员工入职" style="margin-bottom: 0" prop="disDay">    
-                    <el-input v-model="form.disDay" placeholder="请输入正整数" type="number" min="0"></el-input>
+                    <el-input v-model="form.disDay" placeholder="请输入正整数" type="number" ></el-input>
                 </el-form-item>
                 <el-form-item label="天后可以分发资源。" style="margin-bottom: 0"></el-form-item>
             </el-row>
@@ -179,10 +179,40 @@
                         { required: true, message: '请选择业务线', trigger: 'blur' }
                     ],
                     createDay: [
-                        { required: true, message: '请输入正整数', trigger: 'blur' }
+                        { required: true, message: '请输入正整数', trigger: 'blur' },
+                        { validator: function (rule, value, callback) {
+                                var reg = /^[0-9]+[0-9]*]*$/;
+                                if (value == null || value == "null" || value == "") {
+                                    callback(new Error("请输入正整数"));
+                                    releaseRuleVM.form.createDay = "";
+
+                                } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正整数"));
+                                    releaseRuleVM.form.createDay = "";
+                                } else {
+                                    callback();
+                                }
+
+                            }, trigger: 'change'
+                        }
                     ],
                     disDay: [
-                        { required: true, message: '请输入正整数', trigger: 'blur' }
+                        { required: true, message: '请输入正整数', trigger: 'blur' },
+                        { validator: function (rule, value, callback) {
+                            var reg = /^[0-9]+[0-9]*]*$/;
+                            if (value == null || value == "null" || value == "") {
+                                callback(new Error("请输入正整数"));
+                                releaseRuleVM.form.disDay = "";
+
+                            } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                callback(new Error("请输入正整数"));
+                                releaseRuleVM.form.disDay = "";
+                            } else {
+                                callback();
+                            }
+
+                            }, trigger: 'change'
+                        }
                     ],
                     srangeStart: [
                         { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }

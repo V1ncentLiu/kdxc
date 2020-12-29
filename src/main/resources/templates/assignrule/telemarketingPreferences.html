@@ -45,9 +45,9 @@
                     </el-select>
                 </el-form-item>  
                 <el-form-item label="项目:">  
-                    <el-select v-model="form.teleSaleId" placeholder="项目" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.projectIds" placeholder="项目" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in teleSaleArr"
+                            v-for="item in projectList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -61,7 +61,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="" label-width="0">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
                 </el-form-item>  
             </el-form>
         </div>
@@ -78,17 +78,30 @@
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
                 <el-table-column prop="teleSaleName" align="center" label="电销顾问">
                 </el-table-column>
-                <el-table-column prop="teleSaleName" align="center" label="新老员工">
+                <el-table-column prop="isNewUser" align="center" label="新老员工">
+                    <!-- 是否新用户（1：新用户 0：老用户） -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleSaleStatus === '1'">
+                            新用户
+                        </div>                    
+                        <div v-else-if="scope.row.teleSaleStatus === '0'">
+                            老用户
+                        </div>
+                    </template>
                 </el-table-column>
                 <el-table-column prop="teleSaleName" align="center" label="非接收资源时间段">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.startTime">{{scope.row.startTime}}</span>                    
+                        <span v-if="scope.row.endTime">-{{scope.row.endTime}}</span>
+                    </template>
                 </el-table-column>
-                <el-table-column prop="projectIds" align="center" label="项目">
+                <el-table-column prop="projectNames" align="center" label="项目">
                 </el-table-column>
                 <el-table-column prop="projectCategory" align="center" label="品类">
                 </el-table-column>
                 <el-table-column prop="districts" align="center" label="地域">
                 </el-table-column>
-                <el-table-column prop="sources" align="center" label="媒介">
+                <el-table-column prop="sourcesNames" align="center" label="媒介">
                 </el-table-column>
                 <el-table-column prop="rootWords" align="center" label="词根">
                 </el-table-column>
@@ -114,7 +127,7 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- 设置顾问偏好弹窗 -->
@@ -281,13 +294,16 @@
                     pageSize: 20
                 },
                 form: {
-                    teleGroupId: '',
-                    teleSaleId: '',
-                    imAuthorizeStatus: '',
+                    teleGroupId:'',
+                    teleSaleId:'',
+                    projectIds:'',
+                    startTime:'',
+                    endTime:'',
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
                 teleSaleArr: [], // 顾问
+                projectList:projectList,
                 cardVisible:false,//设置顾问偏好
                 cardForm: {
                     projectIds:[],
@@ -515,11 +531,14 @@
                 //     });
                 // });
             },       
-            searchTable(firstPage) {                
+            searchTable() {                
                 var param = {};
                 param.teleGroupId = this.form.teleGroupId;
                 param.teleSaleId = this.form.teleSaleId;
-                param.imAuthorizeStatus = this.form.imAuthorizeStatus;
+                param.startTime = this.form.startTime;
+                param.endTime = this.form.endTime;
+                param.projectIds = this.form.projectIds;
+
                 param.pageNum = this.pager.currentPage
                 param.pageSize = this.pager.pageSize;                
                 this.loading = true; 
