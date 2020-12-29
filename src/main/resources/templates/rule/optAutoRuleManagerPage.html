@@ -277,20 +277,18 @@
             </div>
         </el-form>
         <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
-            <el-table-column align="center" prop="orgName" label="电销小组"></el-table-column>
+            <el-table-column align="center" prop="businessLineName" label="业务线"></el-table-column>
             <el-table-column align="center" prop="proportion" label="比例" width="120"></el-table-column>
-            <el-table-column align="center" prop="resourceMaxNum" label="资源条数" :formatter="transformNum" width="120"></el-table-column>
-            <el-table-column align="center" prop="isPrior" label="是否优先分配" width="150">
+            <el-table-column align="center" prop="isAuto" label="是否自动分配" width="150">
                 <template slot-scope="scope">
-                    <span v-if="scope.row.isPrior == 1">优先</span>
-                    <span v-else-if="scope.row.isPrior == 0">非优先</span>
+                    <span v-if="scope.row.isAuto == 1">是</span>
+                    <span v-else-if="scope.row.isAuto == 0">否</span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="" label="接收时间段">
-                <template slot-scope="scope">
-                    {{scope.row.orgDayTimeStart}}-{{scope.row.orgDayTimeEnd}}
-                </template>
-            </el-table-column>
+        </el-table>
+        <el-table ref="dialogTableData" :data="teleData" tooltip-effect="dark" border>
+            <el-table-column align="center" prop="businessLineName" label="业务线"></el-table-column>
+            <el-table-column align="center" prop="orgName" label="电销小组"></el-table-column>
             <el-table-column align="center" prop="ascriptionProjectName" label="资源项目归属"></el-table-column>
         </el-table>
     </el-dialog>
@@ -351,6 +349,7 @@
                 formLabelWidth: '120px',
                 dataTable: [],
                 dialogTableData:[],
+                teleData:[],
                 categoryOptions:clueCategoryList,
                 industryCategoryOptions:industryCategoryList ,
                 orgTeleArr:queryOrg,
@@ -622,7 +621,8 @@
                 this.dialogForm.days = this.daysFormat(null,null,row.days);
                 this.dialogForm.dayTimeStart = row.dayTimeStart;
                 this.dialogForm.dayTimeEnd = row.dayTimeEnd;
-                this.dialogTableData=row.assignRuleTeamList;
+                this.dialogTableData=row.autoAssignRuleTeamList;
+                this.teleData = row.autoAssignRuleTeamDetailList;
             },
             addFun(){
             	document.location.href='/clueAutoAssignRule/optAutoRule/initCreate';
