@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+	<title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>非优化自动分配规则管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <shiro:hasPermission name="clueAutoAssignRule:notOptAutoRuleManager:add">
+        	<el-button type="primary" @click="addFun"><i class="el-icon-plus"></i>添加新规则</el-button>
+        </shiro:hasPermission>
+    	<shiro:hasPermission name="clueAutoAssignRule:notOptAutoRuleManager:edit">
+       		<el-button type="success" @click="editFun"><i class="el-icon-edit"></i>编辑规则</el-button>
+        </shiro:hasPermission>
+    	<shiro:hasPermission name="clueAutoAssignRule:notOptAutoRuleManager:delete">
+        	<el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
+        </shiro:hasPermission>
+        	<el-button type="primary" @click="copyFun"><i class="el-icon-edit"></i>复制规则</el-button>
+        <shiro:hasPermission name="clueAutoAssignRule:notOptAutoRuleManager:export">
+            <el-button type="warning" @click="exportFun"><i ></i>导出规则</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="规则有效时间:">
+                    <el-date-picker
+                        v-model="form.searchStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.searchEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="规则名称:">
+                    <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
+                </el-form-item>
+                <el-form-item label="资源项目:">
+                    <el-select v-model="form.projectId" filterable clearable placeholder="资源项目">
+                        <el-option
+                            v-for="item in projectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="状态:">
+                    <el-select v-model="form.status" clearable placeholder="状态">
+                        <el-option
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>                 
+                <el-row v-show="isShow">                    
+                    <el-form-item label="最后编辑时间:">
+                        <el-date-picker
+                            v-model="form.updateTimeBegin"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.updateTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="分配电销组:">
+                        <el-select v-model="form.teleorg" placeholder="选择分配电销组"  clearable  filterable>
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源类别:">
+	                    <el-select v-model="form.category" clearable placeholder="资源类别">
+	                        <el-option
+	                            v-for="item in categoryOptions"
+	                            :key="item.value"
+	                            :label="item.name"
+	                            :value="item.value">
+	                        </el-option>
+	                    </el-select>
+	                </el-form-item>
+                    
+                </el-row>
+                <div class="mainSearchBtnBox"> 
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button>  -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div> 
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @row-click="clickRow"
+                @row-dblclick="rowDblClick"
+                @selection-change="handleSelectionChange" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="ruleName" label="规则名称"></el-table-column>
+                <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory" width="100"></el-table-column>
+                <el-table-column align="center" prop="source" label="媒介" :formatter="transformSource"></el-table-column>
+                <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType" width="100"></el-table-column>
+                <el-table-column align="center" prop="sourceType" label="广告位" :formatter="transformSourceType" width="100"></el-table-column>
+                <el-table-column align="center" prop="projectId" label="资源项目" :formatter="transformProject"  width="120"></el-table-column>
+                <el-table-column align="center" prop="searchWord" label="包含搜索词"></el-table-column>
+                <el-table-column align="center" prop="notSearchWord" label="不包含搜索词"></el-table-column>
+                <el-table-column align="center" prop="province" label="包含省份" width="90"></el-table-column>
+                <el-table-column align="center" prop="notProvince" label="不包含省份" width="90" ></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="最后编辑时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="startTime" label="规则有效开始时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="规则有效结束时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="创建人" width="90"></el-table-column>
+                <el-table-column align="center" prop="updateUserName" label="最后编辑人" width="90"></el-table-column>
+                <el-table-column align="center" prop="teamName" label="分配小组"  width="200"></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="80">
+                    <template slot-scope="scope"> 
+                        <span v-if="scope.row.status == '0'">
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">启用</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status == '1'">
+                            <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,0,'禁用')">禁用</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="状态" width="80" :formatter="transformStatus"></el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <el-dialog title="规则详情" :visible.sync="dialogFormVisible" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="规则名称：" :label-width="formLabelWidth">
+                            {{dialogForm.ruleName}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="广告位：" :label-width="formLabelWidth">
+                            {{dialogForm.sourceType}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                             {{dialogForm.projectId}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                             {{dialogForm.type}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                             {{dialogForm.source}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                             {{dialogForm.category}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="包含搜索词：" :label-width="formLabelWidth">
+                             {{dialogForm.searchWord}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="不包含搜索词：" :label-width="formLabelWidth">
+                             {{dialogForm.notSearchWord}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="包含省份：" :label-width="formLabelWidth">
+                            {{dialogForm.province}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="不包含省份：" :label-width="formLabelWidth">
+                            {{dialogForm.notProvince}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="生效开始时间：" :label-width="formLabelWidth">
+                            {{dialogForm.startTime}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="生效结束时间：" :label-width="formLabelWidth">
+                            {{dialogForm.endTime}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="周期内有效日：" :label-width="formLabelWidth">
+                            {{dialogForm.days}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="有效日内时间范围：" :label-width="formLabelWidth">
+                            {{dialogForm.dayTimeStart}}-{{dialogForm.dayTimeEnd}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+        <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
+            <el-table-column align="center" prop="orgName" label="电销小组"></el-table-column>
+            <el-table-column align="center" prop="proportion" label="比例" width="120"></el-table-column>
+            <el-table-column align="center" prop="resourceMaxNum" label="资源条数" :formatter="transformNum" width="120"></el-table-column>
+            <el-table-column align="center" prop="isPrior" label="是否优先分配" width="150">
+            	<template slot-scope="scope">
+                    <span v-if="scope.row.isPrior == 1">优先</span>
+                    <span v-else-if="scope.row.isPrior == 0">非优先</span>
+                </template>
+            </el-table-column> 
+            <el-table-column align="center" prop="" label="接收时间段">
+                <template slot-scope="scope">
+                    {{scope.row.orgDayTimeStart}}-{{scope.row.orgDayTimeEnd}}
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="ascriptionProjectName" label="资源项目归属"></el-table-column>
+        </el-table>
+    </el-dialog>  
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
+var projectList=[[${projectList}]];//项目集合
+var adsenseList=[[${adsenseList}]];//广告位集合
+var clueTypeList=[[${clueTypeList}]];//资源类型集合
+var mediumList=[[${mediumList}]];//媒介集合
+var userId=[[${userId}]];//登录人账号id
+var roleCode=[[${roleCode}]];//登录人角色code
+var queryOrg=[[${queryOrg}]];//电销组
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                paginationShow: false,
+                isShow:false,
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+                form: {
+                    ruleName:'',
+                    projectId:'',
+                    category:'',
+                    status:'',
+                    searchStartTime:'',
+                    searchEndTime:'',
+                    teleorg:'',
+                    updateTimeBegin:'',
+                    updateTimeEnd:''
+                },
+                dialogForm:{
+                	 ruleName:'',
+                     sourceType:'',
+                     category:'',
+                     type:'',
+                     source:'',
+                     projectId:'',
+                     searchWord:'',
+                     notSearchWord:'',
+                     province:'',
+                     notProvince:'',
+                     startTime:'',
+                     endTime:'',
+                     days:"",
+                    dayTimeStart:"",
+                    dayTimeEnd:"",
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                dialogTableData:[],
+                projectOptions:projectList,
+                categoryOptions:clueCategoryList,
+                orgTeleArr:queryOrg,
+                statusOptions: [{
+                    value: 1,
+                    name: '有效'
+                }, {
+                    value: 0,
+                    name: '无效'
+                }],
+                storeForm: {
+                    ruleName:'',
+                    projectId:'',
+                    category:'',
+                    status:'',
+                    searchStartTime:'',
+                    searchEndTime:'',
+                    teleorg:'',
+                    updateTimeBegin:'',
+                    updateTimeEnd:''
+                },
+                storeId: '',
+                scrollTop: 0,
+
+            }        	  
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },            
+            deleteFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowNames = [];
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+             	   var curRow = rows[i];
+             	   if(roleCode=="NQWY"||roleCode=="NQZG"||roleCode=="NQJL"){
+            		   
+            	   }else if(curRow.createUser+""!=userId){
+             		  this.$message({
+                          message: '不允许删除非本人创建的规则',
+                          type: 'warning'
+                        });
+                       return;
+             	   }
+                   rowIds.push(curRow.id);
+                   rowNames.push("【"+curRow.ruleName+"】");
+                }
+             this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //删除
+             	var param  = {idList:rowIds};
+                 axios.post('/clueAutoAssignRule/notOptAutoRule/delete',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                         
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+            copyFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据操作',
+                       type: 'warning'
+                     });
+                    return;
+                }
+             this.$confirm('确定要复制此规则吗？', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //复制
+             	var param  = {id:rows[0].id};
+                 axios.post('/clueAssignRule/optRule/copy',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'复制成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                         
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+            //修改状态
+            updateStatus(id,status,msg) {
+              var param = {};
+              param.id=id;
+              param.status=status;
+              var url='/clueAutoAssignRule/notOptAutoRule/updateStatusEnable';
+              if(status==0){
+            	  url='/clueAutoAssignRule/notOptAutoRule/updateStatusDisable';
+              }
+              axios.post(url, param)
+              .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                	ocmVM.searchTable();
+          	      }});
+                  
+                }else{
+                	ocmVM.$message.error(msg+"失败");
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+            },
+            searchTable() {
+            	var startTime=this.form.searchStartTime;
+                var endTime=this.form.searchEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var updateTimeBegin=this.form.updateTimeBegin;
+                var updateTimeEnd=this.form.updateTimeEnd;
+                if(updateTimeEnd && updateTimeBegin>updateTimeEnd){
+                this.$message({
+                  message: '最后编辑时间的结束时间不允许选择早于开始时间',
+                  type: 'warning'
+                });
+                return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/clueAutoAssignRule/notOptAutoRule/list', param)
+                .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+
+                        // 取出存储的id
+                        if(!ocmVM.paginationShow){
+                            if(ocmVM.storeId){
+                                ocmVM.$nextTick(function(){
+                                    var storage = [];
+                                    ocmVM.dataTable.forEach(function(item, index){
+                                        if(item.id === ocmVM.storeId ){
+                                            storage.push(ocmVM.dataTable[index]);
+                                        }
+                                    })
+                                    ocmVM.toggleSelection(storage);
+                                    ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                                })
+                            }
+                        }else{
+                            ocmVM.removeSessionStore ("noOptRuleManagerStoreForm");
+                            ocmVM.removeSessionStore ("noOptRuleManagerOtherVal");
+                        }
+                        ocmVM.paginationShow = true;
+                        ocmVM.storeForm = ocmVM.form;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            rowDblClick(row, column, event){//双击查看详情
+                this.dialogFormVisible = true;
+                this.dialogForm.ruleName = row.ruleName;
+                this.dialogForm.category =this.transformCategory(null,null,row.category);
+                this.dialogForm.source = this.transformSource(null,null,row.source);
+                this.dialogForm.type = this.transformType(null,null,row.type);
+                this.dialogForm.sourceType = this.transformSourceType(null,null,row.sourceType);
+                this.dialogForm.projectId = this.transformProject(null,null,row.projectId);
+                this.dialogForm.searchWord = row.searchWord;
+                this.dialogForm.notSearchWord = row.notSearchWord;
+                this.dialogForm.province = row.province;
+                this.dialogForm.notProvince = row.notProvince;
+                this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
+                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
+                this.dialogForm.days = this.daysFormat(null,null,row.days);
+                this.dialogForm.dayTimeStart = row.dayTimeStart;
+                this.dialogForm.dayTimeEnd = row.dayTimeEnd;
+                this.dialogTableData=row.assignRuleTeamList;
+            },
+            addFun(){
+            	document.location.href='/clueAutoAssignRule/notOptAutoRule/initCreate';
+            },
+            editFun() {
+                var rows = this.multipleSelection;                
+                if(rows.length!=1){
+                    this.$message({
+                        message: '请选择一条数据进行编辑',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                    // 存储选中信息--start
+                    var clueId=rows[0].id;
+                    this.setSessionStore("noOptRuleManagerStoreForm", this.storeForm);
+                    var otherVal = {
+                        "currentPage": this.pager.currentPage,
+                        "clueId": clueId,
+                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                    }
+                    this.setSessionStore("noOptRuleManagerOtherVal", otherVal);
+                    // 存储选中信息--end
+                	document.location.href='/clueAutoAssignRule/notOptAutoRule/initUpdate?id='+clueId;
+                }                
+            },
+            exportFun(){
+                var param = this.form;
+                param.pageNum='';
+                param.pageSize='';
+                axios.post('/clueAutoAssignRule/notOptAutoRule/export',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                	ocmVM.loading=false;
+                });                     	
+            	
+            },
+          //状态转换方法
+            transformStatus(row, column, cellValue, index) {
+          	  	var text="无效";
+          	  	var now= new Date();
+                if(cellValue==1&&row.startTime<now&&row.endTime>now){
+              	  text="有效"
+                }
+                return text;
+            },
+          //资源数转换方法
+            transformNum(row, column, cellValue, index) {
+                if(cellValue==-1){
+              	  return "不限";
+                }else{
+	              return cellValue;
+                }
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            //星期和美天数据格式化方法
+            daysFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                var cellValueArr=[];
+                var cellValueNew="";
+                if(cellValue){
+                    cellValueArr=cellValue.split(",");
+                    for(var i=0;i<cellValueArr.length;i++){
+                        if(cellValueArr[i]=="0"){
+                            cellValueArr[i]="每天"
+                        }else if(cellValueArr[i]=="1"){
+                            cellValueArr[i]="星期日"
+                        }else if(cellValueArr[i]=="2"){
+                            cellValueArr[i]="星期一"
+                        }else if(cellValueArr[i]=="3"){
+                            cellValueArr[i]="星期二"
+                        }else if(cellValueArr[i]=="4"){
+                            cellValueArr[i]="星期三"
+                        }else if(cellValueArr[i]=="5"){
+                            cellValueArr[i]="星期四"
+                        }else if(cellValueArr[i]=="6"){
+                            cellValueArr[i]="星期五"
+                        }else if(cellValueArr[i]=="7"){
+                            cellValueArr[i]="星期六"
+                        }
+                        cellValueNew+=cellValueArr[i]+",";
+                    }                    
+                }
+                return (cellValueNew.substring(0, cellValueNew.lastIndexOf(',')));
+            },
+          //媒介转换方法
+            transformSource(row, column, cellValue, index) {
+         	   var text="";
+           	   if(mediumList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<mediumList.length;j++){
+	 	                		if(array[i]==mediumList[j].value){
+	 	                			if(i==0){
+		 	                			text=mediumList[j].name;
+	 	                			}else{
+		 	                			text=text+","+mediumList[j].name;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
+          //行业类别转换方法
+            transformProject(row, column, cellValue, index) {
+         	   var text="";
+           	   if(projectList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
+          //资源类别转换方法
+            transformCategory(row, column, cellValue, index) {
+          	   var text="";
+            	   if(clueCategoryList&&cellValue){
+ 	            	   var array=cellValue.split(",");
+ 	                   for(var i=0;i<array.length;i++){
+ 	                	   for(var j=0;j<clueCategoryList.length;j++){
+ 	 	                		if(array[i]==clueCategoryList[j].value){
+ 	 	                			if(i==0){
+ 		 	                			text=clueCategoryList[j].name;
+ 	 	                			}else{
+ 		 	                			text=text+","+clueCategoryList[j].name;
+ 	 	                			}
+ 	 	                		}
+ 	 	                	}
+ 	                	}
+            	    }
+                  return text;
+             },
+          //资源类型转换方法
+            transformType(row, column, cellValue, index) {
+          	   var text="";
+            	   if(clueTypeList&&cellValue){
+ 	            	   var array=cellValue.split(",");
+ 	                   for(var i=0;i<array.length;i++){
+ 	                	   for(var j=0;j<clueTypeList.length;j++){
+ 	 	                		if(array[i]==clueTypeList[j].value){
+ 	 	                			if(i==0){
+ 		 	                			text=clueTypeList[j].name;
+ 	 	                			}else{
+ 		 	                			text=text+","+clueTypeList[j].name;
+ 	 	                			}
+ 	 	                		}
+ 	 	                	}
+ 	                	}
+            	    }
+                  return text;
+             },
+          //广告位转换方法
+            transformSourceType(row, column, cellValue, index) {
+          	    var text="";
+        	    if(adsenseList&&cellValue){
+            	   var array=cellValue.split(",");
+                   for(var i=0;i<array.length;i++){
+                	   for(var j=0;j<adsenseList.length;j++){
+ 	                		if(array[i]==adsenseList[j].value){
+ 	                			if(i==0){
+	 	                			text=adsenseList[j].name;
+ 	                			}else{
+	 	                			text=text+","+adsenseList[j].name;
+ 	                			}
+ 	                		}
+ 	                	}
+                	}
+        	    }
+                return text;
+            },
+            toogleClick(){
+                if(this.isShow){
+                  this.isShow=false
+                }else{
+                  this.isShow=true
+                }
+            },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
+        },
+        created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("noOptRuleManagerStoreForm");
+                var otherVal = this.getSessionStore("noOptRuleManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+			if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+    })
+</script>
+</html>
