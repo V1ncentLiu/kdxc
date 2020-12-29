@@ -25,7 +25,7 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup" :disabled="teleGroupDisabled">
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -154,7 +154,7 @@
                 <!-- 显示新增的省市 -->
                 <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
                     <el-tag
-                        v-for="tag in districts"
+                        v-for="tag in cardForm.districts"
                         :key="tag"
                         closable
                         @close="deleteFun2(tag)"
@@ -189,7 +189,7 @@
                 <!-- 显示新增的标签 -->
                 <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
                     <el-tag
-                        v-for="tag in rootWords"
+                        v-for="tag in cardForm.rootWords"
                         :key="tag"
                         closable
                         @close="deleteFun1(tag)"
@@ -248,27 +248,36 @@
     var orgId = [[${orgId}]];// 当前账号机构id
     var teleGroupId='';
     var teleSaleArr=[];
-    var teleGroupDisabled=false;
     var mediumList=[[${mediumList}]];//媒介集合
     var projectList=[[${projectList}]];//项目集合
-    if(roleCode=='DXZJ'){
-    	teleGroupId=orgId;
-    	teleSaleArr=teleSale;
-    	teleGroupDisabled=true;
-    }
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
-            return {
-                sourceOptions:mediumList,
-                projectCategoryArr:[],
-                rootWords: [],//词根
-                districts: [],//地域
+            return {                
                 formLabelWidth: '100px',
-                projectOptions:projectList ,
+                projectOptions:[{
+                    id:123,
+                    projectName:"111"
+                },{
+                    id:234,
+                    projectName:"222"
+                }] ,
+                projectCategoryArr:[{
+                    value:123,
+                    name:"333"
+                },{
+                    value:234,
+                    name:"444"
+                }] ,
+                sourceOptions:[{
+                    value:123,
+                    name:"555"
+                },{
+                    value:234,
+                    name:"666"
+                }] ,
                 loading: false,
                 isDisabled: false,
-                teleGroupDisabled:teleGroupDisabled,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -290,6 +299,8 @@
                     teleSaleStatus:'',
                     province:'',
                     city:'',
+                    rootWords: [],//词根
+                    districts: [],//地域
                 },
                 cardFormRules:{},
                 cardTeleSale:'',
@@ -310,27 +321,27 @@
             addFun1() {//添加包含搜索词
                 let searchWord = this.cardForm.searchWord;
                 if (searchWord) {
-                    this.rootWords.push(searchWord);
+                    this.cardForm.rootWords.push(searchWord);
                 }
                 this.cardForm.searchWord = '';
             },
             deleteFun1(tag) {//删除包含搜索词
-                this.rootWords.splice(this.rootWords.indexOf(tag), 1);
+                this.cardForm.rootWords.splice(this.cardForm.rootWords.indexOf(tag), 1);
             },
             addFun2() {//添加包含搜索词
                 let dataProvince = this.cardForm.province;
                 let dataCity = this.cardForm.city;
 
                 if (dataProvince&&!dataCity) {
-                    this.districts.push(dataProvince);
+                    this.cardForm.districts.push(dataProvince);
                 }
                 if(dataCity){
-                    this.districts.push(dataProvince+'-'+dataCity);
+                    this.cardForm.districts.push(dataProvince+'-'+dataCity);
                 }
-                console.log(this.districts);
+                console.log(this.cardForm.districts);
             },
             deleteFun2(tag) {//删除包含搜索词
-                this.districts.splice(this.districts.indexOf(tag), 1);
+                this.cardForm.districts.splice(this.cardForm.districts.indexOf(tag), 1);
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -379,11 +390,13 @@
                         return;
                     }
                 }
-                // var param = {};
-                // param.startTime = this.timeForm.startTime;
-                // param.endTime = this.timeForm.endTime;
+                var param = {};
+                param.startTime = this.timeForm.startTime;
+                param.endTime = this.timeForm.endTime;
+                param.ids = this.multipleSelection;
+                console.log(param)
                 // mainDivVM.loading = true;
-                // axios.post('/saleCard/saveOrUpdate',param).then(function (response) { 
+                // axios.post('/preference/update',param).then(function (response) { 
                     // console.log(response)
                     // mainDivVM.loading = false;
                     this.timeVisible=false;
@@ -477,28 +490,30 @@
                     }
                 }
                 var param = {};
-                if(this.editId){
-                    param.id=this.editId;
-                }
-                param.teleSaleId = this.cardForm.teleSaleId;
-                param.dictionaryRankId = this.cardForm.dictionaryRankId;
-                param.workYear = this.cardForm.workYear;
-                param.serviceScore = this.cardForm.serviceScore;
-                param.serviceNum = this.cardForm.serviceNum;
-
-                this.loading = true; 
-                axios.post('/saleCard/saveOrUpdate',param).then(function (response) { 
-                    mainDivVM.loading = false;
-                    console.log(response)
+                param.id = "";
+                param.startTime = this.cardForm.startTime;
+                param.endTime = this.cardForm.endTime;
+                param.projectIds = this.cardForm.projectIds.length==0?"":this.cardForm.projectIds.join(",");//逗号分隔
+                param.projectCategory = this.cardForm.projectCategory.length==0?"":this.cardForm.projectCategory.join(",");//逗号分隔
+                param.sources = this.cardForm.sources.length==0?"":this.cardForm.sources.join(",");//逗号分隔
+                param.districts = this.cardForm.districts.length==0?"":this.cardForm.districts.join(",");//逗号分隔
+                param.rootWords = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
+                param.teleSaleStatus = this.cardForm.teleSaleStatus;
+                
+                console.log(param)
+                // this.loading = true; 
+                // axios.post('/preference/updateInfo',param).then(function (response) { 
+                //     mainDivVM.loading = false;
+                    // console.log(response)
                     // mainDivVM.cardVisible=false;
-                    window.location.href="/preference/listPage"
-                }).catch(function (error) {
-                    mainDivVM.loading = false;
-                    mainDivVM.$message({
-                        message: "请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
+                //     window.location.href="/preference/listPage"
+                // }).catch(function (error) {
+                //     mainDivVM.loading = false;
+                //     mainDivVM.$message({
+                //         message: "请求失败，请稍后重试",
+                //         type: "error"
+                //     });
+                // });
             },       
             searchTable(firstPage) {                
                 var param = {};
