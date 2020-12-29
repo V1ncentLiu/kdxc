@@ -53,7 +53,7 @@ public class ClueScoreRuleController {
      */
     @RequestMapping("/updateCluesScor")
     public String updatetelemarketingScore(HttpServletRequest request) {
-        return "assignrule/updateCluesScor";
+        return "assignrule/updateCluesScore";
     }
 
 }
