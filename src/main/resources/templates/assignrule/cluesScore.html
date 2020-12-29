@@ -87,17 +87,22 @@
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                 <el-table-column align="center" prop="ruleName" label="资源得分规则名称">
                     <template slot-scope="scope">
-                        <el-button size="mini" type="text" @click="gotoInfo(scope.row.id)">{{scope.row.ruleName}}</el-button>
+                        <el-button size="mini" type="text" @click="rowDblClick(scope.row)">{{scope.row.ruleName}}</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="category" label="业务线" :formatter="transformCategory" width="80"></el-table-column>
+                <el-table-column align="center" prop="category" label="业务线" :formatter="transformCategory"></el-table-column>
                 <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="createUserName" label="创建人" width="90"></el-table-column>
                 <el-table-column align="center" prop="updateTime" label="修改时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="updateUserName" label="修改人" width="90"></el-table-column>
-                <el-table-column align="center" prop="status" label="规则状态" width="80" :formatter="transformStatus"></el-table-column>
+                <el-table-column align="center" prop="status" label="规则状态" width="80" :formatter="transformStatus">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status == '0'">停用</span>
+                        <span v-else-if="scope.row.status == '1'">启用</span>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status == '0'">
@@ -148,6 +153,7 @@
             </div>
         </el-form>
         <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
+            <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
             <el-table-column align="center" prop="orgName" label="指标名称"></el-table-column>
             <el-table-column align="center" prop="proportion" label="指标值范围" width="120">
                 <template slot-scope="scope">
@@ -156,7 +162,6 @@
             </el-table-column>
             <el-table-column align="center" prop="resourceMaxNum" label="得分" :formatter="transformNum" width="120"></el-table-column>
             <el-table-column align="center" prop="" label="指标值时间范围"></el-table-column>
-            <el-table-column align="center" prop="ascriptionProjectName" label="资源项目归属"></el-table-column>
         </el-table>
     </el-dialog>
 </div>
@@ -434,11 +439,8 @@
                 this.dialogForm.dayTimeEnd = row.dayTimeEnd;
                 this.dialogTableData=row.assignRuleTeamList;
             },
-            gotoInfo(){
-                document.location.href='/rule/userScoreRule/telemarketingScoreInfo';
-            },
             addFun(){
-            	document.location.href='/rule/userScoreRule/updatetelemarketingScore';
+            	document.location.href='/rule/clueScoreRule/updateCluesScor';
             },
             editFun() {
                 var rows = this.multipleSelection;                
@@ -459,17 +461,8 @@
                     }
                     this.setSessionStore("optRuleManagerOtherVal", otherVal);
                     // 存储选中信息--end
-                	document.location.href='/rule/userScoreRule/updatetelemarketingScore?id='+clueId;
+                	document.location.href='/rule/clueScoreRule/updateCluesScor?id='+clueId;
                 }                
-            },
-          //状态转换方法
-            transformStatus(row, column, cellValue, index) {
-          	  	var text="无效";
-          	  	var now= new Date();
-                if(cellValue==1&&row.startTime<now&&row.endTime>now){
-              	  text="有效"
-                }
-                return text;
             },
           //资源数转换方法
             transformNum(row, column, cellValue, index) {
