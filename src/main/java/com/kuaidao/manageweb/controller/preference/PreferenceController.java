@@ -2,12 +2,18 @@ package com.kuaidao.manageweb.controller.preference;
 
 import com.kuaidao.aggregation.dto.automodel.AutoDisModelDTO;
 import com.kuaidao.aggregation.dto.telepreference.TelePreferenceSetDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.autodismodel.AutoDisModelFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DicItemWapper;
+import com.kuaidao.manageweb.feign.organization.OrganitionWapper;
 import com.kuaidao.manageweb.feign.preference.PreferenceFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectWapper;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.netflix.discovery.converters.Auto;
@@ -19,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -33,8 +41,60 @@ public class PreferenceController {
     @Autowired
     PreferenceFeignClient preferenceFeignClient;
 
+
+    @Autowired
+    OrganitionWapper organitionWapper;
+
+    @Autowired
+    DicItemWapper dicItemWapper;
+
+    @Autowired
+    ProjectInfoFeignClient projectInfoFeignClient;
+
+    @Autowired
+    ProjectWapper projectWapper;
+
+
+
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request) {
+
+        // 副总能看本事业部的数据，总经理看本中心数据，管理员查看全系统的
+        /**
+         * 电销组
+         */
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
+        Long orgId = curLoginUser.getOrgId();
+        if(RoleCodeEnum.GLY.equals(roleCode)){
+            // 查看全部电销组
+            request.setAttribute("dxzList", organitionWapper.findAllDXZ());
+        }else if(RoleCodeEnum.DXFZ.equals(roleCode)){
+            // 查看本事业部的
+            request.setAttribute("dxzList",organitionWapper.findDxzListByParentId(orgId));
+        }else if(RoleCodeEnum.DXZJL.equals(roleCode)){
+            request.setAttribute("dxzList",organitionWapper.findDxzListByParentId(orgId));
+        }else if(RoleCodeEnum.DXZJ.equals(roleCode)){
+            // 查看本组
+            request.setAttribute("dxzList",Arrays.asList(organitionWapper.findOrgById(orgId)));
+        }else{
+            // 电销顾问
+            request.setAttribute("dxzList",Arrays.asList(organitionWapper.findOrgById(orgId)));
+        }
+        /**
+         * 电销顾问
+         */
+
+        /**
+         * 项目
+         */
+        List<ProjectInfoDTO> projectList = projectWapper.allProject();
+        request.setAttribute("projectList",projectWapper.signProject(projectList));
+        //  项目品类
+        request.setAttribute("projectCategory",projectWapper.projectCategory(projectList));
+
+        // 获取数据字典：媒介
+        request.setAttribute("mediumList",dicItemWapper.findDicItemsByCode(DicCodeEnum.MEDIUM.getCode()));;
         return "assignrule/telemarketingPreferences";
     }
 
@@ -70,7 +130,7 @@ public class PreferenceController {
 
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         log.info("curLoginUser::{}",curLoginUser);
-        String roleCode = curLoginUser.getRoleCode();
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
         /**
          *  顾问角色电销顾问
          */
