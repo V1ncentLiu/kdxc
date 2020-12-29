@@ -26,7 +26,7 @@ public class ProjectWapper {
             return null;
         }
         List<ProjectInfoDTO> collect = data.stream().filter(a -> {
-            return a.getIsNotSign() == 0;
+            return  a.getIsNotSign()==null||a.getIsNotSign() == 0;
         }).collect(Collectors.toList());
         return collect;
     }
