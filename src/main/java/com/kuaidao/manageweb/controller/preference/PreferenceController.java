@@ -81,13 +81,7 @@ public class PreferenceController {
             // 电销顾问
             request.setAttribute("dxzList",Arrays.asList(organitionWapper.findOrgById(orgId)));
         }
-        /**
-         * 电销顾问
-         */
 
-        /**
-         * 项目
-         */
         List<ProjectInfoDTO> projectList = projectWapper.allProject();
         request.setAttribute("projectList",projectWapper.signProject(projectList));
         //  项目品类
@@ -116,6 +110,13 @@ public class PreferenceController {
 
     @RequestMapping(method = RequestMethod.POST,value = "/queryByParams")
     JSONResult<PageBean<TelePreferenceSetDTO>> queryByParams(@RequestBody TelePreferenceSetDTO dto){
+
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
+        Long orgId = curLoginUser.getOrgId();
+        dto.setOrgId(orgId);
+        dto.setRoleCode(roleCode);
+
         return preferenceFeignClient.queryByParams(dto);
     }
 
