@@ -242,14 +242,11 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${teleGroupList}]]; // 电销组
-    var teleSale = [[${teleSaleList}]];// 顾问
-    var roleCode = [[${roleCode}]];// 角色
-    var orgId = [[${orgId}]];// 当前账号机构id
-    var teleGroupId='';
-    var teleSaleArr=[];
-    var mediumList=[[${mediumList}]];//媒介集合
+    var queryOrg=[[${dxzList}]]; // 电销组
     var projectList=[[${projectList}]];//项目集合
+    var projectCategory=[[${projectCategory}]];//项目集合
+    var mediumList=[[${mediumList}]];//媒介集合
+
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -284,13 +281,13 @@
                     pageSize: 20
                 },
                 form: {
-                    teleGroupId: teleGroupId,
+                    teleGroupId: '',
                     teleSaleId: '',
                     imAuthorizeStatus: '',
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
-                teleSaleArr: teleSaleArr, // 顾问
+                teleSaleArr: [], // 顾问
                 cardVisible:false,//设置顾问偏好
                 cardForm: {
                     projectIds:[],
@@ -304,7 +301,6 @@
                 },
                 cardFormRules:{},
                 cardTeleSale:'',
-                editId:'',
 
                 timeVisible:false,//批量设置非接收资源分配接收时间弹窗
                 timeForm:{
@@ -410,24 +406,25 @@
                 // });
             },
             changeTeleGroup(selectedValue) {//改变电销组
-                this.teleSaleArr = [];
-                if (!selectedValue) {
+                var param ={};
+                if (null == this.form.teleGroupId || "" == this.form.teleGroupId) {
+                    mainDivVM.teleSaleArr = [];
                     return;
                 }
-                var param = {};
-                param.orgId = selectedValue;
+                param.orgId = this.form.teleGroupId;
+                console.info(param);
                 axios.post('/business/busAllocation/getSaleList', param)
-                    .then(function (response) {
-                        var result = response.data;
-                        var table = result.data;
-                        mainDivVM.teleSaleArr = table;
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                .then(function (response) {
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    mainDivVM.teleSaleArr= table;
+                })
+                .catch(function (error) {
+                   console.log(error);
+                });
             }, 
             openCard(id,name){// 打开名片
-                this.editId="";//编辑id清空                
                 this.cardVisible=true;
                 this.cardTeleSale=name;
                 this.cardForm.teleSaleId=id;
@@ -441,7 +438,6 @@
                     if(result.code==0){
                         var table=result.data;
                         if(table.id){
-                            mainDivVM.editId=table.id;//编辑id
                             mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
                             mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId.split(',');
                             mainDivVM.cardForm.workYear=table.workYear;
@@ -468,12 +464,16 @@
             },
             cardCancel(){// 关闭名片
                 this.cardVisible=false;
-                this.cardForm.dictionaryRankId='';
-                this.cardForm.dictionaryEvaluationId=[];
-                this.cardForm.workYear=3;
-                this.cardForm.serviceScore=4.5;
-                this.cardForm.serviceNum='3523';
-                this.editId="";//编辑id清空
+                this.cardForm.startTime='';
+                this.cardForm.endTime='';
+                this.cardForm.projectIds=[];
+                this.cardForm.projectCategory=[];
+                this.cardForm.sources=[];
+                this.cardForm.districts=[];
+                this.cardForm.rootWords=[];
+                this.cardForm.teleSaleStatus='';
+                this.cardForm.province='';
+                this.cardForm.city='';
             },
             cardSubmit(){
                 var startTime = this.cardForm.startTime;
