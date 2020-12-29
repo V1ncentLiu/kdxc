@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.feign.rule;
 
 import com.kuaidao.businessconfig.dto.rule.ClueAssignRulePageParam;
 import com.kuaidao.businessconfig.dto.rule.ClueAutoAssignRuleDTO;
+import com.kuaidao.businessconfig.dto.rule.ClueAutoAssignRulePageParam;
 import com.kuaidao.businessconfig.dto.rule.ClueAutoAssignRuleReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -91,7 +92,7 @@ public interface ClueAutoAssignRuleFeignClient {
      */
     @PostMapping("/list")
     public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(
-            @RequestBody ClueAssignRulePageParam pageParam);
+            @RequestBody ClueAutoAssignRulePageParam pageParam);
 
     /**
      * 查询资源分配规则集合（不分页）
@@ -101,7 +102,7 @@ public interface ClueAutoAssignRuleFeignClient {
      */
     @PostMapping("/listNoPage")
     public JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage(
-            @RequestBody ClueAssignRulePageParam pageParam);
+            @RequestBody ClueAutoAssignRulePageParam pageParam);
 
     /**
      * 有效规则集合
@@ -159,12 +160,12 @@ public interface ClueAutoAssignRuleFeignClient {
 
 
         @Override
-        public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(ClueAssignRulePageParam pageParam) {
+        public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(ClueAutoAssignRulePageParam pageParam) {
             return fallBackError("查询资源分配规则集合");
         }
 
         @Override
-        public JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage(ClueAssignRulePageParam pageParam) {
+        public JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage(ClueAutoAssignRulePageParam pageParam) {
             return fallBackError("查询资源分配规则集合");
         }
 

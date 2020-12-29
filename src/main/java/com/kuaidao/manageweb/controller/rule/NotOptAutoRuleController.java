@@ -578,5 +578,20 @@ public class NotOptAutoRuleController {
         }
         return null;
     }
+    /**
+     * 复制规则
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/copy")
+    @ResponseBody
+    @LogRecord(description = "复制规则", operationType = OperationType.DELETE,
+            menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
+    public JSONResult copy(@RequestBody ClueAutoAssignRuleReq clueAssignRuleReq) {
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setCreateUser(user.getId());
+        return clueAutoAssignRuleFeignClient.copy(clueAssignRuleReq);
+    }
 
 }
