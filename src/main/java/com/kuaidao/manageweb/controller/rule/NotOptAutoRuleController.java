@@ -7,10 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import com.kuaidao.businessconfig.dto.rule.AssignRuleTeamDTO;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleDTO;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRulePageParam;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleReq;
+import com.kuaidao.businessconfig.dto.rule.*;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -29,6 +26,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
+import com.kuaidao.manageweb.feign.rule.ClueAutoAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -69,7 +67,7 @@ import java.util.*;
 public class NotOptAutoRuleController {
     private static Logger logger = LoggerFactory.getLogger(NotOptAutoRuleController.class);
     @Autowired
-    private ClueAssignRuleFeignClient clueAssignRuleFeignClient;
+    private ClueAutoAssignRuleFeignClient clueAutoAssignRuleFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
@@ -85,7 +83,7 @@ public class NotOptAutoRuleController {
      * @return
      */
     @RequestMapping("/initRuleList")
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:view")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有项目
@@ -115,7 +113,7 @@ public class NotOptAutoRuleController {
                 organizationFeignClient.queryOrgByParam(orgDto);
         List<OrganizationRespDTO> data = dzList.getData();
         request.setAttribute("queryOrg", data);
-        return "rule/notOptRuleManagerPage";
+        return "rule/notOptAutoRuleManagerPage";
     }
 
     /***
@@ -124,7 +122,7 @@ public class NotOptAutoRuleController {
      * @return
      */
     @RequestMapping("/initCreate")
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:add")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
         // 查询话务组
         List<OrganizationRespDTO> orgList = getTrafficGroup();
@@ -165,15 +163,15 @@ public class NotOptAutoRuleController {
      * @return
      */
     @RequestMapping("/initUpdate")
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:edit")
     public String initUpdateProject(@RequestParam Long id, HttpServletRequest request) {
         // 查询优化规则信息
-        JSONResult<ClueAssignRuleDTO> jsonResult =
-                clueAssignRuleFeignClient.get(new IdEntityLong(id));
-        ClueAssignRuleDTO data = jsonResult.getData();
-        if (data != null && data.getTeleList() != null) {
-            List<AssignRuleTeamDTO> teleList = data.getTeleList();
-            for (AssignRuleTeamDTO assignRuleTeamDTO : teleList) {
+        JSONResult<ClueAutoAssignRuleDTO> jsonResult =
+                clueAutoAssignRuleFeignClient.get(new IdEntityLong(id));
+        ClueAutoAssignRuleDTO data = jsonResult.getData();
+        if (data != null && data.getAutoAssignRuleTeamList() != null) {
+            List<AutoAssignRuleTeamDTO> teleList = data.getAutoAssignRuleTeamList();
+            for (AutoAssignRuleTeamDTO assignRuleTeamDTO : teleList) {
                 OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
                 queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
                 queryDTO.setOrgType(OrgTypeConstant.DXZ);
@@ -223,9 +221,9 @@ public class NotOptAutoRuleController {
      */
     @PostMapping("/list")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:view")
-    public JSONResult<PageBean<ClueAssignRuleDTO>> list(
-            @RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request) {
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:view")
+    public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(
+            @RequestBody ClueAutoAssignRulePageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
@@ -239,7 +237,7 @@ public class NotOptAutoRuleController {
         }
         // 非优化规则
         pageParam.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
-        JSONResult<PageBean<ClueAssignRuleDTO>> list = clueAssignRuleFeignClient.list(pageParam);
+        JSONResult<PageBean<ClueAutoAssignRuleDTO>> list = clueAutoAssignRuleFeignClient.list(pageParam);
 
         return list;
     }
@@ -255,10 +253,10 @@ public class NotOptAutoRuleController {
      */
     @PostMapping("/save")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:add")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:add")
     @LogRecord(description = "新增非自动优化规则", operationType = OperationType.INSERT,
             menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
-    public JSONResult save(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+    public JSONResult save(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -272,7 +270,7 @@ public class NotOptAutoRuleController {
         clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
         // 插入类型为优化
         clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
-        return clueAssignRuleFeignClient.create(clueAssignRuleReq);
+        return clueAutoAssignRuleFeignClient.create(clueAssignRuleReq);
     }
 
     /**
@@ -283,10 +281,10 @@ public class NotOptAutoRuleController {
      */
     @PostMapping("/update")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
-    @LogRecord(description = "修改非优化规则信息", operationType = OperationType.UPDATE,
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:edit")
+    @LogRecord(description = "修改非优化自动规则信息", operationType = OperationType.UPDATE,
             menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
-    public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+    public JSONResult update(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
 
         if (result.hasErrors()) {
@@ -300,7 +298,7 @@ public class NotOptAutoRuleController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-        return clueAssignRuleFeignClient.update(clueAssignRuleReq);
+        return clueAutoAssignRuleFeignClient.update(clueAssignRuleReq);
     }
 
     /**
@@ -311,10 +309,10 @@ public class NotOptAutoRuleController {
      */
     @PostMapping("/updateStatusEnable")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:edit")
     @LogRecord(description = "启用非优化规则", operationType = OperationType.ENABLE,
             menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
-    public JSONResult updateStatusEnable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+    public JSONResult updateStatusEnable(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
 
         if (result.hasErrors()) {
@@ -326,7 +324,7 @@ public class NotOptAutoRuleController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-        return clueAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
+        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
     }
 
     /**
@@ -337,10 +335,10 @@ public class NotOptAutoRuleController {
      */
     @PostMapping("/updateStatusDisable")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:edit")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:edit")
     @LogRecord(description = "禁用非优化规则", operationType = OperationType.DISABLE,
             menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
-    public JSONResult updateStatusDisable(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
+    public JSONResult updateStatusDisable(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
             BindingResult result) {
 
         if (result.hasErrors()) {
@@ -352,7 +350,7 @@ public class NotOptAutoRuleController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-        return clueAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
+        return clueAutoAssignRuleFeignClient.updateStatus(clueAssignRuleReq);
     }
 
 
@@ -364,25 +362,25 @@ public class NotOptAutoRuleController {
      */
     @PostMapping("/delete")
     @ResponseBody
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:delete")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:delete")
     @LogRecord(description = "删除规则", operationType = OperationType.DELETE,
             menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
 
-        return clueAssignRuleFeignClient.delete(idList);
+        return clueAutoAssignRuleFeignClient.delete(idList);
     }
 
     /**
      * 导出
-     * 
+     *
      * @param
      * @return
      */
-    @RequiresPermissions("clueAssignRule:notOptAutoRuleManager:export")
+    @RequiresPermissions("clueAutoAssignRule:notOptAutoRuleManager:export")
     @PostMapping("/export")
     @LogRecord(description = "非优化规则导出", operationType = OperationType.EXPORT,
             menuName = MenuEnum.NOT_AUTO_OPT_RULE_MANAGEMENT)
-    public void export(@RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request,
+    public void export(@RequestBody ClueAutoAssignRulePageParam pageParam, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         logger.debug("list param{}", pageParam);
         UserInfoDTO user = getUser();
@@ -399,19 +397,19 @@ public class NotOptAutoRuleController {
         pageParam.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
 
         // 查询规则数据不分页
-        JSONResult<List<ClueAssignRuleDTO>> listNoPage =
-                clueAssignRuleFeignClient.listNoPage(pageParam);
+        JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage =
+                clueAutoAssignRuleFeignClient.listNoPage(pageParam);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
 
         if (JSONResult.SUCCESS.equals(listNoPage.getCode()) && listNoPage.getData() != null
                 && listNoPage.getData().size() != 0) {
 
-            List<ClueAssignRuleDTO> resultList = listNoPage.getData();
+            List<ClueAutoAssignRuleDTO> resultList = listNoPage.getData();
             int size = resultList.size();
 
             for (int i = 0; i < size; i++) {
-                ClueAssignRuleDTO clueAssignRuleDTO = resultList.get(i);
+                ClueAutoAssignRuleDTO clueAssignRuleDTO = resultList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(i + 1);
                 curList.add(clueAssignRuleDTO.getRuleName());
@@ -455,7 +453,7 @@ public class NotOptAutoRuleController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
 
-        String name = "非优化规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
+        String name = "非优化自动规则" + DateUtil.convert2String(new Date(), DateUtil.ymd) + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));

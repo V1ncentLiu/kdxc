@@ -209,7 +209,7 @@ public class OptAutoRuleController {
     @ResponseBody
     @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:view")
     public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(
-            @RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request) {
+            @RequestBody ClueAutoAssignRulePageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
@@ -376,7 +376,7 @@ public class OptAutoRuleController {
     @PostMapping("/export")
     @LogRecord(description = "优化规则导出", operationType = OperationType.EXPORT,
             menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
-    public void export(@RequestBody ClueAssignRulePageParam pageParam, HttpServletRequest request,
+    public void export(@RequestBody ClueAutoAssignRulePageParam pageParam, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         logger.debug("list param{}", pageParam);
         UserInfoDTO user = getUser();

@@ -19,6 +19,9 @@
             -moz-appearance: textfield;
         }
         .el-form--inline .el-form-item__label{}
+        .el-form-item{margin-bottom: 15px;}
+        .ladderListTable .line{line-height: 35px;}
+        .leftLine{border-left: 5px solid #5c6be8;line-height: 20px;text-indent: 10px;margin-bottom: 20px;}
     </style>
 </head>
 <body>
@@ -32,143 +35,82 @@
     <el-row class="mainWhiteBg">
         <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
             <el-row>
-                <el-form-item label="选择业务线：" prop=""> 
-                    <el-select v-model="form.teleDirectorId" filterable placeholder="电销总监姓名（所属组）">
+                <el-form-item label="选择业务线：" prop="bussinessLine"> 
+                    <el-select v-model="form.bussinessLine" filterable placeholder="">
                         <el-option
                             v-for="item in options"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <span style="line-height: 35px;">配置模型</span>
             </el-row>
-            <div class="fs14 marginB20 paddingT20">餐盟业务线匹配模型：</div>
+            <div class="fs14 marginB20 leftLine">餐盟业务线匹配模型：</div>
             <el-row  class="marginB20">
-                <el-form-item label="新员工是按照创建账号起" style="margin-bottom: 0" prop="number13">    
-                    <el-input v-model="form.number13" placeholder="0-10以内整数" maxLength="2" type="number" min="0" max="10"></el-input>
+                <el-form-item label="新员工是按照创建账号起" style="margin-bottom: 0" prop="createDay">    
+                    <el-input v-model="form.createDay" placeholder="请输入正整数" type="number" min="0"></el-input>
                 </el-form-item>
                 <el-form-item label="天内为新员工。" style="margin-bottom: 0"></el-form-item>
             </el-row>
             <el-row  class="marginB20">
-                <el-form-item label="新员工入职" style="margin-bottom: 0" prop="number13">    
-                    <el-input v-model="form.number13" placeholder="0-10以内整数" maxLength="2" type="number" min="0" max="10"></el-input>
+                <el-form-item label="新员工入职" style="margin-bottom: 0" prop="disDay">    
+                    <el-input v-model="form.disDay" placeholder="请输入正整数" type="number" min="0"></el-input>
                 </el-form-item>
                 <el-form-item label="天后可以分发资源。" style="margin-bottom: 0"></el-form-item>
             </el-row>
-            <div class="fs14 marginB20 paddingT20">顾问与资源阶段匹配设置：</div>
-            <table id="tableBox" class="marginB20">
-                <tr>
-                    <th style="width:4%">序号</th>
-                    <th style="width:16%">顾问阶梯</th>
-                    <th style="width:20%">分数值范围</th>
-                    <th style="width:20%">每日分配上限</th>
-                    <th style="width:20%">资源阶梯</th>
-                    <th style="width:20%">分数值范围</th>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td>一阶梯</td>
-                    <td>
-                        <el-form-item prop="number1">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
+            <div class="fs14 marginB20 leftLine">顾问与资源阶段匹配设置：</div>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="form.ladderList"
+                class="ladderListTable"
+            >
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="ruleName" label="顾问阶梯" width="100">
+                    <template slot-scope="scope">
+                        {{scope.row.ladder}}阶梯
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="srangeStart" label="分数值范围">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" :rules='rules.srangeStart'>
+                            <el-input v-model="scope.row.srangeStart"></el-input>
                         </el-form-item>
-                    </td>
-                    <td>
-                        <el-form-item prop="number2">   
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
+                        <span class="line">——</span>
+                        <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" :rules='rules.srangeEnd'>
+                            <el-input v-model="scope.row.srangeEnd"></el-input>
                         </el-form-item>
-                    </td>
-                    <td>一阶梯</td>
-                    <td>
-                        <el-form-item prop="number3">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="limit" label="每日分配上限">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'ladderList.' + scope.$index + '.limit'" :rules='rules.limit'>
+                            <el-input v-model="scope.row.limit" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
                         </el-form-item>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>二阶梯</td>
-                    <td>
-                        <el-form-item prop="number4">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
+                        
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="startTime" label="资源阶梯" width="100">
+                    <template slot-scope="scope">
+                        {{scope.row.ladder}}阶梯
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="startTime" label="分数值范围">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeStart'" :rules='rules.clueSrangeStart'>
+                            <el-input v-model="scope.row.clueSrangeStart" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
                         </el-form-item>
-                    </td>
-                    <td>
-                        <el-form-item prop="number5">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
+                        <span class="line">——</span>
+                        <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeEnd'" :rules='rules.clueSrangeEnd'>
+                            <el-input v-model="scope.row.clueSrangeEnd" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
                         </el-form-item>
-                    </td>
-                    <td>二阶梯</td>
-                    <td>
-                        <el-form-item prop="number6">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>三阶梯</td>
-                    <td>
-                        <el-form-item prop="number19">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                    <td>
-                        <el-form-item prop="number20">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                    <td>三阶梯</td>
-                    <td>
-                        <el-form-item prop="number21">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>四阶梯</td>
-                    <td>
-                        <el-form-item prop="number7">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                    <td>
-                        <el-form-item prop="number8">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                    <td>四阶梯</td>
-                    <td>
-                        <el-form-item prop="number9">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                </tr>
-                <tr>
-                    <td>5</td>
-                    <td>五阶梯</td>
-                    <td>
-                        <el-form-item prop="number10">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                    <td>
-                        <el-form-item prop="number11">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>
-                    <td>五阶梯</td>
-                    <td>
-                        <el-form-item prop="number12">  
-                            <el-input v-model="form.number1" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100" ></el-input>
-                        </el-form-item>
-                    </td>                    
-                </tr>
-            </table>          
+                    </template>
+                </el-table-column>
+            </el-table>     
             <div class="padding20 f-tac">     
                 <el-button type="primary" @click="submitForm('form')" :disabled="clueRuleSubmitBtnDiabled">提交</el-button>
                 <el-button @click="cancel">取 消</el-button>
@@ -180,7 +122,7 @@
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var accountList = [[${accountList}]];
+    var optionsObj = [[${businessLineList}]];
 </script>
 <script>
     var releaseRuleVM=new Vue({
@@ -190,384 +132,83 @@
             	clueRuleSubmitBtnDiabled:false,
                 isAddAble:true,
                 isShow:false,  
-                form: {   
-                    number1:'',
-                    number2:'',
-                    number3:'',
-                    number4:'',
-                    number5:'',
-                    number6:'',
-                    number7:'',
-                    number8:'',
-                    number9:'',
-                    number10:'',
-                    number11:'',
-                    number12:'',
-                    number13:'',
-                    number14:'',
-                    number15:'',
-                    number16:'',
-                    number17:'',
-                    number18:'',
-                    number19:'',
-                    number20:'',
-                    number21:'',
-                    number22:'',                  
+                form: { 
+                    bussinessLine:'',
+                    createDay:'',
+                    disDay:'',
+                    ladderList:[{
+                        srangeStart:1,
+                        srangeEnd:2,
+                        clueSrangeStart:3,
+                        clueSrangeEnd:4,
+                        ladder:1,
+                        limit:10
+                    },{
+                        srangeStart:2,
+                        srangeEnd:3,
+                        clueSrangeStart:4,
+                        clueSrangeEnd:5,
+                        ladder:2,
+                        limit:10
+                    },{
+                        srangeStart:3,
+                        srangeEnd:4,
+                        clueSrangeStart:5,
+                        clueSrangeEnd:6,
+                        ladder:3,
+                        limit:10
+                    },{
+                        srangeStart:4,
+                        srangeEnd:5,
+                        clueSrangeStart:6,
+                        clueSrangeEnd:7,
+                        ladder:4,
+                        limit:10
+                    },{
+                        srangeStart:5,
+                        srangeEnd:6,
+                        clueSrangeStart:7,
+                        clueSrangeEnd:8,
+                        ladder:5,
+                        limit:10
+                    }] 
+                },                
+                rules:{
+                    bussinessLine: [
+                        { required: true, message: '请选择业务线', trigger: 'blur' }
+                    ],
+                    createDay: [
+                        { required: true, message: '请输入正整数', trigger: 'blur' }
+                    ],
+                    disDay: [
+                        { required: true, message: '请输入正整数', trigger: 'blur' }
+                    ],
+                    srangeStart: [
+                        { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
+                    ],
+                    srangeEnd: [
+                        { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
+                    ],
+                    limit: [
+                        { required: true, message: '请输入每日分配上限', trigger: 'blur' }
+                    ],
+                    clueSrangeStart: [
+                        { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
+                    ],
+                    clueSrangeEnd: [
+                        { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
+                    ]
                 },
-                rules:{},
-                options: accountList,
+                options: optionsObj,
             }             
         },
         methods: {
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
-                    if (valid) {                      
-               
-                         var param = {};
-                         var form = this.form;
-                         var festivalRuleIsEnabled = this.checked1==true?1:0;
-                         var isFestivalRuleBl=false;
-                         if(!festivalRuleIsEnabled){//未启用
-                        	 var festivalRuleId = form.id10;
-                        	 if(festivalRuleId){
-                        		 var festivalRule ={};
-                                 festivalRule.id=festivalRuleId;
-                                 festivalRule.isEnabled=festivalRuleIsEnabled;
-                                 festivalRule.businessLine=businessLine;
-                                 isFestivalRuleBl=true;
-                                 param.festivalRule= festivalRule;
-                        	 }
-                        	 
-                         }else{
-                        	 var festivalRule ={};
-                        	 festivalRule.id=form.id10;
-                        	 festivalRule.startTime=startTime;
-                        	 festivalRule.endTime=endTime;
-                        	 festivalRule.isEnabled=festivalRuleIsEnabled;
-                        	 festivalRule.businessLine=businessLine;
-                        	 isFestivalRuleBl=true;
-                        	 param.festivalRule= festivalRule;
-                         }
-                         //电销顾问未签约资源上线规则
-                        var unSignRuleIsEnabled = this.checked9 == true ? 1 : 0;
-                        var unSignLimitRuleBl = false;
-                        if (!unSignRuleIsEnabled) {//未启用
-                            var unSignLimitId = form.id12;
-                            if (unSignLimitId) {
-                                var teleUnsignLimitRule = {};
-                                teleUnsignLimitRule.id = unSignLimitId;
-                                teleUnsignLimitRule.isEnabled = unSignRuleIsEnabled;
-                                teleUnsignLimitRule.limitNum = this.form.number22;
-                                unSignLimitRuleBl = true;
-                                param.teleUnsignLimitRule = teleUnsignLimitRule;
-                            }
-
-                        } else {
-                            var teleUnsignLimitRule = {};
-                            teleUnsignLimitRule.id = form.id12;
-                            teleUnsignLimitRule.isEnabled = unSignRuleIsEnabled;
-                            teleUnsignLimitRule.limitNum = this.form.number22;
-                            unSignLimitRuleBl = true;
-                            param.teleUnsignLimitRule = teleUnsignLimitRule;
-                        }
-                         //自动释放规则
-                         var autoReleaseRule = new Array();
-                         var autoReleaseRuleIsEnabled = this.checked2==true?1:0;
-                         var isAutoReleaseBl = false;
-                         if(!autoReleaseRuleIsEnabled){//未启用
-                        	 var noFollowId = form.id1;
-                             if(noFollowId){
-                            	 var noFollow = {};
-                            	 noFollow.id=noFollowId;
-                            	 noFollow.isEnabled=autoReleaseRuleIsEnabled;
-                            	 noFollow.businessLine=businessLine;
-                            	 isAutoReleaseBl=true;
-                            	 autoReleaseRule.push(noFollow);
-                             }
-                             var followId = form.id2;
-                             if(followId){
-                            	  var follow={};
-                                  follow.id=followId;
-                                  follow.isEnabled=autoReleaseRuleIsEnabled;
-                                  follow.businessLine=businessLine;
-                                  isAutoReleaseBl=true;
-                                  autoReleaseRule.push(follow);
-                             }
-                             var noVisitId=form.id3;
-                             if(noVisitId){
-                            	 var notVisit={};
-                                 notVisit.id=noVisitId;
-                                 notVisit.isEnabled=autoReleaseRuleIsEnabled;
-                                 notVisit.businessLine=businessLine;
-                                 isAutoReleaseBl=true;
-                                 autoReleaseRule.push(notVisit);
-                             }
-                             var unSignId = form.id4;
-                             if(unSignId){
-                            	 var unSign={};
-                            	 unSign.id=unSignId;
-                                 unSign.isEnabled=autoReleaseRuleIsEnabled;
-                                 unSign.businessLine=businessLine;
-                                 isAutoReleaseBl=true;
-                                 autoReleaseRule.push(unSign);
-                             }
-                             
-                             var inviteId = form.id11;
-                             if(inviteId){
-                            	 var invite = {};
-                            	 invite.id = inviteId;
-                            	 invite.isEnabled=autoReleaseRuleIsEnabled;
-                            	 invite.businessLine=businessLine;
-                                 isAutoReleaseBl=true;
-                                 autoReleaseRule.push(invite);
-                             }
-                             
-                        	 
-                         }else{
-                        	isAutoReleaseBl = true;
-                            var noFollow = {};
-                             //1. 
-                            noFollow.id=form.id1;
-                            noFollow.isEnabled=autoReleaseRuleIsEnabled;
-                            noFollow.customerStatus=1;
-                            noFollow.timeoutRelease=form.number1;
-                            noFollow.retentionTimes=form.number2;
-                            noFollow.retentionDay = form.number3;
-                            noFollow.isReleaseRemind = form.remindValue1;
-                            noFollow.remindTime = form.number13;
-                            noFollow.businessLine = businessLine;
-                            autoReleaseRule.push(noFollow);
-                            //2.
-                            var follow={};
-                            follow.id=form.id2;
-                            follow.isEnabled=autoReleaseRuleIsEnabled;
-                            follow.customerStatus=2;
-                            follow.timeoutRelease=form.number4;
-                            follow.retentionTimes=form.number5;
-                            follow.retentionDay = form.number6;
-                            follow.isReleaseRemind = form.remindValue2;
-                            follow.remindTime = form.number13;
-                            follow.businessLine = businessLine;
-                            autoReleaseRule.push(follow);
-                            //4.invite
-                            var invite={};
-                            invite.id=form.id11;
-                            invite.isEnabled=autoReleaseRuleIsEnabled;
-                            invite.businessLine=businessLine;
-                            invite.customerStatus=4;
-                            invite.timeoutRelease=form.number19;
-                            invite.retentionTimes=form.number20;
-                            invite.retentionDay = form.number21;
-                            invite.isReleaseRemind = form.remindValue5;
-                            invite.remindTime = form.number13;
-                            autoReleaseRule.push(invite);
-                            
-                            
-                            
-                            //5
-                            var notVisit={};
-                            notVisit.id=form.id3;
-                            notVisit.isEnabled=autoReleaseRuleIsEnabled;
-                            notVisit.businessLine=businessLine;
-                            notVisit.customerStatus=5;
-                            notVisit.timeoutRelease=form.number7;
-                            notVisit.retentionTimes=form.number8;
-                            notVisit.retentionDay = form.number9;
-                            notVisit.isReleaseRemind = form.remindValue3;
-                            notVisit.remindTime = form.number13;
-                            autoReleaseRule.push(notVisit);
-                            //6.到访未签约
-                            var  unSign={};
-                            unSign.id=form.id4;
-                            unSign.isEnabled=autoReleaseRuleIsEnabled;
-                            unSign.businessLine=businessLine;
-                            unSign.customerStatus=6;
-                            unSign.timeoutRelease=form.number10;
-                            unSign.retentionTimes=form.number11;
-                            unSign.retentionDay = form.number12;
-                            unSign.isReleaseRemind = form.remindValue4;
-                            unSign.remindTime = form.number13;
-                            autoReleaseRule.push(unSign);
-                            
-                         }
-                        	param.autoReleRuleList = autoReleaseRule;
+                    if (valid) { 
+                        var param = {};
+                        var form = this.form;
                          
-                         
-                         
-                         //强制回收
-                          var forceRuleList = new Array();
-                          var isDismissionBl = false;
-                          var dismissionTeleRuleIsEnabled=this.checked4==true?1:0;
-                          if(!dismissionTeleRuleIsEnabled){
-                        	  var dismissionId = form.id5;
-                        	  if(dismissionId){
-                        		  var dismissionTeleRule ={};
-                                  dismissionTeleRule.id=dismissionId;
-                                  dismissionTeleRule.isEnabled=dismissionTeleRuleIsEnabled;
-                                  dismissionTeleRule.businessLine=businessLine;
-                                  dismissionTeleRule.remindTime = form.number13;
-                                  forceRuleList.push(dismissionTeleRule);
-                                  isDismissionBl=true;
-                        	  }
-                        	  
-                          }else{
-                        	  var dismissionTeleRule ={};
-                              dismissionTeleRule.id=form.id5;
-                              dismissionTeleRule.isEnabled=dismissionTeleRuleIsEnabled;
-                              dismissionTeleRule.businessLine=businessLine;
-                              dismissionTeleRule.days=form.number14;
-                              dismissionTeleRule.recycleType=1;
-                              dismissionTeleRule.remindTime = form.number13;
-                              isDismissionBl=true;
-                              forceRuleList.push(dismissionTeleRule);
-                          }
-                          
-                          var isTeleForceRule = false;
-                          var isTeleForceRuleIsEnabled = this.checked5==true?1:0;
-                          if(!isTeleForceRuleIsEnabled){
-                        	  var teleForceRuleId = form.id6;
-                        	  if(teleForceRuleId){
-                        		  var teleRule ={};
-                                  teleRule.id=teleForceRuleId;
-                                  teleRule.isEnabled=isTeleForceRuleIsEnabled;
-                                  teleRule.businessLine=businessLine;
-                                  teleRule.remindTime = form.number13;
-                                  forceRuleList.push(teleRule);
-                                  isTeleForceRule = true;
-                        	  }
-                        	  
-                          }else{
-                        	  var teleRule ={};
-                              teleRule.id=form.id6;
-                              teleRule.isEnabled=isTeleForceRuleIsEnabled;
-                              teleRule.businessLine=businessLine;
-                              teleRule.days=form.number15;
-                              teleRule.remindTime = form.number13;
-                              teleRule.recycleType=2;
-                              forceRuleList.push(teleRule);
-                              isTeleForceRule = true;
-                          }
-                          var isForceRcycleRuleListBl = false;
-                          if(forceRuleList.length>0){
-                        	    isForceRcycleRuleListBl = true;
-                        	    param.forceRecycleRuleList = forceRuleList;
-                          }
-                          
-                          //
-                        
-                         //公有池领取规则
-                         //1.电销总监领取规则
-                         var publicPoolRuleList = new Array();
-                         var teleDirectorRuleIsEnabled=this.checked6==true?1:0;
-                         var isTeleDirectorRuleBl = false;
-                         if(!teleDirectorRuleIsEnabled){
-                        	 var teleDirectorRuleId = form.id7;
-                        	 if(teleDirectorRuleId){
-                        		 var teleDirectorRule={};
-                                 teleDirectorRule.id=form.id7;
-                                 teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
-                                 teleDirectorRule.businessLine=businessLine;
-                                 publicPoolRuleList.push(teleDirectorRule);
-                                 isTeleDirectorRuleBl=true;
-                        	 }
-                        	 
-                         }else{
-                        	  //添加 电销规则
-                             var teleDirectorRule={};
-                             teleDirectorRule.id=form.id7;
-                             teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
-                             teleDirectorRule.businessLine=businessLine;
-                             teleDirectorRule.limitNum=form.number16;
-                             teleDirectorRule.type=1;
-                             publicPoolRuleList.push(teleDirectorRule);
-                             isTeleDirectorRuleBl=true;
-                        	 
-                        	var telDirecotrArr =  this.form.domains;
-                         	if(telDirecotrArr.length==0) {
-                         		 isTeleDirectorRuleBl=true;
-                        	} else{
-                        		var telDirectorIdArr = {};
-                        		var isExistsSameId = true;
-                        		for(var i=0;i<telDirecotrArr.length;i++){
-                        			var curId = telDirecotrArr[i].teleDirectorId;
-                        			if(telDirectorIdArr["id"+curId]){
-                        				isExistsSameId =false;
-                        				this.$message({message:"为相同的电销总监设置了限制领取资源数",type:'warning'});
-                        				break;
-                        			}else{
-                        				telDirectorIdArr["id"+curId] = curId;
-                        			}
-                        		}
-                        		
-                        		if(!isExistsSameId){
-                        			this.clueRuleSubmitBtnDiabled=false;
-                        			return;
-                        		}
-                        		
-                                  param.teleDirectorReceiveRuleList = telDirecotrArr;
-                                  
-                        	}
-                           
-                         }
-                         
-                         //2电销顾问领取规则
-                         var telRuleIsEnabled=this.checked7==true?1:0;
-                         var isTelRuleBl = false;
-                         if(!telRuleIsEnabled){
-                        	 var teleRuleId = form.id8;
-                        	 if(teleRuleId){
-                        		  var teleRule={};
-                                  teleRule.id=form.id8;
-                                  teleRule.isEnabled=telRuleIsEnabled;
-                                  teleRule.businessLine=businessLine;
-                                  publicPoolRuleList.push(teleRule);
-                                  isTelRuleBl = true;
-                        	 }
-                         }else{
-                        	   var teleRule={};
-                               teleRule.id=form.id8;
-                               teleRule.isEnabled=telRuleIsEnabled;
-                               teleRule.businessLine=businessLine;
-                               teleRule.limitNum=form.number17;
-                               teleRule.type=2;
-                               publicPoolRuleList.push(teleRule);
-                               isTelRuleBl = true;
-                         }
-                       //3.
-                         var busGroupRuleIsEnabled=this.checked8==true?1:0;
-                         var isBusGroupRuleBl = false;
-                         if(!busGroupRuleIsEnabled){
-                        	 var busGroupRuleId = form.id9;
-                        	 if(busGroupRuleId){
-                        		 var busGroupRule={};
-                                 busGroupRule.id=form.id9;
-                                 busGroupRule.isEnabled=busGroupRuleIsEnabled;
-                                 busGroupRule.businessLine=businessLine;
-                                 publicPoolRuleList.push(busGroupRule);
-                                 isBusGroupRuleBl = true;
-                        	 }
-                        	 
-                         }else{
-                        	 var busGroupRule={};
-                             busGroupRule.id=form.id9;
-                             busGroupRule.isEnabled=busGroupRuleIsEnabled;
-                             busGroupRule.businessLine=businessLine;
-                             busGroupRule.limitNum=form.number18;
-                             busGroupRule.type=3;
-                             publicPoolRuleList.push(busGroupRule);
-                             isBusGroupRuleBl = true;
-                         }
-                         var isPublicPoolRuleBl = false;
-                         if(publicPoolRuleList.length>0){
-                        	  isPublicPoolRuleBl = true;
-                        	  param.publicPoolReceiveRuleList=publicPoolRuleList;
-                         }
-                        if(!isFestivalRuleBl&& !unSignLimitRuleBl && !isAutoReleaseBl && !isForceRcycleRuleListBl && !isPublicPoolRuleBl){
-                        	console.info("未选择数据");
-                        	  this.clueRuleSubmitBtnDiabled=false;
-                        	return ;
-                        }
-                        param.businessLine=businessLine;
                         axios.post('/cluerule/clueRule/insertAndUpdateClueRule',param)
                         .then(function (response) {
                             var data =  response.data
