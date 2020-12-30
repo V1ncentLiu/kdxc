@@ -14,14 +14,14 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item>顾问状态得分设置</el-breadcrumb-item>
+        <el-breadcrumb-item>资源实时得分设置</el-breadcrumb-item>
     </el-breadcrumb>  
     <el-row class="marginB20">
         <!-- <shiro:hasPermission name="sys:scheduleManager:add"> -->
-            <el-button type="primary" @click="toSetTime">添加资源范围得分</el-button>
+            <el-button type="primary" @click="openCard"><i class="el-icon-plus"></i>添加资源范围得分</el-button>
         <!-- </shiro:hasPermission> -->
-        <el-button type="primary" @click="toSetTime">编辑</el-button>
-        <el-button type="primary" @click="toSetTime">删除</el-button>
+        <el-button type="success" @click="openCard"><i class="el-icon-edit"></i>编辑</el-button>
+        <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -36,8 +36,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>  
-                <el-form-item label="状态等级:">  
-                    <el-select v-model="form.projectIds" placeholder="选择状态等级" style="width: 100%;" clearable filterable>
+                <el-form-item label="资源维度:">  
+                    <el-select v-model="form.projectIds" placeholder="选择资源维度" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in projectOptions"
                             :key="item.id"
@@ -64,7 +64,9 @@
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
                 <el-table-column prop="teleSaleName" align="center" label="业务线">
                 </el-table-column>                
-                <el-table-column prop="projectNames" align="center" label="状态等级">
+                <el-table-column prop="projectNames" align="center" label="资源维度">
+                </el-table-column>
+                <el-table-column prop="projectCategory" align="center" label="资源范围">
                 </el-table-column>
                 <el-table-column prop="districts" align="center" label="得分">
                 </el-table-column>
@@ -86,8 +88,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="状态等级：" prop="projectCategory" :label-width="formLabelWidth" style="width: 100%;">
-                    <el-select v-model="cardForm.projectCategory" :reserve-keyword=true placeholder="请选择顾问状态等级" filterable multiple  style="width: 333px;">
+                <el-form-item label="资源维度：" prop="projectCategory" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.projectCategory" :reserve-keyword=true placeholder="品类" filterable multiple  style="width: 333px;">
                         <el-option
                             v-for="item in projectCategoryArr"
                             :key="item.id"
@@ -96,9 +98,27 @@
                         </el-option>
                     </el-select>
                 </el-form-item> 
+                <!-- 显示新增的标签 -->
+                <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
+                    <el-tag
+                        v-for="tag in cardForm.rootWords"
+                        :key="tag"
+                        closable
+                        @close="deleteFun1(tag)"
+                        style="margin-right: 10px;">
+                        {{tag}}
+                    </el-tag>
+                </div>
+                <el-col :span="24">
+                    <el-form-item label="资源范围：" :label-width="formLabelWidth" style="">
+                        <el-input v-model="cardForm.searchWord" autocomplete="off"  maxlength="50" style="width: 265px;margin-right: 10px;"></el-input>                            
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="addFun1">添加</el-button>           
+                    </el-form-item>
+                </el-col>
                 <el-form-item label="得分：" :label-width="formLabelWidth" style="position: relative;width: 100%;">
-                    <span style="color: red;position: absolute;left: -75px;top: 0;">*</span>                    
-                    <span>{{cardTeleSale?cardTeleSale:""}}</span>
+                    <el-input v-model="cardForm.scores" autocomplete="off"  maxlength="50" style="width: 265px;margin-right: 10px;"></el-input> 
                 </el-form-item> 
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -315,6 +335,49 @@
                         type: "error"
                     });
                 });
+            },
+            deleteFun() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowNames = [];
+                var rowIds = [];
+                this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                      //删除
+                    var param  = {idList:rowIds};
+                     axios.post('/clueAssignRule/optRule/delete',param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                             ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                                ocmVM.searchTable();
+                            }});
+                             
+                         }else{
+                             ocmVM.$message({
+                                 message: "接口调用失败",
+                                 type: 'error'
+                               }); 
+                         }
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                        
+                     });
+                 }).catch(() => {
+                        
+                 });
             },
         },
         created(){
