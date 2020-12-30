@@ -1,18 +1,13 @@
 package com.kuaidao.manageweb.feign.autodismodel;
 
 
-import com.kuaidao.aggregation.dto.automodel.AutoDisModelDTO;
+import com.kuaidao.businessconfig.dto.automodel.AutoDisModelDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.custservice.dto.autoresponse.AutoResponseReq;
-import com.kuaidao.custservice.dto.autoresponse.AutoResponseReqDto;
-import com.kuaidao.custservice.dto.autoresponse.AutoResponseRespDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,7 +19,7 @@ import java.util.List;
  *
  * @author fengyixuan
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/autodisModel", fallback = AutoDisModelFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "business-config-service", path = "/businessConfig/autodisModel", fallback = AutoDisModelFeignClient.HystrixClientFallback.class)
 public interface AutoDisModelFeignClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
