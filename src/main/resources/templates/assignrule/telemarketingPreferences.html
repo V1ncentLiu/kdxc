@@ -47,9 +47,9 @@
                 <el-form-item label="项目:">  
                     <el-select v-model="form.projectIds" placeholder="项目" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in projectList"
+                            v-for="item in projectOptions"
                             :key="item.id"
-                            :label="item.name"
+                            :label="item.projectName"
                             :value="item.id">
                         </el-option>
                     </el-select>
@@ -158,9 +158,9 @@
                     <el-select v-model="cardForm.projectCategory" :reserve-keyword=true placeholder="品类" filterable multiple  style="width: 333px;">
                         <el-option
                             v-for="item in projectCategoryArr"
-                            :key="item.value"
+                            :key="item.id"
                             :label="item.name"
-                            :value="item.value">
+                            :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -257,35 +257,18 @@
 <script th:inline="javascript">
     var queryOrg=[[${dxzList}]]; // 电销组
     var projectList=[[${projectList}]];//项目集合
-    var projectCategory=[[${projectCategory}]];//项目集合
+    var projectCategory=[[${projectCategory}]];//项目品类集合
     var mediumList=[[${mediumList}]];//媒介集合
+    console.log(projectCategory)
 
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {                
                 formLabelWidth: '100px',
-                projectOptions:[{
-                    id:123,
-                    projectName:"111"
-                },{
-                    id:234,
-                    projectName:"222"
-                }] ,
-                projectCategoryArr:[{
-                    value:123,
-                    name:"333"
-                },{
-                    value:234,
-                    name:"444"
-                }] ,
-                sourceOptions:[{
-                    value:123,
-                    name:"555"
-                },{
-                    value:234,
-                    name:"666"
-                }] ,
+                projectOptions:projectList ,//项目
+                projectCategoryArr:projectCategory,//品类
+                sourceOptions:mediumList ,//媒介
                 loading: false,
                 isDisabled: false,
                 pager:{ 
@@ -543,6 +526,7 @@
                 param.pageSize = this.pager.pageSize;                
                 this.loading = true; 
                 axios.post('/custservice/saleIm/list',param).then(function (response) { 
+                // axios.post('/preference/queryByParams',param).then(function (response) { 
                    mainDivVM.loading = false;
                    console.log(response)
                    var result =  response.data;
