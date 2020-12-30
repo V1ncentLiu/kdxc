@@ -1,8 +1,8 @@
 package com.kuaidao.manageweb.controller.autodistribution;
 
-import com.kuaidao.aggregation.dto.automodel.AutoDisModelDTO;
-import com.kuaidao.aggregation.dto.telepreference.TelePreferenceSetDTO;
+import com.kuaidao.businessconfig.dto.automodel.AutoDisModelDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.telepreference.TelePreferenceSetDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -16,7 +16,6 @@ import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectWapper;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.netflix.discovery.converters.Auto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

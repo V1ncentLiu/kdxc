@@ -1,7 +1,7 @@
 package com.kuaidao.manageweb.controller.autodistribution;
 
 
-import com.kuaidao.aggregation.dto.automodel.AutoDisModelDTO;
+import com.kuaidao.businessconfig.dto.automodel.AutoDisModelDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;

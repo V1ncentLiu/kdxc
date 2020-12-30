@@ -1,8 +1,7 @@
 package com.kuaidao.manageweb.feign.preference;
 
 
-import com.kuaidao.aggregation.dto.automodel.AutoDisModelDTO;
-import com.kuaidao.aggregation.dto.telepreference.TelePreferenceSetDTO;
+import com.kuaidao.businessconfig.dto.telepreference.TelePreferenceSetDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -11,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,13 +19,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
  *
  * @author fengyixuan
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/telepreference", fallback = PreferenceFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "business-config-service", path = "/businessConfig/telepreference", fallback = PreferenceFeignClient.HystrixClientFallback.class)
 public interface PreferenceFeignClient {
 
 
     @RequestMapping(method = RequestMethod.POST,value = "/update")
     JSONResult<Boolean> update(@RequestBody TelePreferenceSetDTO dto);
 
+    @RequestMapping(method = RequestMethod.POST,value = "/insert")
+    JSONResult<Boolean> insert(@RequestBody TelePreferenceSetDTO  dto);
 
     @RequestMapping(method = RequestMethod.POST,value = "/queryByParams")
     JSONResult<PageBean<TelePreferenceSetDTO>> queryByParams(@RequestBody TelePreferenceSetDTO dto);
@@ -55,6 +54,11 @@ public interface PreferenceFeignClient {
         @Override
         public JSONResult<Boolean> update(TelePreferenceSetDTO dto) {
             return fallBackError("偏好设置-更新接口");
+        }
+
+        @Override
+        public JSONResult<Boolean> insert(TelePreferenceSetDTO dto) {
+            return fallBackError("偏好设置-新增接口");
         }
 
         @Override
