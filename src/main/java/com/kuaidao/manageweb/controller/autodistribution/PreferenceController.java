@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.controller.preference;
+package com.kuaidao.manageweb.controller.autodistribution;
 
 import com.kuaidao.aggregation.dto.automodel.AutoDisModelDTO;
 import com.kuaidao.aggregation.dto.telepreference.TelePreferenceSetDTO;
@@ -66,15 +66,15 @@ public class PreferenceController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode = curLoginUser.getRoleList().get(0).getRoleCode();
         Long orgId = curLoginUser.getOrgId();
-        if(RoleCodeEnum.GLY.equals(roleCode)){
+        if(RoleCodeEnum.GLY.name().equals(roleCode)){
             // 查看全部电销组
             request.setAttribute("dxzList", organitionWapper.findAllDXZ());
-        }else if(RoleCodeEnum.DXFZ.equals(roleCode)){
+        }else if(RoleCodeEnum.DXFZ.name().equals(roleCode)){
             // 查看本事业部的
             request.setAttribute("dxzList",organitionWapper.findDxzListByParentId(orgId));
-        }else if(RoleCodeEnum.DXZJL.equals(roleCode)){
+        }else if(RoleCodeEnum.DXZJL.name().equals(roleCode)){
             request.setAttribute("dxzList",organitionWapper.findDxzListByParentId(orgId));
-        }else if(RoleCodeEnum.DXZJ.equals(roleCode)){
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)){
             // 查看本组
             request.setAttribute("dxzList",Arrays.asList(organitionWapper.findOrgById(orgId)));
         }else{
@@ -85,7 +85,7 @@ public class PreferenceController {
         List<ProjectInfoDTO> projectList = projectWapper.allProject();
         request.setAttribute("projectList",projectWapper.signProject(projectList));
         //  项目品类
-        request.setAttribute("projectCategory",projectWapper.projectCategory(projectList));
+        request.setAttribute("projectCategory",dicItemWapper.findDicItemsByCode(DicCodeEnum.PROJECTCATEGORY.getCode()));
 
         // 获取数据字典：媒介
         request.setAttribute("mediumList",dicItemWapper.findDicItemsByCode(DicCodeEnum.MEDIUM.getCode()));;
