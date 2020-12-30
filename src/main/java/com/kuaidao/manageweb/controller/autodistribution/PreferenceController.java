@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.controller.preference;
+package com.kuaidao.manageweb.controller.autodistribution;
 
 import com.kuaidao.aggregation.dto.automodel.AutoDisModelDTO;
 import com.kuaidao.aggregation.dto.telepreference.TelePreferenceSetDTO;
