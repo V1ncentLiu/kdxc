@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <style>
+    .el-input-number.is-controls-right .el-input-number__decrease, .el-input-number.is-controls-right .el-input-number__increase{    line-height: 14px;}
+    .el-input-number__decrease, .el-input-number__increase{top:4px;}
+    .distpicker .form-group{width: 157px;}
+    .distpicker{width:350px;}
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>顾问状态得分设置</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <el-row class="marginB20">
+        <!-- <shiro:hasPermission name="sys:scheduleManager:add"> -->
+            <el-button type="primary" @click="toSetTime">设置非接收资源时间</el-button>
+        <!-- </shiro:hasPermission> -->
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup">
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="顾问名称:">  
+                    <el-select v-model="form.teleSaleId" placeholder="顾问" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in teleSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <el-form-item label="项目:">  
+                    <el-select v-model="form.projectIds" placeholder="项目" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in projectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <el-form-item label="统计截止日期：">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="——" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
+                </el-form-item>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
+                <el-table-column prop="teleSaleName" align="center" label="电销顾问">
+                </el-table-column>
+                <el-table-column prop="isNewUser" align="center" label="新老员工">
+                    <!-- 是否新用户（1：新用户 0：老用户） -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleSaleStatus === '1'">
+                            新用户
+                        </div>                    
+                        <div v-else-if="scope.row.teleSaleStatus === '0'">
+                            老用户
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="非接收资源时间段">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.startTime">{{scope.row.startTime}}</span>                    
+                        <span v-if="scope.row.endTime">-{{scope.row.endTime}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="projectNames" align="center" label="项目">
+                </el-table-column>
+                <el-table-column prop="projectCategory" align="center" label="品类">
+                </el-table-column>
+                <el-table-column prop="districts" align="center" label="地域">
+                </el-table-column>
+                <el-table-column prop="sourcesNames" align="center" label="媒介">
+                </el-table-column>
+                <el-table-column prop="rootWords" align="center" label="词根">
+                </el-table-column>
+                <el-table-column prop="teleSaleStatus" align="center" label="顾问状态" width="90">
+                    <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.teleSaleStatus === 1">
+                            优
+                        </div>                    
+                        <div v-else-if="scope.row.teleSaleStatus === 2">
+                            正常
+                        </div>
+                        <div v-else-if="scope.row.teleSaleStatus === 3">
+                            差
+                        </div>
+                    </template>
+                </el-table-column>
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作" width="100">
+                    <template slot-scope="scope">
+                        <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">设置</el-button>                        
+                        <el-button v-else-if="scope.row.teleCardStatus === 1" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="success" style="margin-left: 10px;">修改</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- 设置顾问偏好弹窗 -->
+    <el-dialog title="设置顾问偏好" :visible.sync="cardVisible" width="600px" @close="cardCancel">
+        <template>
+            <el-form :inline="true" :model="cardForm" ref="cardForm" :rules="cardFormRules">
+                <el-form-item label="顾问姓名："  :label-width="formLabelWidth" style="position: relative;width: 100%;">
+                    <span style="color: red;position: absolute;left: -75px;top: 0;">*</span>                    
+                    <span>{{cardTeleSale?cardTeleSale:""}}</span>
+                </el-form-item>
+                <el-form-item label="非接收时间段：" :label-width="formLabelWidth" style="position: relative;">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="cardForm.startTime" type="datetime" placeholder="开始时间" style="width: 150px;"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="——" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="cardForm.endTime" type="datetime" placeholder="结束时间" style="width: 150px;"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="项目：" prop="projectIds" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.projectIds" :reserve-keyword=true multiple clearable filterable placeholder="请选择" style="width: 333px;">
+                        <el-option
+                            v-for="item in projectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="品类：" prop="projectCategory" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.projectCategory" :reserve-keyword=true placeholder="品类" filterable multiple  style="width: 333px;">
+                        <el-option
+                            v-for="item in projectCategoryArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <!-- 显示新增的省市 -->
+                <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
+                    <el-tag
+                        v-for="tag in cardForm.districts"
+                        :key="tag"
+                        closable
+                        @close="deleteFun2(tag)"
+                        style="margin-right: 10px;">
+                        {{tag}}
+                    </el-tag>
+                </div>
+                <div style="width: 100%;">
+                    <el-form-item label="地域：" :label-width="formLabelWidth" prop="province">
+                        <el-select filterable v-model="cardForm.province" placeholder="省" style="width: 160px;margin-right: 10px;" @change="currentProvince" clearable>
+                            <el-option v-for="item in provinceArr" :key="item.name" :label="item.name"
+                                       :value="item.name"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="" prop="city">
+                        <el-select filterable v-model="cardForm.city" placeholder="市" style="width: 160px;margin-right: 10px;" clearable>
+                            <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                        </el-select>
+                        <el-button type="primary" @click="addFun2">添加</el-button>
+                    </el-form-item>
+                </div>
+                <el-form-item label="媒介：" prop="sources" :label-width="formLabelWidth">
+                    <el-select v-model="cardForm.sources" :reserve-keyword=true filterable multiple placeholder="请选择" style="width: 333px;">
+                        <el-option
+                            v-for="item in sourceOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <!-- 显示新增的标签 -->
+                <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
+                    <el-tag
+                        v-for="tag in cardForm.rootWords"
+                        :key="tag"
+                        closable
+                        @close="deleteFun1(tag)"
+                        style="margin-right: 10px;">
+                        {{tag}}
+                    </el-tag>
+                </div>
+                <el-col :span="24">
+                    <el-form-item label="词根：" :label-width="formLabelWidth" style="">
+                        <el-input v-model="cardForm.searchWord" autocomplete="off"  maxlength="50" style="width: 265px;margin-right: 10px;"></el-input>                            
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="addFun1">添加</el-button>           
+                    </el-form-item>
+                </el-col>
+                <el-form-item label="顾问状态：" :label-width="formLabelWidth">
+                    <el-radio v-model="cardForm.teleSaleStatus" label="1">优</el-radio>
+                    <el-radio v-model="cardForm.teleSaleStatus" label="2">正常</el-radio>
+                    <el-radio v-model="cardForm.teleSaleStatus" label="3">差</el-radio>
+                </el-form-item>  
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="cardSubmit('cardForm')">提 交</el-button>
+                <el-button  @click="cardCancel">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- 设置非接收资源时间弹窗 -->
+    <el-dialog title="批量设置非接收资源分配接收时间" :visible.sync="timeVisible" width="800px" @close="timeCancel">
+        <template>
+            批量设定选中的顾问资源分配非接收时间
+            <el-form :inline="true" :model="timeForm" ref="timeForm" :rules="timeFormRules">
+                <el-form-item label="非接收时间段：" label-width="100px" style="position: relative;">
+                    <span style="color: red;position: absolute;left: -100px;top: 0;">*</span>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.startTime" type="datetime" placeholder="开始时间"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="——" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="timeForm.endTime" type="datetime" placeholder="结束时间"></el-date-picker>
+                </el-form-item>               
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="timeSubmit('cardForm')">确 定</el-button>
+                <el-button  @click="timeCancel">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var queryOrg=[[${dxzList}]]; // 电销组
+    var projectList=[[${projectList}]];//项目集合
+    var projectCategory=[[${projectCategory}]];//项目品类集合
+    var mediumList=[[${mediumList}]];//媒介集合
+    console.log(projectCategory)
+
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {                
+                formLabelWidth: '100px',
+                projectOptions:projectList ,//项目
+                projectCategoryArr:projectCategory,//品类
+                sourceOptions:mediumList ,//媒介
+                loading: false,
+                isDisabled: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
+                form: {
+                    teleGroupId:'',
+                    teleSaleId:'',
+                    projectIds:'',
+                    startTime:'',
+                    endTime:'',
+                },
+                tableData: [],
+                orgTeleArr: queryOrg, // 电销组
+                teleSaleArr: [], // 顾问
+                projectList:projectList,
+                cardVisible:false,//设置顾问偏好
+                cardForm: {
+                    projectIds:[],
+                    projectCategory:[],
+                    sources:[],
+                    teleSaleStatus:'',
+                    province:'',
+                    city:'',
+                    rootWords: [],//词根
+                    districts: [],//地域
+                },
+                cardFormRules:{},
+                cardTeleSale:'',
+
+                timeVisible:false,//批量设置非接收资源分配接收时间弹窗
+                timeForm:{
+                    startTime:'',
+                    endTime:'',                    
+                },
+                timeFormRules:{},
+                multipleSelection:[],
+                provinceArr:[],
+                cityArr:[],
+            }             
+        },
+        methods: { 
+            addFun1() {//添加包含搜索词
+                let searchWord = this.cardForm.searchWord;
+                if (searchWord) {
+                    this.cardForm.rootWords.push(searchWord);
+                }
+                this.cardForm.searchWord = '';
+            },
+            deleteFun1(tag) {//删除包含搜索词
+                this.cardForm.rootWords.splice(this.cardForm.rootWords.indexOf(tag), 1);
+            },
+            addFun2() {//添加包含搜索词
+                let dataProvince = this.cardForm.province;
+                let dataCity = this.cardForm.city;
+
+                if (dataProvince&&!dataCity) {
+                    this.cardForm.districts.push(dataProvince);
+                }
+                if(dataCity){
+                    this.cardForm.districts.push(dataProvince+'-'+dataCity);
+                }
+                console.log(this.cardForm.districts);
+            },
+            deleteFun2(tag) {//删除包含搜索词
+                this.cardForm.districts.splice(this.cardForm.districts.indexOf(tag), 1);
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            toSetTime(){
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({message: '请选择数据', type: 'warning'});
+                    return false;
+                }
+                this.timeVisible=true;
+                setTimeout(function(){
+                    $("#distpicker").distpicker('reset');
+                },0)
+            },
+            timeCancel(){
+                this.timeVisible=false;
+                this.timeForm.startTime="";
+                this.timeForm.endTime="";
+            },
+            timeSubmit(){
+                var startTime = this.timeForm.startTime;
+                var endTime = this.timeForm.endTime;
+                if(!startTime){
+                    this.$message({
+                        message: '开始时间不能为空',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                if(!endTime){
+                    this.$message({
+                        message: '结束时间不能为空',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                if(endTime && startTime) {
+                    beginTimes = new Date(this.timeForm.startTime);
+                    endTimes = new Date(this.timeForm.endTime);
+                    if (beginTimes > endTimes) {
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                var param = {};
+                param.startTime = this.timeForm.startTime;
+                param.endTime = this.timeForm.endTime;
+                param.ids = this.multipleSelection;
+                console.log(param)
+                // mainDivVM.loading = true;
+                // axios.post('/preference/update',param).then(function (response) { 
+                    // console.log(response)
+                    // mainDivVM.loading = false;
+                    this.timeVisible=false;
+                    
+                // }).catch(function (error) {
+                //     mainDivVM.loading = false;
+                //     mainDivVM.$message({
+                //         message: "请求失败，请稍后重试",
+                //         type: "error"
+                //     });
+                // });
+            },
+            changeTeleGroup() {//改变电销组
+                var param ={};
+                if (null == this.form.teleGroupId || "" == this.form.teleGroupId) {
+                    mainDivVM.teleSaleArr = [];
+                    return;
+                }
+                param.orgId = this.form.teleGroupId;
+                console.info(param);
+                axios.post('/business/busAllocation/getSaleList', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    mainDivVM.teleSaleArr= table;
+                })
+                .catch(function (error) {
+                   console.log(error);
+                });
+            }, 
+            openCard(id,name){// 打开名片
+                this.cardVisible=true;
+                this.cardTeleSale=name;
+                this.cardForm.teleSaleId=id;
+                var param = {};
+                param.teleSaleId = id;
+                this.loading = true; 
+                axios.post('/saleCard/getSaleCard',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                    console.log(response)
+                    var result=response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        if(table.id){
+                            mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
+                            mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId.split(',');
+                            mainDivVM.cardForm.workYear=table.workYear;
+                            mainDivVM.cardForm.serviceScore=table.serviceScore;
+                            mainDivVM.cardForm.serviceNum=table.serviceNum;
+                        }else{
+                            mainDivVM.cardForm.dictionaryRankId='';
+                            mainDivVM.cardForm.dictionaryEvaluationId=[];
+                            mainDivVM.cardForm.workYear=3;
+                            mainDivVM.cardForm.serviceScore=4.5;
+                            mainDivVM.cardForm.serviceNum='3523';
+                        }                        
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            cardCancel(){// 关闭名片
+                this.cardVisible=false;
+                this.cardForm.startTime='';
+                this.cardForm.endTime='';
+                this.cardForm.projectIds=[];
+                this.cardForm.projectCategory=[];
+                this.cardForm.sources=[];
+                this.cardForm.districts=[];
+                this.cardForm.rootWords=[];
+                this.cardForm.teleSaleStatus='';
+                this.cardForm.province='';
+                this.cardForm.city='';
+            },
+            cardSubmit(){
+                var startTime = this.cardForm.startTime;
+                var endTime = this.cardForm.endTime;
+                if(endTime && startTime) {
+                    beginTimes = new Date(this.cardForm.startTime);
+                    endTimes = new Date(this.cardForm.endTime);
+                    if (beginTimes > endTimes) {
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                var param = {};
+                param.id = "";
+                param.startTime = this.cardForm.startTime;
+                param.endTime = this.cardForm.endTime;
+                param.projectIds = this.cardForm.projectIds.length==0?"":this.cardForm.projectIds.join(",");//逗号分隔
+                param.projectCategory = this.cardForm.projectCategory.length==0?"":this.cardForm.projectCategory.join(",");//逗号分隔
+                param.sources = this.cardForm.sources.length==0?"":this.cardForm.sources.join(",");//逗号分隔
+                param.districts = this.cardForm.districts.length==0?"":this.cardForm.districts.join(",");//逗号分隔
+                param.rootWords = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
+                param.teleSaleStatus = this.cardForm.teleSaleStatus;
+                
+                console.log(param)
+                // this.loading = true; 
+                // axios.post('/preference/updateInfo',param).then(function (response) { 
+                //     mainDivVM.loading = false;
+                    // console.log(response)
+                    // mainDivVM.cardVisible=false;
+                //     window.location.href="/preference/listPage"
+                // }).catch(function (error) {
+                //     mainDivVM.loading = false;
+                //     mainDivVM.$message({
+                //         message: "请求失败，请稍后重试",
+                //         type: "error"
+                //     });
+                // });
+            },       
+            searchTable() {                
+                var param = {};
+                param.teleGroupId = this.form.teleGroupId;
+                param.teleSaleId = this.form.teleSaleId;
+                param.startTime = this.form.startTime;
+                param.endTime = this.form.endTime;
+                param.projectIds = this.form.projectIds;
+
+                param.pageNum = this.pager.currentPage
+                param.pageSize = this.pager.pageSize;                
+                this.loading = true; 
+                axios.post('/custservice/saleIm/list',param).then(function (response) { 
+                // axios.post('/preference/queryByParams',param).then(function (response) { 
+                   mainDivVM.loading = false;
+                   console.log(response)
+                   var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.tableData= table.data;
+                        mainDivVM.pager.total =  table.total;
+                        mainDivVM.pager.currentPage = table.currentPage;
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }  
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            currentProvince(selVal) {
+                //动态获取城市
+                var param = {};
+                param.type = "1";
+                param.name = selVal;
+                if (this.cardForm.city != null && this.cardForm.city != '') {
+                    this.cardForm.city = null;
+                }
+                this.$refs['cardForm'].clearValidate();
+                axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                    mainDivVM.cityArr = response.data.data.data;
+                });
+            },
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            this.searchTable();
+            //获取省
+            param = {};
+            param.type = "0";
+            axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                mainDivVM.provinceArr = response.data.data.data;
+            });
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
