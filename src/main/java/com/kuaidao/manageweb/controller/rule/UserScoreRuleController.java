@@ -4,43 +4,21 @@
 package com.kuaidao.manageweb.controller.rule;
 
 import com.kuaidao.businessconfig.constant.AggregationConstant;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import com.kuaidao.businessconfig.dto.rule.AssignRuleTeamDTO;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleDTO;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRulePageParam;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleReq;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.businessconfig.dto.rule.*;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
+import com.kuaidao.manageweb.feign.rule.UserScoreRuleFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -50,12 +28,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -68,24 +43,20 @@ import java.util.*;
 public class UserScoreRuleController {
     private static Logger logger = LoggerFactory.getLogger(UserScoreRuleController.class);
     @Autowired
-    private ClueAssignRuleFeignClient clueAssignRuleFeignClient;
-    @Autowired
-    private OrganizationFeignClient organizationFeignClient;
+    UserScoreRuleFeignClient userScoreRuleFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-    @Autowired
-    private SysSettingFeignClient sysSettingFeignClient;
-    @Autowired
-    private ProjectInfoFeignClient projectInfoFeignClient;
 
     /***
      * 优化规则列表页
      *
      * @return
      */
-    @RequestMapping("/telemarketingScore")
-    public String initCompanyList(HttpServletRequest request) {
-        return "assignrule/telemarketingScore";
+    @RequestMapping("/userScoreRulePage")
+    public String userScoreRulePage(HttpServletRequest request) {
+        // 查询优化类资源类别集合
+        request.setAttribute("businessLineList", getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode()));
+        return "rule/userScoreRulePage";
     }
 
     /***
@@ -94,6 +65,7 @@ public class UserScoreRuleController {
      * @return
      */
     @RequestMapping("/addtelemarketingScore")
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:add")
     public String addtelemarketingScore(HttpServletRequest request) {
         return "assignrule/addtelemarketingScore";
     }
@@ -103,8 +75,101 @@ public class UserScoreRuleController {
      * @return
      */
     @RequestMapping("/updatetelemarketingScore")
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:edit")
     public String updatetelemarketingScore(HttpServletRequest request) {
         return "assignrule/updatetelemarketingScore";
     }
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
+    /***
+     * 列表
+     *
+     * @return
+     */
+    @PostMapping("/userScoreRuleList")
+    @ResponseBody
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:view")
+    public JSONResult<PageBean<UserScoreRuleDTO>> getUserScoreRuleListByPage(
+            @RequestBody UserScoreRuleDTO pageParam, HttpServletRequest request) {
+        JSONResult<PageBean<UserScoreRuleDTO>> list = userScoreRuleFeignClient.getUserScoreRuleListByPage(pageParam);
+        return list;
+    }
+    /**
+     * 获取当前登录账号
+     *
+     * @param
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
 
+    /**
+     * 保存规则
+     *
+     * @param
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/save")
+    @ResponseBody
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:add")
+    @LogRecord(description = "新增顾问得分规则", operationType = LogRecord.OperationType.INSERT,
+            menuName = MenuEnum.USER_SCORE_RULE_MANAGEMENT)
+    public JSONResult save(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
+                           BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        // 插入创建人信息
+        UserInfoDTO user = getUser();
+        userScoreRuleDTO.setCreateUser(user.getId());
+        return userScoreRuleFeignClient.create(userScoreRuleDTO);
+    }
+
+    /**
+     * 保存规则
+     *
+     * @param
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/getRuleByBusinessLine")
+    @ResponseBody
+    public JSONResult getRuleByBusinessLine(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
+                           BindingResult result) {
+        return userScoreRuleFeignClient.getRuleByBusinessLine(userScoreRuleDTO);
+    }
+
+    /**
+     * 删除非优化规则
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/delete")
+    @ResponseBody
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:delete")
+    @LogRecord(description = "删除规则", operationType = LogRecord.OperationType.DELETE,
+            menuName = MenuEnum.USER_SCORE_RULE_MANAGEMENT)
+    public JSONResult delete(@RequestBody IdListLongReq idList) {
+        return userScoreRuleFeignClient.delete(idList);
+    }
 }
