@@ -5,6 +5,7 @@ package com.kuaidao.manageweb.controller.rule;
 
 import com.kuaidao.businessconfig.dto.rule.*;
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -94,7 +95,7 @@ public class UserScoreRuleController {
      *
      * @return
      */
-    @PostMapping("/userScoreRuleList")
+    @PostMapping("/getUserScoreRuleListByPage")
     @ResponseBody
     @RequiresPermissions("clueAssignRule:userScoreRuleManager:view")
     public JSONResult<PageBean<UserScoreRuleDTO>> getUserScoreRuleListByPage(
@@ -139,7 +140,7 @@ public class UserScoreRuleController {
     }
 
     /**
-     * 保存规则
+     * 规则
      *
      * @param
      * @return
@@ -148,7 +149,7 @@ public class UserScoreRuleController {
      */
     @PostMapping("/getRuleByBusinessLine")
     @ResponseBody
-    public JSONResult getRuleByBusinessLine(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
+    public JSONResult<Boolean> getRuleByBusinessLine(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
                                             BindingResult result) {
         return userScoreRuleFeignClient.getRuleByBusinessLine(userScoreRuleDTO);
     }
@@ -162,7 +163,7 @@ public class UserScoreRuleController {
     @PostMapping("/delete")
     @ResponseBody
     @RequiresPermissions("clueAssignRule:userScoreRuleManager:delete")
-    @LogRecord(description = "删除规则", operationType = LogRecord.OperationType.DELETE,
+    @LogRecord(description = "删除顾问得分规则", operationType = LogRecord.OperationType.DELETE,
             menuName = MenuEnum.USER_SCORE_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
         return userScoreRuleFeignClient.delete(idList);
@@ -195,5 +196,88 @@ public class UserScoreRuleController {
     public List<DictionaryItemRespDTO> getBusinesslineList() {
         // 查询优化类资源类别集合
         return  getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
+    }
+
+    /**
+     * 启用规则
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/updateStatusEnable")
+    @ResponseBody
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:edit")
+    @LogRecord(description = "启用顾问得分规则", operationType = LogRecord.OperationType.ENABLE,
+            menuName = MenuEnum.USER_SCORE_RULE_MANAGEMENT)
+    public JSONResult updateStatusEnable(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
+                                         BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+
+        Long id = userScoreRuleDTO.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        UserInfoDTO user = getUser();
+        userScoreRuleDTO.setUpdateUser(user.getId());
+        return userScoreRuleFeignClient.updateStatus(userScoreRuleDTO);
+    }
+
+    /**
+     * 禁用规则
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/updateStatusDisable")
+    @ResponseBody
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:edit")
+    @LogRecord(description = "禁用顾问得分规则", operationType = LogRecord.OperationType.DISABLE,
+            menuName = MenuEnum.USER_SCORE_RULE_MANAGEMENT)
+    public JSONResult updateStatusDisable(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
+                                          BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+
+        Long id = userScoreRuleDTO.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        UserInfoDTO user = getUser();
+        userScoreRuleDTO.setUpdateUser(user.getId());
+        return userScoreRuleFeignClient.updateStatus(userScoreRuleDTO);
+    }
+    /**
+     * 修改非优化规则
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("/update")
+    @ResponseBody
+    @RequiresPermissions("clueAssignRule:userScoreRuleManager:edit")
+    @LogRecord(description = "修改顾问得分规则信息", operationType = LogRecord.OperationType.UPDATE,
+            menuName = MenuEnum.USER_SCORE_RULE_MANAGEMENT)
+    public JSONResult update(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
+                             BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        // 插入修改人信息
+        UserInfoDTO user = getUser();
+        userScoreRuleDTO.setUpdateUser(user.getId());
+        Long id = userScoreRuleDTO.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        return userScoreRuleFeignClient.update(userScoreRuleDTO);
     }
 }

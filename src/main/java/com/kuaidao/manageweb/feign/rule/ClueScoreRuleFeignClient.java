@@ -1,11 +1,7 @@
 package com.kuaidao.manageweb.feign.rule;
 
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleDTO;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRulePageParam;
-import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleReq;
-import com.kuaidao.businessconfig.dto.rule.UserScoreRuleDTO;
+import com.kuaidao.businessconfig.dto.rule.ClueScoreRuleDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -16,8 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
-
 /**
  * 资源分配规则
  * 
@@ -26,8 +20,8 @@ import java.util.List;
  * @version V1.0
  */
 @FeignClient(name = "business-config-service", path = "/businessConfig/userStoreRule",
-        fallback = UserScoreRuleFeignClient.HystrixClientFallback.class)
-public interface UserScoreRuleFeignClient {
+        fallback = ClueScoreRuleFeignClient.HystrixClientFallback.class)
+public interface ClueScoreRuleFeignClient {
     /**
      * 新增资源分配规则
      * 
@@ -35,7 +29,7 @@ public interface UserScoreRuleFeignClient {
      * @return
      */
     @PostMapping("/create")
-    public JSONResult<Long> create(@RequestBody UserScoreRuleDTO clueAssignRuleReq);
+    public JSONResult<Long> create(@RequestBody ClueScoreRuleDTO clueScoreRuleDTO);
 
 
     /**
@@ -45,7 +39,7 @@ public interface UserScoreRuleFeignClient {
      * @return
      */
     @PostMapping("/getRuleByBusinessLine")
-    public JSONResult<Boolean> getRuleByBusinessLine(@RequestBody UserScoreRuleDTO clueAssignRuleReq);
+    public JSONResult<Boolean> getRuleByBusinessLine(@RequestBody ClueScoreRuleDTO clueScoreRuleDTO);
     /**
      * 删除资源分配规则
      *
@@ -62,7 +56,7 @@ public interface UserScoreRuleFeignClient {
      * @return
      */
     @PostMapping("/getRuleDetailById")
-    public JSONResult getRuleDetailById(@RequestBody UserScoreRuleDTO clueAssignRuleReq);
+    public JSONResult getRuleDetailById(@RequestBody ClueScoreRuleDTO clueScoreRuleDTO);
 
     /**
      * 查询资源分配规则集合
@@ -71,8 +65,8 @@ public interface UserScoreRuleFeignClient {
      * @return
      */
     @PostMapping("/getUserScoreRuleListByPage")
-    public JSONResult<PageBean<UserScoreRuleDTO>> getUserScoreRuleListByPage(
-            @RequestBody UserScoreRuleDTO pageParam);
+    public JSONResult<PageBean<ClueScoreRuleDTO>> getClueScoreRuleListByPage(
+            @RequestBody ClueScoreRuleDTO clueScoreRuleDTO);
 
     /**
      * 修改规则状态
@@ -81,7 +75,7 @@ public interface UserScoreRuleFeignClient {
      * @return
      */
     @PostMapping("/updateStatus")
-    public JSONResult updateStatus(@RequestBody UserScoreRuleDTO userScoreRuleDTO);
+    public JSONResult updateStatus(@RequestBody ClueScoreRuleDTO clueScoreRuleDTO);
 
     /**
      * 修改规则状态
@@ -90,12 +84,12 @@ public interface UserScoreRuleFeignClient {
      * @return
      */
     @PostMapping("/update")
-    public JSONResult update(@RequestBody UserScoreRuleDTO userScoreRuleDTO);
+    public JSONResult update(@RequestBody ClueScoreRuleDTO clueScoreRuleDTO);
 
     @Component
-    static class HystrixClientFallback implements UserScoreRuleFeignClient {
+    static class HystrixClientFallback implements ClueScoreRuleFeignClient {
 
-        private static Logger logger = LoggerFactory.getLogger(UserScoreRuleFeignClient.class);
+        private static Logger logger = LoggerFactory.getLogger(ClueScoreRuleFeignClient.class);
 
 
         private JSONResult fallBackError(String name) {
@@ -106,12 +100,12 @@ public interface UserScoreRuleFeignClient {
 
 
         @Override
-        public JSONResult<Long> create(UserScoreRuleDTO pageParam) {
-            return fallBackError("创建顾问得分");
+        public JSONResult<Long> create(ClueScoreRuleDTO clueScoreRuleDTO) {
+            return fallBackError("创建资源得分");
         }
 
         @Override
-        public JSONResult<Boolean> getRuleByBusinessLine(UserScoreRuleDTO clueAssignRuleReq) {
+        public JSONResult<Boolean> getRuleByBusinessLine(ClueScoreRuleDTO clueScoreRuleDTO) {
             return fallBackError("校验规则是否有效");
         }
 
@@ -121,23 +115,23 @@ public interface UserScoreRuleFeignClient {
         }
 
         @Override
-        public JSONResult getRuleDetailById(UserScoreRuleDTO clueAssignRuleRe) {
-            return fallBackError("顾问得分详情");
+        public JSONResult getRuleDetailById(ClueScoreRuleDTO clueScoreRuleDTO) {
+            return fallBackError("资源得分详情");
         }
 
         @Override
-        public JSONResult<PageBean<UserScoreRuleDTO>> getUserScoreRuleListByPage(UserScoreRuleDTO pageParam) {
-            return fallBackError("查询顾问得分规则列表");
+        public JSONResult<PageBean<ClueScoreRuleDTO>> getClueScoreRuleListByPage(ClueScoreRuleDTO clueScoreRuleDTO) {
+            return fallBackError("查询资源得分规则列表");
         }
 
         @Override
-        public JSONResult updateStatus(UserScoreRuleDTO userScoreRuleDTO) {
-            return fallBackError("顾问得分状态修改");
+        public JSONResult updateStatus(ClueScoreRuleDTO clueScoreRuleDTO) {
+            return fallBackError("资源得分状态修改");
         }
 
         @Override
-        public JSONResult update(UserScoreRuleDTO userScoreRuleDTO) {
-            return fallBackError("顾问得分信息修改");
+        public JSONResult update(ClueScoreRuleDTO clueScoreRuleDTO) {
+            return fallBackError("资源得分信息修改");
         }
 
 
