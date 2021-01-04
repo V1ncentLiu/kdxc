@@ -427,7 +427,8 @@ public class ExtendClueDistributionedTaskController {
                 if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
                     curList.add(taskDTO.getConsultProjectTurn());
                 }
-
+                curList.add(taskDTO.getSaleLadder());
+                curList.add(taskDTO.getClueLadder());
                 dataList.add(curList);
             }
         }
