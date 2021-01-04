@@ -194,6 +194,6 @@ public class UserScoreRuleController {
     @ResponseBody
     public List<DictionaryItemRespDTO> getBusinesslineList() {
         // 查询优化类资源类别集合
-        return  new getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        return  getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
     }
 }
