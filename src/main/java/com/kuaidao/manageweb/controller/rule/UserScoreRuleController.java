@@ -3,7 +3,6 @@
  */
 package com.kuaidao.manageweb.controller.rule;
 
-import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.rule.*;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -13,10 +12,7 @@ import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.rule.UserScoreRuleFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.shiro.SecurityUtils;
@@ -54,8 +50,6 @@ public class UserScoreRuleController {
      */
     @RequestMapping("/userScoreRulePage")
     public String userScoreRulePage(HttpServletRequest request) {
-        // 查询优化类资源类别集合
-        request.setAttribute("businessLineList", getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode()));
         return "rule/userScoreRulePage";
     }
 
@@ -67,7 +61,7 @@ public class UserScoreRuleController {
     @RequestMapping("/addtelemarketingScore")
     @RequiresPermissions("clueAssignRule:userScoreRuleManager:add")
     public String addtelemarketingScore(HttpServletRequest request) {
-        return "assignrule/addtelemarketingScore";
+        return "rule/updatetelemarketingScore";
     }
     /***
      * 优化规则列表页
@@ -76,8 +70,9 @@ public class UserScoreRuleController {
      */
     @RequestMapping("/updatetelemarketingScore")
     @RequiresPermissions("clueAssignRule:userScoreRuleManager:edit")
-    public String updatetelemarketingScore(HttpServletRequest request) {
-        return "assignrule/updatetelemarketingScore";
+    public String updatetelemarketingScore(HttpServletRequest request)
+    {
+        return "rule/updatetelemarketingScore";
     }
     /**
      * 查询字典表
@@ -154,7 +149,7 @@ public class UserScoreRuleController {
     @PostMapping("/getRuleByBusinessLine")
     @ResponseBody
     public JSONResult getRuleByBusinessLine(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
-                           BindingResult result) {
+                                            BindingResult result) {
         return userScoreRuleFeignClient.getRuleByBusinessLine(userScoreRuleDTO);
     }
 
@@ -171,5 +166,34 @@ public class UserScoreRuleController {
             menuName = MenuEnum.USER_SCORE_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
         return userScoreRuleFeignClient.delete(idList);
+    }
+    /**
+     * 规则详情
+     *
+     * @param
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/getRuleDetailById")
+    @ResponseBody
+    public JSONResult getRuleDetailById(@Valid @RequestBody UserScoreRuleDTO userScoreRuleDTO,
+                                        BindingResult result) {
+        return userScoreRuleFeignClient.getRuleDetailById(userScoreRuleDTO);
+    }
+
+    /**
+     * 规则详情
+     *
+     * @param
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/getBusinesslineList")
+    @ResponseBody
+    public List<DictionaryItemRespDTO> getBusinesslineList() {
+        // 查询优化类资源类别集合
+        return  new getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
     }
 }
