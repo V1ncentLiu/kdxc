@@ -27,7 +27,7 @@ import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.*;
@@ -354,7 +354,7 @@ public class SignRecordController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         reqDTO.setUserId(user.getId());
         reqDTO.setOrgId(user.getOrgId());
-        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.REJECT);
+        reqDTO.setStatus(BusinessConfigConstant.SIGN_ORDER_STATUS.REJECT);
         return signRecordFeignClient.rejectSignOrderNew(reqDTO);
     }
 
@@ -371,7 +371,7 @@ public class SignRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.PASS);
+        reqDTO.setStatus(BusinessConfigConstant.SIGN_ORDER_STATUS.PASS);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setBusinessLine(curLoginUser.getBusinessLine());
         reqDTO.setOrgId(curLoginUser.getOrgId());
@@ -436,7 +436,7 @@ public class SignRecordController {
     public JSONResult<List<ProjectInfoDTO>> queryProjectList() {
         // 查询所有签约项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         return projectInfoFeignClient.queryBySign(param);
     }
 

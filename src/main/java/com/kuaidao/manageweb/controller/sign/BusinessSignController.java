@@ -35,7 +35,7 @@ import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.sign.SignParamDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
@@ -147,7 +147,7 @@ public class BusinessSignController {
 
         // 查询所有签约项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         // 获取省份
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
@@ -468,7 +468,7 @@ public class BusinessSignController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         BusVisitRecordReqDTO recordReqDTO = new BusVisitRecordReqDTO();
         recordReqDTO.setClueId(clueId);
-        recordReqDTO.setIsVisit(AggregationConstant.YES);
+        recordReqDTO.setIsVisit(BusinessConfigConstant.YES);
         recordReqDTO.setBusGroupId(curLoginUser.getOrgId());
         JSONResult<List<BusVisitRecordRespDTO>> result = visitRecordFeignClient.queryList(recordReqDTO);
         List<BusVisitRecordRespDTO> data = result.data();
