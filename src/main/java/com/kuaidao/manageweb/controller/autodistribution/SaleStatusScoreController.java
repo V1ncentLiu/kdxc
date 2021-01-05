@@ -3,12 +3,15 @@ package com.kuaidao.manageweb.controller.autodistribution;
 
 import com.kuaidao.businessconfig.dto.scoreset.SaleScoreSetDTO;
 import com.kuaidao.businessconfig.dto.scoreset.SaleScoreSetParam;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.scoreset.SaleScoreFegin;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +31,14 @@ public class SaleStatusScoreController {
     @Autowired
     SaleScoreFegin saleScoreFegin;
 
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
+
     @RequestMapping("/page")
     public String listPage(HttpServletRequest request) {
+        JSONResult<List<DictionaryItemRespDTO>> businessLineJR = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        request.setAttribute("businessLineList", businessLineJR.getData());
         return "assignrule/telemarketingStatusScore";
     }
 
