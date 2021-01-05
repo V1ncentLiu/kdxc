@@ -4,7 +4,7 @@ import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailAccountDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
@@ -148,7 +148,7 @@ public class BalanceAccountController {
 
         // 查询所有签约项目
         ProjectInfoPageParam param=new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // 查询所有项目
@@ -354,7 +354,7 @@ public class BalanceAccountController {
             HttpServletRequest request) {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         req.setCommitUser(user.getId());
-        req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_1);
+        req.setStatus(BusinessConfigConstant.RECONCILIATION_STATUS.STATUS_1);
         JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.rejectApply(req);
         return reconciliationConfirm;
     }
@@ -378,7 +378,7 @@ public class BalanceAccountController {
         BigDecimal bigDecimal = new BigDecimal(req.getMoney());
         // req.setCommissionMoney(bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new
         // BigDecimal(100)));
-        req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
+        req.setStatus(BusinessConfigConstant.RECONCILIATION_STATUS.STATUS_2);
         JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.applyConfirm(req);
         return reconciliationConfirm;
     }

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import org.apache.commons.lang3.StringUtils;
@@ -97,7 +97,7 @@ public class BusArrangeController {
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("teleProjectList", allProject.getData());
         //查询可签约的项目
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> project = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", project.getData());
         // 获取省份

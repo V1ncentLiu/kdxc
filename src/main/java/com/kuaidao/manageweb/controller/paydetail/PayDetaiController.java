@@ -19,7 +19,7 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailListDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailPageParam;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
@@ -184,7 +184,7 @@ public class PayDetaiController {
         request.setAttribute("giveTypeList", getDictionaryByCode(DicCodeEnum.GIVETYPE.getCode()));
         // 查询所有签约项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
 

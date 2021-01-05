@@ -11,7 +11,7 @@ import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.*;
@@ -312,8 +312,8 @@ public class ConsoleController {
         reqDTO.setEndTime(curDate);
         reqDTO.setStartTime(DateUtil.getCurStartDate());
         List<Integer> sourceList = new ArrayList<Integer>();
-        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE1);
-        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE2);
+        sourceList.add(BusinessConfigConstant.SALE_RECEIVE_SOURCE.SOURCE1);
+        sourceList.add(BusinessConfigConstant.SALE_RECEIVE_SOURCE.SOURCE2);
         reqDTO.setPhase(CluePhase.PHAE_4TH.getCode());
         reqDTO.setSourceList(sourceList);
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
@@ -336,7 +336,7 @@ public class ConsoleController {
         // reqDTO.setStartTime(DateUtil.getCurStartDate());
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         List<Integer> sourceList = new ArrayList<Integer>();
-        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE3);
+        sourceList.add(BusinessConfigConstant.SALE_RECEIVE_SOURCE.SOURCE3);
         reqDTO.setSourceList(sourceList);
         // type 1：日期字段用电销的
         reqDTO.setType(1);
@@ -449,8 +449,8 @@ public class ConsoleController {
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         reqDTO.setType(2);
         List<Integer> teleDirectorSourceList = new ArrayList<>();
-        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE2);
-        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE3);
+        teleDirectorSourceList.add(BusinessConfigConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE2);
+        teleDirectorSourceList.add(BusinessConfigConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE3);
         reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
         reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
@@ -473,7 +473,7 @@ public class ConsoleController {
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         reqDTO.setType(2);
         List<Integer> teleDirectorSourceList = new ArrayList<>();
-        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE1);
+        teleDirectorSourceList.add(BusinessConfigConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE1);
         reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
@@ -702,7 +702,7 @@ public class ConsoleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
 
-        pageParam.setDelFalg(AggregationConstant.INVITIT_DEL_FALG.NORMAL);
+        pageParam.setDelFalg(BusinessConfigConstant.INVITIT_DEL_FALG.NORMAL);
 
         JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
                 pendingVisitFeignClient.pendingVisitListNoPage(pageParam);
@@ -831,7 +831,7 @@ public class ConsoleController {
             businessGroupIdList.add(orgId);
             reqDTO.setBusinessGroupIdList(businessGroupIdList);
         }
-        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
+        reqDTO.setStatus(BusinessConfigConstant.SIGN_ORDER_STATUS.AUDITING);
         return signRecordFeignClient.listSignRecordNoPage(reqDTO);
     }
 

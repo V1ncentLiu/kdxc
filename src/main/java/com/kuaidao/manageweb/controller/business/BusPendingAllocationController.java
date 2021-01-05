@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import org.apache.shiro.SecurityUtils;
@@ -94,7 +94,7 @@ public class BusPendingAllocationController {
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("teleProjectList", allProject.getData());
         //查询可签约的项目
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> project = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", project.getData());
         // 查询所有商务经理

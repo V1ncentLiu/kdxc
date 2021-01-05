@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.visitrecord.*;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -164,7 +164,7 @@ public class VisitRecordController {
 
         // 查询所有签约项目
         ProjectInfoPageParam param=new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // request.setAttribute("busManagerList",busManagerList);
@@ -480,7 +480,7 @@ public class VisitRecordController {
         }
         UserInfoDTO userInfo = CommUtil.getCurLoginUser();
         reqDTO.setAuditPerson(userInfo.getId());
-        reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.REJECT);
+        reqDTO.setStatus(BusinessConfigConstant.VISIT_RECORD_STATUS.REJECT);
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }
 
@@ -499,7 +499,7 @@ public class VisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.PASS);
+        reqDTO.setStatus(BusinessConfigConstant.VISIT_RECORD_STATUS.PASS);
 
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }

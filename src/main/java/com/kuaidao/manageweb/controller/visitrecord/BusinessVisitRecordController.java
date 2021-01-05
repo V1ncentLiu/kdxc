@@ -1,7 +1,7 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
 import com.kuaidao.aggregation.dto.visitrecord.*;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -102,8 +102,8 @@ public class BusinessVisitRecordController {
     public String listPage(HttpServletRequest request, @RequestParam String clueId) {
         BusVisitRecordReqDTO recordReqDTO = new BusVisitRecordReqDTO();
         recordReqDTO.setClueId(Long.valueOf(clueId));
-        recordReqDTO.setIsVisit(AggregationConstant.YES);
-        recordReqDTO.setIsHistory(AggregationConstant.NO);
+        recordReqDTO.setIsVisit(BusinessConfigConstant.YES);
+        recordReqDTO.setIsHistory(BusinessConfigConstant.NO);
         JSONResult<List<BusVisitRecordRespDTO>> listJSONResult =
                 visitRecordFeignClient.queryList(recordReqDTO);
         List<BusVisitRecordRespDTO> data = new ArrayList<>();
@@ -170,7 +170,7 @@ public class BusinessVisitRecordController {
     @ResponseBody
     public JSONResult<List<BusVisitRecordRespDTO>> queryList(@RequestBody BusVisitRecordReqDTO dto)
             throws Exception {
-        dto.setIsHistory(AggregationConstant.NO);
+        dto.setIsHistory(BusinessConfigConstant.NO);
         return this.queryVisitList(dto);
     }
 
@@ -231,7 +231,7 @@ public class BusinessVisitRecordController {
      */
     private JSONResult<List<BusVisitRecordRespDTO>> queryVisitList(BusVisitRecordReqDTO dto)
         throws Exception {
-        dto.setIsVisit(AggregationConstant.YES);
+        dto.setIsVisit(BusinessConfigConstant.YES);
         return visitRecordFeignClient.queryList(dto);
     }
 
@@ -241,8 +241,8 @@ public class BusinessVisitRecordController {
     @RequestMapping("/queryHisList")
     @ResponseBody
     public List<List<BusVisitRecordRespDTO>> queryHisList(@RequestBody BusVisitRecordReqDTO dto) throws Exception {
-        dto.setIsVisit(AggregationConstant.YES);
-        dto.setIsHistory(AggregationConstant.YES);
+        dto.setIsVisit(BusinessConfigConstant.YES);
+        dto.setIsHistory(BusinessConfigConstant.YES);
         JSONResult<List<BusVisitRecordRespDTO>> listJSONResult = visitRecordFeignClient.queryList(dto);
         List<List<BusVisitRecordRespDTO>> list = new ArrayList<>();
         if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
@@ -264,8 +264,8 @@ public class BusinessVisitRecordController {
         // 查询为到访记录：
         VisitNoRecordReqDTO visitNoRecordReqDTO = new VisitNoRecordReqDTO();
         visitNoRecordReqDTO.setClueId(dto.getClueId());
-        visitNoRecordReqDTO.setIsHistory(AggregationConstant.YES);
-        visitNoRecordReqDTO.setIsVisit(AggregationConstant.NO);
+        visitNoRecordReqDTO.setIsHistory(BusinessConfigConstant.YES);
+        visitNoRecordReqDTO.setIsVisit(BusinessConfigConstant.NO);
         JSONResult<List<VisitNoRecordRespDTO>> listJSONResult1 = visitRecordFeignClient1.listNoVisitRecordNoPage(visitNoRecordReqDTO);
         if(JSONResult.SUCCESS.equals(listJSONResult1.getCode())){
             List<VisitNoRecordRespDTO> data = listJSONResult1.getData();
@@ -275,7 +275,7 @@ public class BusinessVisitRecordController {
                 busVisitRecordRespDTO.setCreateTime(noRecord.getCreateTime());
                 busVisitRecordRespDTO.setCreateUser(noRecord.getCreateUser());
                 busVisitRecordRespDTO.setCreateUserName(noRecord.getCreateUserName());
-                busVisitRecordRespDTO.setIsVisit(AggregationConstant.NO);
+                busVisitRecordRespDTO.setIsVisit(BusinessConfigConstant.NO);
                 busVisitRecordRespDTO.setCustomerName(noRecord.getCusName());
                 busVisitRecordRespDTO.setProjectName(noRecord.getTasteProjectName());
                 busVisitRecordRespDTO.setSignProvince(noRecord.getProvince());
@@ -342,7 +342,7 @@ public class BusinessVisitRecordController {
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
-            List<ProjectInfoDTO> alist = proJson.getData().parallelStream().filter(a->AggregationConstant.NO.equals(a.getIsNotSign())).collect(Collectors.toList());
+            List<ProjectInfoDTO> alist = proJson.getData().parallelStream().filter(a->BusinessConfigConstant.NO.equals(a.getIsNotSign())).collect(Collectors.toList());
             request.setAttribute("proSelect", alist);
         }
 
@@ -440,7 +440,7 @@ public class BusinessVisitRecordController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         BusVisitRecordReqDTO recordReqDTO = new BusVisitRecordReqDTO();
         recordReqDTO.setClueId(clueId);
-        recordReqDTO.setIsVisit(AggregationConstant.YES);
+        recordReqDTO.setIsVisit(BusinessConfigConstant.YES);
         recordReqDTO.setBusGroupId(curLoginUser.getOrgId());
         JSONResult<List<BusVisitRecordRespDTO>> result = visitRecordFeignClient.queryList(recordReqDTO);
         List<BusVisitRecordRespDTO> data = result.data();
