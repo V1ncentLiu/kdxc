@@ -169,17 +169,17 @@
                 cardForm: {
                     businessLine:'',
                     dimension:'1',
-                    scope:[],
+                    scope:[],//资源范围
                     rootWords: [],//词根
                     clueScopeIpt:'',
                     score:'',
                 },
                 cardFormRules:{
                     businessLine:[
-                        { required: true, message: '请选择业务线', trigger: 'blur' },
+                        { required: true, message: '请选择业务线', trigger: 'change' },
                     ],
                     dimension:[
-                        { required: true, message: '请选择资源维度', trigger: 'blur' },
+                        { required: true, message: '请选择资源维度', trigger: 'change' },
                     ],
                     scope:[
                         // { required: true, message: '请选择资源范围', trigger: 'blur' },
@@ -236,16 +236,16 @@
                 if(val=="1"){
                     this.clueScopeArr=[];
                     if(clueType){
-                        this.cardForm.scope=clueType;
+                        this.clueScopeArr=clueType;
                     }else{
-                        this.cardForm.scope=[];
+                        this.clueScopeArr=[];
                     }                    
                 }else if(val=="2"){
                     this.clueScopeArr=[];
                     if(medium){
-                        this.cardForm.scope=medium;
+                        this.clueScopeArr=medium;
                     }else{
-                        this.cardForm.scope=[];
+                        this.clueScopeArr=[];
                     }                    
                 }else if(val=="3"){
                     this.clueScopeArr=[{id:'1',name:'调查问卷'}]   
@@ -330,29 +330,32 @@
                 this.$refs['cardForm'].validate((valid) => {
                     if (valid) {
                         var param = {};
-                        param.id = "";
-                        param.projectIds = this.cardForm.projectIds.length==0?"":this.cardForm.projectIds.join(",");//逗号分隔
-                        param.projectCategory = this.cardForm.projectCategory.length==0?"":this.cardForm.projectCategory.join(",");//逗号分隔
-                        param.sources = this.cardForm.sources.length==0?"":this.cardForm.source.join(",");//逗号分隔
-                        param.districts = this.cardForm.districts.length==0?"":this.cardForm.districts.join(",");//逗号分隔
-                        param.rootWords = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
-                        param.teleSaleStatus = this.cardForm.teleSaleStatus;
-                        
+                        param.businessLine = this.cardForm.businessLine;
+                        param.dimension = this.cardForm.dimension;
+                        if(this.cardForm.dimension=="5"){//词根
+                            param.scope = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
+                        }
+                        param.scope = this.cardForm.scope.length==0?"":this.cardForm.scope.join(",");//逗号分隔
+
+                        param.score = this.cardForm.score;
                         console.log(param)
                         // this.loading = true; 
-                        // axios.post('/preference/updateInfo',param).then(function (response) { 
-                        //     mainDivVM.loading = false;
-                            // console.log(response)
-                            // mainDivVM.cardVisible=false;
-                        //     window.location.href="/preference/listPage"
-                        // }).catch(function (error) {
-                        //     mainDivVM.loading = false;
-                        //     mainDivVM.$message({
-                        //         message: "请求失败，请稍后重试",
-                        //         type: "error"
-                        //     });
-                        // });
-                    } else {return false;}
+                        axios.post('/cluescore/insert',param).then(function (response) { 
+                            // mainDivVM.loading = false;
+                            console.log(response)
+                            mainDivVM.cardVisible=false;
+                            // window.location.href="/preference/listPage"
+                        }).catch(function (error) {
+                            // mainDivVM.loading = false;
+                            mainDivVM.$message({
+                                message: "请求失败，请稍后重试",
+                                type: "error"
+                            });
+                        });
+                    } else {
+                        console.log("验证未通过")
+                        return false;
+                    }
                 });
             },       
             searchTable() {                
@@ -428,8 +431,8 @@
                  });
             },
             number(){
-          　　this.cardForm.scores=this.cardForm.scores.replace(/[^\.\d]/g,'');
-              this.cardForm.scores=this.cardForm.scores.replace('.','');
+          　　this.cardForm.score=this.cardForm.score.replace(/[^\.\d]/g,'');
+              this.cardForm.score=this.cardForm.score.replace('.','');
           },
         },
         created(){
@@ -438,7 +441,7 @@
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
             if(clueType){
-                this.cardForm.scope=clueType;//默认下拉资源类型
+                this.clueScopeArr=clueType;//默认下拉资源类型
             }
             
         },
