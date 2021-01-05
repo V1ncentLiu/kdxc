@@ -30,9 +30,9 @@
                     <el-select v-model="form.businessLine" placeholder="选择业务线" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in businessLineArr"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>  
@@ -62,11 +62,11 @@
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
-                <el-table-column prop="businessLine" align="center" label="业务线">
+                <el-table-column prop="businessLineName" align="center" label="业务线">
                 </el-table-column>                
-                <el-table-column prop="dimension" align="center" label="资源维度">
+                <el-table-column prop="dimensionName" align="center" label="资源维度">
                 </el-table-column>
-                <el-table-column prop="scope" align="center" label="资源范围">
+                <el-table-column prop="scopeName" align="center" label="资源范围">
                 </el-table-column>
                 <el-table-column prop="score" align="center" label="得分">
                 </el-table-column>
@@ -82,9 +82,9 @@
                     <el-select v-model="cardForm.businessLine" :reserve-keyword=true clearable placeholder="请选择业务线" style="width: 333px;">
                         <el-option
                             v-for="item in businessLineArr"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -102,9 +102,9 @@
                     <el-select v-model="cardForm.scope" :reserve-keyword=true placeholder="请选择资源范围" filterable multiple  style="width: 333px;">
                         <el-option
                             v-for="item in clueScopeArr"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>                           
                 </el-form-item>
@@ -278,6 +278,14 @@
                 this.dialogTitle="添加资源范围得分";
             },
             editCard(){// 打开名片
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行编辑',
+                       type: 'warning'
+                     });
+                    return;
+                }
                 this.cardVisible=true;
                 this.dialogTitle="编辑资源范围得分";
                 this.cardForm.teleSaleId=id;
