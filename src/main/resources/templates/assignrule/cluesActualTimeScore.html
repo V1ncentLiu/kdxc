@@ -279,44 +279,44 @@
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-            openCard(){// 打开名片
+            openCard(){// 打开新建名片
                 this.cardVisible=true;
                 this.dialogTitle="添加资源范围得分";
             },
-            editCard(){// 打开名片
+            editCard(){// 打开编辑名片回显
                 var rows = this.multipleSelection;
-                if(rows.length==0){
+                if(rows.length!==1){
                     this.$message({
-                       message: '请选择数据进行编辑',
+                       message: '请选择一条数据进行编辑',
                        type: 'warning'
                      });
                     return;
                 }
                 this.cardVisible=true;
                 this.dialogTitle="编辑资源范围得分";
-                this.cardForm.teleSaleId=id;
                 var param = {};
-                param.teleSaleId = id;
+                param.id = rows[0].id;
                 this.loading = true; 
-                axios.post('/saleCard/getSaleCard',param).then(function (response) { 
+                axios.post('/cluescore/queryOne',param).then(function (response) { 
                     mainDivVM.loading = false;
                     console.log(response)
                     var result=response.data;
                     if(result.code==0){
                         var table=result.data;
                         if(table.id){
-                            mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
-                            mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId.split(',');
-                            mainDivVM.cardForm.workYear=table.workYear;
-                            mainDivVM.cardForm.serviceScore=table.serviceScore;
-                            mainDivVM.cardForm.serviceNum=table.serviceNum;
-                        }else{
-                            mainDivVM.cardForm.dictionaryRankId='';
-                            mainDivVM.cardForm.dictionaryEvaluationId=[];
-                            mainDivVM.cardForm.workYear=3;
-                            mainDivVM.cardForm.serviceScore=4.5;
-                            mainDivVM.cardForm.serviceNum='3523';
-                        }                        
+                            mainDivVM.cardForm.businessLine=table.businessLine+"";
+                            mainDivVM.cardForm.dimension=table.dimension+"";
+                            // 判断是不是词根
+                            if(table.dimension=="5"){//词根
+                                mainDivVM.showSelect=false;
+                                mainDivVM.showIpt=true;
+                                mainDivVM.cardForm.rootWords=table.scope.split(',');
+                                mainDivVM.cardForm.scope=[];
+                            }else{
+                                mainDivVM.cardForm.scope=table.scope.split(',');
+                            }                            
+                            mainDivVM.cardForm.score=table.score;
+                        }                      
                     }else{
                         mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
@@ -341,9 +341,21 @@
                 this.cardForm.city='';
             },
             cardSubmit(){
+                var rows=this.multipleSelection;
+                var id=""
+                if(rows){
+                    id=rows[0].id;
+                }
                 this.$refs['cardForm'].validate((valid) => {
                     if (valid) {
                         var param = {};
+                        var url = "";
+                        if(id){
+                            url="/cluescore/update"//编辑
+                            param.id=id;
+                        }else{
+                            url="/cluescore/insert"//新建
+                        }
                         param.businessLine = this.cardForm.businessLine;
                         param.dimension = this.cardForm.dimension;
                         if(this.cardForm.dimension=="5"){//词根
@@ -355,7 +367,7 @@
                         param.score = this.cardForm.score;
                         console.log(param)
                         // this.loading = true; 
-                        axios.post('/cluescore/insert',param).then(function (response) { 
+                        axios.post(url,param).then(function (response) { 
                             // mainDivVM.loading = false;
                             console.log(response)
                             // mainDivVM.cardVisible=false;
