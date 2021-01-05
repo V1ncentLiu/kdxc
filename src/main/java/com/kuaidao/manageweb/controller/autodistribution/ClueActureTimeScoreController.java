@@ -41,6 +41,17 @@ public class ClueActureTimeScoreController {
         JSONResult<List<DictionaryItemRespDTO>> businessLineJR = dictionaryItemFeignClient
                 .queryDicItemsByGroupCode(DicCodeEnum.BUSINESS_LINE.getCode());
         request.setAttribute("businessLineList", businessLineJR.getData());
+
+
+        JSONResult<List<DictionaryItemRespDTO>> mediumJR = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode());
+        request.setAttribute("mediumList", mediumJR.getData());
+
+
+        JSONResult<List<DictionaryItemRespDTO>> clueTypeJR = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode());
+        request.setAttribute("clueTypeList", clueTypeJR.getData());
+
         return "assignrule/cluesActualTimeScore";
     }
 
