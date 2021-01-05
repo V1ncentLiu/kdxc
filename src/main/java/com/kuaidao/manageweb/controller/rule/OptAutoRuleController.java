@@ -7,6 +7,7 @@ import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.businessconfig.dto.rule.*;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -36,6 +37,7 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -55,6 +57,7 @@ import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zxy
@@ -123,10 +126,10 @@ public class OptAutoRuleController {
         Collections.sort(orgList,
                 Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
         request.setAttribute("trafficList", orgList);
-        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
-                organizationFeignClient.listBusinessLineOrg();
+        /*JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();*/
         // 查询所有业务线
-        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
+        request.setAttribute("businessLineList", getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode()));
 
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getOptCategory());
@@ -150,55 +153,61 @@ public class OptAutoRuleController {
      *
      * @return
      */
-//    @RequestMapping("/initUpdate")
-//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-//    public String initUpdateProject(@RequestParam Long id, HttpServletRequest request) {
-//        // 查询优化规则信息
-//        JSONResult<ClueAutoAssignRuleDTO> jsonResult =
-//                clueAutoAssignRuleFeignClient.get(new IdEntityLong(id));
-//        ClueAutoAssignRuleDTO data = jsonResult.getData();
-//        if (data != null && data.getTeleList() != null) {
-//            List<AutoAssignRuleTeamDTO> teleList = data.getTeleList();
-//            for (AutoAssignRuleTeamDTO assignRuleTeamDTO : teleList) {
-//                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-//                queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-//                queryDTO.setOrgType(OrgTypeConstant.DXZ);
-//                queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
-//                JSONResult<List<OrganizationRespDTO>> orgList =
-//                        organizationFeignClient.queryOrgByParam(queryDTO);
-//                List<OrganizationRespDTO> dxzList = orgList.getData();
-//                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime));
-//                assignRuleTeamDTO.setTeleOptions(dxzList);
-//            }
-//        }
-//
-//
-//        request.setAttribute("clueAssignRule", data);
-//        // 查询话务组
-//        List<OrganizationRespDTO> orgList = getTrafficGroup();
-//        Collections.sort(orgList,
-//                Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
-//        request.setAttribute("trafficList", orgList);
+    @RequestMapping("/initUpdate")
+    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+    public String initUpdate(@RequestParam Long id, HttpServletRequest request) {
+        // 查询优化规则信息
+        JSONResult<ClueAutoAssignRuleDTO> jsonResult =
+                clueAutoAssignRuleFeignClient.get(new IdEntityLong(id));
+        ClueAutoAssignRuleDTO data = jsonResult.getData();
+        List<OrganizationRespDTO> teleGroupList = new ArrayList<>();
+        if (data != null && data.getAutoAssignRuleTeamDetailList() != null) {
+            List<AutoAssignRuleTeamDetailDTO> teleList = data.getAutoAssignRuleTeamDetailList();
+            List<Integer> businessLineList = new ArrayList<>();
+            for (AutoAssignRuleTeamDetailDTO assignRuleTeamDTO : teleList) {
+                if(assignRuleTeamDTO.getBusinessLine() !=null){
+                    businessLineList.add(assignRuleTeamDTO.getBusinessLine());
+                }
+            }
+            if(CollectionUtils.isNotEmpty(businessLineList)){
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+                queryDTO.setOrgType(OrgTypeConstant.DXZ);
+                queryDTO.setBusinessLineList(businessLineList);
+                JSONResult<List<OrganizationRespDTO>> orgList =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                if(JSONResult.SUCCESS.equals(orgList.getCode()) && CollectionUtils.isNotEmpty(orgList.getData())){
+                    teleGroupList = orgList.getData();
+                }
+            }
+        }
+        request.setAttribute("teleGroupList", teleGroupList);
+        request.setAttribute("clueAssignRule", data);
+        // 查询话务组
+        List<OrganizationRespDTO> orgList = getTrafficGroup();
+        Collections.sort(orgList,
+                Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        request.setAttribute("trafficList", orgList);
 //        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
 //                organizationFeignClient.listBusinessLineOrg();
-//        // 查询所有业务线
-//        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
-//        // 查询优化类资源类别集合
-//        request.setAttribute("clueCategoryList", getOptCategory());
-//        // 查询字典行业类别集合
-//        request.setAttribute("industryCategoryList",
-//                getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
-//        // 查询字典媒介集合
-//        request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
-//        // 项目
-//        ProjectInfoPageParam param = new ProjectInfoPageParam();
-//        param.setIsNotSign(-1);
-//        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-//        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-//            request.setAttribute("noSingProjectList", proJson.getData());
-//        }
-//        return "rule/updateOptRulePage";
-//    }
+        // 查询所有业务线
+        request.setAttribute("businessLineList", getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode()));
+        // 查询优化类资源类别集合
+        request.setAttribute("clueCategoryList", getOptCategory());
+        // 查询字典行业类别集合
+        request.setAttribute("industryCategoryList",
+                getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
+        // 查询字典媒介集合
+        request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("noSingProjectList", proJson.getData());
+        }
+        return "rule/updateOptAutoRulePage";
+    }
 
     /***
      * 优化规则列表

@@ -80,7 +80,7 @@ public class ClueScoreRuleController {
     /***
      * 列表
      *
-     * @return
+     * @return.
      */
     @PostMapping("/getClueScoreRuleListByPage")
     @ResponseBody
