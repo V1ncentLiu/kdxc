@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -56,6 +57,7 @@ public class AutoDistributionController {
         return autoDisModelFeignClient.update(dto);
     }
 
+    @ResponseBody
     @PostMapping(value = "/insert")
     public JSONResult<Boolean> insert(@RequestBody AutoDisModelDTO dto ,BindingResult result){
         if (result.hasErrors()) {
@@ -67,8 +69,7 @@ public class AutoDistributionController {
     }
 
 
-    /**
-     */
+    @ResponseBody
     @PostMapping(value = "/queryByParams")
     public JSONResult<AutoDisModelDTO> queryByParams(@RequestBody AutoDisModelDTO dto){
         return autoDisModelFeignClient.queryByParams(dto);

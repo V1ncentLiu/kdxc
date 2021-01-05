@@ -22,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -91,7 +92,7 @@ public class PreferenceController {
         return "assignrule/telemarketingPreferences";
     }
 
-
+    @ResponseBody
     @RequestMapping(method = RequestMethod.POST,value = "/update")
     JSONResult<Boolean> update(@RequestBody TelePreferenceSetDTO dto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -99,14 +100,14 @@ public class PreferenceController {
         return preferenceFeignClient.update(dto);
     }
 
-
+    @ResponseBody
     @RequestMapping(method = RequestMethod.POST,value = "/updateInfo")
     JSONResult<Boolean> updateInfo(@RequestBody TelePreferenceSetDTO dto){
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         dto.setUpdateUser(curLoginUser.getId());
         return preferenceFeignClient.update(dto);
     }
-
+    @ResponseBody
     @RequestMapping(method = RequestMethod.POST,value = "/queryByParams")
     JSONResult<PageBean<TelePreferenceSetDTO>> queryByParams(@RequestBody TelePreferenceSetDTO dto){
 
@@ -119,12 +120,13 @@ public class PreferenceController {
         return preferenceFeignClient.queryByParams(dto);
     }
 
-
+    @ResponseBody
     @RequestMapping(method = RequestMethod.POST,value = "/updateBusyStatus")
     JSONResult<Boolean> updateBusyStatus(@RequestBody TelePreferenceSetDTO  dto){
         return preferenceFeignClient.updateBusyStatus(dto);
     }
 
+    @ResponseBody
     @RequestMapping(method = RequestMethod.POST,value = "/queryBusyStatus")
     public JSONResult<Integer> queryBusyStatus(){
 
