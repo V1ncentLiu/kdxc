@@ -577,10 +577,10 @@ var homePageVM=new Vue({
               if(resData.code=='0'){
                   // 忙碌状态(1:忙碌 ，0：不忙碌)
                   homePageVM.showBusyBtn=true;
-                  if(val=="1"){
+                  if(resData.data=='1'){
                     homePageVM.isBusyButton=false;
                     homePageVM.isBusyStatus=true;
-                  }else if(val=='0'){
+                  }else if(resData.data=='0'){
                     homePageVM.isBusyButton=true;
                     homePageVM.isBusyStatus=false;
                   }
