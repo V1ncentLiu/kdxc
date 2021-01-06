@@ -543,15 +543,15 @@ var homePageVM=new Vue({
              console.log(response)
              var resData = response.data;
              if(resData.code=='0'){
-                if(resData.data==true){
-                  homePageVM.$message({message:'设置成功',type:'success'});
-                  if(val==1){
-                    this.isBusyButton=false;
-                    this.isBusyStatus=true;
-                  }else if(val==2){
-                    this.isBusyButton=true;
-                    this.isBusyStatus=false;
-                  }
+                if(resData.data==true&&val==1){
+                    homePageVM.$message({message:'设置成功',type:'success'});
+                    homePageVM.isBusyButton=false;
+                    homePageVM.isBusyStatus=true;
+                    
+                }else if(resData.data==true&&val==2){
+                    homePageVM.$message({message:'取消成功',type:'success'});
+                    homePageVM.isBusyButton=true;
+                    homePageVM.isBusyStatus=false;
                 }
              }else{
                 homePageVM.$message({message:resData.msg,type:'error'});
