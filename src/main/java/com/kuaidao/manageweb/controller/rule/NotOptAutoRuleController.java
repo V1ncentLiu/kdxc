@@ -298,6 +298,7 @@ public class NotOptAutoRuleController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
+        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
         return clueAutoAssignRuleFeignClient.update(clueAssignRuleReq);
     }
 
