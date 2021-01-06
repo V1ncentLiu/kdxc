@@ -128,7 +128,7 @@ public class PreferenceController {
 
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST,value = "/queryBusyStatus")
-    public JSONResult<Integer> queryBusyStatus(){
+    public JSONResult<String> queryBusyStatus(){
 
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         log.info("curLoginUser::{}",curLoginUser);
@@ -152,10 +152,11 @@ public class PreferenceController {
         idEntityLong.setId(curLoginUser.getId());
         JSONResult<TelePreferenceSetDTO> result = preferenceFeignClient.queryBusyStatus(idEntityLong);
 
-        Integer status = 0;
+        String status = "0";
         if(result.data()!=null){
             TelePreferenceSetDTO data = result.data();
-            status = data.getBustStatus();
+            if(data.getBustStatus()!=null){
+            }
         }
         return new JSONResult().success(status);
     }
