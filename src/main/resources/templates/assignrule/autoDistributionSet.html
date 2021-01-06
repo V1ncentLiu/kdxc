@@ -123,7 +123,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var optionsObj = [[${businessLineList}]];
-    console.log(optionsObj)
+    // console.log(optionsObj)
 </script>
 <script>
     var releaseRuleVM=new Vue({
@@ -139,43 +139,8 @@
                     createDay:'',
                     disDay:'',
                     ladderList:[],
-                    // ladderList:[{
-                    //     srangeStart:1,
-                    //     srangeEnd:2,
-                    //     clueSrangeStart:3,
-                    //     clueSrangeEnd:4,
-                    //     ladder:1,
-                    //     limit:10
-                    // },{
-                    //     srangeStart:2,
-                    //     srangeEnd:3,
-                    //     clueSrangeStart:4,
-                    //     clueSrangeEnd:5,
-                    //     ladder:2,
-                    //     limit:10
-                    // },{
-                    //     srangeStart:3,
-                    //     srangeEnd:4,
-                    //     clueSrangeStart:5,
-                    //     clueSrangeEnd:6,
-                    //     ladder:3,
-                    //     limit:10
-                    // },{
-                    //     srangeStart:4,
-                    //     srangeEnd:5,
-                    //     clueSrangeStart:6,
-                    //     clueSrangeEnd:7,
-                    //     ladder:4,
-                    //     limit:10
-                    // },{
-                    //     srangeStart:5,
-                    //     srangeEnd:6,
-                    //     clueSrangeStart:7,
-                    //     clueSrangeEnd:8,
-                    //     ladder:5,
-                    //     limit:10
-                    // }] 
-                },                
+                },   
+                editId:'',             
                 rules:{
                     bussinessLine: [
                         { required: true, message: '请选择业务线', trigger: 'blur' }
@@ -217,19 +182,19 @@
                         }
                     ],
                     srangeStart: [
-                        { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
+                        // { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
                     ],
                     srangeEnd: [
-                        { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
+                        // { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
                     ],
                     limit: [
-                        { required: true, message: '请输入每日分配上限', trigger: 'blur' }
+                        // { required: true, message: '请输入每日分配上限', trigger: 'blur' }
                     ],
                     clueSrangeStart: [
-                        { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
+                        // { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
                     ],
                     clueSrangeEnd: [
-                        { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
+                        // { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
                     ]
                 },
                 options: optionsObj,
@@ -244,18 +209,28 @@
                     if(val==optionsVal[i].value){
                         this.bussinessLineTitle=optionsVal[i].name;
                         this.bussinessLine=optionsVal[i].value;
+                        this.initClueRule(optionsVal[i].value)
                     }
                 }
+                
             },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) { 
+                        var url=""
                         var param = {};
+                        if(this.editId){
+                            param.id=this.editId;
+                            url="/autodistribution/update"
+                        }else{
+                            url="/autodistribution/insert"
+                        }
                         param.bussinessLine=this.form.bussinessLine;
                         param.createDay=this.form.createDay;
                         param.disDay=this.form.disDay;
                         param.ladderList=this.form.ladderList;
-                        axios.post('/autodistribution/insert',param)
+                        console.log(param)
+                        axios.post(url,param)
                         .then(function (response) {
                             console.log(response)
                             var data =  response.data
@@ -291,23 +266,76 @@
             cancel(){//取消
             	location.reload();
             },
-            initClueRule(type){
+            initClueRule(val){
             	var param={};
-                if(type==1){
-                    param.bussinessLine=optionsObj[0].value;
+                if(val){
+                    param.bussinessLine=val;
                 }else{
-                    param.bussinessLine=this.bussinessLine;
+                    param.bussinessLine=optionsObj[0].value;
                 }
                 
             	 axios.post('/autodistribution/queryByParams',param)
                  .then(function (response) {
+                    console.log(response)
                      var data =  response.data;
                      if(data.code=='0'){
                         var resData = data.data;
-                        releaseRuleVM.form.bussinessLine=resData.bussinessLine+"";
-                        releaseRuleVM.form.createDay=resData.createDay;
-                        releaseRuleVM.form.disDay=resData.disDay;
-                        releaseRuleVM.form.ladderList=resData.ladderList;
+                        if(resData&&resData.id){
+                            releaseRuleVM.editId=resData.id;
+                        }
+                        if(resData&&resData.bussinessLine){
+                            releaseRuleVM.form.bussinessLine=resData.bussinessLine+"";
+                        }
+                        if(resData&&resData.createDay){
+                            releaseRuleVM.form.createDay=resData.createDay;
+                        }else{
+                            releaseRuleVM.form.createDay=null;
+                        }
+                        if(resData&&resData.disDay){
+                            releaseRuleVM.form.disDay=resData.disDay;
+                        }else{
+                            releaseRuleVM.form.disDay=null;
+                        }
+                        if(resData&&resData.ladderList.length!=0){
+                            releaseRuleVM.form.ladderList=resData.ladderList;
+                        }else{
+                            releaseRuleVM.form.ladderList=[{
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:1,
+                                limit:null
+                            },{
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:2,
+                                limit:null
+                            },{
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:3,
+                                limit:null
+                            },{
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:4,
+                                limit:null
+                            },{
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:5,
+                                limit:null
+                            }];
+                        }
                         
                          
                      }else{
@@ -326,7 +354,7 @@
             document.getElementById('releaseRule').style.display = 'block';
         },
         created(){
-        	this.initClueRule(1);
+        	this.initClueRule();
             var optionsVal=this.options;
             for(var i=0;i<optionsVal.length;i++){
                 this.bussinessLineTitle=optionsVal[0].name
