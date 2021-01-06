@@ -156,8 +156,9 @@ public class PreferenceController {
         if(result.data()!=null){
             TelePreferenceSetDTO data = result.data();
             if(data.getBustStatus()!=null){
+                status = data.getBustStatus().toString();
             }
-        }
+         }
         return new JSONResult().success(status);
     }
 
