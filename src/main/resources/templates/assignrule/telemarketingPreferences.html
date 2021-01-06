@@ -78,18 +78,18 @@
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
                 <el-table-column prop="teleSaleName" align="center" label="电销顾问">
                 </el-table-column>
-                <el-table-column prop="isNewUser" align="center" label="新老员工">
+                <el-table-column prop="isNewUser" align="center" label="新老员工" width="90">
                     <!-- 是否新用户（1：新用户 0：老用户） -->
                     <template slot-scope="scope">
-                        <div v-if="scope.row.teleSaleStatus === '1'">
+                        <div v-if="scope.row.isNewUser == '1'">
                             新员工
                         </div>                    
-                        <div v-else-if="scope.row.teleSaleStatus === '0'">
+                        <div v-else-if="scope.row.isNewUser == '0'">
                             老员工
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="teleSaleName" align="center" label="非接收资源时间段">
+                <el-table-column prop="teleSaleName" align="center" label="非接收资源时间段" width="250">
                     <template slot-scope="scope">
                         <span v-if="scope.row.startTime">{{formatTimeFn(scope.row.startTime)}}</span>                    
                         <span v-if="scope.row.endTime">-{{formatTimeFn(scope.row.endTime)}}</span>
@@ -122,7 +122,6 @@
                 </el-table-column>
                 <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作" width="100">
                     <template slot-scope="scope">
-                        {{scope.row.updateTime}}
                         <el-button  v-if="scope.row.updateTime" @click="editCard(scope.row)" size="small" type="warning" style="margin-left: 10px;">修改</el-button>                        
                         <el-button v-else @click="openCard(scope.row)" size="small" type="success" style="margin-left: 10px;">设置</el-button>
                     </template>
@@ -138,7 +137,7 @@
                 <el-form-item label="顾问姓名："  :label-width="formLabelWidth" style="position: relative;width: 100%;">
                     <span style="color: red;position: absolute;left: -75px;top: 0;">*</span>                    
                     <span>{{cardTeleSale?cardTeleSale:""}}</span>
-                    <span style="color: red;">{{teleSaleStatus?'('+teleSaleStatus+')':""}}</span>
+                    <span style="color: red;">{{isNewUser?'('+isNewUser+')':""}}</span>
                 </el-form-item>
                 <el-form-item label="非接收时间段：" :label-width="formLabelWidth" style="position: relative;">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="cardForm.startTime" type="datetime" placeholder="开始时间" style="width: 150px;"></el-date-picker>
@@ -302,7 +301,7 @@
                 },
                 cardFormRules:{},
                 cardTeleSale:'',
-                teleSaleStatus:'',
+                isNewUser:'',
 
                 timeVisible:false,//批量设置非接收资源分配接收时间弹窗
                 timeForm:{
@@ -338,6 +337,8 @@
                     this.cardForm.districts.push(dataProvince+'-'+dataCity);
                 }
                 console.log(this.cardForm.districts);
+                this.cardForm.province="";
+                this.cardForm.city="";
             },
             deleteFun2(tag) {//删除包含搜索词
                 this.cardForm.districts.splice(this.cardForm.districts.indexOf(tag), 1);
@@ -450,12 +451,12 @@
                 // 新老员工
                 var status="";
                 if(rows){
-                    if(rows.teleSaleStatus&&rows.teleSaleStatus=="1"){
+                    if(rows.isNewUser&&rows.isNewUser=="1"){
                         status="新员工"
-                    }else if(rows.teleSaleStatus&&rows.teleSaleStatus=="0"){
+                    }else if(rows.isNewUser&&rows.isNewUser=="0"){
                         status="老员工"
                     }
-                    this.teleSaleStatus=status;
+                    this.isNewUser=status;
                 }
             },
             editCard(rows){// 打开名片   
@@ -466,12 +467,12 @@
                 var status="";
                 if(rows){
                     this.clickId=rows.id;
-                    if(rows.teleSaleStatus&&rows.teleSaleStatus=="1"){
+                    if(rows.isNewUser&&rows.isNewUser=="1"){
                         status="新员工"
-                    }else if(rows.teleSaleStatus&&rows.teleSaleStatus=="0"){
+                    }else if(rows.isNewUser&&rows.isNewUser=="0"){
                         status="老员工"
                     }
-                    this.teleSaleStatus=status;
+                    this.isNewUser=status;
                     if(rows.startTime){
                        this.cardForm.startTime=rows.startTime; 
                     }
