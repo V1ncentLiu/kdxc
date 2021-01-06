@@ -160,9 +160,9 @@
                     <el-select v-model="cardForm.projectCategory" :reserve-keyword=true placeholder="品类" filterable multiple  style="width: 333px;">
                         <el-option
                             v-for="item in projectCategoryArr"
-                            :key="item.id"
+                            :key="item.name"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.name">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -313,6 +313,7 @@
                 multipleSelection:[],
                 provinceArr:[],
                 cityArr:[],
+                clickId:'',
             }             
         },
         methods: { 
@@ -464,6 +465,7 @@
                 // 新老员工
                 var status="";
                 if(rows){
+                    this.clickId=rows.id;
                     if(rows.teleSaleStatus&&rows.teleSaleStatus=="1"){
                         status="新员工"
                     }else if(rows.teleSaleStatus&&rows.teleSaleStatus=="0"){
@@ -476,7 +478,24 @@
                     if(rows.endTime){
                         this.cardForm.endTime=rows.endTime;
                     }
-                    
+                    if(rows.teleSaleStatus){//顾问状态
+                        this.cardForm.teleSaleStatus=rows.teleSaleStatus+"";
+                    }  
+                    if(rows.projectIds){//项目
+                        this.cardForm.projectIds=rows.projectIds?rows.projectIds.split(','):[];
+                    }
+                    if(rows.projectCategory){//品类
+                        this.cardForm.projectCategory=rows.projectCategory?rows.projectCategory.split(','):[];
+                    }                                      
+                    if(rows.sources){//媒介
+                        this.cardForm.sources=rows.sources?rows.sources.split(','):[];
+                    }                    
+                    if(rows.districts){// 省市
+                        this.cardForm.districts=rows.districts?rows.districts.split(','):[];
+                    }                    
+                    if(rows.rootWords){// 词根
+                        this.cardForm.rootWords=rows.rootWords?rows.rootWords.split(','):[];
+                    }
                 }
                 
             },
@@ -508,7 +527,7 @@
                     }
                 }
                 var param = {};
-                param.id = "";
+                param.id = this.clickId;
                 param.startTime = this.cardForm.startTime;
                 param.endTime = this.cardForm.endTime;
                 param.projectIds = this.cardForm.projectIds.length==0?"":this.cardForm.projectIds.join(",");//逗号分隔
