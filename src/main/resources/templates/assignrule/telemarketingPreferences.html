@@ -82,17 +82,17 @@
                     <!-- 是否新用户（1：新用户 0：老用户） -->
                     <template slot-scope="scope">
                         <div v-if="scope.row.teleSaleStatus === '1'">
-                            新用户
+                            新员工
                         </div>                    
                         <div v-else-if="scope.row.teleSaleStatus === '0'">
-                            老用户
+                            老员工
                         </div>
                     </template>
                 </el-table-column>
                 <el-table-column prop="teleSaleName" align="center" label="非接收资源时间段">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.startTime">{{scope.row.startTime}}</span>                    
-                        <span v-if="scope.row.endTime">-{{scope.row.endTime}}</span>
+                        <span v-if="scope.row.startTime">{{formatTimeFn(scope.row.startTime)}}</span>                    
+                        <span v-if="scope.row.endTime">-{{formatTimeFn(scope.row.endTime)}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="projectNames" align="center" label="项目">
@@ -122,8 +122,9 @@
                 </el-table-column>
                 <el-table-column prop="userAvgDayValidCallTime" align="center" label="操作" width="100">
                     <template slot-scope="scope">
-                        <el-button  v-if="scope.row.teleCardStatus === 0" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="warning" style="margin-left: 10px;">设置</el-button>                        
-                        <el-button v-else-if="scope.row.teleCardStatus === 1" @click="openCard(scope.row.teleSaleId,scope.row.teleSaleName)" size="small" type="success" style="margin-left: 10px;">修改</el-button>
+                        {{scope.row.updateTime}}
+                        <el-button  v-if="scope.row.updateTime" @click="editCard(scope.row)" size="small" type="warning" style="margin-left: 10px;">修改</el-button>                        
+                        <el-button v-else @click="openCard(scope.row)" size="small" type="success" style="margin-left: 10px;">设置</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -131,12 +132,13 @@
         </el-row>
     </div>
     <!-- 设置顾问偏好弹窗 -->
-    <el-dialog title="设置顾问偏好" :visible.sync="cardVisible" width="600px" @close="cardCancel">
+    <el-dialog title="设置顾问偏好" :visible.sync="cardVisible" :close-on-click-modal="false" width="600px" @close="cardCancel">
         <template>
             <el-form :inline="true" :model="cardForm" ref="cardForm" :rules="cardFormRules">
                 <el-form-item label="顾问姓名："  :label-width="formLabelWidth" style="position: relative;width: 100%;">
                     <span style="color: red;position: absolute;left: -75px;top: 0;">*</span>                    
                     <span>{{cardTeleSale?cardTeleSale:""}}</span>
+                    <span style="color: red;">{{teleSaleStatus?'('+teleSaleStatus+')':""}}</span>
                 </el-form-item>
                 <el-form-item label="非接收时间段：" :label-width="formLabelWidth" style="position: relative;">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="cardForm.startTime" type="datetime" placeholder="开始时间" style="width: 150px;"></el-date-picker>
@@ -231,7 +233,7 @@
         </template>
     </el-dialog>
     <!-- 设置非接收资源时间弹窗 -->
-    <el-dialog title="批量设置非接收资源分配接收时间" :visible.sync="timeVisible" width="800px" @close="timeCancel">
+    <el-dialog title="批量设置非接收资源分配接收时间" :visible.sync="timeVisible" :close-on-click-modal="false" width="800px" @close="timeCancel">
         <template>
             批量设定选中的顾问资源分配非接收时间
             <el-form :inline="true" :model="timeForm" ref="timeForm" :rules="timeFormRules">
@@ -300,6 +302,7 @@
                 },
                 cardFormRules:{},
                 cardTeleSale:'',
+                teleSaleStatus:'',
 
                 timeVisible:false,//批量设置非接收资源分配接收时间弹窗
                 timeForm:{
@@ -344,7 +347,7 @@
             toSetTime(){
                 var rows = this.multipleSelection;
                 if(rows.length==0){
-                    this.$message({message: '请选择数据', type: 'warning'});
+                    this.$message({message: '请选择数据进行设置', type: 'warning'});
                     return false;
                 }
                 this.timeVisible=true;
@@ -358,6 +361,11 @@
                 this.timeForm.endTime="";
             },
             timeSubmit(){
+                var rows = this.multipleSelection;
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+                   rowIds.push(rows[i].id)
+                }
                 var startTime = this.timeForm.startTime;
                 var endTime = this.timeForm.endTime;
                 if(!startTime){
@@ -388,21 +396,33 @@
                 var param = {};
                 param.startTime = this.timeForm.startTime;
                 param.endTime = this.timeForm.endTime;
-                param.ids = this.multipleSelection;
+                param.ids = rowIds;
                 console.log(param)
                 // mainDivVM.loading = true;
-                // axios.post('/preference/update',param).then(function (response) { 
-                    // console.log(response)
+                axios.post('/preference/update',param).then(function (response) { 
+                    console.log(response)
                     // mainDivVM.loading = false;
-                    this.timeVisible=false;
+                    // this.timeVisible=false;
+                    var data =  response.data;
+                    if(data.code=='0'){
+                        mainDivVM.$message({message:'设置成功',type:'success',duration:1000,onClose:function(){
+                        window.location.href="/preference/listPage"
+                    }});
+
+                    }else{
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        }); 
+                    }
                     
-                // }).catch(function (error) {
-                //     mainDivVM.loading = false;
-                //     mainDivVM.$message({
-                //         message: "请求失败，请稍后重试",
-                //         type: "error"
-                //     });
-                // });
+                }).catch(function (error) {
+                    // mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             changeTeleGroup() {//改变电销组
                 var param ={};
@@ -423,43 +443,42 @@
                    console.log(error);
                 });
             }, 
-            openCard(id,name){// 打开名片
+            openCard(rows){                
                 this.cardVisible=true;
-                this.cardTeleSale=name;
-                this.cardForm.teleSaleId=id;
-                var param = {};
-                param.teleSaleId = id;
-                this.loading = true; 
-                axios.post('/saleCard/getSaleCard',param).then(function (response) { 
-                    mainDivVM.loading = false;
-                    console.log(response)
-                    var result=response.data;
-                    if(result.code==0){
-                        var table=result.data;
-                        if(table.id){
-                            mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
-                            mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId.split(',');
-                            mainDivVM.cardForm.workYear=table.workYear;
-                            mainDivVM.cardForm.serviceScore=table.serviceScore;
-                            mainDivVM.cardForm.serviceNum=table.serviceNum;
-                        }else{
-                            mainDivVM.cardForm.dictionaryRankId='';
-                            mainDivVM.cardForm.dictionaryEvaluationId=[];
-                            mainDivVM.cardForm.workYear=3;
-                            mainDivVM.cardForm.serviceScore=4.5;
-                            mainDivVM.cardForm.serviceNum='3523';
-                        }                        
-                    }else{
-                        mainDivVM.isDisabled=false;
-                        mainDivVM.$message.error(result.msg);
+                this.cardTeleSale=rows.teleSaleName;
+                // 新老员工
+                var status="";
+                if(rows){
+                    if(rows.teleSaleStatus&&rows.teleSaleStatus=="1"){
+                        status="新员工"
+                    }else if(rows.teleSaleStatus&&rows.teleSaleStatus=="0"){
+                        status="老员工"
                     }
-                }).catch(function (error) {
-                    mainDivVM.loading = false;
-                    mainDivVM.$message({
-                        message: "请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
+                    this.teleSaleStatus=status;
+                }
+            },
+            editCard(rows){// 打开名片   
+                console.log(rows)             
+                this.cardVisible=true;
+                this.cardTeleSale=rows.teleSaleName;
+                // 新老员工
+                var status="";
+                if(rows){
+                    if(rows.teleSaleStatus&&rows.teleSaleStatus=="1"){
+                        status="新员工"
+                    }else if(rows.teleSaleStatus&&rows.teleSaleStatus=="0"){
+                        status="老员工"
+                    }
+                    this.teleSaleStatus=status;
+                    if(rows.startTime){
+                       this.cardForm.startTime=rows.startTime; 
+                    }
+                    if(rows.endTime){
+                        this.cardForm.endTime=rows.endTime;
+                    }
+                    
+                }
+                
             },
             cardCancel(){// 关闭名片
                 this.cardVisible=false;
@@ -499,20 +518,17 @@
                 param.rootWords = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
                 param.teleSaleStatus = this.cardForm.teleSaleStatus;
                 
-                console.log(param)
-                // this.loading = true; 
-                // axios.post('/preference/updateInfo',param).then(function (response) { 
-                //     mainDivVM.loading = false;
-                    // console.log(response)
-                    // mainDivVM.cardVisible=false;
-                //     window.location.href="/preference/listPage"
-                // }).catch(function (error) {
-                //     mainDivVM.loading = false;
-                //     mainDivVM.$message({
-                //         message: "请求失败，请稍后重试",
-                //         type: "error"
-                //     });
-                // });
+                console.log(param) 
+                axios.post('/preference/updateInfo',param).then(function (response) { 
+                    console.log(response)
+                    window.location.href="/preference/listPage"
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },       
             searchTable() {                
                 var param = {};
@@ -525,8 +541,7 @@
                 param.pageNum = this.pager.currentPage
                 param.pageSize = this.pager.pageSize;                
                 this.loading = true; 
-                axios.post('/custservice/saleIm/list',param).then(function (response) { 
-                // axios.post('/preference/queryByParams',param).then(function (response) { 
+                axios.post('/preference/queryByParams',param).then(function (response) { 
                    mainDivVM.loading = false;
                    console.log(response)
                    var result =  response.data;
@@ -559,6 +574,31 @@
                 axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                     mainDivVM.cityArr = response.data.data.data;
                 });
+            },
+            dateTimeFormats(date) {
+                if (date != null && date != '') {
+                  return moment(date).format("YYYY-MM-DD HH:mm:ss");
+                } else {
+                  return "";
+                }
+
+            },
+            formatTimeFn(date) {
+                if (null == date) {
+                    return "";
+                }
+                var dateNew = new Date(date);
+                var year = dateNew.getFullYear();
+                var month = dateNew.getMonth() + 1;
+                var day = dateNew.getDate();
+                var hour = dateNew.getHours();
+                var minute = dateNew.getMinutes();
+                var second = dateNew.getSeconds();
+                return year + "-" + this.formatNumberFn(month) + "-" + this.formatNumberFn(day) + " " + this.formatNumberFn(hour) + ":" + this.formatNumberFn(minute);
+            },
+            formatNumberFn(n) {
+                n = n.toString();
+                return n[1] ? n : '0' + n
             },
         },
         created(){
