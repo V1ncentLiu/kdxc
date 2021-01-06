@@ -78,11 +78,11 @@
                 <el-table-column align="center" prop="srangeStart" label="分数值范围">
                     <template slot-scope="scope">
                         <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" :rules='rules.srangeStart'>
-                            <el-input v-model="scope.row.srangeStart"></el-input>
+                            <el-input v-model="scope.row.srangeStart" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
                         </el-form-item>
                         <span class="line">——</span>
                         <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" :rules='rules.srangeEnd'>
-                            <el-input v-model="scope.row.srangeEnd"></el-input>
+                            <el-input v-model="scope.row.srangeEnd" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
@@ -123,6 +123,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var optionsObj = [[${businessLineList}]];
+    console.log(optionsObj)
 </script>
 <script>
     var releaseRuleVM=new Vue({
@@ -137,42 +138,43 @@
                     bussinessLine:'1',
                     createDay:'',
                     disDay:'',
-                    ladderList:[{
-                        srangeStart:1,
-                        srangeEnd:2,
-                        clueSrangeStart:3,
-                        clueSrangeEnd:4,
-                        ladder:1,
-                        limit:10
-                    },{
-                        srangeStart:2,
-                        srangeEnd:3,
-                        clueSrangeStart:4,
-                        clueSrangeEnd:5,
-                        ladder:2,
-                        limit:10
-                    },{
-                        srangeStart:3,
-                        srangeEnd:4,
-                        clueSrangeStart:5,
-                        clueSrangeEnd:6,
-                        ladder:3,
-                        limit:10
-                    },{
-                        srangeStart:4,
-                        srangeEnd:5,
-                        clueSrangeStart:6,
-                        clueSrangeEnd:7,
-                        ladder:4,
-                        limit:10
-                    },{
-                        srangeStart:5,
-                        srangeEnd:6,
-                        clueSrangeStart:7,
-                        clueSrangeEnd:8,
-                        ladder:5,
-                        limit:10
-                    }] 
+                    ladderList:[],
+                    // ladderList:[{
+                    //     srangeStart:1,
+                    //     srangeEnd:2,
+                    //     clueSrangeStart:3,
+                    //     clueSrangeEnd:4,
+                    //     ladder:1,
+                    //     limit:10
+                    // },{
+                    //     srangeStart:2,
+                    //     srangeEnd:3,
+                    //     clueSrangeStart:4,
+                    //     clueSrangeEnd:5,
+                    //     ladder:2,
+                    //     limit:10
+                    // },{
+                    //     srangeStart:3,
+                    //     srangeEnd:4,
+                    //     clueSrangeStart:5,
+                    //     clueSrangeEnd:6,
+                    //     ladder:3,
+                    //     limit:10
+                    // },{
+                    //     srangeStart:4,
+                    //     srangeEnd:5,
+                    //     clueSrangeStart:6,
+                    //     clueSrangeEnd:7,
+                    //     ladder:4,
+                    //     limit:10
+                    // },{
+                    //     srangeStart:5,
+                    //     srangeEnd:6,
+                    //     clueSrangeStart:7,
+                    //     clueSrangeEnd:8,
+                    //     ladder:5,
+                    //     limit:10
+                    // }] 
                 },                
                 rules:{
                     bussinessLine: [
@@ -230,13 +232,8 @@
                         { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
                     ]
                 },
-                options: [{
-                    value:'1',
-                    name:'餐盟业务线'
-                },{
-                    value:'2',
-                    name:'餐盟业务线2'
-                }],
+                options: optionsObj,
+                bussinessLine:'',//业务线
             }             
         },
         methods: {
@@ -245,7 +242,8 @@
                 var optionsVal=this.options;
                 for(var i=0;i<optionsVal.length;i++){
                     if(val==optionsVal[i].value){
-                        this.bussinessLineTitle=optionsVal[i].name
+                        this.bussinessLineTitle=optionsVal[i].name;
+                        this.bussinessLine=optionsVal[i].value;
                     }
                 }
             },
@@ -253,24 +251,23 @@
                 this.$refs[form].validate((valid) => {
                     if (valid) { 
                         var param = {};
-                        var form = this.form;
-                         
-                        axios.post('/cluerule/clueRule/insertAndUpdateClueRule',param)
+                        param.bussinessLine=this.form.bussinessLine;
+                        param.createDay=this.form.createDay;
+                        param.disDay=this.form.disDay;
+                        param.ladderList=this.form.ladderList;
+                        axios.post('/autodistribution/insert',param)
                         .then(function (response) {
+                            console.log(response)
                             var data =  response.data
                             if(data.code=='0'){
                                var resData = data.data;
                                 
                                releaseRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                             	   //releaseRuleVM.initClueRule();
-                                   releaseRuleVM.clueRuleSubmitBtnDiabled=false;
-                            	   location.reload();
                             	   
                                }});  ;  
                             }else{
                             	releaseRuleVM.$message({message:data.msg,type:'error'});
-                                releaseRuleVM.clueRuleSubmitBtnDiabled=false;
-                                // console.error(data);
                             }
                         
                         })
@@ -288,188 +285,29 @@
                 });
             },
             number(){
-		    　　　      this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
-		                this.form.customerPhone=this.form.customerPhone.replace('.','');
-		        　　},
-              removeDomain(item) {
-		        	
-        	   var id = item.id;
-                if(!id){
-                	 var index = this.form.domains.indexOf(item)
-                     if (index !== -1) {
-                         this.form.domains.splice(index, 1)
-                     }
-                    return;
-                }
-               
-          
-              
-                var param={};
-                param.id=id;
-                axios.post('/cluerule/clueRule/deleteTeleDirectorRuleById', param)
-                .then(function (response) {
-                    var resData = response.data;
-                    if(resData.code=='0'){
-                    	releaseRuleVM.$message({message:'刪除成功',type:'success',duration:2000,onClose:function(){
-                    		releaseRuleVM.initClueRule();
-                          }});                     
-                    }else{
-                    	releaseRuleVM.$message({message:resData.msg,type:'error'});
-                        console.error(resData);
-                    }
-                
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-             },
-            addDomain() {
-                this.form.domains.push({
-                	teleDirectorId:'',
-                	limitNum: '',
-                	businessLine: businessLine,
-                    key: Date.now()
-                });
-            },
-            addDomains(){
-                this.isShow=true
-            },
+    　　　      this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+                this.form.customerPhone=this.form.customerPhone.replace('.','');
+        　　},
             cancel(){//取消
             	location.reload();
             },
-            checked6Change(value){
-                if(value==false){
-                    releaseRuleVM.isShow=false
-                    releaseRuleVM.isAddAble=true//按钮不可点击
+            initClueRule(type){
+            	var param={};
+                if(type==1){
+                    param.bussinessLine=optionsObj[0].value;
                 }else{
-                    releaseRuleVM.isAddAble=false//按钮可点击
+                    param.bussinessLine=this.bussinessLine;
                 }
-            },
-            initClueRule(){
-            	
-            	 axios.post('/cluerule/clueRule/queryAllClueRule',null)
+                
+            	 axios.post('/autodistribution/queryByParams',param)
                  .then(function (response) {
                      var data =  response.data;
                      if(data.code=='0'){
                         var resData = data.data;
-                        //春节规则
-                        var festivalRule = resData.festivalRule;
-                        if(festivalRule){
-                        	releaseRuleVM.form.id10=festivalRule.id;
-                        	releaseRuleVM.form.startTime=festivalRule.startTime;
-                        	releaseRuleVM.form.endTime=festivalRule.endTime;
-                        	releaseRuleVM.checked1=festivalRule.isEnabled==0?false:true;
-                        }
-                         //电销顾问资源未签约上限
-                         var unSignLimitRule = resData.teleUnsignLimitRule;
-                         if (unSignLimitRule) {
-                             releaseRuleVM.form.id12 = unSignLimitRule.id;
-                             releaseRuleVM.checked9 = unSignLimitRule.isEnabled == 0 ? false : true;
-                             releaseRuleVM.form.number22 = unSignLimitRule.limitNum;
-                         }
-                        //自动释放规则
-                        var autoReleRuleList = resData.autoReleRuleList;
-                        for(var i=0;i<autoReleRuleList.length;i++){
-                        	var autoReleRule = autoReleRuleList[i];
-                        	if(i==0){
-                        		releaseRuleVM.checked2=autoReleRule.isEnabled==0?false:true;
-                        		releaseRuleVM.form.number13=autoReleRule.remindTime;
-                        	}
-                        	if(autoReleRule.customerStatus==1){//未联系
-                        		releaseRuleVM.form.id1=autoReleRule.id;
-                        		releaseRuleVM.form.number1=autoReleRule.timeoutRelease;
-                        		releaseRuleVM.form.number2=autoReleRule.retentionTimes;
-                        		releaseRuleVM.form.number3=autoReleRule.retentionDay;
-                        		releaseRuleVM.form.remindValue1=autoReleRule.isReleaseRemind;
-                        		if(autoReleRule.isReleaseRemind==1){
-                        			releaseRuleVM.checked3=true;
-                        		}
-                        		
-                        	}else if(autoReleRule.customerStatus==2){//gen jin
-                        		releaseRuleVM.form.id2=autoReleRule.id;
-                                releaseRuleVM.form.number4=autoReleRule.timeoutRelease;
-                                releaseRuleVM.form.number5=autoReleRule.retentionTimes;
-                                releaseRuleVM.form.number6=autoReleRule.retentionDay;
-                                releaseRuleVM.form.remindValue2=autoReleRule.isReleaseRemind;
-                                if(autoReleRule.isReleaseRemind==1){
-                                    releaseRuleVM.checked3=true;
-                                }
-                        	}else if(autoReleRule.customerStatus==5){//未到访
-                        		releaseRuleVM.form.id3=autoReleRule.id;
-                                releaseRuleVM.form.number7=autoReleRule.timeoutRelease;
-                                releaseRuleVM.form.number8=autoReleRule.retentionTimes;
-                                releaseRuleVM.form.number9=autoReleRule.retentionDay;
-                                releaseRuleVM.form.remindValue3=autoReleRule.isReleaseRemind;
-                                if(autoReleRule.isReleaseRemind==1){
-                                    releaseRuleVM.checked3=true;
-                                }
-                        	}else if(autoReleRule.customerStatus==6){//到访未到访
-                        		releaseRuleVM.form.id4=autoReleRule.id;
-                                releaseRuleVM.form.number10=autoReleRule.timeoutRelease;
-                                releaseRuleVM.form.number11=autoReleRule.retentionTimes;
-                                releaseRuleVM.form.number12=autoReleRule.retentionDay;
-                                releaseRuleVM.form.remindValue4=autoReleRule.isReleaseRemind;
-                                if(autoReleRule.isReleaseRemind==1){
-                                    releaseRuleVM.checked3=true;
-                                }
-                        	}else if(autoReleRule.customerStatus==4){//yao yue
-                        		releaseRuleVM.form.id11=autoReleRule.id;
-                                releaseRuleVM.form.number19=autoReleRule.timeoutRelease;
-                                releaseRuleVM.form.number20=autoReleRule.retentionTimes;
-                                releaseRuleVM.form.number21=autoReleRule.retentionDay;
-                                releaseRuleVM.form.remindValue5=autoReleRule.isReleaseRemind;
-                                if(autoReleRule.isReleaseRemind==1){
-                                    releaseRuleVM.checked3=true;
-                                }
-                        	}
-                        	
-                        }
-                        //强制回收
-                        var forceRecycleRuleList =  resData.forceRecycleRuleList;
-                        for(var i=0;i<forceRecycleRuleList.length;i++){
-                        	var forceRecycleRule = forceRecycleRuleList[i];
-                        	var type = forceRecycleRule.recycleType;
-                        	if(type==1){
-                        		releaseRuleVM.form.id5=forceRecycleRule.id;
-                        		releaseRuleVM.checked4=forceRecycleRule.isEnabled==0?false:true;
-                        		releaseRuleVM.form.number14=forceRecycleRule.days;
-                        		
-                        	}else if(type==2){
-                        		releaseRuleVM.form.id6=forceRecycleRule.id;
-                                releaseRuleVM.checked5=forceRecycleRule.isEnabled==0?false:true;
-                                releaseRuleVM.form.number15=forceRecycleRule.days;
-                        	}
-                        	if(forceRecycleRule.remindTime){
-                                //提醒时间
-                                if(!releaseRuleVM.form.number13){
-                                    releaseRuleVM.form.number13 = forceRecycleRule.remindTime;
-                                }
-                            }
-                        }
-                        //公有池
-                        var publicPoolReceiveRuleList = resData.publicPoolReceiveRuleList;
-                        for(var i=0;i<publicPoolReceiveRuleList.length;i++){
-                        	var publicPoolRule = publicPoolReceiveRuleList[i];
-                        	var type = publicPoolRule.type;
-                        	if(type==1){
-                        		releaseRuleVM.form.id7=publicPoolRule.id;
-                        		releaseRuleVM.form.number16=publicPoolRule.limitNum;
-                        		releaseRuleVM.checked6=publicPoolRule.isEnabled==0?false:true;
-                        		releaseRuleVM.isAddAble=publicPoolRule.isEnabled==0?true:false;
-                        		releaseRuleVM.isShow=publicPoolRule.isEnabled==0?false:true;
-                        		 var teleDirectorReceiveRuleList = resData.teleDirectorReceiveRuleList;
-                        		 releaseRuleVM.form.domains = teleDirectorReceiveRuleList;
-                        	}else if(type==2){
-                        		releaseRuleVM.form.id8=publicPoolRule.id;
-                                releaseRuleVM.form.number17=publicPoolRule.limitNum;
-                                releaseRuleVM.checked7=publicPoolRule.isEnabled==0?false:true;
-                        	}else if(type==3){
-                        		releaseRuleVM.form.id9=publicPoolRule.id;
-                                releaseRuleVM.form.number18=publicPoolRule.limitNum;
-                                releaseRuleVM.checked8=publicPoolRule.isEnabled==0?false:true;
-                        	}
-                        	
-                        }
+                        releaseRuleVM.form.bussinessLine=resData.bussinessLine+"";
+                        releaseRuleVM.form.createDay=resData.createDay;
+                        releaseRuleVM.form.disDay=resData.disDay;
+                        releaseRuleVM.form.ladderList=resData.ladderList;
                         
                          
                      }else{
@@ -488,7 +326,7 @@
             document.getElementById('releaseRule').style.display = 'block';
         },
         created(){
-        	this.initClueRule();
+        	this.initClueRule(1);
             var optionsVal=this.options;
             for(var i=0;i<optionsVal.length;i++){
                 this.bussinessLineTitle=optionsVal[0].name
