@@ -1,19 +1,91 @@
 package com.kuaidao.manageweb.controller.autodistribution;
 
 
+import com.kuaidao.businessconfig.dto.scoreset.ClueScoreSetDTO;
+import com.kuaidao.businessconfig.dto.scoreset.ClueScoreSetParam;
+import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.scoreset.ClueScoreFegin;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @Controller
-@RequestMapping("/clueacture")
+@RequestMapping("/cluescore")
 public class ClueActureTimeScoreController {
+
+
+    @Autowired
+    ClueScoreFegin clueScoreFegin;
+
+
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
 
     @RequestMapping("/page")
     public String listPage(HttpServletRequest request) {
+        JSONResult<List<DictionaryItemRespDTO>> businessLineJR = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        request.setAttribute("businessLineList", businessLineJR.getData());
+
+
+        JSONResult<List<DictionaryItemRespDTO>> mediumJR = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode());
+        request.setAttribute("mediumList", mediumJR.getData());
+
+
+        JSONResult<List<DictionaryItemRespDTO>> clueTypeJR = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode());
+        request.setAttribute("clueTypeList", clueTypeJR.getData());
+
         return "assignrule/cluesActualTimeScore";
     }
+
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.POST,value ="/queryPage")
+    public JSONResult<PageBean<ClueScoreSetDTO>> queryPage(@RequestBody ClueScoreSetParam param) {
+        return clueScoreFegin.queryPage(param);
+    }
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.POST,value ="/insert")
+    public JSONResult<Boolean> insert(@RequestBody ClueScoreSetDTO dto ){
+
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        dto.setCreateUser(curLoginUser.getId());
+
+        return clueScoreFegin.insert(dto);
+    }
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.POST,value ="/update")
+    public JSONResult<Boolean> update(@RequestBody ClueScoreSetDTO dto ){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        dto.setUpdateUser(curLoginUser.getId());
+        return clueScoreFegin.update(dto);
+    }
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.POST,value ="/delete")
+    public JSONResult<Boolean> delete(@RequestBody IdListLongReq idListReq ){
+        return clueScoreFegin.delete(idListReq);
+    }
+    @ResponseBody
+    @RequestMapping(method = RequestMethod.POST,value ="/queryOne")
+    public JSONResult<ClueScoreSetDTO> queryOne(@RequestBody IdEntityLong idEntity){
+        return clueScoreFegin.queryOne(idEntity);
+    }
+
 }

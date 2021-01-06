@@ -30,14 +30,14 @@
                     <el-select v-model="form.businessLine" placeholder="选择业务线" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in businessLineArr"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>  
                 <el-form-item label="资源维度:">  
-                    <el-select v-model="form.clueDimension" placeholder="选择资源维度" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.dimension" placeholder="选择资源维度" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clueDimensionArr"
                             :key="item.id"
@@ -47,7 +47,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="" label-width="0">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
                 </el-form-item>  
             </el-form>
         </div>
@@ -62,13 +62,16 @@
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
-                <el-table-column prop="teleSaleName" align="center" label="业务线">
+                <el-table-column prop="businessLineName" align="center" label="业务线">
                 </el-table-column>                
-                <el-table-column prop="projectNames" align="center" label="资源维度">
+                <el-table-column prop="dimensionName" align="center" label="资源维度">
                 </el-table-column>
-                <el-table-column prop="projectCategory" align="center" label="资源范围">
+                <el-table-column prop="scopeName" align="center" label="资源范围">
                 </el-table-column>
-                <el-table-column prop="districts" align="center" label="得分">
+                <el-table-column prop="score" align="center" label="得分">
+                    <template slot-scope="scope">
+                        +{{scope.row.score}}
+                    </template>
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
@@ -82,14 +85,14 @@
                     <el-select v-model="cardForm.businessLine" :reserve-keyword=true clearable placeholder="请选择业务线" style="width: 333px;">
                         <el-option
                             v-for="item in businessLineArr"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="资源维度：" prop="clueDimension" :label-width="formLabelWidth" style="width: 100%;">
-                    <el-select v-model="cardForm.clueDimension" :reserve-keyword=true placeholder="请选择资源维度" style="width: 333px;" @change="selectChange">
+                <el-form-item label="资源维度：" prop="dimension" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.dimension" :reserve-keyword=true placeholder="请选择资源维度" style="width: 333px;" @change="selectChange">
                         <el-option
                             v-for="item in clueDimensionArr"
                             :key="item.id"
@@ -98,13 +101,13 @@
                         </el-option>
                     </el-select>
                 </el-form-item> 
-                <el-form-item label="资源范围：" prop="clueScope" :label-width="formLabelWidth" v-if="showSelect" style="width: 100%;">
-                    <el-select v-model="cardForm.clueScope" :reserve-keyword=true placeholder="请选择资源范围" filterable multiple  style="width: 333px;">
+                <el-form-item label="资源范围：" prop="scope" :label-width="formLabelWidth" v-if="showSelect" style="width: 100%;">
+                    <el-select v-model="cardForm.scope" :reserve-keyword=true placeholder="请选择资源范围" filterable multiple  style="width: 333px;">
                         <el-option
                             v-for="item in clueScopeArr"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>                           
                 </el-form-item>
@@ -127,8 +130,8 @@
                         <el-button type="primary" @click="addFun1">添加</el-button>           
                     </el-form-item>
                 </el-col>
-                <el-form-item label="得分：" prop="scores" :label-width="formLabelWidth" style="position: relative;width: 100%;">
-                    <el-input v-model="cardForm.scores" autocomplete="off" placeholder="0-50正整数" maxlength="2" style="width: 265px;margin-right: 10px;" @keyup.native.prevent="number"></el-input> 
+                <el-form-item label="得分：" prop="score" :label-width="formLabelWidth" style="position: relative;width: 100%;">
+                    <el-input v-model="cardForm.score" autocomplete="off" placeholder="0-50正整数" maxlength="2" style="width: 265px;margin-right: 10px;" @keyup.native.prevent="number"></el-input> 
                 </el-form-item> 
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -144,6 +147,8 @@
 </body>
 <script th:inline="javascript">
     var businessLine=[[${businessLineList}]]; // 业务线
+    var clueType=[[${clueTypeList}]]; // 资源类型
+    var medium=[[${mediumList}]]; // 媒介    
 
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -158,34 +163,31 @@
                     pageSize: 20
                 },
                 form: {
-                    teleGroupId:'',
-                    teleSaleId:'',
-                    projectIds:'',
-                    startTime:'',
-                    endTime:'',
+                    businessLine:'',
+                    dimension:''
                 },
                 tableData: [],
                 dialogTitle:'',  
                 cardVisible:false,//设置顾问偏好
                 cardForm: {
                     businessLine:'',
-                    clueDimension:'1',
-                    clueScope:[],
+                    dimension:'1',
+                    scope:[],//资源范围
                     rootWords: [],//词根
                     clueScopeIpt:'',
-                    scores:'',
+                    score:'',
                 },
                 cardFormRules:{
                     businessLine:[
-                        { required: true, message: '请选择业务线', trigger: 'blur' },
+                        { required: true, message: '请选择业务线', trigger: 'change' },
                     ],
-                    clueDimension:[
-                        { required: true, message: '请选择资源维度', trigger: 'blur' },
+                    dimension:[
+                        { required: true, message: '请选择资源维度', trigger: 'change' },
                     ],
-                    clueScope:[
+                    scope:[
                         // { required: true, message: '请选择资源范围', trigger: 'blur' },
                         { validator:function(rule,value,callback){
-                            if(mainDivVM.showSelect==true&&mainDivVM.cardForm.clueScope.length==0){
+                            if(mainDivVM.showSelect==true&&mainDivVM.cardForm.scope.length==0){
                              callback(new Error("请选择资源范围"));
                              return;
                             }
@@ -202,19 +204,13 @@
                             callback();
                         }, trigger: 'change'}
                     ],
-                    scores:[
+                    score:[
                         { required: true, message: '请填写得分', trigger: 'blur' }
                     ],
                 },
                 cardTeleSale:'',
                 multipleSelection:[],
-                businessLineArr:[{
-                    id:'1',
-                    name:'业务线1'
-                },{
-                    id:'2',
-                    name:'业务线2'
-                }],//业务线
+                businessLineArr:businessLine,//业务线
                 clueDimensionArr:[{
                     id:'1',
                     name:'资源类型'
@@ -242,21 +238,35 @@
                 this.showIpt=false;
                 if(val=="1"){
                     this.clueScopeArr=[];
-                    this.cardForm.clueScope=[];
+                    this.cardForm.scope=[];
+                    if(clueType){
+                        this.clueScopeArr=clueType;
+                    }else{
+                        this.clueScopeArr=[];
+                    }  
+                    this.cardForm.rootWords=[];                  
                 }else if(val=="2"){
                     this.clueScopeArr=[];
-                    this.cardForm.clueScope=[];
+                    this.cardForm.scope=[];
+                    if(medium){
+                        this.clueScopeArr=medium;
+                    }else{
+                        this.clueScopeArr=[];
+                    }  
+                    this.cardForm.rootWords=[];                  
                 }else if(val=="3"){
-                    this.clueScopeArr=[{id:'1',name:'调查问卷'}]   
-                    this.cardForm.clueScope=['1']                 
+                    this.clueScopeArr=[{id:'调查问卷',name:'调查问卷'}]   
+                    this.cardForm.scope=['调查问卷'] 
+                    this.cardForm.rootWords=[];                
                 }else if(val=="4"){
-                    this.clueScopeArr=[{id:'2',name:'重复资源'}]
-                    this.cardForm.clueScope=['2']
+                    this.clueScopeArr=[{id:'重复资源',name:'重复资源'}]
+                    this.cardForm.scope=['重复资源']
+                    this.cardForm.rootWords=[];
                 }else if(val=="5"){
                     this.showSelect=false;
                     this.showIpt=true;
                     this.clueScopeArr=[];
-                    this.cardForm.clueScope=[];
+                    this.cardForm.scope=[];
                 }
             },
             addFun1() {//添加包含搜索词
@@ -272,36 +282,44 @@
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-            openCard(){// 打开名片
+            openCard(){// 打开新建名片
                 this.cardVisible=true;
                 this.dialogTitle="添加资源范围得分";
             },
-            editCard(){// 打开名片
+            editCard(){// 打开编辑名片回显
+                var rows = this.multipleSelection;
+                if(rows.length!==1){
+                    this.$message({
+                       message: '请选择一条数据进行编辑',
+                       type: 'warning'
+                     });
+                    return;
+                }
                 this.cardVisible=true;
                 this.dialogTitle="编辑资源范围得分";
-                this.cardForm.teleSaleId=id;
                 var param = {};
-                param.teleSaleId = id;
+                param.id = rows[0].id;
                 this.loading = true; 
-                axios.post('/saleCard/getSaleCard',param).then(function (response) { 
+                axios.post('/cluescore/queryOne',param).then(function (response) { 
                     mainDivVM.loading = false;
                     console.log(response)
                     var result=response.data;
                     if(result.code==0){
                         var table=result.data;
                         if(table.id){
-                            mainDivVM.cardForm.dictionaryRankId=table.dictionaryRankId;
-                            mainDivVM.cardForm.dictionaryEvaluationId=table.dictionaryEvaluationId.split(',');
-                            mainDivVM.cardForm.workYear=table.workYear;
-                            mainDivVM.cardForm.serviceScore=table.serviceScore;
-                            mainDivVM.cardForm.serviceNum=table.serviceNum;
-                        }else{
-                            mainDivVM.cardForm.dictionaryRankId='';
-                            mainDivVM.cardForm.dictionaryEvaluationId=[];
-                            mainDivVM.cardForm.workYear=3;
-                            mainDivVM.cardForm.serviceScore=4.5;
-                            mainDivVM.cardForm.serviceNum='3523';
-                        }                        
+                            mainDivVM.cardForm.businessLine=table.businessLine+"";
+                            mainDivVM.cardForm.dimension=table.dimension+"";
+                            // 判断是不是词根
+                            if(table.dimension=="5"){//词根
+                                mainDivVM.showSelect=false;
+                                mainDivVM.showIpt=true;
+                                mainDivVM.cardForm.rootWords=table.scope.split(',');
+                                mainDivVM.cardForm.scope=[];
+                            }else{
+                                mainDivVM.cardForm.scope=table.scope.split(',');
+                            }                            
+                            mainDivVM.cardForm.score=table.score;
+                        }                      
                     }else{
                         mainDivVM.isDisabled=false;
                         mainDivVM.$message.error(result.msg);
@@ -326,47 +344,59 @@
                 this.cardForm.city='';
             },
             cardSubmit(){
+                var rows=this.multipleSelection;
+                var id=""
+                if(rows.length!=0){
+                    id=rows[0].id;
+                }
                 this.$refs['cardForm'].validate((valid) => {
                     if (valid) {
                         var param = {};
-                        param.id = "";
-                        param.projectIds = this.cardForm.projectIds.length==0?"":this.cardForm.projectIds.join(",");//逗号分隔
-                        param.projectCategory = this.cardForm.projectCategory.length==0?"":this.cardForm.projectCategory.join(",");//逗号分隔
-                        param.sources = this.cardForm.sources.length==0?"":this.cardForm.sources.join(",");//逗号分隔
-                        param.districts = this.cardForm.districts.length==0?"":this.cardForm.districts.join(",");//逗号分隔
-                        param.rootWords = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
-                        param.teleSaleStatus = this.cardForm.teleSaleStatus;
-                        
+                        var url = "";
+                        if(id){
+                            url="/cluescore/update"//编辑
+                            param.id=id;
+                        }else{
+                            url="/cluescore/insert"//新建
+                        }
+                        param.businessLine = this.cardForm.businessLine;
+                        param.dimension = this.cardForm.dimension;
+                        if(this.cardForm.dimension=="5"){//词根
+                            param.scope = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
+                        }else{
+                            param.scope = this.cardForm.scope.length==0?"":this.cardForm.scope.join(",");//逗号分隔
+                        }                        
+
+                        param.score = this.cardForm.score;
                         console.log(param)
                         // this.loading = true; 
-                        // axios.post('/preference/updateInfo',param).then(function (response) { 
-                        //     mainDivVM.loading = false;
-                            // console.log(response)
+                        axios.post(url,param).then(function (response) { 
+                            // mainDivVM.loading = false;
+                            console.log(response)
                             // mainDivVM.cardVisible=false;
-                        //     window.location.href="/preference/listPage"
-                        // }).catch(function (error) {
-                        //     mainDivVM.loading = false;
-                        //     mainDivVM.$message({
-                        //         message: "请求失败，请稍后重试",
-                        //         type: "error"
-                        //     });
-                        // });
-                    } else {return false;}
+                            window.location.href="/cluescore/page"
+                        }).catch(function (error) {
+                            // mainDivVM.loading = false;
+                            mainDivVM.$message({
+                                message: "请求失败，请稍后重试",
+                                type: "error"
+                            });
+                        });
+                    } else {
+                        console.log("验证未通过")
+                        return false;
+                    }
                 });
             },       
             searchTable() {                
                 var param = {};
-                param.teleGroupId = this.form.teleGroupId;
-                param.teleSaleId = this.form.teleSaleId;
-                param.startTime = this.form.startTime;
-                param.endTime = this.form.endTime;
-                param.projectIds = this.form.projectIds;
+                param.businessLine = this.form.businessLine;
+                param.dimension = this.form.dimension;
 
-                param.pageNum = this.pager.currentPage
-                param.pageSize = this.pager.pageSize;                
+                param.pageNum = this.pager.pageSize
+                param.pageSize = this.pager.pageSizes;                
                 this.loading = true; 
-                axios.post('/custservice/saleIm/list',param).then(function (response) { 
-                // axios.post('/preference/queryByParams',param).then(function (response) { 
+                axios.post('/cluescore/queryPage',param).then(function (response) { 
                    mainDivVM.loading = false;
                    console.log(response)
                    var result =  response.data;
@@ -396,25 +426,27 @@
                      });
                     return;
                 }
-                var rowNames = [];
                 var rowIds = [];
-                this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                for(var i=0;i<rows.length;i++){
+                   rowIds.push(rows[i].id)
+                }
+                this.$confirm('删除后不可恢复，确定要删除吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
                       //删除
                     var param  = {idList:rowIds};
-                     axios.post('/clueAssignRule/optRule/delete',param)
+                     axios.post('/cluescore/delete',param)
                      .then(function (response) {
                          var data =  response.data;
                          if(data.code=='0'){
-                             ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
-                                ocmVM.searchTable();
+                             mainDivVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                                window.location.href="/cluescore/page"
                             }});
                              
                          }else{
-                             ocmVM.$message({
+                             mainDivVM.$message({
                                  message: "接口调用失败",
                                  type: 'error'
                                }); 
@@ -431,8 +463,8 @@
                  });
             },
             number(){
-          　　this.cardForm.scores=this.cardForm.scores.replace(/[^\.\d]/g,'');
-              this.cardForm.scores=this.cardForm.scores.replace('.','');
+          　　this.cardForm.score=this.cardForm.score.replace(/[^\.\d]/g,'');
+              this.cardForm.score=this.cardForm.score.replace('.','');
           },
         },
         created(){
@@ -440,6 +472,10 @@
             var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
             if(localVal){this.pager.pageSize = localVal;}
             this.searchTable();
+            if(clueType){
+                this.clueScopeArr=clueType;//默认下拉资源类型
+            }
+            
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';

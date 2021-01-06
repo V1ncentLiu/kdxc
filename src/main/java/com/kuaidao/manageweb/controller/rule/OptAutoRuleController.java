@@ -3,7 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.rule;
 
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.businessconfig.dto.rule.*;
@@ -230,7 +230,7 @@ public class OptAutoRuleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 优化规则
-        pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        pageParam.setRuleType(BusinessConfigConstant.RULE_TYPE.OPT);
         JSONResult<PageBean<ClueAutoAssignRuleDTO>> list = clueAutoAssignRuleFeignClient.list(pageParam);
 
         return list;
@@ -263,7 +263,7 @@ public class OptAutoRuleController {
         // 推广所属公司 为当前账号所在机构的推广所属公司
         clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
         // 插入类型为优化
-        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        clueAssignRuleReq.setRuleType(BusinessConfigConstant.RULE_TYPE.OPT);
         return clueAutoAssignRuleFeignClient.create(clueAssignRuleReq);
     }
 
@@ -398,7 +398,7 @@ public class OptAutoRuleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 优化规则
-        pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        pageParam.setRuleType(BusinessConfigConstant.RULE_TYPE.OPT);
         // 查询规则数据不分页
         JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage =
                 clueAutoAssignRuleFeignClient.listNoPage(pageParam);
