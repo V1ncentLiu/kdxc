@@ -47,6 +47,7 @@ public class AutoDistributionController {
     /**
      *  页面流程
      */
+    @ResponseBody
     @PostMapping(value = "/update")
     public JSONResult<Boolean> update(@RequestBody AutoDisModelDTO dto, BindingResult result){
         if (result.hasErrors()) {
