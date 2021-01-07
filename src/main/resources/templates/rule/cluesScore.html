@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+        .backIsYellow{
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>资源得分计算模型</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <shiro:hasPermission name="clueAssignRule:optRuleManager:add">
+            <el-button type="primary" @click="addFun"><i class="el-icon-plus"></i>添加新规则</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="clueAssignRule:optRuleManager:edit">
+            <el-button type="success" @click="editFun"><i class="el-icon-edit"></i>编辑规则</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="clueAssignRule:optRuleManager:delete">
+            <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="顾问得分规则名称:">
+                    <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
+                </el-form-item>
+                <el-form-item label="业务线:">
+                    <el-select v-model="form.businessLine" clearable placeholder="选择业务线">
+                        <el-option
+                            v-for="item in businessLineArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="规则状态:">
+                    <el-select v-model="form.status" clearable placeholder="状态">
+                        <el-option
+                            v-for="item in statusArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.categorys" clearable placeholder="选择资源类别">
+                        <el-option
+                            v-for="item in categorysArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
+                </el-form-item> 
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @row-dblclick="rowDblClick"
+                @selection-change="handleSelectionChange"
+            >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="ruleName" label="资源得分规则名称">
+                    <template slot-scope="scope">
+                        <!-- <el-button size="mini" type="text" @click="gotoInfo(scope.row.id)">{{scope.row.ruleName}}</el-button> -->
+                        <el-button size="mini" type="text" @click="rowDblClick(scope.row)">{{scope.row.ruleName}}</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="businessLineName" label="业务线"></el-table-column>
+                <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="150"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="150"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="150"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="创建人" width="90"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="修改时间"  :formatter="dateFormat" width="150"></el-table-column>
+                <el-table-column align="center" prop="updateUserName" label="修改人" width="90"></el-table-column>
+                <el-table-column align="center" prop="status" label="规则状态" width="90">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status == '0'">停用</span>
+                        <span v-else-if="scope.row.status == '1'">启用</span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="80">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status == '0'">
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">启用</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status == '1'">
+                            <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,0,'停用')">停用</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <el-dialog title="规则详情" :visible.sync="dialogFormVisible" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="规则名称：" :label-width="formLabelWidth">
+                            {{dialogForm.ruleName}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="业务线：" :label-width="formLabelWidth">
+                            {{dialogForm.industryCategory}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>                
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="规则开始时间：" :label-width="formLabelWidth">
+                            {{dialogForm.startTime}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="规则结束时间：" :label-width="formLabelWidth">
+                            {{dialogForm.endTime}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+        <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
+            <el-table-column align="center" prop="orgName" label="指标名称"></el-table-column>
+            <el-table-column align="center" prop="" label="指标值范围">
+                <template slot-scope="scope">
+                    {{scope.row.orgDayTimeStart}}-{{scope.row.orgDayTimeEnd}}
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="resourceMaxNum" label="得分" :formatter="transformNum" width="120"></el-table-column>
+            <el-table-column align="center" prop="ascriptionProjectName" label="指标值时间范围"></el-table-column>
+        </el-table>
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                paginationShow: false,
+                isShow:false,
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                form: {
+                    ruleName:'',
+                    businessLine:'',
+                    status:'',
+                    categorys:'',
+                },
+                dialogForm:{
+                  ruleName:'',
+                  category:'',
+                  source:'',
+                  industryCategory:'',
+                  searchWord:'',
+                  notSearchWord:'',
+                  province:'',
+                  notProvince:'',
+                  startTime:'',
+                  endTime:'',
+                  days:"",
+                  dayTimeStart:"",
+                  dayTimeEnd:"",
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                dialogTableData:[],                
+                storeForm: {
+                    ruleName:'',
+                    businessLine:'',
+                    status:'',
+                    categorys:'',
+                },
+                storeId: '',
+                scrollTop: 0,
+                businessLineArr:[],//业务线列表
+                categorysArr:[],
+                statusArr: [{
+                  value: 0,
+                  name: '停用'
+                },{
+                  value: 1,
+                  name: '启用'
+                },{
+                  value: 2,
+                  name: '删除'
+                }],
+            }             
+        },
+        methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+            handleSelectionChange(val) {//选择节点的事件
+                // console.log(val)
+                this.multipleSelection = val;
+            },         
+            deleteFun() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowNames = [];
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+                   rowIds.push(rows[i].id)
+                }
+                for(var i=0;i<rows.length;i++){
+                   rowNames.push(rows[i].name)
+                }
+                this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                      //删除
+                    var param  = {idList:rowIds};
+                     axios.post('/rule/userScoreRule/delete',param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                             ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                                window.location.href="/rule/clueScoreRule/cluesScore"
+                            }});
+                             
+                         }else{
+                             ocmVM.$message({
+                                 message: "接口调用失败",
+                                 type: 'error'
+                               }); 
+                         }
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                        
+                     });
+                 }).catch(() => {
+                        
+                 });
+            },
+            //修改状态
+            updateStatus(id,status,msg) {
+              var param = {};
+              param.id=id;
+              param.status=status;
+              var url='/clueAssignRule/optRule/updateStatusEnable';
+              if(status==0){
+                  url='/clueAssignRule/optRule/updateStatusDisable';
+              }
+              axios.post(url, param)
+              .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                    ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                    ocmVM.searchTable();
+                  }});
+                  
+                }else{
+                    ocmVM.$message.error(msg+"失败");
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+            },
+            searchTable() {
+                var startTime=this.form.searchStartTime;
+                var endTime=this.form.searchEndTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param ={};
+                param.ruleName=this.form.ruleName
+                param.businessLine=this.form.businessLine
+                param.status=this.form.status
+                param.categorys=this.form.categorys
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/rule/clueScoreRule/getClueScoreRuleListByPage', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    console.info(result);
+                    if(result.code==0){
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+
+                        // 取出存储的id
+                        if(!ocmVM.paginationShow){
+                            if(ocmVM.storeId){
+                                ocmVM.$nextTick(function(){
+                                    var storage = [];
+                                    ocmVM.dataTable.forEach(function(item, index){
+                                        if(item.id === ocmVM.storeId ){
+                                            storage.push(ocmVM.dataTable[index]);
+                                        }
+                                    })
+                                    ocmVM.toggleSelection(storage);
+                                    ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                                })
+                            }
+                        }else{
+                            ocmVM.removeSessionStore ("optRuleManagerStoreForm");
+                            ocmVM.removeSessionStore ("optRuleManagerOtherVal");
+                        }
+                        ocmVM.paginationShow = true;
+                        ocmVM.storeForm = ocmVM.form;
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            rowDblClick(row, column, event){//双击查看详情
+                this.dialogFormVisible = true;
+                this.dialogForm.ruleName = row.ruleName;
+                this.dialogForm.searchWord = row.searchWord;
+                this.dialogForm.notSearchWord = row.notSearchWord;
+                this.dialogForm.province = row.province;
+                this.dialogForm.notProvince = row.notProvince;
+                this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
+                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
+                this.dialogForm.days = this.daysFormat(null,null,row.days);
+                this.dialogForm.dayTimeStart = row.dayTimeStart;
+                this.dialogForm.dayTimeEnd = row.dayTimeEnd;
+                this.dialogTableData=row.assignRuleTeamList;
+            },
+            gotoInfo(){
+                document.location.href='/rule/userScoreRule/telemarketingScoreInfo';
+            },
+            addFun(){
+                document.location.href='/rule/userScoreRule/updatetelemarketingScore';
+            },
+            editFun() {
+                var rows = this.multipleSelection;                
+                if(rows.length!=1){
+                    this.$message({
+                        message: '请选择一条数据进行编辑',
+                        type: 'warning'
+                    });
+                    return;
+                }else{           
+                    // 存储选中信息--start
+                    var clueId=rows[0].id; 
+                    this.setSessionStore("optRuleManagerStoreForm", this.storeForm);
+                    var otherVal = {
+                        "currentPage": this.pager.currentPage,
+                        "clueId": clueId,
+                        "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                    }
+                    this.setSessionStore("optRuleManagerOtherVal", otherVal);
+                    // 存储选中信息--end
+                    document.location.href='/rule/userScoreRule/updatetelemarketingScore?id='+clueId;
+                }                
+            },
+          //资源数转换方法
+            transformNum(row, column, cellValue, index) {
+                if(cellValue==-1){
+                  return "不限";
+                }else{
+                  return cellValue;
+                }
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            //星期和美天数据格式化方法
+            daysFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                var cellValueArr=[];
+                var cellValueNew="";
+                if(cellValue){
+                    cellValueArr=cellValue.split(",");
+                    for(var i=0;i<cellValueArr.length;i++){
+                        if(cellValueArr[i]=="0"){
+                            cellValueArr[i]="每天"
+                        }else if(cellValueArr[i]=="1"){
+                            cellValueArr[i]="星期日"
+                        }else if(cellValueArr[i]=="2"){
+                            cellValueArr[i]="星期一"
+                        }else if(cellValueArr[i]=="3"){
+                            cellValueArr[i]="星期二"
+                        }else if(cellValueArr[i]=="4"){
+                            cellValueArr[i]="星期三"
+                        }else if(cellValueArr[i]=="5"){
+                            cellValueArr[i]="星期四"
+                        }else if(cellValueArr[i]=="6"){
+                            cellValueArr[i]="星期五"
+                        }else if(cellValueArr[i]=="7"){
+                            cellValueArr[i]="星期六"
+                        }
+                        cellValueNew+=cellValueArr[i]+",";
+                    }                    
+                }
+                return (cellValueNew.substring(0, cellValueNew.lastIndexOf(',')));
+            },
+             toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
+            isContainSource(source){
+              if(this.source !=null && this.source !="" && source!=null && source !="" && source.indexOf("3") != -1){
+                    return true;
+              }
+                return false
+            },
+            initBusinessline(){
+                var param = {};
+                axios.post('/rule/userScoreRule/getBusinesslineList', param).then(function (response) {
+                    ocmVM.businessLineArr = response.data;
+                });
+            }
+        },
+        created(){
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("optRuleManagerStoreForm");
+                var otherVal = this.getSessionStore("optRuleManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            // console.info("create method");
+            this.searchTable();
+            //初始化业务线
+            this.initBusinessline();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+  })
+</script>
+</html>
