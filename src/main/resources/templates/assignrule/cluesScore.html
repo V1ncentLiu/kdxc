@@ -58,7 +58,7 @@
                     </el-select>
                 </el-form-item>  
                 <el-form-item label="资源类别:">
-                    <el-select v-model="form.categorys" clearable placeholder="选择资源类别">
+                    <el-select v-model="form.categorys" multiple clearable placeholder="选择资源类别">
                         <el-option
                             v-for="item in categorysArr"
                             :key="item.value"
@@ -130,6 +130,11 @@
                     <el-col :span="12">
                         <el-form-item label="业务线：" :label-width="formLabelWidth">
                             {{dialogForm.businessLineName}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{dialogForm.categoryNames}}
                         </el-form-item>
                     </el-col>
                 </el-row>                
@@ -273,12 +278,12 @@
                 }).then(() => {
                       //删除
                     var param  = {idList:rowIds};
-                     axios.post('/rule/userScoreRule/delete',param)
+                     axios.post('/rule/clueScoreRule/delete',param)
                      .then(function (response) {
                          var data =  response.data;
                          if(data.code=='0'){
                              ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
-                                window.location.href="/rule/userScoreRule/userScoreRulePage"
+                                window.location.href="/rule/clueScoreRule/cluesScore"
                             }});
                              
                          }else{
@@ -326,9 +331,9 @@
                     .catch(function (error) {
                         console.log(error);
                     });
-                    url='/rule/userScoreRule/updateStatusEnable';
-                }else{//调启用停用接口
-                    url='/rule/userScoreRule/updateStatusDisable';
+                    url='/rule/clueScoreRule/updateStatusEnable';
+                }else{//调用停用接口
+                    url='/rule/clueScoreRule/updateStatusDisable';
                 }
                 axios.post(url, param)
                 .then(function (response) {
@@ -415,7 +420,7 @@
             rowDblClick(row, column, event){//双击查看详情
                 var param={};
                 param.id=row.id;
-                axios.post('/rule/userScoreRule/getRuleDetailById', param)
+                axios.post('/rule/clueScoreRule/getRuleDetailById', param)
                 .then(function (response) {
                     var result =  response.data;
                     if(result.code=="0"){
@@ -423,9 +428,10 @@
                         ocmVM.dialogFormVisible = true;
                         ocmVM.dialogForm.ruleName=tableData.ruleName;
                         ocmVM.dialogForm.businessLineName=tableData.businessLineName;
+                        ocmVM.dialogForm.categoryNames=tableData.categoryNames;
                         ocmVM.dialogForm.startTime=ocmVM.dateFormat(null,null,row.startTime);
                         ocmVM.dialogForm.endTime=ocmVM.dateFormat(null,null,row.endTime);
-                        ocmVM.dialogTableData=tableData.dialogTableData;
+                        ocmVM.dialogTableData=tableData.clueScoreRuleDetailList;
                     }else{
                         ocmVM.$message.error(msg+"失败");
                     }
