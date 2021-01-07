@@ -81,13 +81,13 @@
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="businessLineName" label="业务线" width="80"></el-table-column>
-                <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="130"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="150"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="150"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="150"></el-table-column>
                 <el-table-column align="center" prop="createUserName" label="创建人" width="90"></el-table-column>
-                <el-table-column align="center" prop="updateTime" label="修改时间"  :formatter="dateFormat" width="130"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="修改时间"  :formatter="dateFormat" width="150"></el-table-column>
                 <el-table-column align="center" prop="updateUserName" label="修改人" width="90"></el-table-column>
-                <el-table-column align="center" prop="status" label="状态" width="80">
+                <el-table-column align="center" prop="status" label="规则状态" width="90">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status == '0'">停用</span>
                         <span v-else-if="scope.row.status == '1'">启用</span>
@@ -193,14 +193,8 @@
                 dialogTableData:[],                
                 storeForm: {
                     ruleName:'',
-                    category:'',
-                    industryCategory:'',
+                    businessLine:'',
                     status:'',
-                    searchStartTime:'',
-                    searchEndTime:'',
-                    teleorg:'',
-                    updateTimeBegin:'',
-                    updateTimeEnd:''
                 },
                 storeId: '',
                 scrollTop: 0,
@@ -318,8 +312,9 @@
                 console.info(param);
                 axios.post('/rule/userScoreRule/getUserScoreRuleListByPage', param)
                 .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
+                    var result =  response.data;
+                    console.info(result);                    
+                    if(result.code==0){
                         var table=result.data;
                         ocmVM.dataTable= table.data;
                         ocmVM.pager.total =  table.total;
@@ -345,7 +340,9 @@
                         }
                         ocmVM.paginationShow = true;
                         ocmVM.storeForm = ocmVM.form;
-
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }
                 })
                 .catch(function (error) {
                      console.log(error);
