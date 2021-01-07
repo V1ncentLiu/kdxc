@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -64,6 +67,8 @@ public class ProjectController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
 
     /***
      * 项目列表页
@@ -105,15 +110,17 @@ public class ProjectController {
         // 查询字典品类集合
         request.setAttribute("categoryList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         // 查询字典类别集合
-        request.setAttribute("classificationList",
-                getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
+        request.setAttribute("classificationList",getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
         // 查询字典店型集合
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
         // 查询字典项目归属集合
-        request.setAttribute("projectAttributiveList",
-                getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
+        request.setAttribute("projectAttributiveList",getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
         // 查询字典集团分配比例归属集合
         List<DictionaryItemRespDTO> ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
+
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
+        // 查询所有业务线
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
         if (ratioList != null && ratioList.size() > 0) {
             for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
                 dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue() + "%");
@@ -170,16 +177,18 @@ public class ProjectController {
         // 查询字典品类集合
         request.setAttribute("categoryList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         // 查询字典类别集合
-        request.setAttribute("classificationList",
-                getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
+        request.setAttribute("classificationList",getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
         // 查询字典店型集合
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
         // 查询字典项目归属集合
-        request.setAttribute("projectAttributiveList",
-                getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
+        request.setAttribute("projectAttributiveList",getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
         // 查询品牌品类集合
         JSONResult<List<CategoryDTO>> categoryList = projectInfoFeignClient.getCategoryList();
         request.setAttribute("brandCategoryList", categoryList.getData());
+
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
+        // 查询所有业务线
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
 
         // 获取商家账号集合，倒叙
         List<Integer> statusList = new ArrayList<>();

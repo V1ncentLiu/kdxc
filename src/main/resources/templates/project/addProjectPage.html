@@ -223,6 +223,20 @@
                         </el-select>
                     </el-form-item>
                 </el-col>
+                <el-col :span="12">
+                    <el-form-item label="所属业务线：" :label-width="formLabelWidth1" prop="businessLine">
+                        <el-select v-model="form.businessLine" reserve-keyword=true multiple clearable filterable placeholder="请选择" style="width: 300px;">
+                            <el-option
+                                    v-for="item in businessLineOptions"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
                 <el-col :span="12" class="shopType">
                     <el-form-item label="店型：" :label-width="formLabelWidth1" prop="shopTypeList">
                         <el-checkbox-group v-model="form.shopTypeList">
@@ -308,6 +322,7 @@
     var brandCategoryList = [[${brandCategoryList}]];//品类集合
     var project = [[${project}]];//品类集合
     var ratioList = [[${ratioList}]];//比例集合
+    var businessLineList=[[${businessLineList}]];//业务线集合
 
     var projectVm = new Vue({
         el: '#userManage',
@@ -348,6 +363,8 @@
                     projectAttributive: '',
                     shopType: '',
                     shopTypeList: [],
+                    businessLine:[],
+                    businessLines:'',
                     headAddress: '',
                     groupId: '',
                     ratio: '',
@@ -391,6 +408,7 @@
                 shopTypeOptions: shopTypeList,
                 projectAttributiveOptions: projectAttributiveList,
                 userInfoAddList: userInfoAddList,
+                businessLineOptions:businessLineList,
                 brandCategoryOptions: brandCategoryList,
                 isNotSignOptions: [{
                     value: 1,
@@ -480,6 +498,7 @@
                         }
                         param.ratio = param.ratio.replace("%", "");
                         param.shopType = shopType;
+                        param.businessLines = projectVm.form.businessLine.join(',');
                         var url = "/aggregation/projectManager/saveProject";
                         if (param.id != "") {
                             url = "/aggregation/projectManager/updateProject";
@@ -538,6 +557,7 @@
                 this.form.groupId = project.groupId;
                 this.form.isSettle = project.isSettle + "";
                 this.form.lowestCommission = project.lowestCommission;
+                this.form.businessLine=project.businessLines.split(',');
                 if (project.shopType != null && project.shopType != "") {
                     this.form.shopTypeList = project.shopType.split(",");
                 }
