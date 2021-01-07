@@ -326,8 +326,9 @@
                 console.info(param);
                 axios.post('/rule/clueScoreRule/getClueScoreRuleListByPage', param)
                 .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
+                    var result =  response.data;
+                    console.info(result);
+                    if(result.code==0){
                         var table=result.data;
                         ocmVM.dataTable= table.data;
                         ocmVM.pager.total =  table.total;
@@ -353,7 +354,9 @@
                         }
                         ocmVM.paginationShow = true;
                         ocmVM.storeForm = ocmVM.form;
-
+                    }else{
+                        ocmVM.$message.error(result.msg);
+                    }
                 })
                 .catch(function (error) {
                      console.log(error);
