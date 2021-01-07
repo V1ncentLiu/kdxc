@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @date:
  * @version V1.0
  */
-@FeignClient(name = "business-config-service", path = "/businessConfig/clueScoreRule",
+@FeignClient(name = "business-config-service-jzx", path = "/businessConfig/clueScoreRule",
         fallback = ClueScoreRuleFeignClient.HystrixClientFallback.class)
 public interface ClueScoreRuleFeignClient {
     /**
