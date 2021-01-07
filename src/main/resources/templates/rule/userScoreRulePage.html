@@ -236,6 +236,12 @@
                 }
                 var rowNames = [];
                 var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+                   rowIds.push(rows[i].id)
+                }
+                for(var i=0;i<rows.length;i++){
+                   rowNames.push(rows[i].name)
+                }
                 this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -243,12 +249,12 @@
                 }).then(() => {
                  	  //删除
                  	var param  = {idList:rowIds};
-                     axios.post('/clueAssignRule/optRule/delete',param)
+                     axios.post('/rule/userScoreRule/delete',param)
                      .then(function (response) {
                          var data =  response.data;
                          if(data.code=='0'){
                         	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
-                         		ocmVM.searchTable();
+                         		window.location.href="/rule/userScoreRule/userScoreRulePage"
                      	    }});
                              
                          }else{
@@ -310,7 +316,7 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 console.info(param);
-                axios.post('/rule/userScoreRule/userScoreRuleListByPage', param)
+                axios.post('/rule/userScoreRule/getUserScoreRuleListByPage', param)
                 .then(function (response) {
                         var result =  response.data;
                         console.info(result);
