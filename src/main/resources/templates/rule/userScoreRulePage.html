@@ -89,17 +89,17 @@
                 <el-table-column align="center" prop="updateUserName" label="修改人" width="90"></el-table-column>
                 <el-table-column align="center" prop="status" label="规则状态" width="90">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.status == '0'">停用</span>
-                        <span v-else-if="scope.row.status == '1'">启用</span>
+                        <span v-if="scope.row.status === 0">停用</span>
+                        <span v-else-if="scope.row.status === 1">启用</span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     <template slot-scope="scope">
-                        <span v-if="scope.row.status == '0'">
-                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">启用</el-button>
+                        <span v-if="scope.row.status === 0">
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,0,'启用')">启用</el-button>
                         </span>
-                        <span v-else-if="scope.row.status == '1'">
-                            <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,0,'停用')">停用</el-button>
+                        <span v-else-if="scope.row.status === 1">
+                            <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,1,'停用')">停用</el-button>
                         </span>
                     </template>
                 </el-table-column>
@@ -221,6 +221,7 @@
             },         
             deleteFun() {
             	var rows = this.multipleSelection;
+                console.log(rows)
                 if(rows.length==0){
                     this.$message({
                        message: '请选择数据进行删除',
@@ -228,15 +229,22 @@
                      });
                     return;
                 }
-                var rowNames = [];
+                var rowNames = "";
                 var rowIds = [];
                 for(var i=0;i<rows.length;i++){
                    rowIds.push(rows[i].id)
                 }
                 for(var i=0;i<rows.length;i++){
-                   rowNames.push(rows[i].name)
+                    var ruleName="";
+                    if(rows&&rows[i].ruleName){
+                        ruleName=rows[i].ruleName
+                        rowNames = rowNames + '【'+ruleName+'】';
+                    }else{
+                        ruleName=""
+                        rowNames = rowNames + '【'+ruleName+'】';
+                    }                   
                 }
-                this.$confirm('确定要删除 '+rowNames.join(" ")+'吗？删除后不可恢复。', '提示', {
+                this.$confirm('确定要删除 '+rowNames+'吗？删除后不可恢复。', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
@@ -273,9 +281,9 @@
               var param = {};
               param.id=id;
               param.status=status;
-              var url='/clueAssignRule/optRule/updateStatusEnable';
-              if(status==0){
-            	  url='/clueAssignRule/optRule/updateStatusDisable';
+              var url='/rule/userScoreRule/updateStatusDisable';
+              if(status==0){//表示停用状态，调启用接口
+            	  url='/rule/userScoreRule/updateStatusEnable';
               }
               axios.post(url, param)
               .then(function (response) {
