@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.rule;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
@@ -273,26 +274,27 @@ public class OptAutoRuleController {
      * @param
      * @return
      */
-//    @PostMapping("/update")
-//    @ResponseBody
-//    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
-//    @LogRecord(description = "修改优化规则信息", operationType = OperationType.UPDATE,
-//            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
-//    public JSONResult update(@Valid @RequestBody ClueAssignRuleReq clueAssignRuleReq,
-//            BindingResult result) {
-//        if (result.hasErrors()) {
-//            return CommonUtil.validateParam(result);
-//        }
-//        // 插入修改人信息
-//        UserInfoDTO user = getUser();
-//        clueAssignRuleReq.setUpdateUser(user.getId());
-//        Long id = clueAssignRuleReq.getId();
-//        if (id == null) {
-//            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-//                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
-//        }
-//        return clueAutoAssignRuleFeignClient.update(clueAssignRuleReq);
-//    }
+    @PostMapping("/update")
+    @ResponseBody
+    @RequiresPermissions("clueAutoAssignRule:optAutoRuleManager:edit")
+    @LogRecord(description = "修改优化规则信息", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.OPT_AUTO_RULE_MANAGEMENT)
+    public JSONResult update(@Valid @RequestBody ClueAutoAssignRuleReq clueAssignRuleReq,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        // 插入修改人信息
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setUpdateUser(user.getId());
+        Long id = clueAssignRuleReq.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        return clueAutoAssignRuleFeignClient.update(clueAssignRuleReq);
+    }
 
     /**
      * 启用规则

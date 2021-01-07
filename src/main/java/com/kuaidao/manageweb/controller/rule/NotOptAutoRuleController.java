@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.rule;
 
 import com.alibaba.fastjson.JSON;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
