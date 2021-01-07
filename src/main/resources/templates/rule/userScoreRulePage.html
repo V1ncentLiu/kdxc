@@ -38,7 +38,7 @@
                     <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
                 </el-form-item>
                 <el-form-item label="业务线:">
-                    <el-select v-model="form.businessLine" clearable placeholder="选择资源类别">
+                    <el-select v-model="form.businessLine" clearable placeholder="选择业务线">
                         <el-option
                             v-for="item in businessLineArr"
                             :key="item.value"
@@ -96,10 +96,10 @@
                 <el-table-column align="center" prop="handler" label="操作" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status === 0">
-                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,0,'启用')">启用</el-button>
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row,1,'启用')">启用</el-button>
                         </span>
                         <span v-else-if="scope.row.status === 1">
-                            <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,1,'停用')">停用</el-button>
+                            <el-button size="mini" type="danger" @click="updateStatus(scope.row,0,'停用')">停用</el-button>
                         </span>
                     </template>
                 </el-table-column>
@@ -119,7 +119,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="业务线：" :label-width="formLabelWidth">
-                            {{dialogForm.industryCategory}}
+                            {{dialogForm.businessLineName}}
                         </el-form-item>
                     </el-col>
                 </el-row>                
@@ -138,14 +138,32 @@
             </div>
         </el-form>
         <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
-            <el-table-column align="center" prop="orgName" label="指标名称"></el-table-column>
-            <el-table-column align="center" prop="" label="指标值范围">
+            <el-table-column align="center" prop="type" label="指标名称">
                 <template slot-scope="scope">
-                    {{scope.row.orgDayTimeStart}}-{{scope.row.orgDayTimeEnd}}
+                    <span v-if="scope.row.type==1">业绩金额</span>
+                    <span v-else="scope.row.type==2">单数</span>
+                    <span v-else="scope.row.type==3">来访率</span>
+                    <span v-else="scope.row.type==4">平均时间间隔</span>
+                    <span v-else="scope.row.type==5">通话时长</span>
+                    <span v-else="scope.row.type==6">跟访次数</span>
+                    <span v-else="scope.row.type==7">接通率</span>
+                    <span v-else="scope.row.type==8">有效率</span>
+                    <span v-else="scope.row.type==9">ROI</span>
+                    <span v-else="scope.row.type==10">资源价值</span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="resourceMaxNum" label="得分" :formatter="transformNum" width="120"></el-table-column>
-            <el-table-column align="center" prop="ascriptionProjectName" label="指标值时间范围"></el-table-column>
+            <el-table-column align="center" prop="" label="指标值范围">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.type==3||scope.row.type==7||scope.row.type==8">{{scope.row.startNum}}%-{{scope.row.endNum}}%</span>
+                    <span v-else>{{scope.row.startNum}}-{{scope.row.endNum}}</span>                    
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="addScore" label="得分" width="120"></el-table-column>
+            <el-table-column align="center" prop="days" label="指标值时间范围">
+                <template slot-scope="scope">
+                    近{{scope.row.days}}天数据
+                </template>
+            </el-table-column>
         </el-table>
     </el-dialog>
 </div>
@@ -174,19 +192,10 @@
                     status:'',
                 },
                 dialogForm:{
-                  ruleName:'',
-                  category:'',
-                  source:'',
-                  industryCategory:'',
-                  searchWord:'',
-                  notSearchWord:'',
-                  province:'',
-                  notProvince:'',
-                  startTime:'',
-                  endTime:'',
-                  days:"",
-                  dayTimeStart:"",
-                  dayTimeEnd:"",
+                    ruleName:'',
+                    businessLineName:'',
+                    startTime:'',
+                    endTime:'',
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -277,29 +286,52 @@
                  });
             },
             //修改状态
-            updateStatus(id,status,msg) {
-              var param = {};
-              param.id=id;
-              param.status=status;
-              var url='/rule/userScoreRule/updateStatusDisable';
-              if(status==0){//表示停用状态，调启用接口
-            	  url='/rule/userScoreRule/updateStatusEnable';
-              }
-              axios.post(url, param)
-              .then(function (response) {
-                var result =  response.data;
-                if(result.code=="0"){
-                	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
-                	ocmVM.searchTable();
-          	      }});
-                  
-                }else{
-                	ocmVM.$message.error(msg+"失败");
+            updateStatus(rows,status,msg) {
+                console.log(rows)
+                var param = {};
+                param.id=rows.id;
+                param.status=status;
+                var url='';
+                if(rows.status===0){//表示停用状态，调启用接口
+                    // 检验该业务线是否有启用
+                    var param1={};
+                    param.id=rows.id;
+                    param.status=status;
+                    param.businessLine=rows.businessLine;
+                    axios.post('/rule/userScoreRule/getRuleByBusinessLine', param1)
+                    .then(function (response) {
+                        var result =  response.data;
+                        if(result.code=="0"){
+                            ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                                ocmVM.searchTable();
+                            }});
+                          
+                        }else{
+                            ocmVM.$message.error(msg+"失败");
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            	    url='/rule/userScoreRule/updateStatusEnable';
+                }else{//调启用停用接口
+                    url='/rule/userScoreRule/updateStatusDisable';
                 }
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
+                axios.post(url, param)
+                .then(function (response) {
+                    var result =  response.data;
+                    if(result.code=="0"){
+                    	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                    	ocmVM.searchTable();
+              	      }});
+                      
+                    }else{
+                    	ocmVM.$message.error(msg+"失败");
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
             },
             searchTable() {
             	var startTime=this.form.searchStartTime;
@@ -367,18 +399,26 @@
                 }
             },
             rowDblClick(row, column, event){//双击查看详情
-                this.dialogFormVisible = true;
-                this.dialogForm.ruleName = row.ruleName;
-                this.dialogForm.searchWord = row.searchWord;
-                this.dialogForm.notSearchWord = row.notSearchWord;
-                this.dialogForm.province = row.province;
-                this.dialogForm.notProvince = row.notProvince;
-                this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
-                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
-                this.dialogForm.days = this.daysFormat(null,null,row.days);
-                this.dialogForm.dayTimeStart = row.dayTimeStart;
-                this.dialogForm.dayTimeEnd = row.dayTimeEnd;
-                this.dialogTableData=row.assignRuleTeamList;
+                var param={};
+                param.id=row.id;
+                axios.post('/rule/userScoreRule/getRuleDetailById', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        var tableData=result.data;
+                        ocmVM.dialogFormVisible = true;
+                        ocmVM.dialogForm.ruleName=tableData.ruleName;
+                        ocmVM.dialogForm.businessLineName=tableData.businessLineName;
+                        ocmVM.dialogForm.startTime=ocmVM.dateFormat(null,null,row.startTime);
+                        ocmVM.dialogForm.endTime=ocmVM.dateFormat(null,null,row.endTime);
+                        ocmVM.dialogTableData=tableData.userScoreRuleDetailList;
+                    }else{
+                        ocmVM.$message.error(msg+"失败");
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
             },
             gotoInfo(){
                 document.location.href='/rule/userScoreRule/telemarketingScoreInfo';
@@ -408,52 +448,12 @@
                 	document.location.href='/rule/userScoreRule/updatetelemarketingScore?id='+clueId;
                 }                
             },
-          //资源数转换方法
-            transformNum(row, column, cellValue, index) {
-                if(cellValue==-1){
-              	  return "不限";
-                }else{
-	              return cellValue;
-                }
-            },
           //日期数据格式化方法
             dateFormat( row, column, cellValue, index) {
               if (cellValue == undefined) {
                  return "";
               }
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-            },
-            //星期和美天数据格式化方法
-            daysFormat( row, column, cellValue, index) {
-                if (cellValue == undefined) {
-                    return "";
-                }
-                var cellValueArr=[];
-                var cellValueNew="";
-                if(cellValue){
-                    cellValueArr=cellValue.split(",");
-                    for(var i=0;i<cellValueArr.length;i++){
-                        if(cellValueArr[i]=="0"){
-                            cellValueArr[i]="每天"
-                        }else if(cellValueArr[i]=="1"){
-                            cellValueArr[i]="星期日"
-                        }else if(cellValueArr[i]=="2"){
-                            cellValueArr[i]="星期一"
-                        }else if(cellValueArr[i]=="3"){
-                            cellValueArr[i]="星期二"
-                        }else if(cellValueArr[i]=="4"){
-                            cellValueArr[i]="星期三"
-                        }else if(cellValueArr[i]=="5"){
-                            cellValueArr[i]="星期四"
-                        }else if(cellValueArr[i]=="6"){
-                            cellValueArr[i]="星期五"
-                        }else if(cellValueArr[i]=="7"){
-                            cellValueArr[i]="星期六"
-                        }
-                        cellValueNew+=cellValueArr[i]+",";
-                    }                    
-                }
-                return (cellValueNew.substring(0, cellValueNew.lastIndexOf(',')));
             },
              toogleClick(){
                 if(this.isShow){
