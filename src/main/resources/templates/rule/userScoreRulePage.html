@@ -38,9 +38,9 @@
                     <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
                 </el-form-item>
                 <el-form-item label="业务线:">
-                    <el-select v-model="form.category" clearable placeholder="选择资源类别">
+                    <el-select v-model="form.businessLine" clearable placeholder="选择资源类别">
                         <el-option
-                            v-for="item in categoryOptions"
+                            v-for="item in businessLineArr"
                             :key="item.value"
                             :label="item.name"
                             :value="item.value">
@@ -50,7 +50,7 @@
                 <el-form-item label="规则状态:">
                     <el-select v-model="form.status" clearable placeholder="状态">
                         <el-option
-                            v-for="item in statusOptions"
+                            v-for="item in statusArr"
                             :key="item.value"
                             :label="item.name"
                             :value="item.value">
@@ -80,14 +80,14 @@
                         <el-button size="mini" type="text" @click="rowDblClick(scope.row)">{{scope.row.ruleName}}</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="category" label="业务线" :formatter="transformCategory" width="80"></el-table-column>
+                <el-table-column align="center" prop="businessLineName" label="业务线" width="80"></el-table-column>
                 <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="createUserName" label="创建人" width="90"></el-table-column>
                 <el-table-column align="center" prop="updateTime" label="修改时间"  :formatter="dateFormat" width="130"></el-table-column>
                 <el-table-column align="center" prop="updateUserName" label="修改人" width="90"></el-table-column>
-                <el-table-column align="center" prop="status" label="状态" width="80" :formatter="transformStatus">
+                <el-table-column align="center" prop="status" label="状态" width="80">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status == '0'">停用</span>
                         <span v-else-if="scope.row.status == '1'">启用</span>
@@ -155,17 +155,10 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
-    var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
-    var mediumList=[[${mediumList}]];//媒介集合
-    var queryOrg=[[${queryOrg}]];//电销组
-    var userId=[[${userId}]];//登录人账号id
-    var roleCode=[[${roleCode}]];//登录人角色code
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
-                mediumArry: [],
                 paginationShow: false,
                 isShow:false,
                 dialogFormVisible: false,
@@ -176,16 +169,9 @@
                   pageSize: 20,
                 },
                 form: {
-                    source:"",
-                  ruleName:'',
-                  category:'',
-                  industryCategory:'',
-                  status:'',
-                  searchStartTime:'',
-                  searchEndTime:'',
-                  teleorg:'',
-                  updateTimeBegin:'',
-                  updateTimeEnd:''
+                    ruleName:'',
+                    businessLine:'',
+                    status:'',
                 },
                 dialogForm:{
                   ruleName:'',
@@ -204,17 +190,7 @@
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
-                dialogTableData:[],
-                categoryOptions:clueCategoryList,
-                industryCategoryOptions:industryCategoryList ,
-                orgTeleArr:queryOrg,
-                statusOptions: [{
-                  value: 1,
-                  name: '有效'
-                }, {
-                  value: 0,
-                  name: '无效'
-                }],
+                dialogTableData:[],                
                 storeForm: {
                     ruleName:'',
                     category:'',
@@ -228,40 +204,27 @@
                 },
                 storeId: '',
                 scrollTop: 0,
+                businessLineArr:[],//业务线列表
+                statusArr: [{
+                  value: 0,
+                  name: '停用'
+                },{
+                  value: 1,
+                  name: '启用'
+                },{
+                  value: 2,
+                  name: '删除'
+                }],
             }        	  
         },
         methods: {
-            searchwordShow(val){
-                if(this.form.searchWord !=null && this.form.searchWord !="" && val.indexOf(this.form.searchWord)!=-1){
-                    return true;
-                }
-                return false;
-            },
-            notSearchwordShow(val){
-                if(this.form.notSearchWord !=null && this.form.notSearchWord !="" && val.indexOf(this.form.notSearchWord)!=-1){
-                    return true;
-                }
-                return false;
-            },
-            sourceShow(val){
-                if(this.form.source !=null && this.form.source !="" && (","+val+",").indexOf(","+this.form.source+",")!=-1){
-                    return true;
-                }
-                return false;
-            },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
             handleSelectionChange(val) {//选择节点的事件
                 // console.log(val)
                 this.multipleSelection = val;
-            },
-            handleStart(index, row) {
-                console.log(index, row);
-            },
-            handleForbid(index, row) {
-                console.log(index, row);
-            },            
+            },         
             deleteFun() {
             	var rows = this.multipleSelection;
                 if(rows.length==0){
@@ -340,11 +303,14 @@
                     });
                     return;
                 }
-                var param =this.form;
+                var param ={};
+                param.ruleName=this.form.ruleName
+                param.businessLine=this.form.businessLine
+                param.status=this.form.status
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 console.info(param);
-                axios.post('/clueAssignRule/optRule/list', param)
+                axios.post('/rule/userScoreRule/userScoreRuleListByPage', param)
                 .then(function (response) {
                         var result =  response.data;
                         console.info(result);
@@ -352,23 +318,6 @@
                         ocmVM.dataTable= table.data;
                         ocmVM.pager.total =  table.total;
                         ocmVM.pager.currentPage = table.currentPage;
-
-                        // 和搜索框有匹配值则设置颜色
-                        for(var i=0;i<table.data.length;i++){
-                            if(table&&table.data[i].searchWord){
-                                ocmVM.dataTable[i].searchWordList=table.data[i].searchWord.split(",");
-                                ocmVM.dataTable[i].searchWordListLength = table.data[i].searchWord.split(",").length;
-                            }
-                            if(table&&table.data[i].notSearchWord){
-                                ocmVM.dataTable[i].notSearchWordList=table.data[i].notSearchWord.split(",");
-                                ocmVM.dataTable[i].notSearchWordListLength = table.data[i].notSearchWord.split(",").length;
-                            }
-                            if(table&&table.data[i].source){
-                                ocmVM.dataTable[i].sourceList=table.data[i].source.split(",");
-                                console.log("1111111  "+ocmVM.dataTable[i].sourceList);
-                                ocmVM.dataTable[i].sourceLength = table.data[i].source.split(",").length;
-                            }
-                        }
 
                         // 取出存储的id
                         if(!ocmVM.paginationShow){
@@ -409,9 +358,6 @@
             rowDblClick(row, column, event){//双击查看详情
                 this.dialogFormVisible = true;
                 this.dialogForm.ruleName = row.ruleName;
-                this.dialogForm.category =this.transformCategory(null,null,row.category);
-                this.dialogForm.source = this.transformSource(null,null,row.source);
-                this.dialogForm.industryCategory = this.transformIndustry(null,null,row.industryCategory);
                 this.dialogForm.searchWord = row.searchWord;
                 this.dialogForm.notSearchWord = row.notSearchWord;
                 this.dialogForm.province = row.province;
@@ -498,63 +444,6 @@
                 }
                 return (cellValueNew.substring(0, cellValueNew.lastIndexOf(',')));
             },
-          //媒介转换方法
-            transformSource(row, column, cellValue, index) {
-         	   var text="";
-           	   if(mediumList&&cellValue){
-	            	   var array=cellValue.split(",");
-	                   for(var i=0;i<array.length;i++){
-	                	   for(var j=0;j<mediumList.length;j++){
-	 	                		if(array[i]==mediumList[j].value){
-	 	                			if(i==0){
-		 	                			text=mediumList[j].name;
-	 	                			}else{
-		 	                			text=text+","+mediumList[j].name;
-	 	                			}
-	 	                		}
-	 	                	}
-	                	}
-           	    }
-                 return text;
-            },
-          //行业类别转换方法
-            transformIndustry(row, column, cellValue, index) {
-         	   var text="";
-           	   if(industryCategoryList&&cellValue){
-	            	   var array=cellValue.split(",");
-	                   for(var i=0;i<array.length;i++){
-	                	   for(var j=0;j<industryCategoryList.length;j++){
-	 	                		if(array[i]==industryCategoryList[j].value){
-	 	                			if(i==0){
-		 	                			text=industryCategoryList[j].name;
-	 	                			}else{
-		 	                			text=text+","+industryCategoryList[j].name;
-	 	                			}
-	 	                		}
-	 	                	}
-	                	}
-           	    }
-                 return text;
-            },
-          //资源类别转换方法
-            transformCategory(row, column, cellValue, index) {
-          	   var text="";
-            	   if(clueCategoryList&&cellValue){
- 	            	   var array=cellValue.split(",");
- 	                   for(var i=0;i<array.length;i++){
- 	                	   for(var j=0;j<clueCategoryList.length;j++){
- 	 	                		if(array[i]==clueCategoryList[j].value){
- 	 	                			if(i==0){
- 		 	                			text=clueCategoryList[j].name;
- 	 	                			}else{
- 		 	                			text=text+","+clueCategoryList[j].name;
- 	 	                			}
- 	 	                		}
- 	 	                	}
- 	                	}
-            	    }
-                  return text;
-             },
              toogleClick(){
                 if(this.isShow){
                     this.isShow=false
@@ -581,30 +470,17 @@
                 if (!name) return
                 return window.sessionStorage.removeItem(name)
             },
-            //媒介转换方法
-            transformSourceBySource(cellValue) {
-                var text="";
-                if(mediumList&&cellValue){
-                    var array=cellValue.split(",");
-                    for(var i=0;i<array.length;i++){
-                        for(var j=0;j<mediumList.length;j++){
-                            if(array[i]==mediumList[j].value){
-                                if(i==0){
-                                    text=mediumList[j].name;
-                                }else{
-                                    text=text+","+mediumList[j].name;
-                                }
-                            }
-                        }
-                    }
-                }
-                return text;
-            },
             isContainSource(source){
               if(this.source !=null && this.source !="" && source!=null && source !="" && source.indexOf("3") != -1){
                     return true;
               }
                 return false
+            },
+            initBusinessline(){
+                var param = {};
+                axios.post('/rule/userScoreRule/getBusinesslineList', param).then(function (response) {
+                    ocmVM.businessLineArr = response.data;
+                });
             }
         },
         created(){
@@ -623,16 +499,12 @@
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
-            //初始化媒介
-            var param = {};
-            param.groupCode = "medium";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                ocmVM.mediumArry = response.data.data;
-            });
+            //初始化业务线
+            this.initBusinessline();
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
         }
   })
 </script>
-</html>s
+</html>
