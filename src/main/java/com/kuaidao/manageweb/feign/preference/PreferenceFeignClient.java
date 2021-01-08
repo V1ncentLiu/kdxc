@@ -1,11 +1,5 @@
 package com.kuaidao.manageweb.feign.preference;
 
-
-import com.kuaidao.businessconfig.dto.telepreference.TelePreferenceSetDTO;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -14,29 +8,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.kuaidao.businessconfig.dto.telepreference.TelePreferenceSetDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+
 /**
  * 自动分配模型Feign类
- *
  * @author fengyixuan
  */
 @FeignClient(name = "business-config-service", path = "/businessConfig/telepreference", fallback = PreferenceFeignClient.HystrixClientFallback.class)
 public interface PreferenceFeignClient {
 
-
-    @RequestMapping(method = RequestMethod.POST,value = "/update")
+    @RequestMapping(method = RequestMethod.POST, value = "/update")
     JSONResult<Boolean> update(@RequestBody TelePreferenceSetDTO dto);
 
-    @RequestMapping(method = RequestMethod.POST,value = "/insert")
-    JSONResult<Boolean> insert(@RequestBody TelePreferenceSetDTO  dto);
+    @RequestMapping(method = RequestMethod.POST, value = "/insert")
+    JSONResult<Boolean> insert(@RequestBody TelePreferenceSetDTO dto);
 
-    @RequestMapping(method = RequestMethod.POST,value = "/queryByParams")
+    @RequestMapping(method = RequestMethod.POST, value = "/queryByParams")
     JSONResult<PageBean<TelePreferenceSetDTO>> queryByParams(@RequestBody TelePreferenceSetDTO dto);
 
+    @RequestMapping(method = RequestMethod.POST, value = "/updateBusyStatus")
+    JSONResult<Boolean> updateBusyStatus(@RequestBody TelePreferenceSetDTO dto);
 
-    @RequestMapping(method = RequestMethod.POST,value = "/updateBusyStatus")
-    JSONResult<Boolean> updateBusyStatus(@RequestBody TelePreferenceSetDTO  dto);
-
-    @RequestMapping(method = RequestMethod.POST,value = "/queryBusyStatus")
+    @RequestMapping(method = RequestMethod.POST, value = "/queryBusyStatus")
     public JSONResult<TelePreferenceSetDTO> queryBusyStatus(@RequestBody IdEntityLong id);
 
     @Component
@@ -46,10 +43,8 @@ public interface PreferenceFeignClient {
 
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
         }
-
 
         @Override
         public JSONResult<Boolean> update(TelePreferenceSetDTO dto) {
