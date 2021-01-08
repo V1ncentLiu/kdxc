@@ -121,6 +121,11 @@ public class ProjectController {
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
         request.setAttribute("businessLineList", listBusinessLineOrg.getData());
+
+        // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
+
         if (ratioList != null && ratioList.size() > 0) {
             for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
                 dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue() + "%");
@@ -189,6 +194,10 @@ public class ProjectController {
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
         request.setAttribute("businessLineList", listBusinessLineOrg.getData());
+
+        // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
 
         // 获取商家账号集合，倒叙
         List<Integer> statusList = new ArrayList<>();
