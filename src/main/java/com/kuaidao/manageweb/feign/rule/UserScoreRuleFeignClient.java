@@ -25,7 +25,7 @@ import java.util.List;
  * @date:
  * @version V1.0
  */
-@FeignClient(name = "business-config-service-jzx", path = "/businessConfig/userScoreRule",
+@FeignClient(name = "business-config-service", path = "/businessConfig/userScoreRule",
         fallback = UserScoreRuleFeignClient.HystrixClientFallback.class)
 public interface UserScoreRuleFeignClient {
     /**
