@@ -59,10 +59,10 @@
                     </el-form-item> 
                 </el-col>                
             </el-row> 
-            <!-- 1添加接通率规则 -->
+            <!-- 1添加业绩规则 -->
             <div class="marginBottom15">
                 <el-form-item label="" prop="chooseTeam1" label-width="0" style="display:inline-block;">
-                    <el-button type="primary" @click="addDomain1" icon="el-icon-plus">添加接通率规则</el-button>
+                    <el-button type="primary" @click="addDomain1" icon="el-icon-plus">添加业绩规则</el-button>
                 </el-form-item>
                 <el-form-item label="统计近" prop="days1" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days1" autocomplete="off"></el-input>
@@ -101,10 +101,10 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <!-- 2添加有效率规则 -->
+            <!-- 2添加单数规则 -->
             <div class="marginBottom15">
                 <el-form-item label="" prop="chooseTeam2" label-width="0" style="display:inline-block;">
-                    <el-button type="primary" @click="addDomain2" icon="el-icon-plus">添加有效率规则</el-button>
+                    <el-button type="primary" @click="addDomain2" icon="el-icon-plus">添加单数规则</el-button>
                 </el-form-item>
                 <el-form-item label="统计近" prop="days2" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days2" autocomplete="off"></el-input>
@@ -143,10 +143,10 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <!-- 3添加RIO规则 -->
+            <!-- 3添加来访率规则 -->
             <div class="marginBottom15">
                 <el-form-item label="" prop="chooseTeam3" label-width="0" style="display:inline-block;">
-                    <el-button type="primary" @click="addDomain3" icon="el-icon-plus">添加RIO规则</el-button>
+                    <el-button type="primary" @click="addDomain3" icon="el-icon-plus">添加来访率规则</el-button>
                 </el-form-item>
                 <el-form-item label="统计近" prop="days3" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days3" autocomplete="off"></el-input>
@@ -185,10 +185,10 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <!-- 4添加资源价值规则 -->
+            <!-- 4添加平均响应间隔规则 -->
             <div class="marginBottom15">
                 <el-form-item label="" prop="chooseTeam4" label-width="0" style="display:inline-block;">
-                    <el-button type="primary" @click="addDomain4" icon="el-icon-plus">添加资源价值规则</el-button>
+                    <el-button type="primary" @click="addDomain4" icon="el-icon-plus">添加平均响应间隔规则</el-button>
                 </el-form-item>
                 <el-form-item label="统计近" prop="days4" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days4" autocomplete="off"></el-input>
@@ -227,6 +227,92 @@
                     </template>
                 </el-table-column>
             </el-table>
+            <!-- 5添加通话时长规则 -->
+            <div class="marginBottom15">
+                <el-form-item label="" prop="chooseTeam5" label-width="0" style="display:inline-block;">
+                    <el-button type="primary" @click="addDomain5" icon="el-icon-plus">添加通话时长间隔规则</el-button>
+                </el-form-item>
+                <el-form-item label="统计近" prop="days5" label-width="90px" style="display:inline-block;">
+                    <el-input v-model="form.days5" autocomplete="off"></el-input>
+                </el-form-item>
+                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+            </div>            
+            <el-table :data="form.clueScorErulEdetailList5" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" label="业绩范围" width="500">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList5.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startNum"></el-input>
+                        </el-form-item>
+                        <span>——</span>
+                        <el-form-item :prop="'clueScorErulEdetailList5.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
+                            <!-- input值 -->
+                            <el-input v-model="scope.row.endNum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList5)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList5)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="得分">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList5.' + scope.$index + '.addscore'" :rules='rules.addscore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addscore" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList5)" type="text" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- 6添加跟访次数规则 -->
+            <div class="marginBottom15">
+                <el-form-item label="" prop="chooseTeam6" label-width="0" style="display:inline-block;">
+                    <el-button type="primary" @click="addDomain6" icon="el-icon-plus">添加跟访次数规则</el-button>
+                </el-form-item>
+                <el-form-item label="统计近" prop="days6" label-width="90px" style="display:inline-block;">
+                    <el-input v-model="form.days6" autocomplete="off"></el-input>
+                </el-form-item>
+                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+            </div>            
+            <el-table :data="form.clueScorErulEdetailList6" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" label="业绩范围" width="500">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList6.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startNum"></el-input>
+                        </el-form-item>
+                        <span>——</span>
+                        <el-form-item :prop="'clueScorErulEdetailList6.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
+                            <!-- input值 -->
+                            <el-input v-model="scope.row.endNum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList6)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList6)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="得分">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList6.' + scope.$index + '.addscore'" :rules='rules.addscore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addscore" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList6)" type="text" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+
 
             <div class="padding20 f-tac">            
                 <el-button type="primary" :disabled="submitDisabled" @click="submitForm('form')">确认</el-button>
