@@ -38,7 +38,7 @@ import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficRespDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.TrafficParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.CluePhase;
@@ -160,14 +160,14 @@ public class PhoneTrafficController {
 
 
 
-        Integer flag = AggregationConstant.YES;
+        Integer flag = BusinessConfigConstant.YES;
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && roleList.get(0) != null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
                     || RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())
                     || RoleCodeEnum.HWJL.name().equals(roleList.get(0).getRoleCode())) {
                 request.setAttribute("phtrafficList", phTrafficList());
-                flag = AggregationConstant.NO;
+                flag = BusinessConfigConstant.NO;
             } else {
                 List<UserInfoDTO> list = new ArrayList<>();
                 list.add(user);

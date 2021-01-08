@@ -11,7 +11,7 @@ import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
@@ -190,7 +190,7 @@ public class BusCustomerManagerController {
         request.setAttribute("allSaleList", allSaleList);
         // 查询所有签约项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // 查询所有省

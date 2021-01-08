@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <style>
+        .dayTimeEnd .el-form-item__label:before{display: none;}
+        .days .el-form-item__error{padding-left: 165px;}
+        .timeToLine{display: block;float: left;margin-right: 2px;height: 34px;line-height: 34px;}
+        .el-form-item{margin-bottom: 15px;}
+    </style>
+</head>
+<body>
+<div id="addOptimizeRule" class="addOptimizeRule mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>资源得分计算模型</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="inforTitle">{{title}}</div> 
+    <el-form :model="form" :rules="rules" ref="form" :inline="true">
+        <div class="borderbox padding20">
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item label="规则名称：" prop="ruleName" :label-width="formLabelWidth">
+                        <el-input v-model="form.ruleName" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item label="业务线：" prop="businessLine" :label-width="formLabelWidth">
+                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 300px;">
+                            <el-option
+                                v-for="item in businessLineArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item label="资源类别：" prop="categorys" :label-width="formLabelWidth">
+                        <el-select v-model="form.categorys" :reserve-keyword=true multiple placeholder="请选择" style="width: 300px;">
+                            <el-option
+                                v-for="item in categorysArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>                
+                <el-col :span="8">
+                    <el-form-item label="规则开始时间：" prop="startTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item label="规则结束时间：" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>                
+                <el-col :span="12">
+                    <el-form-item label="启用状态：" prop="status" :label-width="formLabelWidth">
+                        <el-radio v-model="form.status" label="0">启用</el-radio>
+                        <el-radio v-model="form.status" label="1">停用</el-radio>
+                    </el-form-item> 
+                </el-col>                
+            </el-row> 
+            <!-- 1添加接通率规则 -->
+            <div class="marginBottom15">
+                <el-form-item label="" prop="chooseTeam1" label-width="0" style="display:inline-block;">
+                    <el-button type="primary" @click="addDomain1" icon="el-icon-plus">添加接通率规则</el-button>
+                </el-form-item>
+                <el-form-item label="统计近" prop="days1" label-width="90px" style="display:inline-block;">
+                    <el-input v-model="form.days1" autocomplete="off"></el-input>
+                </el-form-item>
+                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+            </div>            
+            <el-table :data="form.clueScorErulEdetailList1" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" label="业绩范围" width="500">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.startNum'" :rules='rules.startnum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startNum"></el-input>
+                        </el-form-item>
+                        <span>——</span>
+                        <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
+                            <!-- input值 -->
+                            <el-input v-model="scope.row.endNum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList1)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList1)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="得分">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.addScore'" :rules='rules.addScore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addScore" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList1)" type="text" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- 2添加有效率规则 -->
+            <div class="marginBottom15">
+                <el-form-item label="" prop="chooseTeam2" label-width="0" style="display:inline-block;">
+                    <el-button type="primary" @click="addDomain2" icon="el-icon-plus">添加有效率规则</el-button>
+                </el-form-item>
+                <el-form-item label="统计近" prop="days2" label-width="90px" style="display:inline-block;">
+                    <el-input v-model="form.days2" autocomplete="off"></el-input>
+                </el-form-item>
+                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+            </div>            
+            <el-table :data="form.clueScorErulEdetailList2" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" label="业绩范围" width="500">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startNum"></el-input>
+                        </el-form-item>
+                        <span>——</span>
+                        <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
+                            <!-- input值 -->
+                            <el-input v-model="scope.row.endNum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList2)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList2)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="得分">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.addscore'" :rules='rules.addscore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addscore" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList2)" type="text" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- 3添加RIO规则 -->
+            <div class="marginBottom15">
+                <el-form-item label="" prop="chooseTeam3" label-width="0" style="display:inline-block;">
+                    <el-button type="primary" @click="addDomain3" icon="el-icon-plus">添加RIO规则</el-button>
+                </el-form-item>
+                <el-form-item label="统计近" prop="days3" label-width="90px" style="display:inline-block;">
+                    <el-input v-model="form.days3" autocomplete="off"></el-input>
+                </el-form-item>
+                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+            </div>            
+            <el-table :data="form.clueScorErulEdetailList3" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" label="业绩范围" width="500">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList3.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startNum"></el-input>
+                        </el-form-item>
+                        <span>——</span>
+                        <el-form-item :prop="'clueScorErulEdetailList3.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
+                            <!-- input值 -->
+                            <el-input v-model="scope.row.endNum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList3)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList3)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="得分">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList3.' + scope.$index + '.addscore'" :rules='rules.addscore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addscore" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList3)" type="text" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- 4添加资源价值规则 -->
+            <div class="marginBottom15">
+                <el-form-item label="" prop="chooseTeam4" label-width="0" style="display:inline-block;">
+                    <el-button type="primary" @click="addDomain4" icon="el-icon-plus">添加资源价值规则</el-button>
+                </el-form-item>
+                <el-form-item label="统计近" prop="days4" label-width="90px" style="display:inline-block;">
+                    <el-input v-model="form.days4" autocomplete="off"></el-input>
+                </el-form-item>
+                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+            </div>            
+            <el-table :data="form.clueScorErulEdetailList4" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" label="业绩范围" width="500">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList4.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startNum"></el-input>
+                        </el-form-item>
+                        <span>——</span>
+                        <el-form-item :prop="'clueScorErulEdetailList4.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
+                            <!-- input值 -->
+                            <el-input v-model="scope.row.endNum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList4)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList4)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="得分">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList4.' + scope.$index + '.addscore'" :rules='rules.addscore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addscore" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList4)" type="text" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <div class="padding20 f-tac">            
+                <el-button type="primary" :disabled="submitDisabled" @click="submitForm('form')">确认</el-button>
+                <el-button @click="cancelForm()">取 消</el-button>
+            </div> 
+        </div>        
+    </el-form>  
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+var clueAssignRule=[[${clueAssignRule}]];//规则信息
+console.log(clueAssignRule)
+    var aorVM = new Vue({
+        el: '#addOptimizeRule',
+        data: function() {
+            return {  
+                title:'',  
+                businessLineArr:[],//业务线下拉            
+                categorysArr:[],//资源类别下拉
+                form: {
+                    id:'',
+                    ruleName:'',
+                    startTime:'',
+                    endTime:'',
+                    businessLine:null,//业务线
+                    categorys:[],  //资源类别                  
+                    status:"1",//默认选停用
+                    days1:'',
+                    days2:'',
+                    days3:'',
+                    days4:'',
+                    clueScorErulEdetailList1: [
+                       // {
+                       //      startNum:'',
+                       //      endNum:'',
+                       //      addScore:'',
+                       //      unlimited:'',//不限文字
+                       //      unlimitedVal:'',//不限-1取值
+                       //      unlimitedShow:false,//是否显示不限input
+                       //      days:'',
+                       //      type:7,//接通率
+                       // }
+                    ],
+                    clueScorErulEdetailList2:[
+                        // {
+                        //      startNum:'',
+                        //      endNum:'',
+                        //      addScore:'',
+                        //      unlimited:'',//不限文字
+                        //      unlimitedVal:'',//不限-1取值
+                        //      unlimitedShow:false,//是否显示不限input
+                        //      days:'',
+                        //      type:8,//有效率
+                        // }
+                    ],
+                    clueScorErulEdetailList3:[
+                        // {
+                        //      startNum:'',
+                        //      endNum:'',
+                        //      addScore:'',
+                        //      unlimited:'',//不限文字
+                        //      unlimitedVal:'',//不限-1取值
+                        //      unlimitedShow:false,//是否显示不限input
+                        //      days:'',
+                        //      type:9,//RIO
+                        // }
+                    ],
+                    clueScorErulEdetailList4:[
+                        // {
+                        //      startNum:'',
+                        //      endNum:'',
+                        //      addScore:'',
+                        //      unlimited:'',//不限文字
+                        //      unlimitedVal:'',//不限-1取值
+                        //      unlimitedShow:false,//是否显示不限input
+                        //      days:'',
+                        //      type:10,//资源价值
+                        // }
+                    ],                    
+                },
+                formLabelWidth: '180px',
+                rules:{
+                    ruleName: [
+                        { required: true, message: '请输入规则名称', trigger: 'blur' }
+                    ],
+                    businessLine: [
+                       { required: true, message: '请选择业务线', trigger: 'change' }
+                    ],
+                    categorys: [
+                        { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
+                    ],
+                    startTime: [
+                        { required: true, message: '请选择规则有效开始时间', trigger: 'blur' }
+                    ],
+                    endTime: [
+                        { required: true, message: '请选择规则有效结束时间', trigger: 'blur' }
+                    ],
+                    
+                    status: [
+                        { required: true, required: true, message: '请选择是否启用', trigger: 'change' }
+                    ],            
+                    // chooseTeam1: [
+                    //     { validator:function(rule,value,callback){
+                    //         if(aorVM.form.clueScorErulEdetailList1.length==0){
+                    //             callback(new Error("请添加业绩规则"));
+                    //             return;
+                    //         }
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ],                     
+                    startNum: [
+                        { required: true, required: true, message: '请输入业绩范围', trigger: 'change'},
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入正整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
+                    ], 
+                    endNum: [
+                        { required: true, required: true, message: '请输入业绩范围', trigger: 'change' },
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入正整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
+                    ],                    
+                    addscore : [
+                        { required: true, message: '请添输入得分', trigger: 'change' },
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入正整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
+                    ], 
+                    
+                },
+                submitDisabled:false,
+            }             
+        },
+        methods: {
+            unlimitedBtn(index, rows){                
+                rows[index].unlimitedShow=true 
+                rows[index].unlimited="不限" 
+                rows[index].unlimitedVal="-1" 
+                rows[index].endNum="0" //为了不让校验而赋的无用的值  
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].endNum)                             
+            },
+            unlimitedIpt(index, rows){//点击不限input
+                rows[index].unlimitedShow=false 
+                rows[index].unlimited=""
+                rows[index].unlimitedVal="" 
+                rows[index].endNum=""                             
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].endNum)
+            },
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {                    
+                    if (valid) {
+                        // 开始时间不能大约结束时间
+                        var  startTime=this.form.startTime;
+                        var  endTime=this.form.endTime;
+                        if(endTime&&startTime>endTime){
+                            this.$message({
+                                message: '结束时间不允许选择早于开始时间',
+                                type: 'warning'
+                            });
+                            return;
+                        }
+                        
+                        var clueScorErulEdetailList=[];
+                        var clueScorErulEdetailList1=this.form.clueScorErulEdetailList1;
+                        var clueScorErulEdetailList2=this.form.clueScorErulEdetailList2;
+                        var clueScorErulEdetailList3=this.form.clueScorErulEdetailList3;
+                        var clueScorErulEdetailList4=this.form.clueScorErulEdetailList4;
+                        clueScorErulEdetailList= clueScorErulEdetailList.concat(clueScorErulEdetailList1).concat(clueScorErulEdetailList2).concat(clueScorErulEdetailList3).concat(clueScorErulEdetailList4) ;
+
+                        var param={};
+                        // 判断是否有id
+                        var idVal=this.getQueryString("id");
+                        var url="";
+                        if(idVal){
+                            param.id=idVal;
+                            url="/rule/clueScoreRule/update"
+                        }else{
+                            url='/rule/clueScoreRule/save';
+                        }
+                        param.ruleName=this.form.ruleName;
+                        param.businessLine=this.form.businessLine;
+                        param.categorys=this.form.categorys.join(',');
+                        param.startTime=this.form.startTime;
+                        param.endTime=this.form.endTime;
+                        param.status=this.form.status;
+                        param.clueScoreRuleDetailList=clueScorErulEdetailList;                        
+                        
+                        aorVM.submitDisabled=true;
+                        axios.post(url, param)
+                        .then(function (response) {
+                            var data =response.data;
+                            if(data.code!="0"){
+                                aorVM.$message({message:data.msg,type:'error'});
+                                aorVM.submitDisabled=false;
+                            }else{
+                                aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    aorVM.submitDisabled=false;
+                                    document.location.href='/rule/clueScoreRule/updateCluesScor';
+                                }});
+                            }
+                        })
+                        .catch(function (error) {
+                            aorVM.submitDisabled=false;
+                            console.log(error);
+                        });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            deleteRow(index, rows) {//删除一行表格
+                rows.splice(index, 1);
+            },            
+            addDomain1() {
+                var list=this.form.clueScorErulEdetailList1
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var days=this.form.days1;
+                this.form.clueScorErulEdetailList1.push({
+                    startNum:'',
+                    endNum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    days:days,
+                    type:7,//接通率
+                });                
+            },
+            addDomain2() {
+                var list=this.form.clueScorErulEdetailList2
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var days=this.form.days2;
+                this.form.clueScorErulEdetailList2.push({
+                    startNum:'',
+                    endNum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    days:days,
+                    type:8,//有效率
+                });                
+            },
+            addDomain3() {
+                var list=this.form.clueScorErulEdetailList3
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var days=this.form.days3;
+                this.form.clueScorErulEdetailList3.push({
+                    startNum:'',
+                    endNum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    days:days,
+                    type:9,//roi
+                });                
+            },
+            addDomain4() {
+                var list=this.form.clueScorErulEdetailList4
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var days=this.form.days4;
+                this.form.clueScorErulEdetailList4.push({
+                    startNum:'',
+                    endNum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    days:days,
+                    type:10,//资源价值
+                });                
+            },
+            cancelForm(){
+                document.location.href='/rule/clueScoreRule/cluesScore';
+            },
+            initBusinessline(){//初始化业务线
+                var param = {};
+                axios.post('/rule/userScoreRule/getBusinesslineList', param).then(function (response) {
+                    // console.log(response)
+                    aorVM.businessLineArr = response.data;
+                });
+            },
+            initCategorys(){//初始化资源类别
+                var param = {};
+                param.groupCode='clueCategory';
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                    // console.log(response)
+                    aorVM.categorysArr = response.data.data;
+                });
+            },
+            getQueryString(name){//获取url地址栏参数的方法
+                var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if(r!=null)return  unescape(r[2]); return null;
+            },
+            initPageInfo(){
+                var id=this.getQueryString("id");
+                console.log(id)
+                if(id){
+                    this.title="编辑顾问得分模型"
+                    var param={};
+                    param.id=id;
+                    axios.post('/rule/clueScoreRule/getRuleDetailById', param)
+                    .then(function (response) {
+                        var result =  response.data;
+                        if(result.code=="0"){
+                            var tableData=result.data;
+                            aorVM.form.ruleName=tableData.ruleName;
+                            aorVM.form.businessLine=tableData.businessLine+'';
+                            aorVM.form.categorys=tableData.categorys.split(",");
+                            aorVM.form.startTime=tableData.startTime;
+                            aorVM.form.endTime=tableData.endTime;
+
+                            aorVM.form.clueScorErulEdetailList1= tableData.clueScoreRuleDetailList;
+
+                           
+
+                        }else{
+                            ocmVM.$message.error(msg+"失败");
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                }else{
+                    this.title="新增顾问得分模型"
+                }
+            }
+        },
+        created(){            
+            this.initBusinessline();//初始化业务线
+            this.initCategorys();//初始化资源类别            
+            this.initPageInfo();// 编辑回显
+        },
+        mounted(){
+            document.getElementById('addOptimizeRule').style.display = 'block';
+        }
+    })
+</script>
+</html>

@@ -30,7 +30,7 @@ import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
@@ -370,7 +370,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add("否"); // 是否重复
                 // 是否自建
                 String inputName = "否 ";
-                if (AggregationConstant.YES.equals(taskDTO.getInputType())) {
+                if (BusinessConfigConstant.YES.equals(taskDTO.getInputType())) {
                     inputName = "是";
                 }
                 curList.add(inputName);
@@ -395,16 +395,16 @@ public class ExtendClueDistributionedTaskController {
                 }
                 curList.add(phase);
                 String phtraIsCall = "";
-                if (AggregationConstant.YES.equals(taskDTO.getPhtraIsCall())) {
+                if (BusinessConfigConstant.YES.equals(taskDTO.getPhtraIsCall())) {
                     phtraIsCall = "是";
-                } else if (AggregationConstant.NO.equals(taskDTO.getPhtraIsCall())) {
+                } else if (BusinessConfigConstant.NO.equals(taskDTO.getPhtraIsCall())) {
                     phtraIsCall = "否";
                 }
                 curList.add(phtraIsCall);
                 String phstatus = "";
-                if (AggregationConstant.YES.equals(taskDTO.getPhstatus())) {
+                if (BusinessConfigConstant.YES.equals(taskDTO.getPhstatus())) {
                     phstatus = "是";
-                } else if (AggregationConstant.NO.equals(taskDTO.getPhstatus())) {
+                } else if (BusinessConfigConstant.NO.equals(taskDTO.getPhstatus())) {
                     phstatus = "否";
                 }
                 curList.add(phstatus);
@@ -424,10 +424,11 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(sourceFrom);
                 curList.add(taskDTO.getAscriptionProjectName());
                 curList.add(taskDTO.getRootWord());
-                if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                if(null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
                     curList.add(taskDTO.getConsultProjectTurn());
                 }
-
+                curList.add(taskDTO.getSaleLadder());
+                curList.add(taskDTO.getClueLadder());
                 dataList.add(curList);
             }
         }
@@ -579,7 +580,7 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     call = taskDTO.getIsCall();
                 }
-                if (null != call && AggregationConstant.YES.equals(call)) {
+                if (null != call && BusinessConfigConstant.YES.equals(call)) {
                     isCall = "是";
                 } else {
                     isCall = "否";
@@ -593,7 +594,7 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     status = taskDTO.getStatus();
                 }
-                if (null != status && AggregationConstant.YES.equals(status)) {
+                if (null != status && BusinessConfigConstant.YES.equals(status)) {
                     statusStr = "是";
                 } else {
                     statusStr = "否";
@@ -674,7 +675,7 @@ public class ExtendClueDistributionedTaskController {
                     //词根
                     curList.add(taskDTO.getRootWord());
                     //咨询项目
-                    if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                    if(null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
                         curList.add(taskDTO.getConsultProjectTurn());
                     }
                 }
