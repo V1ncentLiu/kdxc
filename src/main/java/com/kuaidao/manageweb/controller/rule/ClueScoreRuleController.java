@@ -65,7 +65,7 @@ public class ClueScoreRuleController {
      */
     @RequestMapping("/cluesScore")
     public String initCompanyList(HttpServletRequest request) {
-        return "assignrule/cluesScore";
+        return "rule/cluesScore";
     }
 
     /***
@@ -75,7 +75,7 @@ public class ClueScoreRuleController {
      */
     @RequestMapping("/updateCluesScor")
     public String updatetelemarketingScore(HttpServletRequest request) {
-        return "assignrule/updateCluesScore";
+        return "rule/updateCluesScore";
     }
     /***
      * 列表

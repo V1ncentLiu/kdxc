@@ -64,7 +64,7 @@ public interface ClueScoreRuleFeignClient {
      * @param
      * @return
      */
-    @PostMapping("/getUserScoreRuleListByPage")
+    @PostMapping("/getClueScoreRuleListByPage")
     public JSONResult<PageBean<ClueScoreRuleDTO>> getClueScoreRuleListByPage(
             @RequestBody ClueScoreRuleDTO clueScoreRuleDTO);
 

@@ -18,7 +18,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item>顾问得分计算模型</el-breadcrumb-item>
+        <el-breadcrumb-item>资源得分计算模型</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <shiro:hasPermission name="clueAssignRule:optRuleManager:add">
@@ -57,6 +57,16 @@
                         </el-option>
                     </el-select>
                 </el-form-item>  
+                <el-form-item label="资源类别:">
+                    <el-select v-model="form.categorys" clearable placeholder="选择资源类别">
+                        <el-option
+                            v-for="item in categorysArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="" label-width="0">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn" style="margin-left: 10px;">搜索</el-button>
                 </el-form-item> 
@@ -81,6 +91,7 @@
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="businessLineName" label="业务线" width="80"></el-table-column>
+                <el-table-column align="center" prop="categoryNames" label="资源类别"></el-table-column>
                 <el-table-column align="center" prop="startTime" label="规则开始时间"  :formatter="dateFormat" width="150"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="规则结束时间"  :formatter="dateFormat" width="150"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="150"></el-table-column>
@@ -120,6 +131,11 @@
                     <el-col :span="12">
                         <el-form-item label="业务线：" :label-width="formLabelWidth">
                             {{dialogForm.businessLineName}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{dialogForm.categoryNames}}
                         </el-form-item>
                     </el-col>
                 </el-row>                
@@ -190,6 +206,7 @@
                     ruleName:'',
                     businessLine:'',
                     status:'',
+                    categorys:'',
                 },
                 dialogForm:{
                     ruleName:'',
@@ -204,10 +221,12 @@
                     ruleName:'',
                     businessLine:'',
                     status:'',
+                    categorys:'',
                 },
                 storeId: '',
                 scrollTop: 0,
                 businessLineArr:[],//业务线列表
+                categorysArr:[],//资源类别
                 statusArr: [{
                   value: 0,
                   name: '停用'
@@ -218,7 +237,7 @@
                   value: 2,
                   name: '删除'
                 }],
-            }        	  
+            }             
         },
         methods: {
             clickRow(row){
@@ -229,7 +248,7 @@
                 this.multipleSelection = val;
             },         
             deleteFun() {
-            	var rows = this.multipleSelection;
+                var rows = this.multipleSelection;
                 console.log(rows)
                 if(rows.length==0){
                     this.$message({
@@ -258,18 +277,18 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                 	  //删除
-                 	var param  = {idList:rowIds};
-                     axios.post('/rule/userScoreRule/delete',param)
+                      //删除
+                    var param  = {idList:rowIds};
+                     axios.post('/rule/clueScoreRule/delete',param)
                      .then(function (response) {
                          var data =  response.data;
                          if(data.code=='0'){
-                        	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
-                         		window.location.href="/rule/userScoreRule/userScoreRulePage"
-                     	    }});
+                             ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                                window.location.href="/rule/clueScoreRule/cluesScore"
+                            }});
                              
                          }else{
-                        	 ocmVM.$message({
+                             ocmVM.$message({
                                  message: "接口调用失败",
                                  type: 'error'
                                }); 
@@ -279,7 +298,7 @@
                        console.log(error);
                      })
                      .then(function () {
-                     	
+                        
                      });
                  }).catch(() => {
                         
@@ -313,20 +332,20 @@
                     .catch(function (error) {
                         console.log(error);
                     });
-            	    url='/rule/userScoreRule/updateStatusEnable';
-                }else{//调启用停用接口
-                    url='/rule/userScoreRule/updateStatusDisable';
+                    url='/rule/clueScoreRule/updateStatusEnable';
+                }else{//调用停用接口
+                    url='/rule/clueScoreRule/updateStatusDisable';
                 }
                 axios.post(url, param)
                 .then(function (response) {
                     var result =  response.data;
                     if(result.code=="0"){
-                    	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
-                    	ocmVM.searchTable();
-              	      }});
+                        ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                        ocmVM.searchTable();
+                      }});
                       
                     }else{
-                    	ocmVM.$message.error(msg+"失败");
+                        ocmVM.$message.error(msg+"失败");
                     }
                 })
                 .catch(function (error) {
@@ -334,7 +353,7 @@
                 });
             },
             searchTable() {
-            	var startTime=this.form.searchStartTime;
+                var startTime=this.form.searchStartTime;
                 var endTime=this.form.searchEndTime;
                 if(endTime && startTime>endTime){
                     this.$message({
@@ -344,13 +363,14 @@
                     return;
                 }
                 var param ={};
-                param.ruleName=this.form.ruleName
-                param.businessLine=this.form.businessLine
-                param.status=this.form.status
+                param.ruleName=this.form.ruleName;
+                param.businessLine=this.form.businessLine;
+                param.status=this.form.status;
+                param.categorys=this.form.categorys;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 console.info(param);
-                axios.post('/rule/userScoreRule/getUserScoreRuleListByPage', param)
+                axios.post('/rule/clueScoreRule/getClueScoreRuleListByPage', param)
                 .then(function (response) {
                     var result =  response.data;
                     console.info(result);                    
@@ -401,7 +421,7 @@
             rowDblClick(row, column, event){//双击查看详情
                 var param={};
                 param.id=row.id;
-                axios.post('/rule/userScoreRule/getRuleDetailById', param)
+                axios.post('/rule/clueScoreRule/getRuleDetailById', param)
                 .then(function (response) {
                     var result =  response.data;
                     if(result.code=="0"){
@@ -409,9 +429,10 @@
                         ocmVM.dialogFormVisible = true;
                         ocmVM.dialogForm.ruleName=tableData.ruleName;
                         ocmVM.dialogForm.businessLineName=tableData.businessLineName;
+                        ocmVM.dialogForm.categoryNames=tableData.categoryNames;
                         ocmVM.dialogForm.startTime=ocmVM.dateFormat(null,null,row.startTime);
                         ocmVM.dialogForm.endTime=ocmVM.dateFormat(null,null,row.endTime);
-                        ocmVM.dialogTableData=tableData.userScoreRuleDetailList;
+                        ocmVM.dialogTableData=tableData.clueScoreRuleDetailList;
                     }else{
                         ocmVM.$message.error(msg+"失败");
                     }
@@ -424,7 +445,7 @@
                 document.location.href='/rule/userScoreRule/telemarketingScoreInfo';
             },
             addFun(){
-            	document.location.href='/rule/userScoreRule/updatetelemarketingScore';
+                document.location.href='/rule/userScoreRule/updatetelemarketingScore';
             },
             editFun() {
                 var rows = this.multipleSelection;                
@@ -445,7 +466,7 @@
                     }
                     this.setSessionStore("optRuleManagerOtherVal", otherVal);
                     // 存储选中信息--end
-                	document.location.href='/rule/userScoreRule/updatetelemarketingScore?id='+clueId;
+                    document.location.href='/rule/userScoreRule/updatetelemarketingScore?id='+clueId;
                 }                
             },
           //日期数据格式化方法
@@ -490,7 +511,16 @@
             initBusinessline(){
                 var param = {};
                 axios.post('/rule/userScoreRule/getBusinesslineList', param).then(function (response) {
+                    // console.log(response)
                     ocmVM.businessLineArr = response.data;
+                });
+            },
+            initCategorys(){
+                var param = {};
+                param.groupCode='clueCategory';
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                    // console.log(response)
+                    ocmVM.categorysArr = response.data.data;
                 });
             }
         },
@@ -512,6 +542,7 @@
             this.searchTable();
             //初始化业务线
             this.initBusinessline();
+            this.initCategorys();
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
