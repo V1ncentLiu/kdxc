@@ -1133,6 +1133,10 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
             @RequestBody RepeatClueQueryDTO dto) {
+        UserInfoDTO user = getUser();
+        if (user.getBusinessLine() != null) {
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         return myCustomerFeignClient.queryRepeatClue(dto);
     }
 
