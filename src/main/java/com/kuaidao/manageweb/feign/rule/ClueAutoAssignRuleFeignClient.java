@@ -1,5 +1,14 @@
 package com.kuaidao.manageweb.feign.rule;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import com.kuaidao.businessconfig.dto.rule.ClueAssignRulePageParam;
 import com.kuaidao.businessconfig.dto.rule.ClueAutoAssignRuleDTO;
 import com.kuaidao.businessconfig.dto.rule.ClueAutoAssignRulePageParam;
@@ -9,18 +18,9 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.List;
 
 /**
  * 资源分配规则
- * 
  * @author: zxy
  * @date: 2019年3月14日
  * @version V1.0
@@ -30,7 +30,6 @@ import java.util.List;
 public interface ClueAutoAssignRuleFeignClient {
     /**
      * 新增资源分配规则
-     * 
      * @param
      * @return
      */
@@ -39,7 +38,6 @@ public interface ClueAutoAssignRuleFeignClient {
 
     /**
      * 修改资源分配规则信息
-     * 
      * @param
      * @return
      */
@@ -48,7 +46,6 @@ public interface ClueAutoAssignRuleFeignClient {
 
     /**
      * 修改资源分配规则状态
-     * 
      * @param
      * @return
      */
@@ -57,7 +54,6 @@ public interface ClueAutoAssignRuleFeignClient {
 
     /**
      * 删除资源分配规则
-     * 
      * @param
      * @return
      */
@@ -66,66 +62,52 @@ public interface ClueAutoAssignRuleFeignClient {
 
     /**
      * 复制规则
-     * 
      * @param
      * @return
      */
     @PostMapping("/copy")
     public JSONResult copy(@RequestBody ClueAutoAssignRuleReq clueAssignRuleReq);
 
-
     /**
      * 根据id查询资源分配规则信息
-     * 
      * @param
      * @return
      */
     @PostMapping("/get")
     public JSONResult<ClueAutoAssignRuleDTO> get(@RequestBody IdEntityLong id);
 
-
     /**
      * 查询资源分配规则集合
-     * 
      * @param
      * @return
      */
     @PostMapping("/list")
-    public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(
-            @RequestBody ClueAutoAssignRulePageParam pageParam);
+    public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(@RequestBody ClueAutoAssignRulePageParam pageParam);
 
     /**
      * 查询资源分配规则集合（不分页）
-     * 
      * @param
      * @return
      */
     @PostMapping("/listNoPage")
-    public JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage(
-            @RequestBody ClueAutoAssignRulePageParam pageParam);
+    public JSONResult<List<ClueAutoAssignRuleDTO>> listNoPage(@RequestBody ClueAutoAssignRulePageParam pageParam);
 
     /**
      * 有效规则集合
-     * 
      * @param
      * @return
      */
     @PostMapping("/allValidRule")
-    public JSONResult<List<ClueAutoAssignRuleDTO>> allValidRule(
-            @RequestBody ClueAssignRulePageParam pageParam);
-
-
+    public JSONResult<List<ClueAutoAssignRuleDTO>> allValidRule(@RequestBody ClueAssignRulePageParam pageParam);
 
     @Component
     static class HystrixClientFallback implements ClueAutoAssignRuleFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(ClueAutoAssignRuleFeignClient.class);
 
-
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
         }
 
         @Override
@@ -158,7 +140,6 @@ public interface ClueAutoAssignRuleFeignClient {
             return fallBackError("复制规则");
         }
 
-
         @Override
         public JSONResult<PageBean<ClueAutoAssignRuleDTO>> list(ClueAutoAssignRulePageParam pageParam) {
             return fallBackError("查询资源分配规则集合");
@@ -174,9 +155,6 @@ public interface ClueAutoAssignRuleFeignClient {
             return fallBackError("有效规则集合");
         }
 
-
-
     }
-
 
 }
