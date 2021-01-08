@@ -25,7 +25,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年3月14日
  * @version V1.0
  */
-@FeignClient(name = "business-config-service-jzx", path = "/businessConfig/clueAutoAssignRule",
+@FeignClient(name = "business-config-service", path = "/businessConfig/clueAutoAssignRule",
         fallback = ClueAutoAssignRuleFeignClient.HystrixClientFallback.class)
 public interface ClueAutoAssignRuleFeignClient {
     /**

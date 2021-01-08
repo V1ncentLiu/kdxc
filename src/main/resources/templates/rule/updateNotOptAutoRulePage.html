@@ -400,7 +400,18 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         { required: true, required: true, message: '请选择电销组', trigger: 'change' }
                     ],
                     businessLine: [
-                                   { required: true, required: true, message: '请选择业务线', trigger: 'change' }
+                                   { required: true, required: true, message: '请选择业务线', trigger: 'change' },
+                        { validator:function(rule,value,callback){
+                                if(aorVM.form.teleRuleTeamList.length>0){
+                                    for(var i=0;i<aorVM.form.teleRuleTeamList.length;i++){
+                                        if(aorVM.form.teleRuleTeamList[i].businessLine !=value){
+                                            callback(new Error("只能选择一个业务线"));
+                                            return;
+                                        }
+                                    }
+                                }
+                                callback();
+                            }, trigger: 'change'}
                                ],
                     proportion: [
                         { required: true, required: true, message: '请输入比例', trigger: 'change'},
