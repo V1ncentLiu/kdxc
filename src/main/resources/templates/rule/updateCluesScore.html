@@ -27,10 +27,10 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
-                    <el-form-item label="业务线：" prop="industryCategory" :label-width="formLabelWidth">
-                        <el-select v-model="form.industryCategory" :reserve-keyword=true filterable multiple placeholder="请选择" style="width: 300px;">
+                    <el-form-item label="业务线：" prop="businessLine" :label-width="formLabelWidth">
+                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 300px;">
                             <el-option
-                                v-for="item in industryOptions"
+                                v-for="item in businessLineArr"
                                 :key="item.value"
                                 :label="item.name"
                                 :value="item.value">
@@ -39,10 +39,10 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
-                    <el-form-item label="资源类别：" prop="industryCategory" :label-width="formLabelWidth">
-                        <el-select v-model="form.industryCategory" :reserve-keyword=true filterable multiple placeholder="请选择" style="width: 300px;">
+                    <el-form-item label="资源类别：" prop="categorys" :label-width="formLabelWidth">
+                        <el-select v-model="form.categorys" :reserve-keyword=true multiple placeholder="请选择" style="width: 300px;">
                             <el-option
-                                v-for="item in industryOptions"
+                                v-for="item in categorysArr"
                                 :key="item.value"
                                 :label="item.name"
                                 :value="item.value">
@@ -71,48 +71,87 @@
                     </el-form-item> 
                 </el-col>                
             </el-row> 
+
             <div class="marginBottom15">
                 <el-form-item label="" prop="chooseTeam" label-width="0" style="display:inline-block;">
-                    <el-button type="primary" @click="addDomain" icon="el-icon-plus">添加业绩规则</el-button>
+                    <el-button type="primary" @click="addDomain1" icon="el-icon-plus">添加接通率规则</el-button>
                 </el-form-item>
                 <el-form-item label="统计近" prop="days1" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days1" autocomplete="off"></el-input>
                 </el-form-item>
                 <span style="display:inline-block;line-height: 35px;">几天数据</span>
             </div>            
-            <el-table :data="form.teleRuleTeamList" style="width: 100%;margin-bottom: 20px" border>
+            <el-table :data="form.clueScorErulEdetailList1" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" label="业绩范围" width="500">
                     <span style="color: #f56c6c;">*</span>
                     <template slot-scope="scope">
-                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.performanceMinNum'" :rules='rules.performanceMinNum' style="width: 130px;display: inline-block;">
-                            <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.teleRuleTeamList)" v-model="scope.row.performanceMinNum"></el-input>
+                        <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.startnum'" :rules='rules.startnum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startnum"></el-input>
                         </el-form-item>
                         <span>——</span>
-                    <!-- </template>
-                </el-table-column>
-                <el-table-column align="center" prop="resourceMaxNum" label="资源条数*" width="160">
-                    <template slot-scope="scope"> -->
-                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.performanceMaxNum'" :rules='rules.performanceMaxNum' style="width: 130px;display: inline-block;">
+                        <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.endnum'" :rules='rules.endnum' style="width: 130px;display: inline-block;">
                             <!-- input值 -->
-                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.teleRuleTeamList)" v-model="scope.row.performanceMaxNum" ></el-input>
+                            <el-input v-model="scope.row.endnum" ></el-input>
                             <!-- 不限按钮    -->
-                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.teleRuleTeamList)" >不限</el-button>
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList1)" >不限</el-button>
                             <!-- 不限input -->
-                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.teleRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList1)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" label="得分">
                     <template slot-scope="scope">
-                        <el-form-item prop="scores1"  style="width: 160px;margin:0 auto;height: 57px;">
-                            <el-input v-model="scope.row.scores1" autocomplete="off"></el-input>
+                        <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.addscore'" :rules='rules.addscore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addscore" autocomplete="off"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" label="操作">
                     <template slot-scope="scope">
-                        <el-button @click.native.prevent="deleteRow(scope.$index, form.teleRuleTeamList)" type="text" size="small">删除</el-button>
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList1)" type="text" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <div class="marginBottom15">
+                <el-form-item label="" prop="chooseTeam" label-width="0" style="display:inline-block;">
+                    <el-button type="primary" @click="addDomain2" icon="el-icon-plus">添加有效率规则</el-button>
+                </el-form-item>
+                <el-form-item label="统计近" prop="days2" label-width="90px" style="display:inline-block;">
+                    <el-input v-model="form.days2" autocomplete="off"></el-input>
+                </el-form-item>
+                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+            </div>            
+            <el-table :data="form.clueScorErulEdetailList2" style="width: 100%;margin-bottom: 20px" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" label="业绩范围" width="500">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.startnum'" :rules='rules.startnum' style="width: 130px;display: inline-block;">
+                            <el-input v-model="scope.row.startnum"></el-input>
+                        </el-form-item>
+                        <span>——</span>
+                        <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.endnum'" :rules='rules.endnum' style="width: 130px;display: inline-block;">
+                            <!-- input值 -->
+                            <el-input v-model="scope.row.endnum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.clueScorErulEdetailList2)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList2)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="得分">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.addscore'" :rules='rules.addscore'  style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input v-model="scope.row.addscore" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.clueScorErulEdetailList2)" type="text" size="small">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -132,74 +171,82 @@
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var noSingProjectList =[[${noSingProjectList}]];
 var clueAssignRule=[[${clueAssignRule}]];//规则信息
-var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
-var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
-var mediumList=[[${mediumList}]];//媒介集合
-var trafficList=[[${trafficList}]];//话务组集合
-var businessLineList=[[${businessLineList}]];//业务线集合
     var aorVM = new Vue({
         el: '#addOptimizeRule',
         data: function() {
             return {  
-                title:'',              
+                title:'',  
+                businessLineArr:[],//业务线下拉            
+                categorysArr:[],//资源类别下拉
                 form: {
                     id:'',
                     ruleName:'',
                     startTime:'',
                     endTime:'',
-                    industryCategory:[],
-                    source:[],
-                    category:[],
-                    searchWord:'',
-                    notSearchWord:'',
-                    province:'',
-                    notProvince:'',
+                    businessLine:'',//业务线
+                    categorys:[],  //资源类别                  
                     status:"1",//默认选停用
-                    teleRuleTeamList: [
+                    days1:'',
+                    days2:'',
+                    days3:'',
+                    days4:'',
+                    clueScorErulEdetailList1: [
                        // {
-                       //      orgId:'',
-                       //      proportion:'',
-                       //      resourceMaxNum:'',
-                       //      isPrior:'',
+                       //      startNum:'',
+                       //      endnum:'',
+                       //      addScore:'',
                        //      unlimited:'',//不限文字
                        //      unlimitedVal:'',//不限-1取值
                        //      unlimitedShow:false,//是否显示不限input
+                       //      type:7,//接通率
                        // }
                     ],
-                    scores1:'',
-                    days:[],
-                    dayTimeStart:"00:00:00",
-                    dayTimeEnd:"23:59:59",
+                    clueScorErulEdetailList2:[
+                        // {
+                        //      startNum:'',
+                        //      endnum:'',
+                        //      addScore:'',
+                        //      unlimited:'',//不限文字
+                        //      unlimitedVal:'',//不限-1取值
+                        //      unlimitedShow:false,//是否显示不限input
+                        //      type:8,//有效率
+                        // }
+                    ],
+                    clueScorErulEdetailList3:[
+                        // {
+                        //      startNum:'',
+                        //      endnum:'',
+                        //      addScore:'',
+                        //      unlimited:'',//不限文字
+                        //      unlimitedVal:'',//不限-1取值
+                        //      unlimitedShow:false,//是否显示不限input
+                        //      type:9,//RIO
+                        // }
+                    ],
+                    clueScorErulEdetailList4:[
+                        // {
+                        //      startNum:'',
+                        //      endnum:'',
+                        //      addScore:'',
+                        //      unlimited:'',//不限文字
+                        //      unlimitedVal:'',//不限-1取值
+                        //      unlimitedShow:false,//是否显示不限input
+                        //      type:10,//资源价值
+                        // }
+                    ],                    
                 },
-                weeksOptions:[{
-                    value: "2",
-                    name: '星期一'
-                },{
-                    value: "3",
-                    name: '星期二'
-                },{
-                    value: "4",
-                    name: '星期三'
-                },{
-                    value: "5",
-                    name: '星期四'
-                },{
-                    value: "6",
-                    name: '星期五'
-                },{
-                    value: "7",
-                    name: '星期六'
-                },{
-                    value: "1",
-                    name: '星期日'
-                }],
                 showDays:false,//默认不显示星期 
                 formLabelWidth: '180px',
                 rules:{
                     ruleName: [
                         { required: true, message: '请输入规则名称', trigger: 'blur' }
+                    ],
+                    businessLine: [
+                       { required: true, message: '请选择业务线', trigger: 'change' }
+                    ],
+                    categorys: [
+                        { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
                     ],
                     startTime: [
                         { required: true, message: '请选择规则有效开始时间', trigger: 'blur' }
@@ -207,104 +254,59 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     endTime: [
                         { required: true, message: '请选择规则有效结束时间', trigger: 'blur' }
                     ],
-                    industryCategory: [
-                        {  required: true, message: '请至少选择一个行业类别', trigger: 'change' }
-                    ],
-                    source: [
-                        { required: true, message: '请至少选择一个媒介', trigger: 'change' }
-                    ],
-                    category: [
-                        { required: true, message: '请至少选择一个资源类别', trigger: 'change' }
-                    ],
+                    
                     status: [
                         { required: true, required: true, message: '请选择是否启用', trigger: 'change' }
-                    ],                    
+                    ],  
+                    days1: [
+                        { required: true, message: '请添加统计天数', trigger: 'change' }
+                    ], 
+                    days2: [
+                        { required: true, message: '请添加统计天数', trigger: 'change' }
+                    ], 
+                    days3: [
+                        { required: true, message: '请添加统计天数', trigger: 'change' }
+                    ], 
+                    days4: [
+                        { required: true, message: '请添加统计天数', trigger: 'change' }
+                    ],                   
                     chooseTeam: [
                         { validator:function(rule,value,callback){
-                            if(aorVM.form.teleRuleTeamList.length==0){
+                            if(aorVM.form.clueScorErulEdetailList1.length==0){
                                 callback(new Error("请添加业绩规则"));
                                 return;
                             }
                             callback();
                         }, trigger: 'change'}
                     ],  
-                    performanceMinNum: [
-                        { required: true, required: true, message: '请输入业绩范围', trigger: 'change'},
-                        { validator:function(rule,value,callback){               
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数数字"));
-                            }else{
-                               callback();
-                            } 
-                            callback();
-                        }, trigger: 'change'}
-                    ], 
-                     performanceMaxNum: [
-                        { required: true, required: true, message: '请输入业绩范围', trigger: 'change' },
-                        { validator:function(rule,value,callback){               
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数数字"));
-                            }else{
-                               callback();
-                            } 
-                            callback();
-                        }, trigger: 'change'}
-                    ],
-                    days1: [
-                        { required: true, required: true, message: '请添加统计天数', trigger: 'change' }
-                    ], 
-                    scores1 : [
-                        { required: true, required: true, message: '请添输入得分', trigger: 'change' }
-                    ],                  
-                    orgId: [
-                        { required: true, required: true, message: '请选择电销组', trigger: 'change' }
-                    ],
-                    businessLine: [
-                                   { required: true, required: true, message: '请选择业务线', trigger: 'change' }
-                               ],
+                    // startnum: [
+                    //     { required: true, required: true, message: '请输入业绩范围', trigger: 'change'},
+                    //     { validator:function(rule,value,callback){               
+                    //         if(/^[0-9]*$/.test(value) == false){
+                    //            callback(new Error("请输入整数数字"));
+                    //         }else{
+                    //            callback();
+                    //         } 
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ], 
+                    // endnum: [
+                    //     { required: true, required: true, message: '请输入业绩范围', trigger: 'change' },
+                    //     { validator:function(rule,value,callback){               
+                    //         if(/^[0-9]*$/.test(value) == false){
+                    //            callback(new Error("请输入整数数字"));
+                    //         }else{
+                    //            callback();
+                    //         } 
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ],                    
+                    // addscore : [
+                    //     { required: true, message: '请添输入得分', trigger: 'change' }
+                    // ], 
                     
-                   
-                    days: [
-                        { validator:function(rule,value,callback){
-                            if(aorVM.form.radio!=="0"&&aorVM.form.days.length==0){
-                               callback(new Error("请选择星期"));
-                            }else{
-                               callback();
-                            } 
-                        }, trigger: 'change'}
-                    ],
-                    dayTimeStart: [
-                        { required: true, message: '请选择有效日内时间范围', trigger: 'blur' }
-                    ],
-                    dayTimeEnd: [
-                        { required: true, message: '请选择有效日内时间范围', trigger: 'blur' }
-                    ],
                 },
-                noSingProjectList:noSingProjectList,
                 submitDisabled:false,
-                trafficOptions:trafficList,
-                businessLineOptions:businessLineList,
-                sourceOptions:mediumList,
-                categoryOptions:clueCategoryList,
-                industryOptions:industryCategoryList ,
-                statusOptions: [{
-                    value: 1,
-                    name: '启用'
-                }, {
-                    value: 0,
-                    name: '禁用'
-                }],
-                priorOptions: [{
-                    value: 1,
-                    name: '优先'
-                }, {
-                    value: 0,
-                    name: '非优先'
-                }],
-                tags1: [],//包含搜索词
-                tags2: [],//不包含搜索词
-                tags3: [],//包含省
-                tags4: [],//不包含省
             }             
         },
         methods: {
@@ -320,19 +322,19 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                 rows[index].unlimitedShow=true 
                 rows[index].unlimited="不限" 
                 rows[index].unlimitedVal="-1" 
-                rows[index].resourceMaxNum="0" //为了不让校验而赋的无用的值  
+                rows[index].endnum="0" //为了不让校验而赋的无用的值  
                 console.log(rows[index].unlimited)
                 console.log(rows[index].unlimitedVal)                             
-                console.log(rows[index].resourceMaxNum)                             
+                console.log(rows[index].endnum)                             
             },
             unlimitedIpt(index, rows){//点击不限input
                 rows[index].unlimitedShow=false 
                 rows[index].unlimited=""
                 rows[index].unlimitedVal="" 
-                rows[index].resourceMaxNum=""                             
+                rows[index].endnum=""                             
                 console.log(rows[index].unlimited)
                 console.log(rows[index].unlimitedVal)                             
-                console.log(rows[index].resourceMaxNum)
+                console.log(rows[index].endnum)
             },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {                    
@@ -363,7 +365,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                             return;
                         }
                         // 不能选择重复电销组
-                        var orgIdChoose=form.teleRuleTeamList; 
+                        var orgIdChoose=form.clueScorErulEdetailList; 
                         var ary=[];                   
                         for(var i=0;i<orgIdChoose.length;i++){
                             var split=orgIdChoose[i].orgId.split(",");
@@ -387,38 +389,10 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         param.ruleName=form.ruleName;
                         param.startTime=form.startTime;
                         param.endTime=form.endTime;
-                        if(form.radio=="0"){
-                            param.days="0"
-                        }else{
-                            param.days=this.form.days.join(',');
-                        }
-                        param.dayTimeStart=form.dayTimeStart;
-                        param.dayTimeEnd=form.dayTimeEnd;
                         param.status=form.status;
-                        param.teleList=form.teleRuleTeamList;
-                        param.source=form.source.join(',');
-                        param.industryCategory=form.industryCategory.join(',');
+                        param.teleList=form.clueScorErulEdetailList;
                         param.category=form.category.join(',');
-                        if(this.tags1){
-                            param.searchWord=this.tags1.join(',');
-                        }else{
-                            param.searchWord='';
-                        }
-                        if(this.tags2){
-                            param.notSearchWord=this.tags2.join(',');
-                        }else{
-                            param.notSearchWord='';
-                        }
-                          if(this.tags3){
-                            param.province=this.tags3.join(',');
-                          }else{
-                            param.province='';
-                          }
-                          if(this.tags4){
-                            param.notProvince=this.tags4.join(',');
-                          }else{
-                            param.notProvince='';
-                          }
+                        
                         aorVM.submitDisabled=true;
                         axios.post('/clueAssignRule/optRule/update', param)
                         .then(function (response) {
@@ -445,96 +419,95 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             },
             deleteRow(index, rows) {//删除一行表格
                 rows.splice(index, 1);
-            },
-            addFun1() {//添加包含搜索词
-                let searchWord = this.form.searchWord;
-                if (searchWord) {
-                    this.tags1.push(searchWord);
+            },            
+            addDomain1() {
+                var list=this.form.clueScorErulEdetailList1
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
                 }
-                this.form.searchWord = '';
+                this.form.clueScorErulEdetailList1.push({
+                    startNum:'',
+                    endnum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    type:7,//接通率
+                });                
             },
-            deleteFun1(tag) {//删除包含搜索词
-                this.tags1.splice(this.tags1.indexOf(tag), 1);
-            },
-            addFun2() {//添加不包含搜索词
-                let notSearchWord = this.form.notSearchWord;
-                if (notSearchWord) {
-                    this.tags2.push(notSearchWord);
+            addDomain2() {
+                var list=this.form.clueScorErulEdetailList2
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
                 }
-                this.form.notSearchWord = '';
+                this.form.clueScorErulEdetailList2.push({
+                    startNum:'',
+                    endnum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    type:8,//接通率
+                });                
             },
-            deleteFun2(tag) {//删除不包含搜索词
-                this.tags2.splice(this.tags2.indexOf(tag), 1);
-            },
-              addFun3() {//添加包含省
-                let province = this.form.province;
-                if (province) {
-                  this.tags3.push(province);
+            addDomain3() {
+                var list=this.form.clueScorErulEdetailList3
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
                 }
-                this.form.province = '';
-              },
-              deleteFun3(tag) {//删除包含省
-                this.tags3.splice(this.tags3.indexOf(tag), 1);
-              },
-              addFun4() {//添加不包含省
-                let notProvince = this.form.notProvince;
-                if (notProvince) {
-                  this.tags4.push(notProvince);
-                }
-                this.form.notProvince = '';
-              },
-              deleteFun4(tag) {//删除不包含省
-                this.tags4.splice(this.tags4.indexOf(tag), 1);
-              },
-            addDomain() {
-                // console.log(businessLineList)
-                // 取第一条
-                var first=null;
-                // for(var i=0;i<businessLineList.length;i++){
-                //     first=businessLineList[0].businessLine;
-                // }
-                var param ={};
-                  param.systemCode = "HUIJU";
-                  param.orgType = 1;
-                  param.businessLine = first;
-                  console.info(param);
-                  axios.post('/organization/organization/queryOrgByBusinessline', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        aorVM.form.teleRuleTeamList.push({
-                            orgId: '',                    
-                            businessLine: first,//业务线取第一条                 
-                            teleOptions:table,                    
-                            orgType: '',                    
-                            proportion:'',
-                            resourceMaxNum:'',
-                            isPrior: 0,//默认非优先
-                            orgDayTimeStart:'00:00:00',//新增时间段
-                            orgDayTimeEnd:'23:59:59',//新增时间段
-                            unlimited:'',//不限层
-                            unlimitedVal:'',//不限层取值
-                            unlimitedShow:false,//默认不显示
-                        });
-                  })
-                  .catch(function (error) {
-                       console.log(error);
-                  });
-                
+                this.form.clueScorErulEdetailList3.push({
+                    startNum:'',
+                    endnum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    type:9,//接通率
+                });                
             },
-            resourceMaxNumber(index, rows){
+            addDomain4() {
+                var list=this.form.clueScorErulEdetailList4
+                if(list.length==5){
+                    this.$message({
+                        message: '同一指标阶梯设置不允许超过5个',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.form.clueScorErulEdetailList4.push({
+                    startNum:'',
+                    endnum:'',
+                    addScore:'',
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
+                    type:10,//接通率
+                });                
+            },
+            endnumber(index, rows){
                 for(var i=0;i<rows.length;i++){                    
-        　　                      rows[i].proportion=rows[i].proportion.replace(/[^\.\d]/g,'');
-                    rows[i].proportion=rows[i].proportion.replace('.','');                    
+        　　        rows[i].startnum=rows[i].startnum.replace(/[^\.\d]/g,'');
+                    rows[i].startnum=rows[i].startnum.replace('.','');                    
                 }
-        　　      },
-            resourceMaxNumber1(index, rows){
+        　　},
+            endnumber1(index, rows){
                 for(var i=0;i<rows.length;i++){                    
-        　　                      rows[i].resourceMaxNum=rows[i].resourceMaxNum.replace(/[^\.\d]/g,'');
-                    rows[i].resourceMaxNum=rows[i].resourceMaxNum.replace('.','');                    
+        　　        rows[i].endnum=rows[i].endnum.replace(/[^\.\d]/g,'');
+                    rows[i].endnum=rows[i].endnum.replace('.','');                    
                 }
-        　　      },
+        　　},
             cancelForm(){
                 document.location.href='/clueAssignRule/optRule/initRuleList';
             },
@@ -557,6 +530,25 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                      console.log(error);
                 });
             },
+            initBusinessline(){//初始化业务线
+                var param = {};
+                axios.post('/rule/userScoreRule/getBusinesslineList', param).then(function (response) {
+                    // console.log(response)
+                    aorVM.businessLineArr = response.data;
+                });
+            },
+            initCategorys(){//初始化资源类别
+                var param = {};
+                param.groupCode='clueCategory';
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                    // console.log(response)
+                    aorVM.categorysArr = response.data.data;
+                });
+            }
+        },
+        created(){            
+            this.initBusinessline();//初始化业务线
+            this.initCategorys();//初始化资源类别
         },
         mounted(){
             document.getElementById('addOptimizeRule').style.display = 'block';
@@ -587,39 +579,15 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                 this.form.source=clueAssignRule.source.split(',');
                 this.form.category=clueAssignRule.category.split(',');
                 this.form.status=clueAssignRule.status;
-                var teleRuleTeamList=clueAssignRule.teleList;
-                for(var i=0;i<teleRuleTeamList.length;i++){
-                    teleRuleTeamList[i].orgId=teleRuleTeamList[i].orgId+","+teleRuleTeamList[i].orgType;
-                    if(teleRuleTeamList[i].resourceMaxNum==-1){
-                        this.unlimitedBtn(i,teleRuleTeamList);
+                var clueScorErulEdetailList=clueAssignRule.teleList;
+                for(var i=0;i<clueScorErulEdetailList.length;i++){
+                    clueScorErulEdetailList[i].orgId=clueScorErulEdetailList[i].orgId+","+clueScorErulEdetailList[i].orgType;
+                    if(clueScorErulEdetailList[i].endnum==-1){
+                        this.unlimitedBtn(i,clueScorErulEdetailList);
                     }
                 }
-                this.form.teleRuleTeamList=teleRuleTeamList;
+                this.form.clueScorErulEdetailList=clueScorErulEdetailList;
                 
-                var trafficRuleTeamList=clueAssignRule.trafficList;
-                for(var i=0;i<trafficRuleTeamList.length;i++){
-                    trafficRuleTeamList[i].orgId=trafficRuleTeamList[i].orgId+","+trafficRuleTeamList[i].orgType;
-                    if(trafficRuleTeamList[i].resourceMaxNum==-1){
-                        this.unlimitedBtn(i,trafficRuleTeamList);
-                    }
-                }
-                this.form.trafficRuleTeamList=trafficRuleTeamList;
-                
-                
-                if(clueAssignRule.searchWord){
-                    this.tags1=clueAssignRule.searchWord.split(',');
-                }
-                if(clueAssignRule.notSearchWord){
-                    this.tags2=clueAssignRule.notSearchWord.split(',');
-                }
-                // this.form.province=clueAssignRule.province;
-                // this.form.notProvince=clueAssignRule.notProvince;
-                  if(clueAssignRule.province){
-                    this.tags3=clueAssignRule.province.split(',');
-                  }
-                  if(clueAssignRule.notProvince){
-                    this.tags4=clueAssignRule.notProvince.split(',');
-                  }
             }else{
                 this.title="新增顾问得分模型"
             }

@@ -154,6 +154,7 @@
             </div>
         </el-form>
         <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
+            <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
             <el-table-column align="center" prop="type" label="指标名称">
                 <template slot-scope="scope">
                     <span v-if="scope.row.type==1">业绩金额</span>
@@ -508,14 +509,14 @@
               }
                 return false
             },
-            initBusinessline(){
+            initBusinessline(){//初始化业务线
                 var param = {};
                 axios.post('/rule/userScoreRule/getBusinesslineList', param).then(function (response) {
                     // console.log(response)
                     ocmVM.businessLineArr = response.data;
                 });
             },
-            initCategorys(){
+            initCategorys(){//初始化资源类别
                 var param = {};
                 param.groupCode='clueCategory';
                 axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
@@ -540,9 +541,8 @@
             if(localVal){this.pager.pageSize = localVal;}
             // console.info("create method");
             this.searchTable();
-            //初始化业务线
-            this.initBusinessline();
-            this.initCategorys();
+            this.initBusinessline();//初始化业务线
+            this.initCategorys();//初始化资源类别
         },
         mounted(){
             document.getElementById('optimizeClueManagement').style.display = 'block';
