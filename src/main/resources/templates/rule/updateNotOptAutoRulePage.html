@@ -536,7 +536,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         }
                         // 不能选择重复电销组
                         var orgIdChoose=form.teleRuleTeamList; 
-                        var ary=[];                   
+                        var ary=[];
+                        var businessLineAry =[];
                         for(var i=0;i<orgIdChoose.length;i++){
                         	var orgId=orgIdChoose[i].orgId;
                             for(var j=0;j<ary.length;j++) {
@@ -551,6 +552,20 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                                 }                                
                             }
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
+
+                            var businessLine = orgIdChoose[i].businessLine;
+                            for(var j=0;j<businessLineAry.length;j++) {
+                                if(businessLineAry[j]!=""){
+                                    if(businessLineAry.indexOf(businessLine)==-1) {
+                                        this.$message({
+                                            message: '只能选择相同的业务线',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }
+                            }
+                            businessLineAry.push(businessLine);
                         }
 
                         var param=form;
