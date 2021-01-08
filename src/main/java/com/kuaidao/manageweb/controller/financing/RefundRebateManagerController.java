@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.financing.ApplyRefundRebateReq;
 import com.kuaidao.aggregation.dto.financing.RefundRebateListDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRebatePageParam;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -104,7 +104,7 @@ public class RefundRebateManagerController {
                 List<ProjectInfoDTO> data = proJson.getData();
                 List<ProjectInfoDTO> alist = new ArrayList<>();
                 for (ProjectInfoDTO infoDTO : data) {
-                    if (AggregationConstant.NO.equals(infoDTO.getIsNotSign())) {
+                    if (BusinessConfigConstant.NO.equals(infoDTO.getIsNotSign())) {
                         alist.add(infoDTO);
                     }
                 }
@@ -174,7 +174,7 @@ public class RefundRebateManagerController {
         UserInfoDTO user = getUser();
         // 插入申请人id
         req.setCreateUser(user.getId());
-        req.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        req.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         req.setBusinessLine(user.getBusinessLine());
         JSONResult<Long> applyRefund = refundRebateFeignClient.applyRefundRebate(req);
         return applyRefund;
@@ -195,7 +195,7 @@ public class RefundRebateManagerController {
         UserInfoDTO user = getUser();
         // 插入申请人id
         req.setCreateUser(user.getId());
-        req.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        req.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         req.setBusinessLine(user.getBusinessLine());
         JSONResult<Long> applyRebate = refundRebateFeignClient.applyRefundRebate(req);
         return applyRebate;

@@ -41,7 +41,7 @@ import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
@@ -129,7 +129,7 @@ public class BusinessMyCustomerController {
                 List<ProjectInfoDTO> data = proJson.getData();
                 List<ProjectInfoDTO> alist = new ArrayList<>();
                 for (ProjectInfoDTO infoDTO : data) {
-                    if (AggregationConstant.NO.equals(infoDTO.getIsNotSign())) {
+                    if (BusinessConfigConstant.NO.equals(infoDTO.getIsNotSign())) {
                         alist.add(infoDTO);
                     }
                 }

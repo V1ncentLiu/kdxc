@@ -26,6 +26,7 @@ import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.preference.PreferenceFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.service.im.ImMassageService;
@@ -89,6 +90,7 @@ public class UserController {
     private ImMassageService imMassageService;
     @Autowired
     private ClientFeignClient clientFeignClient;
+
     /***
      * 用户列表页
      *
@@ -290,7 +292,8 @@ public class UserController {
             return CommonUtil.validateParam(result);
         }
         userInfoReq.setUserType(SysConstant.USER_TYPE_ONE);
-        return userInfoFeignClient.create(userInfoReq);
+        JSONResult<String> result1 = userInfoFeignClient.create(userInfoReq);
+        return result1;
     }
 
     /**

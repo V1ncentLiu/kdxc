@@ -52,7 +52,7 @@ import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundUpdateDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -193,7 +193,7 @@ public class RefundController {
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
-        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        queryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         // 处理商务参数
         // handleBusinessReqParam(queryDTO);
         // 处理电销参数
@@ -312,7 +312,7 @@ public class RefundController {
         if (id == null) {
             return CommonUtil.getParamIllegalJSONResult();
         }
-        refundInfoQueryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        refundInfoQueryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.queryRefundInfoById(refundInfoQueryDTO);
     }
 
@@ -332,8 +332,8 @@ public class RefundController {
         if (CollectionUtils.isEmpty(idList)) {
             return CommonUtil.getParamIllegalJSONResult();
         }
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_5);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_5);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -353,7 +353,7 @@ public class RefundController {
         if (id == null) {
             return CommonUtil.getParamIllegalJSONResult();
         }
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.editRejectRefundInfo(refundUpdateDTO);
     }
 
@@ -371,7 +371,7 @@ public class RefundController {
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
-        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        queryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
@@ -404,8 +404,8 @@ public class RefundController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         refundUpdateDTO.setCurUser(curLoginUser.getId());
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_3);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_3);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -426,8 +426,8 @@ public class RefundController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         refundUpdateDTO.setCurUser(curLoginUser.getId());
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_2);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_2);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -448,8 +448,8 @@ public class RefundController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         refundUpdateDTO.setCurUser(curLoginUser.getId());
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_4);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_4);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -466,7 +466,7 @@ public class RefundController {
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
-        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        queryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         return refundFeignClient.listRefundApply(queryDTO);
     }
@@ -483,7 +483,7 @@ public class RefundController {
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
-        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        queryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         queryDTO.setBusinessLine(curLoginUser.getBusinessLine());
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
@@ -516,8 +516,8 @@ public class RefundController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         refundUpdateDTO.setCurUser(curLoginUser.getId());
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_5);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_5);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -538,8 +538,8 @@ public class RefundController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         refundUpdateDTO.setCurUser(curLoginUser.getId());
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_3);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_3);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -560,8 +560,8 @@ public class RefundController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         refundUpdateDTO.setCurUser(curLoginUser.getId());
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_2);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_2);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -582,8 +582,8 @@ public class RefundController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         refundUpdateDTO.setCurUser(curLoginUser.getId());
-        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_4);
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        refundUpdateDTO.setStatus(BusinessConfigConstant.REFOUND_REBATE_STATUS.STATUS_4);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -615,7 +615,7 @@ public class RefundController {
         if (id == null) {
             return CommonUtil.getParamIllegalJSONResult();
         }
-        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        refundUpdateDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.editRejectRefundInfo(refundUpdateDTO);
     }
 
@@ -652,7 +652,7 @@ public class RefundController {
         if (id == null) {
             return CommonUtil.getParamIllegalJSONResult();
         }
-        refundInfoQueryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        refundInfoQueryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.queryRefundInfoById(refundInfoQueryDTO);
     }
 
@@ -717,7 +717,7 @@ public class RefundController {
                                       @RequestBody RefundQueryDTO queryDTO) throws Exception {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
-        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        queryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         // 处理商务参数
         // handleBusinessReqParam(queryDTO);
         // 处理电销参数
@@ -774,7 +774,7 @@ public class RefundController {
                                       @RequestBody RefundQueryDTO queryDTO) throws Exception {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
-        queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        queryDTO.setType(BusinessConfigConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         // 处理商务参数
         // handleBusinessReqParam(queryDTO);
         // 处理电销参数

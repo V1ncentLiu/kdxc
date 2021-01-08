@@ -62,7 +62,10 @@
                 <!-- <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">
                     <em style="color: #e37470;" id="messageCount"></em>
                 </el-button> -->  
-                <img th:src="@{/images/headIco.png}" alt="" class="headIco">
+                <span class="messageCenterBtn" style="margin: 10px 30px 0 0;">
+                    <img th:src="@{/images/headIco.png}" alt="">
+                    <span v-if="isBusyStatus" id="messageText" class="messageCount">忙</span>
+                </span> 
                 <!-- 下拉 -->
                 <el-dropdown class="elDropdown f-fr" trigger="click"  @command="handleCommand">
                     <div class="elDropdownBtn">
@@ -72,6 +75,11 @@
                     <el-dropdown-menu slot="dropdown">
                         <!-- 商家版的菜单 -->
                         <!-- <el-dropdown-item command="userInfo">用户信息</el-dropdown-item> -->
+                        <span v-if="showBusyBtn">
+                           <el-dropdown-item command="setBusyStatus" v-if="isBusyButton">设为忙碌状态</el-dropdown-item>
+                            <el-dropdown-item command="cancelBusyStatus" v-else>取消忙碌状态</el-dropdown-item> 
+                        </span>
+                        
                         <el-dropdown-item command="modifyPwd">修改密码</el-dropdown-item>
                         <el-dropdown-item command="logout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>

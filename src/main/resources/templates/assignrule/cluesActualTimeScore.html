@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <style>
+    .el-input-number.is-controls-right .el-input-number__decrease, .el-input-number.is-controls-right .el-input-number__increase{    line-height: 14px;}
+    .el-input-number__decrease, .el-input-number__increase{top:4px;}
+    .distpicker .form-group{width: 157px;}
+    .distpicker{width:350px;}
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>资源实时得分设置</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <el-row class="marginB20">
+        <!-- <shiro:hasPermission name="sys:scheduleManager:add"> -->
+            <el-button type="primary" @click="openCard"><i class="el-icon-plus"></i>添加资源范围得分</el-button>
+        <!-- </shiro:hasPermission> -->
+        <el-button type="success" @click="editCard"><i class="el-icon-edit"></i>编辑</el-button>
+        <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                <el-form-item label="业务线:">  
+                    <el-select v-model="form.businessLine" placeholder="选择业务线" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in businessLineArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <el-form-item label="资源维度:">  
+                    <el-select v-model="form.dimension" placeholder="选择资源维度" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in clueDimensionArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
+                </el-form-item>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
+                <el-table-column prop="businessLineName" align="center" label="业务线">
+                </el-table-column>                
+                <el-table-column prop="dimensionName" align="center" label="资源维度">
+                </el-table-column>
+                <el-table-column prop="scopeName" align="center" label="资源范围">
+                </el-table-column>
+                <el-table-column prop="score" align="center" label="得分">
+                    <template slot-scope="scope">
+                        +{{scope.row.score}}
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- 设置顾问偏好弹窗 -->
+    <el-dialog :title="dialogTitle" :visible.sync="cardVisible" :close-on-click-modal="false" width="600px" @close="cardCancel">
+        <template>
+            <el-form :inline="true" :model="cardForm" ref="cardForm" :rules="cardFormRules">
+                <el-form-item label="业务线：" prop="businessLine" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.businessLine" :reserve-keyword=true clearable placeholder="请选择业务线" style="width: 333px;">
+                        <el-option
+                            v-for="item in businessLineArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="资源维度：" prop="dimension" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.dimension" :reserve-keyword=true placeholder="请选择资源维度" style="width: 333px;" @change="selectChange">
+                        <el-option
+                            v-for="item in clueDimensionArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="资源范围：" prop="scope" :label-width="formLabelWidth" v-if="showSelect" style="width: 100%;">
+                    <el-select v-model="cardForm.scope" :reserve-keyword=true placeholder="请选择资源范围" filterable multiple  style="width: 333px;">
+                        <el-option
+                            v-for="item in clueScopeArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>                           
+                </el-form-item>
+                <!-- 显示新增的标签 -->
+                <div style="margin-bottom: 0;width: 480px;margin-left: 100px;">
+                    <el-tag
+                        v-for="tag in cardForm.rootWords"
+                        :key="tag"
+                        closable
+                        @close="deleteFun1(tag)"
+                        style="margin-right: 10px;">
+                        {{tag}}
+                    </el-tag>
+                </div>
+                <el-col :span="24" v-if="showIpt">
+                    <el-form-item label="资源范围：" prop="clueScopeIpt" :label-width="formLabelWidth">
+                        <el-input v-model="cardForm.clueScopeIpt" autocomplete="off" placeholder="请填写资源范围" maxlength="20" style="width: 265px;margin-right: 10px;"></el-input>                            
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="addFun1">添加</el-button>           
+                    </el-form-item>
+                </el-col>
+                <el-form-item label="得分：" prop="score" :label-width="formLabelWidth" style="position: relative;width: 100%;">
+                    <el-input v-model="cardForm.score" autocomplete="off" placeholder="0-50正整数" maxlength="2" style="width: 265px;margin-right: 10px;" @keyup.native.prevent="number"></el-input> 
+                </el-form-item> 
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="cardSubmit('cardForm')">提 交</el-button>
+                <el-button  @click="cardCancel">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var businessLine=[[${businessLineList}]]; // 业务线
+    var clueType=[[${clueTypeList}]]; // 资源类型
+    var medium=[[${mediumList}]]; // 媒介    
+
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {   
+                formLabelWidth: '100px',
+                loading: false,
+                isDisabled: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
+                form: {
+                    businessLine:'',
+                    dimension:''
+                },
+                tableData: [],
+                dialogTitle:'',  
+                cardVisible:false,//设置顾问偏好
+                cardForm: {
+                    businessLine:'',
+                    dimension:'1',
+                    scope:[],//资源范围
+                    rootWords: [],//词根
+                    clueScopeIpt:'',
+                    score:'',
+                },
+                cardFormRules:{
+                    businessLine:[
+                        { required: true, message: '请选择业务线', trigger: 'change' },
+                    ],
+                    dimension:[
+                        { required: true, message: '请选择资源维度', trigger: 'change' },
+                    ],
+                    scope:[
+                        // { required: true, message: '请选择资源范围', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            if(mainDivVM.showSelect==true&&mainDivVM.cardForm.scope.length==0){
+                             callback(new Error("请选择资源范围"));
+                             return;
+                            }
+                            callback();
+                        }, trigger: 'change'}
+                    ],
+                    clueScopeIpt:[
+                        // { required: true, message: '请填写资源范围', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            if(mainDivVM.showIpt==true&&mainDivVM.cardForm.rootWords.length==0){
+                                 callback(new Error("请填写资源范围"));
+                                 return;
+                            }
+                            callback();
+                        }, trigger: 'change'}
+                    ],
+                    score:[
+                        { required: true, message: '请填写得分', trigger: 'blur' }
+                    ],
+                },
+                cardTeleSale:'',
+                multipleSelection:[],
+                businessLineArr:businessLine,//业务线
+                clueDimensionArr:[{
+                    id:'1',
+                    name:'资源类型'
+                },{
+                    id:'2',
+                    name:'媒介'
+                },{
+                    id:'3',
+                    name:'调查问卷'
+                },{
+                    id:'4',
+                    name:'重复资源'
+                },{
+                    id:'5',
+                    name:'词根'
+                }],
+                clueScopeArr:[],//资源范围                
+                showSelect:true,
+                showIpt:false,
+            }             
+        },
+        methods: { 
+            selectChange(val){
+                this.showSelect=true;
+                this.showIpt=false;
+                if(val=="1"){
+                    this.clueScopeArr=[];
+                    this.cardForm.scope=[];
+                    if(clueType){
+                        this.clueScopeArr=clueType;
+                    }else{
+                        this.clueScopeArr=[];
+                    }  
+                    this.cardForm.rootWords=[];                  
+                }else if(val=="2"){
+                    this.clueScopeArr=[];
+                    this.cardForm.scope=[];
+                    if(medium){
+                        this.clueScopeArr=medium;
+                    }else{
+                        this.clueScopeArr=[];
+                    }  
+                    this.cardForm.rootWords=[];                  
+                }else if(val=="3"){
+                    this.clueScopeArr=[{id:'调查问卷',name:'调查问卷'}]   
+                    this.cardForm.scope=['调查问卷'] 
+                    this.cardForm.rootWords=[];                
+                }else if(val=="4"){
+                    this.clueScopeArr=[{id:'重复资源',name:'重复资源'}]
+                    this.cardForm.scope=['重复资源']
+                    this.cardForm.rootWords=[];
+                }else if(val=="5"){
+                    this.showSelect=false;
+                    this.showIpt=true;
+                    this.clueScopeArr=[];
+                    this.cardForm.scope=[];
+                }
+            },
+            addFun1() {//添加包含搜索词
+                let clueScopeIpt = this.cardForm.clueScopeIpt;
+                if (clueScopeIpt) {
+                    this.cardForm.rootWords.push(clueScopeIpt);
+                }
+                this.cardForm.clueScopeIpt = '';
+            },
+            deleteFun1(tag) {//删除包含搜索词
+                this.cardForm.rootWords.splice(this.cardForm.rootWords.indexOf(tag), 1);
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            openCard(){// 打开新建名片
+                this.cardVisible=true;
+                this.dialogTitle="添加资源范围得分";
+            },
+            editCard(){// 打开编辑名片回显
+                var rows = this.multipleSelection;
+                if(rows.length!==1){
+                    this.$message({
+                       message: '请选择一条数据进行编辑',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                this.cardVisible=true;
+                this.dialogTitle="编辑资源范围得分";
+                var param = {};
+                param.id = rows[0].id;
+                this.loading = true; 
+                axios.post('/cluescore/queryOne',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                    console.log(response)
+                    var result=response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        if(table.id){
+                            mainDivVM.cardForm.businessLine=table.businessLine+"";
+                            mainDivVM.cardForm.dimension=table.dimension+"";
+                            // 判断是不是词根
+                            if(table.dimension=="5"){//词根
+                                mainDivVM.showSelect=false;
+                                mainDivVM.showIpt=true;
+                                mainDivVM.cardForm.rootWords=table.scope.split(',');
+                                mainDivVM.cardForm.scope=[];
+                            }else{
+                                mainDivVM.cardForm.scope=table.scope.split(',');
+                            }                            
+                            mainDivVM.cardForm.score=table.score;
+                        }                      
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            cardCancel(){// 关闭名片
+                this.cardVisible=false;
+                this.showSelect=true;
+                this.showIpt=false;
+                this.cardForm.businessLine='';
+                this.cardForm.dimension='';
+                this.cardForm.rootWords=[];
+                this.cardForm.scope=[];
+                this.cardForm.score='';
+            },
+            cardSubmit(){
+                var rows=this.multipleSelection;
+                var id=""
+                if(rows.length!=0){
+                    id=rows[0].id;
+                }
+                this.$refs['cardForm'].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        var url = "";
+                        if(id){
+                            url="/cluescore/update"//编辑
+                            param.id=id;
+                        }else{
+                            url="/cluescore/insert"//新建
+                        }
+                        param.businessLine = this.cardForm.businessLine;
+                        param.dimension = this.cardForm.dimension;
+                        if(this.cardForm.dimension=="5"){//词根
+                            param.scope = this.cardForm.rootWords.length==0?"":this.cardForm.rootWords.join(",");//逗号分隔
+                        }else{
+                            param.scope = this.cardForm.scope.length==0?"":this.cardForm.scope.join(",");//逗号分隔
+                        }                        
+
+                        param.score = this.cardForm.score;
+                        console.log(param)
+                        // this.loading = true; 
+                        axios.post(url,param).then(function (response) { 
+                            // mainDivVM.loading = false;
+                            console.log(response)
+                            // mainDivVM.cardVisible=false;
+                            window.location.href="/cluescore/page"
+                        }).catch(function (error) {
+                            // mainDivVM.loading = false;
+                            mainDivVM.$message({
+                                message: "请求失败，请稍后重试",
+                                type: "error"
+                            });
+                        });
+                    } else {
+                        console.log("验证未通过")
+                        return false;
+                    }
+                });
+            },       
+            searchTable() {                
+                var param = {};
+                param.businessLine = this.form.businessLine;
+                param.dimension = this.form.dimension;
+
+                param.pageNum = this.pager.pageSize
+                param.pageSize = this.pager.pageSizes;                
+                this.loading = true; 
+                axios.post('/cluescore/queryPage',param).then(function (response) { 
+                   mainDivVM.loading = false;
+                   console.log(response)
+                   var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.tableData= table.data;
+                        mainDivVM.pager.total =  table.total;
+                        mainDivVM.pager.currentPage = table.currentPage;
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }  
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            deleteFun() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+                   rowIds.push(rows[i].id)
+                }
+                this.$confirm('删除后不可恢复，确定要删除吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                      //删除
+                    var param  = {idList:rowIds};
+                     axios.post('/cluescore/delete',param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                             mainDivVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                                window.location.href="/cluescore/page"
+                            }});
+                             
+                         }else{
+                             mainDivVM.$message({
+                                 message: "接口调用失败",
+                                 type: 'error'
+                               }); 
+                         }
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                        
+                     });
+                 }).catch(() => {
+                        
+                 });
+            },
+            number(){
+          　　this.cardForm.score=this.cardForm.score.replace(/[^\.\d]/g,'');
+              this.cardForm.score=this.cardForm.score.replace('.','');
+          },
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            this.searchTable();
+            if(clueType){
+                this.clueScopeArr=clueType;//默认下拉资源类型
+            }
+            
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
