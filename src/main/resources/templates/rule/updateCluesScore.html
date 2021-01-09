@@ -8,6 +8,8 @@
         .days .el-form-item__error{padding-left: 165px;}
         .timeToLine{display: block;float: left;margin-right: 2px;height: 34px;line-height: 34px;}
         .el-form-item{margin-bottom: 15px;}
+        .el-message{}
+        .lineGrey{line-height: 37px;color:#c0c4cc; }
     </style>
 </head>
 <body>
@@ -23,12 +25,12 @@
             <el-row>
                 <el-col :span="8">
                     <el-form-item label="规则名称：" prop="ruleName" :label-width="formLabelWidth">
-                        <el-input v-model="form.ruleName" autocomplete="off" style="width: 300px;" maxlength="50"></el-input>
+                        <el-input v-model="form.ruleName" autocomplete="off" style="width: 170px;" maxlength="50"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
                     <el-form-item label="业务线：" prop="businessLine" :label-width="formLabelWidth">
-                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 170px;">
                             <el-option
                                 v-for="item in businessLineArr"
                                 :key="item.value"
@@ -40,7 +42,7 @@
                 </el-col>
                 <el-col :span="8">
                     <el-form-item label="资源类别：" prop="categorys" :label-width="formLabelWidth">
-                        <el-select v-model="form.categorys" :reserve-keyword=true multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.categorys" :reserve-keyword=true multiple placeholder="请选择" style="width: 170px;">
                             <el-option
                                 v-for="item in categorysArr"
                                 :key="item.value"
@@ -54,12 +56,12 @@
             <el-row>                
                 <el-col :span="8">
                     <el-form-item label="规则开始时间：" prop="startTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 170px;"></el-date-picker>
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
                     <el-form-item label="规则结束时间：" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 170px;"></el-date-picker>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -83,13 +85,13 @@
             </div>            
             <el-table :data="form.clueScorErulEdetailList1" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" label="业绩范围" width="500">
+                <el-table-column align="center" label="接通率范围" width="500">
                     <span style="color: #f56c6c;">*</span>
                     <template slot-scope="scope">
                         <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.startNum'" :rules='rules.startnum' style="width: 130px;display: inline-block;">
                             <el-input v-model="scope.row.startNum"></el-input>
                         </el-form-item>
-                        <span>——</span>
+                        <span style="line-height: 37px;">%<em style="color:#c0c4cc;margin-left: 5px;">——</em></span>
                         <el-form-item :prop="'clueScorErulEdetailList1.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
                             <!-- input值 -->
                             <el-input v-model="scope.row.endNum" ></el-input>
@@ -98,6 +100,7 @@
                             <!-- 不限input -->
                             <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList1)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
                         </el-form-item>
+                        <span style="line-height: 37px;">%</span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" label="得分">
@@ -125,13 +128,13 @@
             </div>            
             <el-table :data="form.clueScorErulEdetailList2" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" label="业绩范围" width="500">
+                <el-table-column align="center" label="有效率范围" width="500">
                     <span style="color: #f56c6c;">*</span>
                     <template slot-scope="scope">
                         <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
                             <el-input v-model="scope.row.startNum"></el-input>
                         </el-form-item>
-                        <span>——</span>
+                        <span style="line-height: 37px;">%<em style="color:#c0c4cc;margin-left: 5px;">——</em></span>
                         <el-form-item :prop="'clueScorErulEdetailList2.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
                             <!-- input值 -->
                             <el-input v-model="scope.row.endNum" ></el-input>
@@ -140,6 +143,7 @@
                             <!-- 不限input -->
                             <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.clueScorErulEdetailList2)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
                         </el-form-item>
+                        <span style="line-height: 37px;">%</span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" label="得分">
@@ -167,13 +171,13 @@
             </div>            
             <el-table :data="form.clueScorErulEdetailList3" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" label="业绩范围" width="500">
+                <el-table-column align="center" label="ROI范围" width="500">
                     <span style="color: #f56c6c;">*</span>
                     <template slot-scope="scope">
                         <el-form-item :prop="'clueScorErulEdetailList3.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
                             <el-input v-model="scope.row.startNum"></el-input>
                         </el-form-item>
-                        <span>——</span>
+                        <span class="lineGrey">——</span>
                         <el-form-item :prop="'clueScorErulEdetailList3.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
                             <!-- input值 -->
                             <el-input v-model="scope.row.endNum" ></el-input>
@@ -209,13 +213,13 @@
             </div>            
             <el-table :data="form.clueScorErulEdetailList4" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" label="业绩范围" width="500">
+                <el-table-column align="center" label="资源价值范围" width="500">
                     <span style="color: #f56c6c;">*</span>
                     <template slot-scope="scope">
                         <el-form-item :prop="'clueScorErulEdetailList4.' + scope.$index + '.startNum'" :rules='rules.startNum' style="width: 130px;display: inline-block;">
                             <el-input v-model="scope.row.startNum"></el-input>
                         </el-form-item>
-                        <span>——</span>
+                        <span class="lineGrey">——</span>
                         <el-form-item :prop="'clueScorErulEdetailList4.' + scope.$index + '.endNum'" :rules='rules.endNum' style="width: 130px;display: inline-block;">
                             <!-- input值 -->
                             <el-input v-model="scope.row.endNum" ></el-input>
