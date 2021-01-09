@@ -22,6 +22,7 @@
         .el-form-item{margin-bottom: 15px;}
         .ladderListTable .line{line-height: 35px;}
         .leftLine{border-left: 5px solid #5c6be8;line-height: 20px;text-indent: 10px;margin-bottom: 20px;}
+        .ladderListTable .el-input__inner{width:120px;}
     </style>
 </head>
 <body>
@@ -78,18 +79,18 @@
                 <el-table-column align="center" prop="srangeStart" label="分数值范围">
                     <template slot-scope="scope">
                         <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" :rules='rules.srangeStart'>
-                            <el-input v-model="scope.row.srangeStart" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
+                            <el-input v-model="scope.row.srangeStart" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                         <span class="line">——</span>
                         <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" :rules='rules.srangeEnd'>
-                            <el-input v-model="scope.row.srangeEnd" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
+                            <el-input v-model="scope.row.srangeEnd" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="limit" label="每日分配上限">
                     <template slot-scope="scope">
                         <el-form-item :prop="'ladderList.' + scope.$index + '.limit'" :rules='rules.limit'>
-                            <el-input v-model="scope.row.limit" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
+                            <el-input v-model="scope.row.limit" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                         
                     </template>
@@ -102,11 +103,11 @@
                 <el-table-column align="center" prop="startTime" label="分数值范围">
                     <template slot-scope="scope">
                         <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeStart'" :rules='rules.clueSrangeStart'>
-                            <el-input v-model="scope.row.clueSrangeStart" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
+                            <el-input v-model="scope.row.clueSrangeStart" placeholder="0-100以内整数" maxLength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                         <span class="line">——</span>
                         <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeEnd'" :rules='rules.clueSrangeEnd'>
-                            <el-input v-model="scope.row.clueSrangeEnd" placeholder="0-100以内整数" maxLength="3" type="number" min="0" max="100"></el-input>
+                            <el-input v-model="scope.row.clueSrangeEnd" placeholder="0-100以内整数" maxLength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
@@ -183,18 +184,58 @@
                     ],
                     srangeStart: [
                         // { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入整数"));
+                            }else if(value<0||value>100){
+                                callback(new Error("请输入0-100以内整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
                     ],
                     srangeEnd: [
                         // { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入整数"));
+                            }else if(value<0||value>100){
+                                callback(new Error("请输入0-100以内整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
                     ],
                     limit: [
                         // { required: true, message: '请输入每日分配上限', trigger: 'blur' }
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入整数"));
+                            }else if(value<0||value>100){
+                                callback(new Error("请输入0-100以内整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
                     ],
                     clueSrangeStart: [
                         // { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入整数"));
+                            }else if(value<0||value>100){
+                                callback(new Error("请输入0-100以内整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
                     ],
                     clueSrangeEnd: [
                         // { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
+                        { validator:function(rule,value,callback){               
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入整数"));
+                            }else if(value<0||value>100){
+                                callback(new Error("请输入0-100以内整数"));
+                            }
+                            callback();
+                        }, trigger: 'change'}
                     ]
                 },
                 options: optionsObj,
