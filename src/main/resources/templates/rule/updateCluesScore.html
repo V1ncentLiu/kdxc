@@ -30,7 +30,7 @@
                 </el-col>
                 <el-col :span="8">
                     <el-form-item label="业务线：" prop="businessLine" :label-width="formLabelWidth">
-                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 170px;">
+                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 170px;" :disabled="isEditSelect">
                             <el-option
                                 v-for="item in businessLineArr"
                                 :key="item.value"
@@ -260,7 +260,8 @@ console.log(clueAssignRule)
     var aorVM = new Vue({
         el: '#addOptimizeRule',
         data: function() {
-            return {  
+            return {
+                isEditSelect:false,
                 title:'',  
                 businessLineArr:[],//业务线下拉            
                 categorysArr:[],//资源类别下拉
@@ -579,11 +580,25 @@ console.log(clueAssignRule)
                 var r = window.location.search.substr(1).match(reg);
                 if(r!=null)return  unescape(r[2]); return null;
             },
+            parseTime(timestamp){
+                var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+                var Y = date.getFullYear() + '-';
+                var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                var D = (date.getDate() < 10 ? '0'+date.getDate() : date.getDate()) + ' ';
+                var h = (date.getHours() < 10 ? '0'+date.getHours() : date.getHours()) + ':';
+                var m = (date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()) + ':';
+                var s = (date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds());
+
+                let strDate = Y+M+D+h+m+s;
+                console.log(strDate) //2020-05-08 17:44:56　
+                return strDate;
+            },
             initPageInfo(){
                 var id=this.getQueryString("id");
                 console.log(id)
                 if(id){
                     this.title="编资源问得分模型"
+                    this.isEditSelect=true;
                     var param={};
                     param.id=id;
                     axios.post('/rule/clueScoreRule/getRuleDetailById', param)
@@ -594,8 +609,8 @@ console.log(clueAssignRule)
                             aorVM.form.ruleName=tableData.ruleName;
                             aorVM.form.businessLine=tableData.businessLine+'';
                             aorVM.form.categorys=tableData.categorys.split(",");
-                            aorVM.form.startTime=tableData.startTime;
-                            aorVM.form.endTime=tableData.endTime;
+                            aorVM.form.startTime=aorVM.parseTime(Number(tableData.startTime));
+                            aorVM.form.endTime=aorVM.parseTime(Number(tableData.endTime));
                             
                             // aorVM.form.clueScorErulEdetailList1= tableData.clueScoreRuleDetailList;
                             var list1=[];
@@ -635,6 +650,7 @@ console.log(clueAssignRule)
                     });
                 }else{
                     this.title="新增顾问得分模型"
+                    this.isEditSelect=false;
                 }
             }
         },
