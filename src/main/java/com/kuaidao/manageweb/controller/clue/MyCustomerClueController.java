@@ -979,6 +979,12 @@ public class MyCustomerClueController {
         // 查询可签约的项目(过滤掉项目属性中是否不可签约（是）的项目，否的都是可以选择的) change by fanjd 20190826
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         param.setIsNotSign(IS_NOT_SIGN_NO);
+
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if(null != user && null != user.getBusinessLine()){
+            param.setBusinessLines(String.valueOf(user.getBusinessLine()));
+        }
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {

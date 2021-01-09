@@ -1,40 +1,14 @@
 
 package com.kuaidao.manageweb.controller.clue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.dto.clue.AppiontmentCancelDTO;
-import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
-import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
-import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
-import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
-import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -57,6 +31,24 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author zxy
@@ -145,7 +137,21 @@ public class AppiontmentController {
         ProjectInfoPageParam param=new ProjectInfoPageParam();
         param.setIsNotSign(AggregationConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
-        request.setAttribute("projectList", allProject.getData());
+
+        List<ProjectInfoDTO> projectInfoDTOS = new ArrayList<>();
+        Integer businessLine = user.getBusinessLine();
+        if(null != businessLine){
+            List<ProjectInfoDTO> projects = allProject.getData();
+            if (CollectionUtils.isNotEmpty(projects)) {
+                for(ProjectInfoDTO projectInfoDTO : projects){
+                    String businessLines = projectInfoDTO.getBusinessLines();
+                    if(null != businessLines && businessLines.contains(String.valueOf(businessLine))){
+                        projectInfoDTOS.add(projectInfoDTO);
+                    }
+                }
+            }
+        }
+        request.setAttribute("projectList",projectInfoDTOS);
 
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();

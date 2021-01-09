@@ -11,6 +11,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import org.apache.shiro.SecurityUtils;
@@ -118,9 +119,9 @@ public class ProjectController {
         // 查询字典集团分配比例归属集合
         List<DictionaryItemRespDTO> ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
 
-        JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
-        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
+        JSONResult<List<DictionaryItemRespDTO>> businessLine = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        request.setAttribute("businessLineList", businessLine.getData());
 
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
@@ -191,9 +192,9 @@ public class ProjectController {
         JSONResult<List<CategoryDTO>> categoryList = projectInfoFeignClient.getCategoryList();
         request.setAttribute("brandCategoryList", categoryList.getData());
 
-        JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
+        JSONResult<List<DictionaryItemRespDTO>> businessLine = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.BUSINESS_LINE.getCode());
         // 查询所有业务线
-        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
+        request.setAttribute("businessLineList", businessLine.getData());
 
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
