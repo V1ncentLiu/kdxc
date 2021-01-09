@@ -102,7 +102,7 @@
                     </el-select>
                 </el-form-item> 
                 <el-form-item label="资源范围：" prop="scope" :label-width="formLabelWidth" v-if="showSelect" style="width: 100%;">
-                    <el-select v-model="cardForm.scope" :reserve-keyword=true placeholder="请选择资源范围" filterable multiple  style="width: 333px;">
+                    <el-select v-model="cardForm.scope" :reserve-keyword=true placeholder="请选择资源范围" filterable multiple  style="width: 333px;" :disabled="isEditSelect">
                         <el-option
                             v-for="item in clueScopeArr"
                             :key="item.value"
@@ -185,7 +185,7 @@
                         { required: true, message: '请选择资源维度', trigger: 'change' },
                     ],
                     scope:[
-                        // { required: true, message: '请选择资源范围', trigger: 'blur' },
+                        { required: true, message: '请选择资源范围', trigger: 'blur' },
                         { validator:function(rule,value,callback){
                             if(mainDivVM.showSelect==true&&mainDivVM.cardForm.scope.length==0){
                              callback(new Error("请选择资源范围"));
@@ -195,7 +195,7 @@
                         }, trigger: 'change'}
                     ],
                     clueScopeIpt:[
-                        // { required: true, message: '请填写资源范围', trigger: 'blur' },
+                        { required: true, message: '请填写资源范围', trigger: 'blur' },
                         { validator:function(rule,value,callback){
                             if(mainDivVM.showIpt==true&&mainDivVM.cardForm.rootWords.length==0){
                                  callback(new Error("请填写资源范围"));
@@ -245,12 +245,14 @@
                 clueScopeArr:[],//资源范围                
                 showSelect:true,
                 showIpt:false,
+                isEditSelect:false,//默认可编辑下拉
             }             
         },
         methods: { 
             selectChange(val){
                 this.showSelect=true;
                 this.showIpt=false;
+                this.isEditSelect=false;
                 if(val=="1"){
                     this.clueScopeArr=[];
                     this.cardForm.scope=[];
@@ -272,11 +274,13 @@
                 }else if(val=="3"){
                     this.clueScopeArr=[{id:'调查问卷',name:'调查问卷'}]   
                     this.cardForm.scope=['调查问卷'] 
-                    this.cardForm.rootWords=[];                
+                    this.cardForm.rootWords=[];
+                    this.isEditSelect=true;                
                 }else if(val=="4"){
                     this.clueScopeArr=[{id:'重复资源',name:'重复资源'}]
                     this.cardForm.scope=['重复资源']
                     this.cardForm.rootWords=[];
+                    this.isEditSelect=true;
                 }else if(val=="5"){
                     this.showSelect=false;
                     this.showIpt=true;
@@ -303,6 +307,7 @@
                 if (this.$refs['cardForm']!=undefined) {
                     this.$refs['cardForm'].resetFields();
                 }
+                this.isEditSelect=false;
             },
             editCard(){// 打开编辑名片回显
                 var rows = this.multipleSelection;
@@ -315,6 +320,7 @@
                 }
                 this.cardVisible=true;
                 this.dialogTitle="编辑资源范围得分";
+                this.isEditSelect=false;
                 var param = {};
                 param.id = rows[0].id;
                 this.loading = true; 
