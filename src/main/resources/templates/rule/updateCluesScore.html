@@ -79,7 +79,7 @@
                 <el-form-item label="统计近" prop="days1" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days1" autocomplete="off"></el-input>
                 </el-form-item>
-                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+                <span style="display:inline-block;line-height: 35px;">天数据</span>
             </div>            
             <el-table :data="form.clueScorErulEdetailList1" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
@@ -121,7 +121,7 @@
                 <el-form-item label="统计近" prop="days2" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days2" autocomplete="off"></el-input>
                 </el-form-item>
-                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+                <span style="display:inline-block;line-height: 35px;">天数据</span>
             </div>            
             <el-table :data="form.clueScorErulEdetailList2" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
@@ -155,15 +155,15 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <!-- 3添加RIO规则 -->
+            <!-- 3添加ROI规则 -->
             <div class="marginBottom15">
                 <el-form-item label="" prop="chooseTeam3" label-width="0" style="display:inline-block;">
-                    <el-button type="primary" @click="addDomain3" icon="el-icon-plus">添加RIO规则</el-button>
+                    <el-button type="primary" @click="addDomain3" icon="el-icon-plus">添加ROI规则</el-button>
                 </el-form-item>
                 <el-form-item label="统计近" prop="days3" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days3" autocomplete="off"></el-input>
                 </el-form-item>
-                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+                <span style="display:inline-block;line-height: 35px;">天数据</span>
             </div>            
             <el-table :data="form.clueScorErulEdetailList3" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
@@ -205,7 +205,7 @@
                 <el-form-item label="统计近" prop="days4" label-width="90px" style="display:inline-block;">
                     <el-input v-model="form.days4" autocomplete="off"></el-input>
                 </el-form-item>
-                <span style="display:inline-block;line-height: 35px;">几天数据</span>
+                <span style="display:inline-block;line-height: 35px;">天数据</span>
             </div>            
             <el-table :data="form.clueScorErulEdetailList4" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
@@ -579,7 +579,7 @@ console.log(clueAssignRule)
                 var id=this.getQueryString("id");
                 console.log(id)
                 if(id){
-                    this.title="编辑顾问得分模型"
+                    this.title="编资源问得分模型"
                     var param={};
                     param.id=id;
                     axios.post('/rule/clueScoreRule/getRuleDetailById', param)
@@ -592,10 +592,35 @@ console.log(clueAssignRule)
                             aorVM.form.categorys=tableData.categorys.split(",");
                             aorVM.form.startTime=tableData.startTime;
                             aorVM.form.endTime=tableData.endTime;
-
-                            aorVM.form.clueScorErulEdetailList1= tableData.clueScoreRuleDetailList;
-
-                           
+                            
+                            // aorVM.form.clueScorErulEdetailList1= tableData.clueScoreRuleDetailList;
+                            var list1=[];
+                            var list2=[];
+                            var list3=[];
+                            var list4=[];
+                            var list=tableData.clueScoreRuleDetailList;
+                            for(var i=0;i<list.length;i++){
+                                if(list[i].type==7){
+                                    list1.push(list[i])
+                                }
+                                if(list[i].type==8){
+                                    list2.push(list[i])
+                                }
+                                if(list[i].type==9){
+                                    list3.push(list[i])
+                                }
+                                if(list[i].type==10){
+                                    list4.push(list[i])
+                                }
+                            }
+                            aorVM.form.clueScorErulEdetailList1=list1;
+                            aorVM.form.clueScorErulEdetailList2=list2;
+                            aorVM.form.clueScorErulEdetailList3=list3;
+                            aorVM.form.clueScorErulEdetailList4=list4;
+                            aorVM.form.days1=list1[0].days+'';
+                            aorVM.form.days2=list2[0].days+'';
+                            aorVM.form.days3=list3[0].days+'';
+                            aorVM.form.days4=list4[0].days+'';
 
                         }else{
                             ocmVM.$message.error(msg+"失败");
