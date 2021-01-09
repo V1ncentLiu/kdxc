@@ -29,7 +29,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="业务线：" prop="businessLine" :label-width="formLabelWidth">
-                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.businessLine" :reserve-keyword=true placeholder="请选择" style="width: 300px;" :disabled="isEditSelect">
                             <el-option
                                 v-for="item in businessLineArr"
                                 :key="item.value"
@@ -502,6 +502,7 @@ console.log(clueAssignRule)
         el: '#addOptimizeRule',
         data: function() {
             return {  
+                isEditSelect:false,
                 title:'',  
                 businessLineArr:[],//业务线下拉 
                 form: {
@@ -906,11 +907,25 @@ console.log(clueAssignRule)
                 var r = window.location.search.substr(1).match(reg);
                 if(r!=null)return  unescape(r[2]); return null;
             },
+            parseTime(timestamp){
+                var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+                var Y = date.getFullYear() + '-';
+                var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+                var D = (date.getDate() < 10 ? '0'+date.getDate() : date.getDate()) + ' ';
+                var h = (date.getHours() < 10 ? '0'+date.getHours() : date.getHours()) + ':';
+                var m = (date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()) + ':';
+                var s = (date.getSeconds() < 10 ? '0'+date.getSeconds() : date.getSeconds());
+
+                let strDate = Y+M+D+h+m+s;
+                console.log(strDate) //2020-05-08 17:44:56　
+                return strDate;
+            },
             initPageInfo(){
                 var id=this.getQueryString("id");
                 console.log(id)
                 if(id){
-                    this.title="编辑顾问得分模型"
+                    this.title="编辑顾问得分模型";
+                    this.isEditSelect=true;
                     var param={};
                     param.id=id;
                     axios.post('/rule/userScoreRule/getRuleDetailById', param)
@@ -920,8 +935,8 @@ console.log(clueAssignRule)
                             var tableData=result.data;
                             aorVM.form.ruleName=tableData.ruleName;
                             aorVM.form.businessLine=tableData.businessLine+'';
-                            aorVM.form.startTime=tableData.startTime;
-                            aorVM.form.endTime=tableData.endTime;
+                            aorVM.form.startTime=aorVM.parseTime(Number(tableData.startTime));
+                            aorVM.form.endTime=aorVM.parseTime(Number(tableData.endTime));
 
                             // aorVM.form.clueScorErulEdetailList1= tableData.clueScoreRuleDetailList;
                             var list1=[],list2=[],list3=[],list4=[],list5=[],list6=[],list7=[],list8=[],list9=[],list10=[];
@@ -988,6 +1003,7 @@ console.log(clueAssignRule)
                     });
                 }else{
                     this.title="新增顾问得分模型"
+                    this.isEditSelect=false;
                 }
             }
         },
