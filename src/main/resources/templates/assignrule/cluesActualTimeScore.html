@@ -300,6 +300,9 @@
             openCard(){// 打开新建名片
                 this.cardVisible=true;
                 this.dialogTitle="添加资源范围得分";
+                if (this.$refs['cardForm']!=undefined) {
+                    this.$refs['cardForm'].resetFields();
+                }
             },
             editCard(){// 打开编辑名片回显
                 var rows = this.multipleSelection;
@@ -332,7 +335,14 @@
                                 mainDivVM.cardForm.scope=[];
                             }else{
                                 mainDivVM.cardForm.scope=table.scope.split(',');
-                            }                            
+                            }   
+                            // 判断是资源类型还是媒介
+                            if(table.dimension=="1"){
+                                mainDivVM.clueScopeArr=clueType;//默认下拉资源类型 
+                            }else if(table.dimension=="2"){
+                                mainDivVM.clueScopeArr=medium;//默认下拉资源类型 
+                            }
+                                                     
                             mainDivVM.cardForm.score=table.score;
                         }                      
                     }else{
