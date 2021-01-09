@@ -100,7 +100,7 @@
                     </el-select>
                 </el-form-item> 
                 <el-form-item label="得分：" prop="score" :label-width="formLabelWidth" style="position: relative;width: 100%;">
-                    <el-input v-model="cardForm.score" autocomplete="off" placeholder="0-50正整数" maxlength="2" style="width: 265px;margin-right: 10px;" @keyup.native.prevent="number"></el-input> 
+                    <el-input v-model="cardForm.score" autocomplete="off" placeholder="0-50整数" maxlength="2" style="width: 265px;margin-right: 10px;" @keyup.native.prevent="number"></el-input> 
                 </el-form-item> 
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -149,7 +149,22 @@
                         { required: true, message: '请选择顾问状态等级', trigger: 'change' },
                     ],
                     score:[
-                        { required: true, message: '请填写得分', trigger: 'blur' }
+                        { required: true, message: '请填写得分', trigger: 'blur' },
+                        { validator: function (rule, value, callback) {
+                                var reg = /^[0-9]+[0-9]*]*$/;
+                                if (value == null || value == "null" || value == "" || value>50) {
+                                    callback(new Error("请输入正确的分数"));
+                                    releaseRuleVM.form.createDay = "";
+
+                                } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正确的分数"));
+                                    releaseRuleVM.form.createDay = "";
+                                } else {
+                                    callback();
+                                }
+
+                            }, trigger: 'change'
+                        }
                     ],
                 },
                 cardTeleSale:'',
