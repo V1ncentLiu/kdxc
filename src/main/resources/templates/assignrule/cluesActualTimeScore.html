@@ -205,7 +205,22 @@
                         }, trigger: 'change'}
                     ],
                     score:[
-                        { required: true, message: '请填写得分', trigger: 'blur' }
+                        { required: true, message: '请填写得分', trigger: 'blur' },
+                        { validator: function (rule, value, callback) {
+                                var reg = /^[0-9]+[0-9]*]*$/;
+                                if (value == null || value == "null" || value == "" || value>50) {
+                                    callback(new Error("请输入正确的分数"));
+                                    releaseRuleVM.form.createDay = "";
+
+                                } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正确的分数"));
+                                    releaseRuleVM.form.createDay = "";
+                                } else {
+                                    callback();
+                                }
+
+                            }, trigger: 'change'
+                        }
                     ],
                 },
                 cardTeleSale:'',
@@ -373,7 +388,9 @@
                             // mainDivVM.loading = false;
                             console.log(response)
                             // mainDivVM.cardVisible=false;
-                            window.location.href="/cluescore/page"
+                            mainDivVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                window.location.href="/cluescore/page"
+                            }});
                         }).catch(function (error) {
                             // mainDivVM.loading = false;
                             mainDivVM.$message({
