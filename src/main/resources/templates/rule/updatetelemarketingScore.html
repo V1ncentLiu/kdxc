@@ -753,7 +753,7 @@ console.log(clueAssignRule)
                         param.startTime=this.form.startTime;
                         param.endTime=this.form.endTime;
                         param.status=this.form.status;
-                        param.clueScoreRuleDetailList=clueScorErulEdetailList;                        
+                        param.userScoreRuleDetailList=clueScorErulEdetailList;                        
                         
                         aorVM.submitDisabled=true;
                         axios.post(url, param)
@@ -1033,10 +1033,20 @@ console.log(clueAssignRule)
                         var result =  response.data;
                         if(result.code=="0"){
                             var tableData=result.data;
-                            aorVM.form.ruleName=tableData.ruleName;
-                            aorVM.form.businessLine=tableData.businessLine+'';
+                            if(tableData.ruleName){
+                               aorVM.form.ruleName=tableData.ruleName; 
+                            }else{
+                                aorVM.form.ruleName=""
+                            }
+                            if(tableData.businessLine){
+                                aorVM.form.businessLine=tableData.businessLine+'';
+                            }else{
+                                aorVM.form.businessLine=""
+                            }
 
-                            aorVM.form.startTime=new Date(aorVM.parseTime(Number(tableData.startTime)));
+                            if(tableData.startTime){
+                                aorVM.form.startTime=new Date(aorVM.parseTime(Number(tableData.startTime)));
+                            } 
                             if(tableData.endTime){
                                 aorVM.form.endTime=new Date(aorVM.parseTime(Number(tableData.endTime)));
                             }
