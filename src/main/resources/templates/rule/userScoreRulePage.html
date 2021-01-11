@@ -158,11 +158,11 @@
                     <span v-else="scope.row.type==10">资源价值</span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="" label="指标值范围">
-                <template slot-scope="scope">
+            <el-table-column align="center" prop="numScope" label="指标值范围">
+                <!-- <template slot-scope="scope">
                     <span v-if="scope.row.type==3||scope.row.type==7||scope.row.type==8">{{scope.row.startNum}}%-{{scope.row.endNum}}%</span>
                     <span v-else>{{scope.row.startNum}}-{{scope.row.endNum}}</span>                    
-                </template>
+                </template> -->
             </el-table-column>
             <el-table-column align="center" prop="addScore" label="得分" width="120"></el-table-column>
             <el-table-column align="center" prop="days" label="指标值时间范围">
@@ -414,7 +414,26 @@
                         ocmVM.dialogForm.businessLineName=tableData.businessLineName;
                         ocmVM.dialogForm.startTime=ocmVM.dateFormat(null,null,row.startTime);
                         ocmVM.dialogForm.endTime=ocmVM.dateFormat(null,null,row.endTime);
-                        ocmVM.dialogTableData=tableData.userScoreRuleDetailList;
+                        // ocmVM.dialogTableData=tableData.userScoreRuleDetailList;
+                        var numScope='';
+                        var dataList=tableData.userScoreRuleDetailList;
+                        for(var i=0;i<dataList.length;i++){
+                            if(dataList[i].type==3||dataList[i].type==7||dataList[i].type==8){
+                                if(dataList[i].endNum==-1){
+                                    numScope=dataList[i].startNum+'%-不限'
+                                }else{
+                                    numScope=dataList[i].startNum+'%-'+dataList[i].endNum+'%'
+                                }
+                            }else{
+                                if(dataList[i].endNum==-1){
+                                    numScope=dataList[i].startNum+'-不限'
+                                }else{
+                                    numScope=dataList[i].startNum+'-'+dataList[i].endNum
+                                }
+                            }
+                            dataList[i].numScope=numScope
+                        }
+                        ocmVM.dialogTableData=dataList;
                     }else{
                         ocmVM.$message.error(msg+"失败");
                     }
