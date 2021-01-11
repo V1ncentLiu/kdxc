@@ -899,6 +899,44 @@ var teleGroupList =[[${teleGroupList}]];
 
 
             },
+            deleteBuslineRow(index, rows) {//删除一行表格
+                var busline = rows[index].businessLine;
+                var flag = false;
+                var teamList = this.form.teleRuleTeamList;
+                this.$confirm("确定要删除该业务线吗？删除后如果有电销组信息,电销组信息将同步删除", '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    flag = true;
+                    if(teamList !=null && teamList.length>0){
+                        for(var i=0;i<teamList.length;i++){
+                            var orgId = teamList[i].orgId;
+                            if(orgId !=null && orgId.trim() !=""){
+                                var orgBuslines = orgId.split(",");
+                                if(orgBuslines[1] !=null && orgBuslines[1] !="" && busline ==orgBuslines[1]){
+                                    aorVM.form.teleRuleTeamList.splice(i, 1);
+                                }
+                            }
+                        }
+                    }
+                    rows.splice(index, 1);
+                    if(rows.length==0){
+                        aorVM.form.teleRuleTeamList=[];
+                    }
+                    aorVM.showBuslineList =[];
+                    for(var i=0;i<rows.length;i++){
+                        if(rows[i].isAuto !=null && rows[i].isAuto==1){
+                            aorVM.showBuslineList.push(rows[i].businessLine);
+                        }
+                    }
+                    if(aorVM.showBuslineList !=null && aorVM.showBuslineList.length>0){
+                        aorVM.getTeleGroupList();
+                    }else{
+                        aorVM.teleGroupList=[];
+                    }
+                })
+            },
         },
         mounted(){
             document.getElementById('addOptimizeRule').style.display = 'block';
