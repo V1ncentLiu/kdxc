@@ -359,7 +359,7 @@
                             <el-select v-model="addVisitRecord.projectId" placeholder="请选择" clearable filterable
                                        style="width:100%" @change="getShopType">
                                 <el-option
-                                        v-for="item in projectArr"
+                                        v-for="item in signProjectList"
                                         :key="item.id"
                                         :label="item.projectName"
                                         :value="item.id">
@@ -866,7 +866,7 @@
                         <el-col :span="12">
                             <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
                                 <el-select v-model="formSigning.signProjectId" clearable filterable  placeholder="请选择" style="width:100%" @change="getShopType">
-                                    <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName"
+                                    <el-option v-for="item in signProjectList" :key="item.id" :label="item.projectName"
                                                :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -1765,7 +1765,7 @@
     var proAllSelect = [[${proAllSelect}]];
     var loginUserId = [[${loginUserId}]];
     var giveTypeList = [[${giveTypeList}]];
-
+    var businessLines =[[${businessLines}]];
     var testdata={
         "code": "0",
         "data": {
@@ -1890,7 +1890,8 @@
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
-        data: { 
+        data: {
+            businessLines:businessLines,
             disabledIsTailMoney:false,//默认可选
             disabledIsSign:false,//默认可选
             dataUrlParam:{
@@ -2010,6 +2011,7 @@
             companyArr: [],
             visitCityArr:[],
             projectArr: proSelect,
+            signProjectList:[],
             multipleSelection: [],
             notVisitFlagRules: {
                 notVisitReason: [
@@ -3992,6 +3994,13 @@
                 if (!name) return
                 return window.sessionStorage.removeItem(name)
             },
+            projectChangeSelect() {
+                var param = {};
+                param.businessLines = businessLines;
+                axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                    mainDivVM.signProjectList = response.data.data;
+                });
+            }
         },
         created() {
             // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
@@ -4073,6 +4082,7 @@
             }
             //初始化数据列表
             this.initList();
+            this.projectChangeSelect();
 
         },
         mounted() {
