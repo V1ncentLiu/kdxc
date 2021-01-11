@@ -60,6 +60,7 @@ public interface ClueAssignLimitFegin {
      * @param idList
      * @return
      */
+    @PostMapping("/delete")
     JSONResult<String> delete(@RequestBody IdListLongReq idList);
 
     @Component
