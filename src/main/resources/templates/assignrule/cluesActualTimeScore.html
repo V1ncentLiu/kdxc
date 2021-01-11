@@ -210,11 +210,11 @@
                                 var reg = /^[0-9]+[0-9]*]*$/;
                                 if (value == null || value == "null" || value == "" || value>50) {
                                     callback(new Error("请输入正确的分数"));
-                                    releaseRuleVM.form.createDay = "";
+                                    mainDivVM.form.createDay = "";
 
                                 } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
                                     callback(new Error("请输入正确的分数"));
-                                    releaseRuleVM.form.createDay = "";
+                                    mainDivVM.form.createDay = "";
                                 } else {
                                     callback();
                                 }
@@ -349,7 +349,7 @@
                                 mainDivVM.clueScopeArr=medium;//默认下拉资源类型 
                             }
                                                      
-                            mainDivVM.cardForm.score=table.score;
+                            mainDivVM.cardForm.score=table.score+'';
                         }                      
                     }else{
                         mainDivVM.isDisabled=false;
@@ -403,10 +403,19 @@
                         axios.post(url,param).then(function (response) { 
                             // mainDivVM.loading = false;
                             console.log(response)
+                            var resData=response.data;
                             // mainDivVM.cardVisible=false;
-                            mainDivVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
-                                window.location.href="/cluescore/page"
-                            }});
+                            if(resData.code=="0"){
+                                mainDivVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    window.location.href="/cluescore/page"
+                                }});
+                            }else if(resData.code=="-1001"){
+                                mainDivVM.$message({
+                                    message: resData.msg,
+                                    type: "error"
+                                });
+                            }
+                           
                         }).catch(function (error) {
                             // mainDivVM.loading = false;
                             mainDivVM.$message({
