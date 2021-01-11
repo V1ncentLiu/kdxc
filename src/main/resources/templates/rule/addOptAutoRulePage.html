@@ -556,7 +556,14 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         
                         // 不能选择重复电销组
                         var orgIdChoose=form.teleRuleTeamList; 
-                        var ary=[];                   
+                        var ary=[];
+                        var checkbusinessLineTeamList = form.businessLineRuleTeamList;
+                        var checkbusinessLineList =[];
+                        for(var i=0;i<checkbusinessLineTeamList.length;i++){
+                            if(checkbusinessLineTeamList[i].isAuto ==1){
+                                checkbusinessLineList.push(checkbusinessLineTeamList[i].businessLine);
+                            }
+                        }
                         for(var i=0;i<orgIdChoose.length;i++){
                         	var split=orgIdChoose[i].orgId.split(",");
                         	orgIdChoose[i].orgId=split[0];
@@ -574,6 +581,13 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                                 }                                
                             }
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
+                            if(checkbusinessLineList.indexOf(orgIdChoose[i].businessLine) ==-1){
+                                this.$message({
+                                    message: '请确认电销组在自动分配业务线中的电销组',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
                         }
                         var param=form;
                         param.ruleName=form.ruleName;
@@ -707,10 +721,17 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             },
           //根据电销组查询电销总监
             getTeleGroupList() {
+                var checkbusinessLineTeamList = this.form.businessLineRuleTeamList;
+                var checkbusinessLineList =[];
+                for(var i=0;i<checkbusinessLineTeamList.length;i++){
+                    if(checkbusinessLineTeamList[i].isAuto ==1){
+                        checkbusinessLineList.push(checkbusinessLineTeamList[i].businessLine);
+                    }
+                }
           	  var param ={};
           	  param.systemCode = "HUIJU";
           	  param.orgType = 1;
-          	  param.businessLineList = this.showBuslineList;
+          	  param.businessLineList = checkbusinessLineList;
                 console.info(param);
                 axios.post('/organization/organization/queryOrgByBusinessline', param)
                 .then(function (response) {
@@ -768,90 +789,36 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                 var isAuto = rows[index].isAuto;
                 var line = rows[index].businessLine;
                 var teamList = this.form.teleRuleTeamList;
+                var checkbusinessLineTeamList = this.form.businessLineRuleTeamList;
                 var isShowUpdateMes=false;
-                if(teamList !=null && teamList.length>0){
-                    for(var i=0;i<teamList.length;i++){
+                var checkbusinessLineList =[];
+                for(var i=0;i<checkbusinessLineTeamList.length;i++){
+                    if(checkbusinessLineTeamList[i].isAuto ==1){
+                        checkbusinessLineList.push(checkbusinessLineTeamList[i].businessLine);
+                    }
+                }
+                this.isDel(teamList,checkbusinessLineList);
+
+            },
+            isDel(teamList,checkbusinessLineList){
+                if(teamList !=null && teamList.length>0) {
+                    for (var i = 0; i < teamList.length; i++) {
                         var orgId = teamList[i].orgId;
-                        if(orgId !=null && orgId.trim() !=""){
+                        if (orgId != null && orgId.trim() != "") {
                             var orgBuslines = orgId.split(",");
-                            if(orgBuslines[1] !=null && orgBuslines[1] !="" && line ==orgBuslines[1]){
-                                isShowUpdateMes = true;
+                            if (checkbusinessLineList.indexOf(orgBuslines[1]) == -1) {
+                                aorVM.form.teleRuleTeamList.splice(i, 1);
+                                i--;
                             }
                         }
                     }
                 }
-
-
-                if(line !=null && isAuto !=null && isAuto==1 && this.showBuslineList !=null &&  this.showBuslineList.indexOf(line) ==-1){
-                    aorVM.showBuslineList.push(line);
-                    if(aorVM.showBuslineList !=null && aorVM.showBuslineList.length>0){
-                        aorVM.getTeleGroupList();
-                    }else{
-                        aorVM.teleGroupList=[];
-                    }
-                }else if(line !=null && isAuto !=null && isAuto==0 && this.showBuslineList !=null &&  this.showBuslineList.indexOf(line) !=-1 && isShowUpdateMes){
-                    this.$confirm("确定修改为非自动吗？修改后如果有电销信息，则电销信息将同步删除", '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        flag = true;
-                        if(teamList !=null && teamList.length>0){
-                            for(var i=0;i<teamList.length;i++){
-                                var orgId = teamList[i].orgId;
-                                if(orgId !=null && orgId.trim() !=""){
-                                    var orgBuslines = orgId.split(",");
-                                    if(orgBuslines[1] !=null && orgBuslines[1] !="" && line ==orgBuslines[1]){
-                                        aorVM.form.teleRuleTeamList.splice(i, 1);
-                                    }
-                                }
-                            }
-                        }
-                        if(rows.length==0){
-                            aorVM.form.teleRuleTeamList=[];
-                        }
-                        aorVM.showBuslineList =[];
-                        for(var i=0;i<rows.length;i++){
-                            if(rows[i].isAuto !=null && rows[i].isAuto==1){
-                                aorVM.showBuslineList.push(rows[i].businessLine);
-                            }
-                        }
-                        if(this.showBuslineList.indexOf(line)!=-1){
-	                        aorVM.showBuslineList.splice(this.showBuslineList.indexOf(line),1);
-                        }
-                        if(aorVM.showBuslineList !=null && aorVM.showBuslineList.length>0){
-                            aorVM.getTeleGroupList();
-                        }else{
-                            aorVM.teleGroupList=[];
-                        }
-                    }).catch(action => {
-                        rows[index].isAuto = 1;
-                        return;
-                    });
-                }else if(line !=null && isAuto !=null && isAuto==0 && this.showBuslineList !=null &&  this.showBuslineList.indexOf(line) !=-1 && !isShowUpdateMes){
-                    aorVM.showBuslineList =[];
-                    for(var i=0;i<rows.length;i++){
-                        if(rows[i].isAuto !=null && rows[i].isAuto==1){
-                            aorVM.showBuslineList.push(rows[i].businessLine);
-                        }
-                    }
-                    if(this.showBuslineList.indexOf(line)!=-1){
-                        aorVM.showBuslineList.splice(this.showBuslineList.indexOf(line),1);
-                    }
-                    if(aorVM.showBuslineList !=null && aorVM.showBuslineList.length>0){
-                        aorVM.getTeleGroupList();
-                    }else{
-                        aorVM.teleGroupList=[];
-                    }
+                if(checkbusinessLineList.length>0){
+                    aorVM.getTeleGroupList();
                 }else{
-                    if(aorVM.showBuslineList !=null && aorVM.showBuslineList.length>0){
-                        aorVM.getTeleGroupList();
-                    }else{
-                        aorVM.teleGroupList=[];
-                    }
+                    aorVM.teleGroupList=[];
+                    aorVM.form.teleRuleTeamList = [];
                 }
-
-
             },
             deleteBuslineRow(index, rows) {//删除一行表格
                 var busline = rows[index].businessLine;
@@ -862,33 +829,15 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    flag = true;
-                    if(teamList !=null && teamList.length>0){
-                        for(var i=0;i<teamList.length;i++){
-                            var orgId = teamList[i].orgId;
-                            if(orgId !=null && orgId.trim() !=""){
-                                var orgBuslines = orgId.split(",");
-                                if(orgBuslines[1] !=null && orgBuslines[1] !="" && busline ==orgBuslines[1]){
-                                    aorVM.form.teleRuleTeamList.splice(i, 1);
-                                }
-                            }
-                        }
-                    }
                     rows.splice(index, 1);
-                    if(rows.length==0){
-                        aorVM.form.teleRuleTeamList=[];
-                    }
-                    aorVM.showBuslineList =[];
-                    for(var i=0;i<rows.length;i++){
-                        if(rows[i].isAuto !=null && rows[i].isAuto==1){
-                            aorVM.showBuslineList.push(rows[i].businessLine);
+                    var checkbusinessLineTeamList = aorVM.form.businessLineRuleTeamList;
+                    var checkbusinessLineList =[];
+                    for(var i=0;i<checkbusinessLineTeamList.length;i++){
+                        if(checkbusinessLineTeamList[i].isAuto ==1){
+                            checkbusinessLineList.push(checkbusinessLineTeamList[i].businessLine);
                         }
                     }
-                    if(aorVM.showBuslineList !=null && aorVM.showBuslineList.length>0){
-                        aorVM.getTeleGroupList();
-                    }else{
-                        aorVM.teleGroupList=[];
-                    }
+                    aorVM.isDel(teamList,checkbusinessLineList);
                 })
             },
         },
