@@ -411,20 +411,22 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
                 String sourceFrom = "";
-                if(null != taskDTO.getSourceFrom()){
+                if (null != taskDTO.getSourceFrom()) {
                     if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
-                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
-                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
-                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
-                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
-                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
                     }
                 }
 
                 curList.add(sourceFrom);
                 curList.add(taskDTO.getAscriptionProjectName());
                 curList.add(taskDTO.getRootWord());
-                if(null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                     curList.add(taskDTO.getConsultProjectTurn());
                 }
                 curList.add(taskDTO.getSaleLadder());
@@ -656,13 +658,15 @@ public class ExtendClueDistributionedTaskController {
                 }
                 curList.add(repeatPhone);
                 String sourceFrom = "";
-                //合并代码后替换成枚举类
-                if(null != taskDTO.getSourceFrom()){
+                // 合并代码后替换成枚举类
+                if (null != taskDTO.getSourceFrom()) {
                     if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
                         sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
-                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
                         sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
-                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
                         sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
                     }
                 }
@@ -672,10 +676,10 @@ public class ExtendClueDistributionedTaskController {
                 // url地址
                 curList.add(taskDTO.getUrlAddress());
                 if (!queryDto.getPhtraExport()) {
-                    //词根
+                    // 词根
                     curList.add(taskDTO.getRootWord());
-                    //咨询项目
-                    if(null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                    // 咨询项目
+                    if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                         curList.add(taskDTO.getConsultProjectTurn());
                     }
                 }
