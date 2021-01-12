@@ -9,7 +9,6 @@ import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
 import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
 import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.CompanyInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
