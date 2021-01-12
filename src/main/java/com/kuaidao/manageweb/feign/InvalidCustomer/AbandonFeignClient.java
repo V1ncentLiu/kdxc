@@ -21,7 +21,7 @@ import java.util.List;
  * @auther yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service-wyp", path = "/aggregation/abandon",
+@FeignClient(name = "aggregation-service", path = "/aggregation/abandon",
         fallback = AbandonFeignClient.HystrixClientFallback.class)
 public interface AbandonFeignClient {
 
