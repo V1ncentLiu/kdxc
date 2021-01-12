@@ -104,7 +104,7 @@
                             <el-button size="mini" type="success" @click="updateStatus(scope.row,1,'启用')">启用</el-button>
                         </span>
                         <span v-else-if="scope.row.status === 1">
-                            <el-button size="mini" type="danger" @click="updateStatus(scope.row,0,'停用')">停用</el-button>
+                            <el-button size="mini" type="danger" @click="updateStatusStop(scope.row,0,'停用')">停用</el-button>
                         </span>
                     </template>
                 </el-table-column>
@@ -289,47 +289,127 @@
                  });
             },
             //修改状态
+            // updateStatus(rows,status,msg) {
+            //     console.log(rows)
+            //     var param = {};
+            //     param.id=rows.id;
+            //     param.status=status;
+            //     var url='';
+            //     if(rows.status===0){//表示停用状态，调启用接口
+            //         // 检验该业务线是否有启用
+            //         var param1={};
+            //         param.id=rows.id;
+            //         param.status=status;
+            //         param.businessLine=rows.businessLine;
+            //         axios.post('/rule/userScoreRule/getRuleByBusinessLine', param1)
+            //         .then(function (response) {
+            //             var result =  response.data;
+            //             if(result.code=="0"){
+            //                 ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+            //                     ocmVM.searchTable();
+            //                 }});
+                          
+            //             }else{
+            //                 ocmVM.$message.error(msg+"失败");
+            //             }
+            //         })
+            //         .catch(function (error) {
+            //             console.log(error);
+            //         });
+            // 	    url='/rule/userScoreRule/updateStatusEnable';
+            //     }else{//调启用停用接口
+            //         url='/rule/userScoreRule/updateStatusDisable';
+            //     }
+            //     axios.post(url, param)
+            //     .then(function (response) {
+            //         var result =  response.data;
+            //         if(result.code=="0"){
+            //         	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+            //         	ocmVM.searchTable();
+            //   	      }});
+                      
+            //         }else{
+            //         	ocmVM.$message.error(msg+"失败");
+            //         }
+            //     })
+            //     .catch(function (error) {
+            //         console.log(error);
+            //     });
+            // },
+            //修改状态
             updateStatus(rows,status,msg) {
+                console.log(rows)
+                // 检验该业务线是否有启用
+                var param={};
+                param.id=rows.id;
+                param.status=status;
+                param.businessLine=rows.businessLine;
+                axios.post('/rule/userScoreRule/getRuleByBusinessLine', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        if(result.data==true){
+                            ocmVM.searchTable();
+                            ocmVM.updateStatusStart(rows,status,msg)
+                        }else{
+                            ocmVM.$confirm('同业务线同时间范围内仅允许启用一条规则，是否停用原规则?', '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                ocmVM.searchTable();
+                                ocmVM.updateStatusStart(rows,status,msg)
+                            }).catch(() => {
+                                ocmVM.$message({
+                                    type: 'info',
+                                    message: '已取消删除'
+                                });          
+                            });
+                        }                        
+                    }else{
+                        ocmVM.$message.error(result.msg+"失败");
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }); 
+            },
+            updateStatusStart(rows,status,msg) {//启用接口
                 console.log(rows)
                 var param = {};
                 param.id=rows.id;
                 param.status=status;
-                var url='';
-                if(rows.status===0){//表示停用状态，调启用接口
-                    // 检验该业务线是否有启用
-                    var param1={};
-                    param.id=rows.id;
-                    param.status=status;
-                    param.businessLine=rows.businessLine;
-                    axios.post('/rule/userScoreRule/getRuleByBusinessLine', param1)
-                    .then(function (response) {
-                        var result =  response.data;
-                        if(result.code=="0"){
-                            ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
-                                ocmVM.searchTable();
-                            }});
-                          
-                        }else{
-                            ocmVM.$message.error(msg+"失败");
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-            	    url='/rule/userScoreRule/updateStatusEnable';
-                }else{//调启用停用接口
-                    url='/rule/userScoreRule/updateStatusDisable';
-                }
-                axios.post(url, param)
+                axios.post('/rule/userScoreRule/updateStatusEnable', param)
                 .then(function (response) {
                     var result =  response.data;
                     if(result.code=="0"){
-                    	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
-                    	ocmVM.searchTable();
-              	      }});
+                        ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                        ocmVM.searchTable();
+                      }});
                       
                     }else{
-                    	ocmVM.$message.error(msg+"失败");
+                        ocmVM.$message.error(msg+"失败");
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            },
+            updateStatusStop(rows,status,msg) {//禁用接口
+                console.log(rows)
+                var param = {};
+                param.id=rows.id;
+                param.status=status;
+                axios.post('/rule/userScoreRule/updateStatusDisable', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    if(result.code=="0"){
+                        ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                        ocmVM.searchTable();
+                      }});
+                      
+                    }else{
+                        ocmVM.$message.error(msg+"失败");
                     }
                 })
                 .catch(function (error) {
