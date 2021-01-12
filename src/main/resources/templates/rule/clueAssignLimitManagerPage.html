@@ -19,7 +19,9 @@
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
             <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>增加分配量设置</el-button>            
    			    <el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑分配量设置</el-button>
-            <!-- <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button> -->
+            <shiro:hasPermission name="clueAssignLimit:clueAssignLimitManager:delete">
+                <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
+            </shiro:hasPermission>
         </el-col>
     </el-row>
     <div class="mainSearchBg">        
@@ -149,6 +151,97 @@
         	dialogFormVisible: false,
         },
         methods: {
+            deleButton() {
+                var rows = this.multipleSelection;
+                if (rows.length === 0) {
+                    this.$message({
+                        message: '请选择数据进行删除',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var rowIds = [];
+                for (var i = 0; i < rows.length; i++) {
+                    var curRow = rows[i];
+                    rowIds.push(curRow.id);
+                }
+                this.$confirm('确定要删除吗？删除后不可恢复。', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    //删除
+                    var param = {idList: rowIds};
+                    axios.post('/clueAssign/clueAssignLimit/delete', param)
+                        .then(function (response) {
+                            var data = response.data;
+                            if (data.code === '0') {
+                                orgVM.$message({
+                                    message: '删除成功', type: 'success', duration: 1000, onClose: function () {
+                                        orgVM.inviteAreaListPage();
+                                    }
+                                });
+
+                            } else {
+                                orgVM.$message({
+                                    message: "接口调用失败",
+                                    type: 'error'
+                                });
+                            }
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+
+                        });
+                }).catch(() => {
+
+                });
+            },
+            updateButton(){
+                this.showTitle="编辑分配量设置"
+                if (this.$refs['form']!=undefined) {
+                    this.$refs['form'].resetFields();
+                }
+                $("#addOrUpdate").val(2);
+                //修改菜单数据
+                var rows = this.multipleSelection;
+                if (rows.length !== 1) {
+                    this.$message({
+                        message: '请选择一条数据进行修改',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.dialogFormVisible = true;
+                var param ={};
+                var str = "";
+                for ( var i = 0; i <rows.length; i++){
+                    str = rows[i].id
+                }
+                param.id = str;
+                axios.post('/clueAssign/clueAssignLimit/get',param).then(function (response) {
+                    console.log(response);
+                    if(null !==response && response.data !=null && response.data.code==='0'){
+                        var telemarketing = response.data.data;
+                        orgVM.form.orgId = telemarketing.orgId;
+                        orgVM.form.dailyUpperLimit = telemarketing.dailyUpperLimit;
+                        orgVM.form.startTime = telemarketing.startTime;
+                        orgVM.form.endTime = telemarketing.endTime;
+                    }else{
+                        alert(response.data.data.message);
+                        return ;
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                    .then(function () {
+                        // always executed
+                    });
+            },
+
+
             number() {
                 this.form.dailyUpperLimit = this.form.dailyUpperLimit.replace(/[^\.\d]/g, '');
                 this.form.dailyUpperLimit = this.form.dailyUpperLimit.replace('.', '');
@@ -278,8 +371,7 @@
                       	    url = "/clueAssign/clueAssignLimit/update"
                         }
                      	  axios.post(url,param).then(function (response) {
-       	                  	//   console.log(response);
-     	                      if(null !==response && response.data !=null && response.data.code=='0'){
+     	                      if(null !==response && response.data !=null && response.data.code==='0'){
                               orgVM.inviteAreaListPage();
                               orgVM.dialogFormVisible=false;
                               orgVM.btnDisabled = false; 

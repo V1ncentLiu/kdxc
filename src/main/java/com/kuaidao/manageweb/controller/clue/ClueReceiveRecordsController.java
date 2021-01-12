@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.clue;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.kuaidao.common.constant.UnSignLimitErrorCode;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,6 +150,12 @@ public class ClueReceiveRecordsController {
             return clueReceiveRecordsFeignClient.receiveClueByClueIds(clueReceiveRecordsDTO);
         }
 
+    }
+
+    @ResponseBody
+    @RequestMapping("/validateCluePhase")
+    public JSONResult validateCluePhase(@RequestBody ClueReceiveRecordsDTO clueReceiveRecordsDTO){
+        return clueReceiveRecordsFeignClient.validateCluePhase(clueReceiveRecordsDTO);
     }
 
     /**

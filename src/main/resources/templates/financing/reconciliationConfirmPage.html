@@ -191,6 +191,13 @@
     	               
                     </template>
     	        </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'showReviewImages'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.showReviewImages === 1 ">
+                            <el-button type="text" size="small" @click="showReviewImageClick(scope.row)">点击查看<span style="color:red;">({{scope.row.reviewImagesNum}})</span> </el-button>
+                        </div>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         	v-else>
     	        </el-table-column>
@@ -224,8 +231,38 @@
 	    <el-button @click="dialogFormVisible = false">取 消</el-button>
 	  </div>
 	</el-dialog>
+    <!-- 查看签约/开店图片 -->
+    <el-dialog title="签约/开店图片" :visible.sync="showReviewImagesDialog" width="1000px" >
+        <el-table ref="multipleTable" :data="tableDataC1" tooltip-effect="dark" style="width: 100%" border  v-loadi>
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column prop="uploadUserName" label="上传人姓名" align="center"></el-table-column>
+            <el-table-column prop="uploadTime" label="上传时间" align="center"></el-table-column>
+            <el-table-column prop="fileName" label="文件名称" align="center"></el-table-column>
+            <el-table-column label="操作" align="center">
+                <template slot-scope="scope">
+                    <el-button size="mini" type="text" @click="handleOperateFn(scope.$index, scope.row)">
+                        {{scope.row.fileType !=="jpg" && scope.row.fileType !=="png" && scope.row.fileType !=="jpeg" &&
+                        scope.row.fileType !=="gif" && scope.row.fileType !=="bmp"? '下载录音':'查看图片'}}
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="delStatus" label="删除状态" align="center">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.delStatus === 0">未删除</div>
+                    <div v-else-if="scope.row.delStatus ===1" class="redcolor">已删除</div>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-dialog>
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg" width="1100px">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt="" max-width="1000px">
+        </div>
+    </el-dialog>
 </div>
 <!-- import common js-->
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
@@ -241,6 +278,10 @@ var giveTypeList =[[${giveTypeList}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+            dialogFormUploadImg: false, //上传资源图片弹框
+            dialogFormUploadImgSrc: '', //上传资源图片弹框
+            showReviewImagesDialog:false,
+            tableDataC1: [],//文件记录
             paginationShow: false,
             isShow:false,
         		searchForm: {
@@ -966,7 +1007,36 @@ var clueVM = new Vue({
              	   }
              	   window.location.href="/financing/balanceaccount/downBalanceAccount?payDetailId="+rows[0].payId;
                 },
+            showReviewImageClick(row) {
+                var param = {};
+                param.signId = row.signId;
+                axios.post('/businesssign/findFileBySignId', param).then(function (response) {
+                    clueVM.tableDataC1 = response.data.data;
+                    clueVM.showReviewImagesDialog = true;
+                })  .catch(function (error) {
+                    console.log(error);
+                });
+
+            },
+            handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
+
+                if (row.fileType == 'mp3'|| row.fileType == 'mp4' || row.fileType == 'wav' || row.fileType == 'wma'|| row.fileType == '3gpp' || row.fileType == 'm4a' ||row.fileType == 'ape'|| row.fileType == 'midi' || row.fileType == 'amr'|| row.fileType == 'MP3'|| row.fileType == 'MP4' ||row.fileType == 'WAV' || row.fileType == 'WMA'|| row.fileType == '3GPP' || row.fileType == 'M4A' ||row.fileType == 'APE'|| row.fileType == 'MIDI' || row.fileType == 'AMR') {
+                    var x = new XMLHttpRequest();
+                    x.open("GET", row.filePath, true);
+                    x.responseType = 'blob';
+                    x.onload = function (e) {
+                        download(x.response, row.fileName, "audio/mp3");
+                    };
+                    x.send();
+                } else {
+                    this.dialogFormUploadImgSrc = row.filePath;
+                    this.dialogFormUploadImg = true;
+                }
+
+            },
         },
+
+
         created(){
             console.info("create method");
             // 进入页面判断有是否有存储值
