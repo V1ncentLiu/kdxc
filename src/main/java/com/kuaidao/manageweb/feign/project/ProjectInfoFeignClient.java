@@ -26,7 +26,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "business-config-service", path = "/businessConfig/projectInfo",
+@FeignClient(name = "business-config-service-wyp", path = "/businessConfig/projectInfo",
         fallback = ProjectInfoFeignClient.HystrixClientFallback.class)
 public interface ProjectInfoFeignClient {
     /**
