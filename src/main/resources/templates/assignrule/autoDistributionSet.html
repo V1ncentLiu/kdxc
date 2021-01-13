@@ -78,21 +78,32 @@
                 </el-table-column>
                 <el-table-column align="center" prop="srangeStart" label="分数值范围">
                     <template slot-scope="scope">
-                        <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" :rules='rules.srangeStart'>
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" :rules='rules.srangeStart'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
                             <el-input v-model="scope.row.srangeStart" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                         <span class="line">——</span>
-                        <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" :rules='rules.srangeEnd'>
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" :rules='rules.srangeEnd'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
                             <el-input v-model="scope.row.srangeEnd" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="limit" label="每日分配上限">
                     <template slot-scope="scope">
-                        <el-form-item :prop="'ladderList.' + scope.$index + '.limit'" :rules='rules.limit'>
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.limit'" :rules='rules.limit'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.limit'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
                             <el-input v-model="scope.row.limit" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
                         </el-form-item>
-                        
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="startTime" label="资源阶梯" width="100">
@@ -102,11 +113,18 @@
                 </el-table-column>
                 <el-table-column align="center" prop="startTime" label="分数值范围">
                     <template slot-scope="scope">
-                        <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeStart'" :rules='rules.clueSrangeStart'>
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeStart'" :rules='rules.clueSrangeStart'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeStart'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
                             <el-input v-model="scope.row.clueSrangeStart" placeholder="0-100以内整数" maxLength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                         <span class="line">——</span>
-                        <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeEnd'" :rules='rules.clueSrangeEnd'>
+                        <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeEnd'" 
+                        :rules="[
+                            { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                        ]">
                             <el-input v-model="scope.row.clueSrangeEnd" placeholder="0-100以内整数" maxLength="3" style="width: 120px;"></el-input>
                         </el-form-item>
                     </template>
@@ -182,61 +200,86 @@
                             }, trigger: 'change'
                         }
                     ],
-                    srangeStart: [
-                        // { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
-                        { validator:function(rule,value,callback){               
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数"));
-                            }else if(value<0||value>100){
-                                callback(new Error("请输入0-100以内整数"));
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ],
-                    srangeEnd: [
-                        // { required: true, message: '请输入顾问分数值范围', trigger: 'blur' }
-                        { validator:function(rule,value,callback){               
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数"));
-                            }else if(value<0||value>100){
-                                callback(new Error("请输入0-100以内整数"));
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ],
-                    limit: [
-                        // { required: true, message: '请输入每日分配上限', trigger: 'blur' }
-                        { validator:function(rule,value,callback){               
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数"));
-                            }else if(value<0||value>100){
-                                callback(new Error("请输入0-100以内整数"));
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ],
-                    clueSrangeStart: [
-                        // { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
-                        { validator:function(rule,value,callback){               
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数"));
-                            }else if(value<0||value>100){
-                                callback(new Error("请输入0-100以内整数"));
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ],
-                    clueSrangeEnd: [
-                        // { required: true, message: '请输入资源分数值范围', trigger: 'blur' }
-                        { validator:function(rule,value,callback){               
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入整数"));
-                            }else if(value<0||value>100){
-                                callback(new Error("请输入0-100以内整数"));
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ]
+                    // srangeStart: [
+                    //     { validator:function(rule,value,callback){  
+                    //         var list=releaseRuleVM.form.ladderList;
+                    //         for(var i=0;i<list.length;i++){
+                    //             if((list[i].srangeEnd||list[i].limit||list[i].clueSrangeStart||list[i].clueSrangeEnd)&&!list[i].srangeStart){
+                    //                 if(/^[0-9]*$/.test(list[i].srangeStart) == false){
+                    //                    callback(new Error("请输入整数"));
+                    //                 }else if(list[i].srangeStart<0||list[i].srangeStart>100){
+                    //                     callback(new Error("请输入0-100以内整数"));
+                    //                 }
+                    //             }
+                    //         }          
+                            
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ],
+                    // srangeEnd: [
+                    //     { validator:function(rule,value,callback){  
+                    //         var list=releaseRuleVM.form.ladderList;
+                    //         for(var i=0;i<list.length;i++){
+                    //             if((list[i].srangeStart||list[i].limit||list[i].clueSrangeStart||list[i].clueSrangeEnd)&&!list[i].srangeEnd){
+                    //                 if(/^[0-9]*$/.test(list[i].srangeEnd) == false){
+                    //                    callback(new Error("请输入整数"));
+                    //                 }else if(list[i].srangeEnd<0||list[i].srangeEnd>100){
+                    //                     callback(new Error("请输入0-100以内整数"));
+                    //                 }
+                    //             }
+                    //         }          
+                            
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ],
+                    // limit: [
+                    //     { validator:function(rule,value,callback){  
+                    //         var list=releaseRuleVM.form.ladderList;
+                    //         for(var i=0;i<list.length;i++){
+                    //             if((list[i].srangeStart||list[i].srangeEnd||list[i].clueSrangeStart||list[i].clueSrangeEnd)&&!list[i].limit){
+                    //                 if(/^[0-9]*$/.test(list[i].limit) == false){
+                    //                    callback(new Error("请输入整数"));
+                    //                 }else if(list[i].limit<0||list[i].limit>100){
+                    //                     callback(new Error("请输入0-100以内整数"));
+                    //                 }
+                    //             }
+                    //         }          
+                            
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ],
+                    // clueSrangeStart: [
+                    //     { validator:function(rule,value,callback){  
+                    //         var list=releaseRuleVM.form.ladderList;
+                    //         for(var i=0;i<list.length;i++){
+                    //             if((list[i].srangeStart||list[i].srangeEnd||list[i].limit||list[i].clueSrangeEnd)&&!list[i].clueSrangeStart){
+                    //                 if(/^[0-9]*$/.test(list[i].clueSrangeStart) == false){
+                    //                    callback(new Error("请输入整数"));
+                    //                 }else if(list[i].clueSrangeStart<0||list[i].clueSrangeStart>100){
+                    //                     callback(new Error("请输入0-100以内整数"));
+                    //                 }
+                    //             }
+                    //         }          
+                            
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ],
+                    // clueSrangeEnd: [
+                    //     { validator:function(rule,value,callback){  
+                    //         var list=releaseRuleVM.form.ladderList;
+                    //         for(var i=0;i<list.length;i++){
+                    //             if((list[i].srangeStart||list[i].srangeEnd||list[i].limit||list[i].clueSrangeStart)&&!list[i].clueSrangeEnd){
+                    //                 if(/^[0-9]*$/.test(list[i].clueSrangeEnd) == false){
+                    //                    callback(new Error("请输入整数"));
+                    //                 }else if(list[i].clueSrangeEnd<0||list[i].clueSrangeEnd>100){
+                    //                     callback(new Error("请输入0-100以内整数"));
+                    //                 }
+                    //             }
+                    //         }          
+                            
+                    //         callback();
+                    //     }, trigger: 'change'}
+                    // ]
                 },
                 options: optionsObj,
                 bussinessLine:'',//业务线
@@ -258,6 +301,16 @@
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) { 
+                        // 判断阶梯不能为空
+                        var list=this.form.ladderList;
+                        console.log(list)
+                        for(var i=0;i<list.length;i++){
+                            if(list[i].srangeStart===""||list[i].srangeEnd===""||list[i].limit===""||list[i].clueSrangeStart===""||list[i].clueSrangeEnd===""){
+                                this.$message({message:'已有数据的阶梯不能为空',type:'error'});
+                                return;
+                            }
+                        }
+
                         var url=""
                         var param = {};
                         if(this.editId){
