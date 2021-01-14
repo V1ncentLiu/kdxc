@@ -168,7 +168,10 @@ public class SaleImController {
     @PostMapping("/list")
     @ResponseBody
     public JSONResult<PageBean<SaleImDTO>> list(@RequestBody SaleImPageParam pageParam, HttpServletRequest request) {
-
+        List<Integer> businessLineList = new ArrayList<>();
+        businessLineList.add(BusinessLineConstant.SHANGJI);
+        businessLineList.add(BusinessLineConstant.CMZSJJ);
+        pageParam.setBusinessLineList(businessLineList);
         JSONResult<PageBean<SaleImDTO>> list = saleImFeignClient.list(pageParam);
 
         return list;
