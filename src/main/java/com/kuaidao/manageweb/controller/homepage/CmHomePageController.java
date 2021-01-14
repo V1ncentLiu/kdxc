@@ -123,7 +123,7 @@ public class CmHomePageController {
         request.setAttribute("showIKonwFlag", showIKonwFlag);
         request.setAttribute("isShowConsoleBtn", isShowConsoleBtn);
         boolean isShowDataBase = false;
-        if((user.getBusinessLine() !=null && (user.getBusinessLine() == BusinessLineConstant.SHANGJI || user.getBusinessLine() == BusinessLineConstant.SHCS)) || roleCode.equals(RoleCodeEnum.GLY.name()) ){
+        if((user.getBusinessLine() !=null && (user.getBusinessLine() == BusinessLineConstant.SHANGJI || user.getBusinessLine() == BusinessLineConstant.SHCS || user.getBusinessLine() == BusinessLineConstant.CMZSJJ)) || roleCode.equals(RoleCodeEnum.GLY.name()) ){
             isShowDataBase = true;
         }
         request.setAttribute("isShowDataBase", isShowDataBase);
