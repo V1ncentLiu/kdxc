@@ -9,6 +9,15 @@
         .timeToLine{display: block;float: left;margin-right: 2px;height: 34px;line-height: 34px;}
         .el-form-item{margin-bottom: 15px;}
         .lineGrey{line-height: 37px;color:#c0c4cc; }
+        .el-message-box__wrapper {
+            position: fixed;
+            top: 50%;
+            bottom: auto;
+            left: 0;
+            right: 0;
+            text-align: center;
+            margin-top: -100px;
+        }
     </style>
 </head>
 <body>
@@ -799,27 +808,71 @@ console.log(clueAssignRule)
                         param.userScoreRuleDetailList=clueScorErulEdetailList;                        
                         
                         aorVM.submitDisabled=true;
-                        axios.post(url, param)
-                        .then(function (response) {
-                            var data =response.data;
-                            if(data.code!="0"){
-                                aorVM.$message({message:data.msg,type:'error'});
-                                aorVM.submitDisabled=false;
-                            }else{
-                                aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
-                                    aorVM.submitDisabled=false;
-                                    document.location.href='/rule/userScoreRule/userScoreRulePage';
-                                }});
+                        // 判断是否选择的启用
+                        if(this.form.status=="1"){
+                            var param1={};
+                            if(idVal){
+                                param1.id=idVal;
                             }
-                        })
-                        .catch(function (error) {
-                            aorVM.submitDisabled=false;
-                            console.log(error);
-                        });
+                            param1.status=this.form.status;
+                            param1.businessLine=this.form.businessLine;
+                            axios.post('/rule/userScoreRule/getRuleByBusinessLine', param1)
+                            .then(function (response) {
+                                var result =  response.data;
+                                if(result.code=="0"){
+                                    if(result.data==true){
+                                        aorVM.ajaxFunction(url, param)
+                                    }else{
+                                        aorVM.$confirm('同业务线仅允许启用一条规则，是否停用原规则?', '提示', {
+                                            confirmButtonText: '确定',
+                                            cancelButtonText: '取消',
+                                            type: 'warning'
+                                        }).then(() => {
+                                            aorVM.ajaxFunction(url, param)
+                                        }).catch(() => {
+                                            aorVM.$message({
+                                                type: 'info',
+                                                message: '已取消操作'
+                                            }); 
+                                            aorVM.submitDisabled=false;         
+                                        });
+                                    }                        
+                                }else{
+                                    aorVM.$message.error(result.msg+"失败");
+                                    aorVM.submitDisabled=false;
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                                aorVM.submitDisabled=false;
+                            }); 
+                        }else{
+                            aorVM.ajaxFunction(url, param)
+                        }
+                        
                     } else {
                         console.log('error submit!!');
                         return false;
                     }
+                });
+            },
+            ajaxFunction(url, param){
+                axios.post(url, param)
+                .then(function (response) {
+                    var data =response.data;
+                    if(data.code!="0"){
+                        aorVM.$message({message:data.msg,type:'error'});
+                        aorVM.submitDisabled=false;
+                    }else{
+                        aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                            aorVM.submitDisabled=false;
+                            document.location.href='/rule/userScoreRule/userScoreRulePage';
+                        }});
+                    }
+                })
+                .catch(function (error) {
+                    aorVM.submitDisabled=false;
+                    console.log(error);
                 });
             },
             deleteRow(index, rows) {//删除一行表格
@@ -898,7 +951,7 @@ console.log(clueAssignRule)
                     unlimited:'',//不限层
                     unlimitedVal:'',//不限层取值
                     unlimitedShow:false,//默认不显示
-                    type:4,//平均时间间隔
+                    type:4,//平均响应间隔
                 });                
             },
             addDomain5() {
