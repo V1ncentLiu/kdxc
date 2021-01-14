@@ -506,27 +506,73 @@ console.log(clueAssignRule)
                         param.clueScoreRuleDetailList=clueScorErulEdetailList;                        
                         
                         aorVM.submitDisabled=true;
-                        axios.post(url, param)
-                        .then(function (response) {
-                            var data =response.data;
-                            if(data.code!="0"){
-                                aorVM.$message({message:data.msg,type:'error'});
-                                aorVM.submitDisabled=false;
-                            }else{
-                                aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
-                                    aorVM.submitDisabled=false;
-                                    document.location.href='/rule/clueScoreRule/cluesScore';
-                                }});
+                        // 判断选的启用还是禁用
+                        if(this.form.status=="1"){
+                            var param1={};
+                            if(idVal){
+                                param1.id=idVal;
                             }
-                        })
-                        .catch(function (error) {
+                            param1.status=this.form.status;
+                            param1.businessLine=this.form.businessLine;
+                            axios.post('/rule/clueScoreRule/getRuleByBusinessLine', param1)
+                            .then(function (response) {
+                                var result =  response.data;
+                                if(result.code=="0"){
+                                    if(result.data==true){
+                                        aorVM.ajaxFun(url,param)
+                                    }else{
+                                        aorVM.$confirm('同业务线仅允许启用一条规则，是否停用原规则?', '提示', {
+                                            confirmButtonText: '确定',
+                                            cancelButtonText: '取消',
+                                            type: 'warning'
+                                        }).then(() => {
+                                            aorVM.ajaxFun(url,param)
+                                        }).catch(() => {
+                                            aorVM.$message({
+                                                type: 'info',
+                                                message: '已取消操作'
+                                            }); 
+                                            aorVM.submitDisabled=false;         
+                                        });
+                                    }                        
+                                }else{
+                                    aorVM.$message.error(result.msg+"失败");
+                                    aorVM.submitDisabled=false;
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                                aorVM.submitDisabled=false;
+                            }); 
+                        }else{
+                            aorVM.ajaxFun(url,param)
                             aorVM.submitDisabled=false;
-                            console.log(error);
-                        });
+                        }
+                        
                     } else {
                         console.log('error submit!!');
+                        aorVM.submitDisabled=false;
                         return false;
                     }
+                });
+            },
+            ajaxFun(url,param){
+                axios.post(url, param)
+                .then(function (response) {
+                    var data =response.data;
+                    if(data.code!="0"){
+                        aorVM.$message({message:data.msg,type:'error'});
+                        aorVM.submitDisabled=false;
+                    }else{
+                        aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                            aorVM.submitDisabled=false;
+                            document.location.href='/rule/clueScoreRule/cluesScore';
+                        }});
+                    }
+                })
+                .catch(function (error) {
+                    aorVM.submitDisabled=false;
+                    console.log(error);
                 });
             },
             deleteRow(index, rows) {//删除一行表格
@@ -704,14 +750,31 @@ console.log(clueAssignRule)
                                     aorVM.unlimitedBtn(i,list);
                                 }
                             }
-                            aorVM.form.clueScorErulEdetailList1=list1;
-                            aorVM.form.clueScorErulEdetailList2=list2;
-                            aorVM.form.clueScorErulEdetailList3=list3;
-                            aorVM.form.clueScorErulEdetailList4=list4;
-                            aorVM.form.days1=list1[0].days+'';
-                            aorVM.form.days2=list2[0].days+'';
-                            aorVM.form.days3=list3[0].days+'';
-                            aorVM.form.days4=list4[0].days+'';
+                            if(list1.length!=0){
+                                aorVM.form.clueScorErulEdetailList1=list1;
+                                if(list1[0].days){
+                                    aorVM.form.days1=list1[0].days+'';
+                                }
+                            }
+                            if(list2.length!=0){
+                                aorVM.form.clueScorErulEdetailList2=list2;
+                                if(list2[0].days){
+                                    aorVM.form.days2=list2[0].days+'';
+                                }
+                            }
+                            if(list3.length!=0){
+                               aorVM.form.clueScorErulEdetailList3=list3; 
+                                if(list3[0].days){
+                                   aorVM.form.days3=list3[0].days+''; 
+                                }
+                            }
+                            if(list4.length!=0){
+                                aorVM.form.clueScorErulEdetailList4=list4;
+                                if(list4[0].days){
+                                    aorVM.form.days4=list4[0].days+'';
+                                }
+                            }
+                            
                         }else{
                             ocmVM.$message.error(msg+"失败");
                         }
