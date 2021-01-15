@@ -21,7 +21,7 @@ import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.entity.RefundExportModel;
@@ -129,7 +129,7 @@ public class ReconciliationConfirmController {
 //        request.setAttribute("projectList", allProject.getData());
         // 查询所有签约项目
         ProjectInfoPageParam param=new ProjectInfoPageParam();
-        param.setIsNotSign(AggregationConstant.NO);
+        param.setIsNotSign(BusinessConfigConstant.NO);
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.queryBySign(param);
         request.setAttribute("projectList", allProject.getData());
         // 查询所有省
@@ -354,7 +354,7 @@ public class ReconciliationConfirmController {
     public JSONResult<Void> applyRefund(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
     	UserInfoDTO user = getUser();
-        req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_3);
+        req.setStatus(BusinessConfigConstant.RECONCILIATION_STATUS.STATUS_3);
         req.setCreateUser(user.getId());
         JSONResult<Void> reconciliationConfirm =
                 reconciliationConfirmFeignClient.reconciliationConfirm(req);
@@ -373,7 +373,7 @@ public class ReconciliationConfirmController {
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
     public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
-        req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_4);
+        req.setStatus(BusinessConfigConstant.RECONCILIATION_STATUS.STATUS_4);
         JSONResult<Void> reconciliationConfirm =
                 reconciliationConfirmFeignClient.reconciliationConfirm(req);
         return reconciliationConfirm;

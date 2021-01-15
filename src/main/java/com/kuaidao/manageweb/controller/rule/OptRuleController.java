@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.rule.AssignRuleTeamDTO;
 import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleDTO;
 import com.kuaidao.businessconfig.dto.rule.ClueAssignRulePageParam;
@@ -231,7 +231,7 @@ public class OptRuleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 优化规则
-        pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        pageParam.setRuleType(BusinessConfigConstant.RULE_TYPE.OPT);
         JSONResult<PageBean<ClueAssignRuleDTO>> list = clueAssignRuleFeignClient.list(pageParam);
 
         return list;
@@ -264,7 +264,7 @@ public class OptRuleController {
         // 推广所属公司 为当前账号所在机构的推广所属公司
         clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
         // 插入类型为优化
-        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        clueAssignRuleReq.setRuleType(BusinessConfigConstant.RULE_TYPE.OPT);
         return clueAssignRuleFeignClient.create(clueAssignRuleReq);
     }
 
@@ -399,7 +399,7 @@ public class OptRuleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 优化规则
-        pageParam.setRuleType(AggregationConstant.RULE_TYPE.OPT);
+        pageParam.setRuleType(BusinessConfigConstant.RULE_TYPE.OPT);
         // 查询规则数据不分页
         JSONResult<List<ClueAssignRuleDTO>> listNoPage =
                 clueAssignRuleFeignClient.listNoPage(pageParam);

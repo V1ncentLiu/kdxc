@@ -24,6 +24,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldMenuQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldMenuRespDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * 资源领取
@@ -40,6 +41,9 @@ public interface ClueReceiveRecordsFeignClient {
 	 */
 	@PostMapping("/receiveClueByClueIds")
 	public JSONResult<ClueReceiveRecordsDTO> receiveClueByClueIds(@RequestBody ClueReceiveRecordsDTO clueReceiveRecordsDTO);
+
+	@RequestMapping("/validateCluePhase")
+	public JSONResult validateCluePhase(@RequestBody ClueReceiveRecordsDTO clueReceiveRecordsDTO);
 	
 	@Component
 	static class HystrixClientFallback implements ClueReceiveRecordsFeignClient {
@@ -57,6 +61,11 @@ public interface ClueReceiveRecordsFeignClient {
 		@Override
 		public JSONResult<ClueReceiveRecordsDTO> receiveClueByClueIds(ClueReceiveRecordsDTO clueReceiveRecordsDTO) {
 			return fallBackError("领取公有池资源失败");
+		}
+
+		@Override
+		public JSONResult validateCluePhase(ClueReceiveRecordsDTO clueReceiveRecordsDTO) {
+			return fallBackError("领取公有池资源校验");
 		}
 
 	}

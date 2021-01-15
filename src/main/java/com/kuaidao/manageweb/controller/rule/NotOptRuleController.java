@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.rule.AssignRuleTeamDTO;
 import com.kuaidao.businessconfig.dto.rule.ClueAssignRuleDTO;
@@ -246,7 +246,7 @@ public class NotOptRuleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 非优化规则
-        pageParam.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
+        pageParam.setRuleType(BusinessConfigConstant.RULE_TYPE.NOT_OPT);
         JSONResult<PageBean<ClueAssignRuleDTO>> list = clueAssignRuleFeignClient.list(pageParam);
 
         return list;
@@ -279,7 +279,7 @@ public class NotOptRuleController {
         // 推广所属公司 为当前账号所在机构的推广所属公司
         clueAssignRuleReq.setPromotionCompany(user.getPromotionCompany());
         // 插入类型为优化
-        clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
+        clueAssignRuleReq.setRuleType(BusinessConfigConstant.RULE_TYPE.NOT_OPT);
         return clueAssignRuleFeignClient.create(clueAssignRuleReq);
     }
 
@@ -404,7 +404,7 @@ public class NotOptRuleController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         // 非优化规则
-        pageParam.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
+        pageParam.setRuleType(BusinessConfigConstant.RULE_TYPE.NOT_OPT);
 
         // 查询规则数据不分页
         JSONResult<List<ClueAssignRuleDTO>> listNoPage =

@@ -630,16 +630,9 @@ var mainDivVM = new Vue({
                 }
             })
         },
-        openReceive(row){//领取 
-            console.log(row)               
-            var param={};
-            param.idList = []
-            // for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
-            //     param.idList.push(this.multipleSelection[i].clueid)
-            // }
-            param.idList.push(row.clueId)
+        receiveDo(param){
             axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
-              .then(function (response) {
+                .then(function (response) {
                     var result =  response.data;
                     if(result.code == 0){
                         if(result.data !=null){
@@ -651,18 +644,55 @@ var mainDivVM = new Vue({
                                 mainDivVM.receiveTitle=data.backResult;
                                 mainDivVM.receiveTable= data.clueCustomerDTOs;
                             }else{
-                                // window.location.href="/aggregation/publiccustomer/listPage"; 
+                                // window.location.href="/aggregation/publiccustomer/listPage";
                                 // 领取成功刷新表格
                                 mainDivVM.initList();
                             }
-                        }                                
+                        }
                     }else{
                         mainDivVM.$message({message: result.msg, type: 'warning'});
                     }
-                    
-              }).catch(function (error) {
-                          console.log(error);
-              })           
+
+                }).catch(function (error) {
+                console.log(error);
+            })
+        },
+        openReceive(row){//领取 
+            console.log(row)               
+            var param={};
+            param.idList = []
+            // for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
+            //     param.idList.push(this.multipleSelection[i].clueid)
+            // }
+            param.idList.push(row.clueId);
+
+
+        axios.post('/clue/cluereceiverecords/validateCluePhase', param)
+            .then(function (response) {
+
+                var result =  response.data;
+
+                if(result.code == 0){
+
+                    mainDivVM.receiveDo(param);
+
+                }else{
+                    mainDivVM.$confirm(result.msg, '提示', {
+                        confirmButtonText: '知道了',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        mainDivVM.initList();
+                }).catch(() => {
+
+                    });
+                    mainDivVM.loading = false;
+                    return false;
+                }
+            }).catch(function (error) {
+            console.log(error);
+        })
+
             // 1、本组释放到公有池的资源，本组的电销人员不能再捡了
             // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
             // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>后台管理系统</title>
+    <style>
+    .el-input-number.is-controls-right .el-input-number__decrease, .el-input-number.is-controls-right .el-input-number__increase{    line-height: 14px;}
+    .el-input-number__decrease, .el-input-number__increase{top:4px;}
+    .distpicker .form-group{width: 157px;}
+    .distpicker{width:350px;}
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>顾问状态得分设置</el-breadcrumb-item>
+    </el-breadcrumb>  
+    <el-row class="marginB20">
+        <!-- <shiro:hasPermission name="sys:scheduleManager:add"> -->
+            <el-button type="primary" @click="openCard"><i class="el-icon-plus"></i>添加状态得分</el-button>
+        <!-- </shiro:hasPermission> -->
+        <el-button type="success" @click="editCard"><i class="el-icon-edit"></i>编辑</el-button>
+        <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                <el-form-item label="业务线:">  
+                    <el-select v-model="form.businessLine" placeholder="选择业务线" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in businessLineArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <el-form-item label="状态等级:">  
+                    <el-select v-model="form.teleSaleStatus" placeholder="选择状态等级" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in teleSaleStatusArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="" label-width="0">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn" style="margin-left: 15px;">搜索</el-button>
+                </el-form-item>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                v-loading="loading"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>                
+                <el-table-column prop="businessLineName" align="center" label="业务线">
+                </el-table-column>                
+                <el-table-column prop="teleSaleStatusName" align="center" label="状态等级">
+                </el-table-column>
+                <el-table-column prop="score" align="center" label="得分">
+                    <template slot-scope="scope">
+                        +{{scope.row.score}}
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- 设置顾问偏好弹窗 -->
+    <el-dialog :title="dialogTitle" :visible.sync="cardVisible" :close-on-click-modal="false" width="600px" @close="cardCancel">
+        <template>
+            <el-form :inline="true" :model="cardForm" ref="cardForm" :rules="cardFormRules">
+                <el-form-item label="业务线：" prop="businessLine" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.businessLine" :reserve-keyword=true filterable clearable placeholder="请选择业务线" style="width: 333px;">
+                        <el-option
+                            v-for="item in businessLineArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="状态等级：" prop="teleSaleStatus" :label-width="formLabelWidth" style="width: 100%;">
+                    <el-select v-model="cardForm.teleSaleStatus" :reserve-keyword=true placeholder="请选择顾问状态等级" style="width: 333px;">
+                        <el-option
+                            v-for="item in teleSaleStatusArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="得分：" prop="score" :label-width="formLabelWidth" style="position: relative;width: 100%;">
+                    <el-input v-model="cardForm.score" autocomplete="off" placeholder="0-50整数" maxlength="2" style="width: 265px;margin-right: 10px;" @keyup.native.prevent="number"></el-input> 
+                </el-form-item> 
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="cardSubmit('cardForm')">提 交</el-button>
+                <el-button  @click="cardCancel">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var businessLine=[[${businessLineList}]]; // 业务线 
+
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {   
+                formLabelWidth: '100px',
+                loading: false,
+                isDisabled: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
+                form: {
+                    businessLine:'',
+                    teleSaleStatus:''
+                },
+                tableData: [],
+                dialogTitle:'',  
+                cardVisible:false,//设置顾问偏好
+                cardForm: {
+                    businessLine:'',
+                    teleSaleStatus:'',
+                    score:'',
+                },
+                cardFormRules:{
+                    businessLine:[
+                        { required: true, message: '请选择业务线', trigger: 'change' },
+                    ],
+                    teleSaleStatus:[
+                        { required: true, message: '请选择顾问状态等级', trigger: 'change' },
+                    ],
+                    score:[
+                        { required: true, message: '请填写得分', trigger: 'blur' },
+                        { validator: function (rule, value, callback) {
+                                var reg = /^[0-9]+[0-9]*]*$/;
+                                if (value == null || value == "null" || value == "" || value>50) {
+                                    callback(new Error("请输入正确的分数"));
+                                    mainDivVM.form.createDay = "";
+
+                                } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正确的分数"));
+                                    mainDivVM.form.createDay = "";
+                                } else {
+                                    callback();
+                                }
+
+                            }, trigger: 'change'
+                        }
+                    ],
+                },
+                cardTeleSale:'',
+                multipleSelection:[],
+                businessLineArr:businessLine,//业务线
+                teleSaleStatusArr:[{
+                    id:'1',
+                    name:'优'
+                },{
+                    id:'2',
+                    name:'正常'
+                },{
+                    id:'3',
+                    name:'差'
+                },{
+                    id:'99',
+                    name:'老员工'
+                }],
+                clueScopeArr:[],//资源范围                
+                showSelect:true,
+                showIpt:false,
+            }             
+        },
+        methods: { 
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            openCard(){// 打开新建名片
+                this.cardVisible=true;
+                this.dialogTitle="添加状态得分";
+                if (this.$refs['cardForm']!=undefined) {
+                    this.$refs['cardForm'].resetFields();
+                }
+            },
+            editCard(){// 打开编辑名片回显
+                var rows = this.multipleSelection;
+                if(rows.length!==1){
+                    this.$message({
+                       message: '请选择一条数据进行编辑',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                this.cardVisible=true;
+                this.dialogTitle="编辑状态得分";
+                var param = {};
+                param.id = rows[0].id;
+                this.loading = true; 
+                axios.post('/salestatus/queryOne',param).then(function (response) { 
+                    mainDivVM.loading = false;
+                    console.log(response)
+                    var result=response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        if(table.id){
+                            mainDivVM.cardForm.businessLine=table.businessLine+"";
+                            mainDivVM.cardForm.teleSaleStatus=table.teleSaleStatus+"";                           
+                            mainDivVM.cardForm.score=table.score+'';
+                        }                      
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            cardCancel(){// 关闭名片
+                this.cardVisible=false;
+                this.cardForm.businessLine='';
+                this.cardForm.businessLineName='';
+                this.cardForm.score='';
+            },
+            cardSubmit(){
+                var rows=this.multipleSelection;
+                var id=""
+                if(rows.length!=0){
+                    id=rows[0].id;
+                }
+                this.$refs['cardForm'].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        var url = "";
+                        if(id){
+                            url="/salestatus/update"//编辑
+                            param.id=id;
+                        }else{
+                            url="/salestatus/insert"//新建
+                        }
+                        param.businessLine = this.cardForm.businessLine;
+                        param.teleSaleStatus = this.cardForm.teleSaleStatus;
+                        param.score = this.cardForm.score;
+                        console.log(param)
+                        // this.loading = true; 
+                        axios.post(url,param).then(function (response) { 
+                            // mainDivVM.loading = false;
+                            console.log(response)
+                            if(response.data.code=="0"){
+                                mainDivVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    window.location.href="/salestatus/page"
+                                }});                               
+
+                            }else if(response.data.code=="-1001"){
+                                mainDivVM.$message({
+                                    message:response.data.msg,
+                                    type: "error"
+                                });
+                            }
+                            
+                        }).catch(function (error) {
+                            // mainDivVM.loading = false;
+                            mainDivVM.$message({
+                                message: "请求失败，请稍后重试",
+                                type: "error"
+                            });
+                        });
+                    } else {
+                        console.log("验证未通过")
+                        return false;
+                    }
+                });
+            },       
+            searchTable() {                
+                var param = {};
+                param.businessLine = this.form.businessLine;
+                param.teleSaleStatus = this.form.teleSaleStatus;
+
+                param.pageNum = this.pager.pageSize
+                param.pageSize = this.pager.pageSizes;                
+                this.loading = true; 
+                axios.post('/salestatus/queryPage',param).then(function (response) { 
+                   mainDivVM.loading = false;
+                   console.log(response)
+                   var result =  response.data;
+                    if(result.code==0){
+                        var table=result.data;
+                        mainDivVM.tableData= table.data;
+                        mainDivVM.pager.total =  table.total;
+                        mainDivVM.pager.currentPage = table.currentPage;
+                    }else{
+                        mainDivVM.isDisabled=false;
+                        mainDivVM.$message.error(result.msg);
+                    }  
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
+            },
+            deleteFun() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+                   rowIds.push(rows[i].id)
+                }
+                this.$confirm('删除后不可恢复，确定要删除吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                      //删除
+                    var param  = {idList:rowIds};
+                     axios.post('/salestatus/delete',param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                             mainDivVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                                window.location.href="/salestatus/page"
+                            }});
+                             
+                         }else{
+                             mainDivVM.$message({
+                                 message: "接口调用失败",
+                                 type: 'error'
+                               }); 
+                         }
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                        
+                     });
+                 }).catch(() => {
+                        
+                 });
+            },
+            number(){
+          　　this.cardForm.score=this.cardForm.score.replace(/[^\.\d]/g,'');
+              this.cardForm.score=this.cardForm.score.replace('.','');
+          },
+        },
+        created(){
+            // 取页数存储
+            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
+            if(localVal){this.pager.pageSize = localVal;}
+            this.searchTable();
+            
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
