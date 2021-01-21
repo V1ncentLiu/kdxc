@@ -1,46 +1,17 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PushClueReq;
-import com.kuaidao.businessconfig.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.ClueCommunicateExportModel;
-import com.kuaidao.common.entity.ClueCommunicatePhtraExportModel;
-import com.kuaidao.common.entity.ClueExportModel;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -66,6 +37,21 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Controller
 @RequestMapping("/exetend/distributionedTaskManager")
@@ -370,7 +356,7 @@ public class ExtendClueDistributionedTaskController {
                 curList.add("否"); // 是否重复
                 // 是否自建
                 String inputName = "否 ";
-                if (AggregationConstant.YES.equals(taskDTO.getInputType())) {
+                if (BusinessConfigConstant.YES.equals(taskDTO.getInputType())) {
                     inputName = "是";
                 }
                 curList.add(inputName);
@@ -395,39 +381,42 @@ public class ExtendClueDistributionedTaskController {
                 }
                 curList.add(phase);
                 String phtraIsCall = "";
-                if (AggregationConstant.YES.equals(taskDTO.getPhtraIsCall())) {
+                if (BusinessConfigConstant.YES.equals(taskDTO.getPhtraIsCall())) {
                     phtraIsCall = "是";
-                } else if (AggregationConstant.NO.equals(taskDTO.getPhtraIsCall())) {
+                } else if (BusinessConfigConstant.NO.equals(taskDTO.getPhtraIsCall())) {
                     phtraIsCall = "否";
                 }
                 curList.add(phtraIsCall);
                 String phstatus = "";
-                if (AggregationConstant.YES.equals(taskDTO.getPhstatus())) {
+                if (BusinessConfigConstant.YES.equals(taskDTO.getPhstatus())) {
                     phstatus = "是";
-                } else if (AggregationConstant.NO.equals(taskDTO.getPhstatus())) {
+                } else if (BusinessConfigConstant.NO.equals(taskDTO.getPhstatus())) {
                     phstatus = "否";
                 }
                 curList.add(phstatus);
                 curList.add(taskDTO.getCusLevelName());
                 curList.add(taskDTO.getOperatorName());
                 String sourceFrom = "";
-                if(null != taskDTO.getSourceFrom()){
+                if (null != taskDTO.getSourceFrom()) {
                     if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
-                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
-                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
-                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
-                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
-                        sourceFrom  = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
                     }
                 }
 
                 curList.add(sourceFrom);
                 curList.add(taskDTO.getAscriptionProjectName());
                 curList.add(taskDTO.getRootWord());
-                if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                     curList.add(taskDTO.getConsultProjectTurn());
                 }
-
+                curList.add(taskDTO.getSaleLadder());
+                curList.add(taskDTO.getClueLadder());
                 dataList.add(curList);
             }
         }
@@ -579,7 +568,7 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     call = taskDTO.getIsCall();
                 }
-                if (null != call && AggregationConstant.YES.equals(call)) {
+                if (null != call && BusinessConfigConstant.YES.equals(call)) {
                     isCall = "是";
                 } else {
                     isCall = "否";
@@ -593,7 +582,7 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     status = taskDTO.getStatus();
                 }
-                if (null != status && AggregationConstant.YES.equals(status)) {
+                if (null != status && BusinessConfigConstant.YES.equals(status)) {
                     statusStr = "是";
                 } else {
                     statusStr = "否";
@@ -655,13 +644,15 @@ public class ExtendClueDistributionedTaskController {
                 }
                 curList.add(repeatPhone);
                 String sourceFrom = "";
-                //合并代码后替换成枚举类
-                if(null != taskDTO.getSourceFrom()){
+                // 合并代码后替换成枚举类
+                if (null != taskDTO.getSourceFrom()) {
                     if (taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6))) {
                         sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_6_NAME;
-                    } else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7))) {
                         sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_7_NAME;
-                    }else if(taskDTO.getSourceFrom().equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
+                    } else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
                         sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
                     }
                 }
@@ -671,12 +662,16 @@ public class ExtendClueDistributionedTaskController {
                 // url地址
                 curList.add(taskDTO.getUrlAddress());
                 if (!queryDto.getPhtraExport()) {
-                    //词根
+                    // 词根
                     curList.add(taskDTO.getRootWord());
-                    //咨询项目
-                    if(null != taskDTO.getConsultProjectIsShow() && AggregationConstant.YES.equals(taskDTO.getConsultProjectIsShow())){
+                    // 咨询项目
+                    if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                         curList.add(taskDTO.getConsultProjectTurn());
                     }
+                }
+                if (!queryDto.getPhtraExport()) {
+                    //阶段名称
+                    curList.add(taskDTO.getPhaseName());
                 }
                 dataList.add(curList);
             }

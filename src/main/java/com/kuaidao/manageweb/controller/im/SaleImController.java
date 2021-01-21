@@ -88,10 +88,12 @@ public class SaleImController {
     public String initListPage(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         String roleCode = user.getRoleList().get(0).getRoleCode();
-
+        List<Integer> businessLineList = new ArrayList<>();
+        businessLineList.add(BusinessLineConstant.SHANGJI);
+        businessLineList.add(BusinessLineConstant.CMZSJJ);
         // 餐盟严选所有电销组
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        organizationQueryDTO.setBusinessLine(BusinessLineConstant.SHANGJI);
+        organizationQueryDTO.setBusinessLineList(businessLineList);
         organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
         if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             organizationQueryDTO.setId(user.getOrgId());
@@ -166,7 +168,10 @@ public class SaleImController {
     @PostMapping("/list")
     @ResponseBody
     public JSONResult<PageBean<SaleImDTO>> list(@RequestBody SaleImPageParam pageParam, HttpServletRequest request) {
-
+        List<Integer> businessLineList = new ArrayList<>();
+        businessLineList.add(BusinessLineConstant.SHANGJI);
+        businessLineList.add(BusinessLineConstant.CMZSJJ);
+        pageParam.setBusinessLineList(businessLineList);
         JSONResult<PageBean<SaleImDTO>> list = saleImFeignClient.list(pageParam);
 
         return list;

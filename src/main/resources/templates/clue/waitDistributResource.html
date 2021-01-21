@@ -492,6 +492,7 @@
   var reasonList = [[${reasonList}]];
   var fieldList = [[${fieldList}]];//自定义字段
   var userFieldList = [[${userFieldList}]];//用户自定义字段
+  var autoAssignTime = [[${autoAssignTime}]];//自动分配时间段
   var wdrVM = new Vue({
     el: '#waitDistributResource',
     data: function () {
@@ -817,6 +818,21 @@
           });
           return;
         } else {
+        	var now = new Date();
+        	var hour = now.getHours();//得到小时
+        	//（晚10点-第二天早9点）期间不允许之前的手工分配 夜晚延迟自动分配的资源
+        	var split=autoAssignTime.split(",");
+        	if(hour>=split[1]||hour<split[0]){
+	        	for (var i = 0; i < rows.length; i++) {
+	                if(rows[i].assignFailReason=='10'){
+	                	 this.$message({
+	                         message: '夜晚延迟自动分配的资源不允许自动分配',
+	                         type: 'warning'
+	                       });
+	                	return;
+	                }
+	              }
+        	}
           this.$confirm('确定要按照规则执行自动分发吗?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',

@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.clue;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.kuaidao.common.constant.UnSignLimitErrorCode;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.clue.ClueReceiveRecordsDTO;
-import com.kuaidao.businessconfig.constant.AggregationErrorCodeEnum;
+import com.kuaidao.businessconfig.constant.BusinessConfigErrorCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -58,8 +59,8 @@ public class ClueReceiveRecordsController {
         List<Long> idList = new ArrayList<Long>();
         if (roleList != null && !RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())
                 && !RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())) {
-            return new JSONResult().fail(AggregationErrorCodeEnum.PUBLICCLUERECEIVERLOE.getCode(),
-                    AggregationErrorCodeEnum.PUBLICCLUERECEIVERLOE.getMessage());
+            return new JSONResult().fail(BusinessConfigErrorCodeEnum.PUBLICCLUERECEIVERLOE.getCode(),
+                    BusinessConfigErrorCodeEnum.PUBLICCLUERECEIVERLOE.getMessage());
         } else {
             clueReceiveRecordsDTO.setReceiveUser(user.getId());
             clueReceiveRecordsDTO.setTeleGroupId(user.getOrgId());
@@ -149,6 +150,12 @@ public class ClueReceiveRecordsController {
             return clueReceiveRecordsFeignClient.receiveClueByClueIds(clueReceiveRecordsDTO);
         }
 
+    }
+
+    @ResponseBody
+    @RequestMapping("/validateCluePhase")
+    public JSONResult validateCluePhase(@RequestBody ClueReceiveRecordsDTO clueReceiveRecordsDTO){
+        return clueReceiveRecordsFeignClient.validateCluePhase(clueReceiveRecordsDTO);
     }
 
     /**

@@ -307,6 +307,9 @@ var homePageVM=new Vue({
           isTipbgShow:false,//默认不显示提示框图片2
           isCurrent:true,//首页按钮默认高亮
           issearchLoading:false,
+          isBusyStatus:false,//默认不显示忙碌标识
+          isBusyButton:true,//默认显示设置忙碌状态
+          showBusyBtn:false,//默认不显示设置忙碌
 	    }
 	},
  	methods: {
@@ -507,18 +510,92 @@ var homePageVM=new Vue({
 	   	handleCommand(command) {//点击下拉菜单
 	        if(command=='modifyPwd'){//修改密码
 	        	this.modifyPwd();
-	        }else if(command=='logout'){//退出
-	        	this.logout();
+	        }else if(command=='setBusyStatus'){//设为忙碌状态
+	        	this.setBusyStatus(1);
+          }else if(command=='cancelBusyStatus'){//取消忙碌状态
+            this.setBusyStatus(2);
+          }else if(command=='logout'){//退出
+            this.logout();
 	        }else{
-                this.gotoUserInfo();
-            }
-	     },
-         gotoUserInfo(){
-            var dataUrl = "/merchant/userManager/userInfo";
-            $("#iframeBox").attr({
-                "src":dataUrl //设置ifream地址
-            });
-         },
+              this.gotoUserInfo();
+          }
+	    },
+      gotoUserInfo(){
+          var dataUrl = "/merchant/userManager/userInfo";
+          $("#iframeBox").attr({
+              "src":dataUrl //设置ifream地址
+          });
+      },
+      setBusyStatus(val){
+        var param={};
+        param.teleSaleId=userId;        
+        if(val==1){
+          // this.isBusyButton=false;
+          // this.isBusyStatus=true;
+          param.bustStatus=1;//1忙碌0取消忙碌
+        }else if(val==2){
+          // this.isBusyButton=true;
+          // this.isBusyStatus=false;
+          param.bustStatus=0;//1忙碌0取消忙碌
+        }
+        axios.post('/preference/updateBusyStatus', param)
+         .then(function (response) {
+             console.log(response)
+             var resData = response.data;
+             if(resData.code=='0'){
+                if(resData.data==true&&val==1){
+                    homePageVM.$message({message:'设置成功',type:'success'});
+                    homePageVM.isBusyButton=false;
+                    homePageVM.isBusyStatus=true;
+                    
+                }else if(resData.data==true&&val==2){
+                    homePageVM.$message({message:'取消成功',type:'success'});
+                    homePageVM.isBusyButton=true;
+                    homePageVM.isBusyStatus=false;
+                }
+             }else{
+                homePageVM.$message({message:resData.msg,type:'error'});
+                console.error(resData);
+             }
+         
+         })
+         .catch(function (error) {
+              console.log(error);
+              homePageVM.$message({
+                  message: "系统出错",
+                  type: 'error'
+              }); 
+         });
+      },
+      queryBusyStatus(){
+        var param={};
+        axios.post('/preference/queryBusyStatus', param)
+         .then(function (response) {
+              console.log("是否可以设置忙碌-------------------------",response)
+              var resData = response.data;
+              // 0:成功 ，-1：非电销顾问没有忙碌状态 -2：当前业务线下没有设置自动分配规则
+              if(resData.code=='0'){
+                  // 忙碌状态(1:忙碌 ，0：不忙碌)
+                  homePageVM.showBusyBtn=true;
+                  if(resData.data=='1'){
+                    homePageVM.isBusyButton=false;
+                    homePageVM.isBusyStatus=true;
+                  }else if(resData.data=='0'){
+                    homePageVM.isBusyButton=true;
+                    homePageVM.isBusyStatus=false;
+                  }
+              }else if(resData.code=='-1'||resData.code=='-2'){
+                homePageVM.showBusyBtn=false;
+              }else{
+                homePageVM.$message({message:resData.msg,type:'error'});
+                console.error(resData);
+              }
+         
+         })
+         .catch(function (error) {
+              console.log(error);
+         });
+      },
 	     modifyPwd(){//修改密码
 	    	 //重置表单
 	    	 this.dialogModifyPwdVisible=true;
@@ -1890,7 +1967,8 @@ var homePageVM=new Vue({
       // 首次登陆显示
       if(showIKonwFlag==1){
         this.unionTipdialogVisible=true;
-      }      
+      } 
+      this.queryBusyStatus();     
 	},
 	computed: {
 	    clientRules:function() {

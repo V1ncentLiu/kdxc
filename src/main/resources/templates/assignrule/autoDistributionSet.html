@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
+    <title>自动匹配模型配置</title>
+    <style type="text/css">
+        .el-input__inner{height: 32px;line-height:32px;width: 150px;}
+        #tableBox{border-collapse:collapse;border:1px solid #eaecf3;width: 100%}
+        #tableBox th{background:#ecedf2; border:1px solid #eaecf3;padding: 12px 0;text-align: center;}
+        #tableBox td{border:1px solid #eaecf3;padding: 14px 0;text-align: center;}
+        #tableBox td .el-form-item{margin-bottom: 2px}
+        #tableBox .el-form-item__error{top: 100%;left: -50%;width: 200%;}
+        .selectIpt .el-input__inner{width: 200px;}
+        /*不显示input的number样式*/
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+        input[type="number"]{
+            -moz-appearance: textfield;
+        }
+        .el-form--inline .el-form-item__label{}
+        .el-form-item{margin-bottom: 15px;}
+        .ladderListTable .line{line-height: 35px;}
+        .leftLine{border-left: 5px solid #5c6be8;line-height: 20px;text-indent: 10px;margin-bottom: 20px;}
+        .ladderListTable .el-input__inner{width:120px;}
+    </style>
+</head>
+<body>
+<div id="releaseRule" class="releaseRule mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>自动匹配模型配置</el-breadcrumb-item>
+    </el-breadcrumb> 
+    
+    <el-row class="mainWhiteBg">
+        <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
+            <el-row>
+                <el-form-item label="选择业务线：" prop="bussinessLine"> 
+                    <el-select v-model="form.bussinessLine" filterable placeholder="" @change="changeBussinessLine">
+                        <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <span style="line-height: 35px;">配置模型</span>
+            </el-row>
+            <div class="fs14 marginB20 leftLine">{{bussinessLineTitle}}匹配模型：</div>
+            <el-row  class="marginB20">
+                <el-form-item label="新员工是按照创建账号起" style="margin-bottom: 0" prop="createDay">    
+                    <el-input v-model="form.createDay" placeholder="请输入正整数" type="number" ></el-input>
+                </el-form-item>
+                <el-form-item label="天内为新员工。" style="margin-bottom: 0"></el-form-item>
+            </el-row>
+            <el-row  class="marginB20">
+                <el-form-item label="新员工入职" style="margin-bottom: 0" prop="disDay">    
+                    <el-input v-model="form.disDay" placeholder="请输入正整数" type="number" ></el-input>
+                </el-form-item>
+                <el-form-item label="天后可以分发资源。" style="margin-bottom: 0"></el-form-item>
+            </el-row>
+            <div class="fs14 marginB20 leftLine">顾问与资源阶段匹配设置：</div>
+            <el-table
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="form.ladderList"
+                class="ladderListTable"
+            >
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="ruleName" label="顾问阶梯" width="100">
+                    <template slot-scope="scope">
+                        {{scope.row.ladder}}阶梯
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="srangeStart" label="分数值范围">
+                    <template slot-scope="scope">
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" :rules='rules.srangeStart'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.srangeStart'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
+                            <el-input v-model="scope.row.srangeStart" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
+                        </el-form-item>
+                        <span class="line">——</span>
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" :rules='rules.srangeEnd'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.srangeEnd'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
+                            <el-input v-model="scope.row.srangeEnd" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="limit" label="每日分配上限">
+                    <template slot-scope="scope">
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.limit'" :rules='rules.limit'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.limit'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
+                            <el-input v-model="scope.row.limit" placeholder="0-100以内整数" maxlength="3" style="width: 120px;"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="startTime" label="资源阶梯" width="100">
+                    <template slot-scope="scope">
+                        {{scope.row.ladder}}阶梯
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="startTime" label="分数值范围">
+                    <template slot-scope="scope">
+                        <!-- <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeStart'" :rules='rules.clueSrangeStart'> -->
+                            <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeStart'" 
+                            :rules="[
+                                { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                            ]">
+                            <el-input v-model="scope.row.clueSrangeStart" placeholder="0-100以内整数" maxLength="3" style="width: 120px;"></el-input>
+                        </el-form-item>
+                        <span class="line">——</span>
+                        <el-form-item :prop="'ladderList.' + scope.$index + '.clueSrangeEnd'" 
+                        :rules="[
+                            { pattern: /^(?:0|[1-9][0-9]?|100)$/, message: '0-100以内整数', trigger: ['blur', 'change'] }
+                        ]">
+                            <el-input v-model="scope.row.clueSrangeEnd" placeholder="0-100以内整数" maxLength="3" style="width: 120px;"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+            </el-table>     
+            <div class="padding20 f-tac">     
+                <el-button type="primary" @click="submitForm('form')" :disabled="clueRuleSubmitBtnDiabled">提交</el-button>
+                <el-button @click="cancel">取 消</el-button>
+            </div> 
+        </el-form> 
+    </el-row>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var optionsObj = [[${businessLineList}]];
+    // console.log(optionsObj)
+</script>
+<script>
+    var releaseRuleVM=new Vue({
+        el: '#releaseRule',
+        data: function() {
+            return { 
+                bussinessLineTitle:'',
+            	clueRuleSubmitBtnDiabled:false,
+                isAddAble:true,
+                isShow:false,  
+                form: { 
+                    bussinessLine:'1',
+                    createDay:'',
+                    disDay:'',
+                    ladderList:[],
+                },   
+                editId:'',             
+                rules:{
+                    bussinessLine: [
+                        { required: true, message: '请选择业务线', trigger: 'blur' }
+                    ],
+                    createDay: [
+                        { required: true, message: '请输入正整数', trigger: 'blur' },
+                        { validator: function (rule, value, callback) {
+                                var reg = /^[0-9]+[0-9]*]*$/;
+                                if (value == null || value == "null" || value == "") {
+                                    callback(new Error("请输入正整数"));
+                                    releaseRuleVM.form.createDay = "";
+
+                                } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正整数"));
+                                    releaseRuleVM.form.createDay = "";
+                                } else {
+                                    callback();
+                                }
+
+                            }, trigger: 'change'
+                        }
+                    ],
+                    disDay: [
+                        { required: true, message: '请输入正整数', trigger: 'blur' },
+                        { validator: function (rule, value, callback) {
+                            var reg = /^[0-9]+[0-9]*]*$/;
+                            if (value == null || value == "null" || value == "") {
+                                callback(new Error("请输入正整数"));
+                                releaseRuleVM.form.disDay = "";
+
+                            } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                callback(new Error("请输入正整数"));
+                                releaseRuleVM.form.disDay = "";
+                            } else {
+                                callback();
+                            }
+
+                            }, trigger: 'change'
+                        }
+                    ]
+                },
+                options: optionsObj,
+                bussinessLine:'',//业务线
+            }             
+        },
+        methods: {
+            changeBussinessLine(val){
+                console.log(val);
+                var optionsVal=this.options;
+                for(var i=0;i<optionsVal.length;i++){
+                    if(val==optionsVal[i].value){
+                        this.bussinessLineTitle=optionsVal[i].name;
+                        this.bussinessLine=optionsVal[i].value;
+                        this.initClueRule(optionsVal[i].value)
+                    }
+                }
+                
+            },
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) { 
+                        // 判断阶梯不能为空
+                        var list=this.form.ladderList;
+                        console.log(list)
+                        for(var i=0;i<list.length;i++){
+                            if(list[i].srangeStart){
+                                if(!list[i].srangeEnd||!list[i].limit||!list[i].clueSrangeStart||!list[i].clueSrangeEnd){
+                                    this.$message({message:'已有数据的阶梯不能为空',type:'error'});
+                                    return;
+                                }
+                            }
+                            if(list[i].srangeEnd){
+                                if(!list[i].srangeStart||!list[i].limit||!list[i].clueSrangeStart||!list[i].clueSrangeEnd){
+                                    this.$message({message:'已有数据的阶梯不能为空',type:'error'});
+                                    return;
+                                }
+                            }
+                            if(list[i].limit){
+                                if(!list[i].srangeStart||!list[i].srangeEnd||!list[i].clueSrangeStart||!list[i].clueSrangeEnd){
+                                    this.$message({message:'已有数据的阶梯不能为空',type:'error'});
+                                    return;
+                                }
+                            }
+                            if(list[i].clueSrangeStart){
+                                if(!list[i].srangeStart||!list[i].srangeEnd||!list[i].limit||!list[i].clueSrangeEnd){
+                                    this.$message({message:'已有数据的阶梯不能为空',type:'error'});
+                                    return;
+                                }
+                            }
+                            if(list[i].clueSrangeEnd){
+                                if(!list[i].srangeStart||!list[i].srangeEnd||!list[i].limit||!list[i].clueSrangeStart){
+                                    this.$message({message:'已有数据的阶梯不能为空',type:'error'});
+                                    return;
+                                }
+                            }
+                            // 判断顾问阶梯数字大小
+                            // if(Number(list[i].srangeStart)>Number(list[i].srangeEnd)){
+                            //     this.$message({message:'顾问阶梯开始范围不能大于结束范围',type:'error'});
+                            //     return;
+                            // }
+                            // for(var j=i+1;j<list.length;j++){
+                            //     if(Number(list[i].srangeStart)<=Number(list[j].srangeEnd)){
+                            //         this.$message({message:'顾问'+(i+1)+'阶梯的开始值不能小于或等于'+(j+1)+'阶梯的结束值',type:'error'});
+                            //         return;
+                            //     }                             
+                            // }
+                            // 判断阶梯开始和结束大小
+                            // if(Number(list[i].clueSrangeStart)>Number(list[i].clueSrangeEnd)){
+                            //     this.$message({message:'资源开始范围不能大于结束范围',type:'error'});
+                            //     return;
+                            // }
+                            // for(var z=i+1;z<list.length;z++){
+                            //     if(Number(list[i].clueSrangeStart)<=Number(list[z].clueSrangeEnd)){
+                            //         this.$message({message:'资源'+(i+1)+'阶梯的开始值不能小于或等于'+(z+1)+'阶梯的结束值',type:'error'});
+                            //         return;
+                            //     }                             
+                            // }
+                        }
+
+                        var url=""
+                        var param = {};
+                        if(this.editId){
+                            param.id=this.editId;
+                            url="/autodistribution/update"
+                        }else{
+                            url="/autodistribution/insert"
+                        }
+                        param.bussinessLine=this.form.bussinessLine;
+                        param.createDay=this.form.createDay;
+                        param.disDay=this.form.disDay;
+                        param.ladderList=this.form.ladderList;
+                        console.log(param)
+                        axios.post(url,param)
+                        .then(function (response) {
+                            console.log(response)
+                            var data =  response.data
+                            if(data.code=='0'){
+                               var resData = data.data;
+                                
+                               releaseRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    location.href="/autodistribution/page"                            	   
+                               }});  ;  
+                            }else{
+                            	releaseRuleVM.$message({message:data.msg,type:'error'});
+                            }
+                        
+                        })
+                        .catch(function (error) {
+                            releaseRuleVM.clueRuleSubmitBtnDiabled=false;
+                            console.log(error);
+                        });
+                        
+
+                    } else {
+                        console.log('error submit!!');
+                        this.clueRuleSubmitBtnDiabled=false;
+                        return false;
+                    }
+                });
+            },
+            number(){
+    　　　      this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+                this.form.customerPhone=this.form.customerPhone.replace('.','');
+        　　},
+            cancel(){//取消
+            	location.reload();
+            },
+            initClueRule(val){
+            	var param={};
+                if(val){
+                    param.bussinessLine=val;
+                }else{
+                    param.bussinessLine=optionsObj[0].value;
+                }
+                
+            	 axios.post('/autodistribution/queryByParams',param)
+                 .then(function (response) {
+                    console.log(response)
+                     var data =  response.data;
+                     if(data.code=='0'){
+                        var resData = data.data;
+                        if(resData&&resData.id){
+                            releaseRuleVM.editId=resData.id;
+                        }else{
+                            releaseRuleVM.editId='';
+                        }
+                        if(resData&&resData.bussinessLine){
+                            releaseRuleVM.form.bussinessLine=resData.bussinessLine+"";
+                        }
+                        if(resData&&resData.createDay){
+                            releaseRuleVM.form.createDay=resData.createDay;
+                        }else{
+                            releaseRuleVM.form.createDay=null;
+                        }
+                        if(resData&&resData.disDay){
+                            releaseRuleVM.form.disDay=resData.disDay;
+                        }else{
+                            releaseRuleVM.form.disDay=null;
+                        }
+                        var list=resData.ladderList;
+                        if(resData&&list.length!=0){
+                            if(list.length!=0){
+                                for(var i=0;i<list.length;i++){
+                                    if(list[i].srangeStart||list[i].srangeStart===0){
+                                       list[i].srangeStart=list[i].srangeStart+""; 
+                                    }
+                                    if(list[i].srangeEnd||list[i].srangeEnd===0){
+                                        list[i].srangeEnd=list[i].srangeEnd+"";
+                                    }                                
+                                    if(list[i].limit||list[i].limit===0){
+                                        list[i].limit=list[i].limit+"";
+                                    }
+                                    if(list[i].clueSrangeStart||list[i].clueSrangeStart===0){
+                                        list[i].clueSrangeStart=list[i].clueSrangeStart+"";
+                                    }
+                                    if(list[i].clueSrangeEnd||list[i].clueSrangeEnd===0){
+                                        list[i].clueSrangeEnd=list[i].clueSrangeEnd+"";
+                                    }                                
+                                }
+                                releaseRuleVM.form.ladderList=list;
+                            }                            
+                        }else{
+                            releaseRuleVM.form.ladderList=[{
+                                id:null,
+                                modelId:null,
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:1,
+                                limit:null
+                            },{
+                                id:null,
+                                modelId:null,
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:2,
+                                limit:null
+                            },{
+                                id:null,
+                                modelId:null,
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:3,
+                                limit:null
+                            },{
+                                id:null,
+                                modelId:null,
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:4,
+                                limit:null
+                            },{
+                                id:null,
+                                modelId:null,
+                                srangeStart:null,
+                                srangeEnd:null,
+                                clueSrangeStart:null,
+                                clueSrangeEnd:null,
+                                ladder:5,
+                                limit:null
+                            }];
+                        }
+                        
+                         
+                     }else{
+                    	 releaseRuleVM.$message({message:data.msg,type:'error'});
+                         console.error(data);
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+            }
+            
+        },
+        mounted(){
+            document.getElementById('releaseRule').style.display = 'block';
+        },
+        created(){
+        	this.initClueRule();
+            var optionsVal=this.options;
+            for(var i=0;i<optionsVal.length;i++){
+                this.bussinessLineTitle=optionsVal[0].name
+            }
+        }
+    })
+</script>
+</html>
