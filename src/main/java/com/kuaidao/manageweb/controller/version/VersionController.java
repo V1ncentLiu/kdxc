@@ -1,33 +1,24 @@
 package com.kuaidao.manageweb.controller.version;
 
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.version.VersionFeignClient;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang.StringUtils;
+import com.kuaidao.version.dto.*;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.version.dto.*;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created on: 2019-08-01-14:58
@@ -50,6 +41,8 @@ public class VersionController {
   @GetMapping(value = "/androidVersionListInit")
   @RequiresPermissions("versionList:view")
   public String androidVersionListInit(HttpServletRequest request, Model model) {
+    request.setAttribute("type",request.getParameter("type"));
+    request.setAttribute("systemCode",request.getParameter("systemCode"));
     request.setAttribute("ossUrl", ossUrl);
     return "update/androidUpdate";
   }
@@ -62,6 +55,8 @@ public class VersionController {
   @GetMapping(value = "/iosVersionListInit")
   @RequiresPermissions("versionList:view")
   public String iosVersionListInit(HttpServletRequest request, Model model) {
+    request.setAttribute("type",request.getParameter("type"));
+    request.setAttribute("systemCode",request.getParameter("systemCode"));
     request.setAttribute("ossUrl", ossUrl);
     return "update/iosUpdate";
   }

@@ -104,6 +104,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+    var type = [[${type}]];// type
+    var systemCode = [[${systemCode}]]; //系统编码
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
@@ -170,7 +172,8 @@
                 var pageNum = this.pager.currentPage;
                 param.pageNum = pageNum;
                 param.pageSize = pageSize;
-                param.type=1;//版本类型:1-android2-ios                
+                param.type=type;//版本类型:1-android2-ios
+                param.systemCode=systemCode;
                 axios.post('/version/list',param).then(function (response) {
                 	  console.log(response);
                     var data=response.data;
@@ -372,7 +375,8 @@
                     if (valid) {
                         var formData = this.form;
                         var param={};
-                        param.type = 1;//版本类型:1-android2-ios
+                        param.type = type;//版本类型:1-android2-ios
+                        param.systemCode = systemCode;
                         param.versionNum = formData.versionNum;//版本号
                         param.upgradeType = formData.upgradeType;//升级模式:1-强制升级、2-可选升级
                         param.url = formData.url;//url地址
@@ -482,7 +486,8 @@
                     var param = {};
                     param.id=id;
                     param.versionNum=versionNum;
-                    param.type=1;
+                    param.type=type;
+                    param.systemCode=systemCode;
                     var url="";
                     if(status=="1"){
                         url='/version/setNewVersion';
