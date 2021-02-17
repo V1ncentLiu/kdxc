@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.assignrule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -306,6 +307,18 @@ public class TelemarketingAssignRuleContoller {
         statusList.add(SysConstant.USER_STATUS_LOCK);
         List<UserInfoDTO> saleList =
                 getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
+        // “经纪人”人员
+        List<UserInfoDTO> jjSaleList =
+                getUserList(user.getOrgId(), RoleCodeEnum.JJR.name(), statusList);
+        if( null == saleList ){
+
+            saleList = Collections.emptyList();
+        }
+        if( null == jjSaleList ){
+
+            jjSaleList = Collections.emptyList();
+        }
+        saleList.addAll(jjSaleList);
         model.addAttribute("orgUserList", saleList);
         return "assignrule/addtelemarketingRule";
     }

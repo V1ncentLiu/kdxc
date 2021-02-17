@@ -750,6 +750,28 @@ public class UserController {
         if(!RoleCodeEnum.GLY.name().equals(roleCode)){
             //非管理员角色,查询同组织用户
             reqDTO.setOrgId(curLoginUser.getOrgId());
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            reqDTO.setStatusList(statusList);
+            JSONResult<List<UserInfoDTO>> listJSONResult = userInfoFeignClient.listUserInfoByParam(reqDTO);
+
+            // 添加“经济人”角色的用户
+            UserOrgRoleReq userRole = new UserOrgRoleReq();
+            userRole.setRoleCode(RoleCodeEnum.JJR.name());
+            userRole.setStatusList(statusList);
+            JSONResult<List<UserInfoDTO>> userInfoJson =
+                    userInfoFeignClient.listByOrgAndRole(userRole);
+
+            if( null == listJSONResult.getData()){
+
+                listJSONResult.setData(Collections.emptyList());
+            }
+            if(JSONResult.isNotNull(userInfoJson)){
+
+                listJSONResult.getData().addAll(userInfoJson.getData());
+            }
+            return listJSONResult;
         }
 
         List<Integer> statusList = new ArrayList<Integer>();
