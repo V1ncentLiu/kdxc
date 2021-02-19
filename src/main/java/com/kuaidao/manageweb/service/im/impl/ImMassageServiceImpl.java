@@ -68,7 +68,7 @@ public class ImMassageServiceImpl implements ImMassageService {
         }
         Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
         // 电销顾问 & 业务线是的商机盒子的
-        if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())) {
+        if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.CMZSJJ).equals(user.getBusinessLine())) {
             // 查询顾问IM账号
             JSONResult<SaleImDTO> byTeleSaleId = saleImFeignClient.getByTeleSaleId(new IdEntityLong(user.getId()));
             if (JSONResult.isNotNull(byTeleSaleId) && !CustServiceConstant.TELE_IM_STATUS_2.equals(byTeleSaleId.getData().getStatus())) {
@@ -108,7 +108,7 @@ public class ImMassageServiceImpl implements ImMassageService {
         }
         Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
         // 电销顾问 & 业务线是的商机盒子的
-        if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())) {
+        if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.CMZSJJ).equals(user.getBusinessLine())) {
             // 查询顾问IM账号
             JSONResult<SaleImDTO> byTeleSaleId = saleImFeignClient.getByTeleSaleId(new IdEntityLong(user.getId()));
             if (JSONResult.isNotNull(byTeleSaleId)) {
