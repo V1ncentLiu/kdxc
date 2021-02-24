@@ -115,7 +115,7 @@ public class ClientController {
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         // 电销总监 | 经济总监
-        if(RoleCodeEnum.DXZJ.name().equals(roleCode) || RoleCodeEnum.JJZJ.name().equals(roleCode) ) {
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode) || RoleCodeEnum.JJJL.name().equals(roleCode) ) {
             //电销总监查他自己的组
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
             if(curOrgGroupByOrgId!=null) {

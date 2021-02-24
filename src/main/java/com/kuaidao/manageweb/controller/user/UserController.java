@@ -758,7 +758,7 @@ public class UserController {
 
             // 添加“经济人”角色的用户
             UserOrgRoleReq userRole = new UserOrgRoleReq();
-            userRole.setRoleCode(RoleCodeEnum.JJR.name());
+            userRole.setRoleCode(RoleCodeEnum.JMJJ.name());
             userRole.setStatusList(statusList);
             JSONResult<List<UserInfoDTO>> userInfoJson =
                     userInfoFeignClient.listByOrgAndRole(userRole);

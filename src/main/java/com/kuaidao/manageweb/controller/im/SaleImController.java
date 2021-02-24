@@ -91,13 +91,13 @@ public class SaleImController {
         UserInfoDTO user = getUser();
         String roleCode = user.getRoleList().get(0).getRoleCode();
         List<Integer> businessLineList = new ArrayList<>();
-        businessLineList.add(BusinessLineConstant.SHANGJI);
+//        businessLineList.add(BusinessLineConstant.SHANGJI);
         businessLineList.add(BusinessLineConstant.CMZSJJ);
         // 餐盟严选所有电销组
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
         organizationQueryDTO.setBusinessLineList(businessLineList);
         organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-        if (RoleCodeEnum.DXZJ.name().equals(roleCode)||RoleCodeEnum.JJZJ.name().equals(roleCode)) {
+        if (RoleCodeEnum.JJJL.name().equals(roleCode)) {
             organizationQueryDTO.setId(user.getOrgId());
         }
         // 查询下级电销组(查询使用)
@@ -106,7 +106,7 @@ public class SaleImController {
         // 餐盟严选所有电销顾问
         List<UserInfoDTO> userList = new ArrayList<>();
 
-        userList = getUserListByBusliness(BusinessLineConstant.SHANGJI, RoleCodeEnum.DXCYGW.name(), user);
+        userList = getUserListByBusliness(BusinessLineConstant.CMZSJJ, RoleCodeEnum.JMJJ.name(), user);
 
         request.setAttribute("teleGroupList", data);
         request.setAttribute("teleSaleList", userList);
@@ -132,7 +132,7 @@ public class SaleImController {
         OrganizationDTO data = result.data();
 
         if(data.getBusinessLine() == BusinessLineConstant.CMZSJJ){
-            userOrgRoleReq.setRoleCode(RoleCodeEnum.JJR.name());
+            userOrgRoleReq.setRoleCode(RoleCodeEnum.JMJJ.name());
         }else{
             userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
         }
@@ -200,7 +200,7 @@ public class SaleImController {
     @ResponseBody
     public JSONResult<PageBean<SaleImDTO>> list(@RequestBody SaleImPageParam pageParam, HttpServletRequest request) {
         List<Integer> businessLineList = new ArrayList<>();
-        businessLineList.add(BusinessLineConstant.SHANGJI);
+//        businessLineList.add(BusinessLineConstant.SHANGJI);
         businessLineList.add(BusinessLineConstant.CMZSJJ);
         pageParam.setBusinessLineList(businessLineList);
         JSONResult<PageBean<SaleImDTO>> list = saleImFeignClient.list(pageParam);
@@ -339,7 +339,7 @@ public class SaleImController {
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
         userOrgRoleReq.setBusinessLine(businessLine);
-        if (RoleCodeEnum.DXZJ.name().equals(user.getRoleList().get(0).getRoleCode())) {
+        if (RoleCodeEnum.JJJL.name().equals(user.getRoleList().get(0).getRoleCode())) {
             userOrgRoleReq.setOrgId(user.getOrgId());
         }
         JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);

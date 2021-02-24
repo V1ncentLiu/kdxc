@@ -309,7 +309,7 @@ public class TelemarketingAssignRuleContoller {
                 getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
         // “经纪人”人员
         List<UserInfoDTO> jjSaleList =
-                getUserList(user.getOrgId(), RoleCodeEnum.JJR.name(), statusList);
+                getUserList(user.getOrgId(), RoleCodeEnum.JJJL.name(), statusList);
         if( null == saleList ){
 
             saleList = Collections.emptyList();
