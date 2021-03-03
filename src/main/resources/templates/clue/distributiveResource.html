@@ -1240,9 +1240,16 @@
                     // var rows = this.multipleSelection;
                     // param.clueIds=clueIds;
                     axios.post(url,param).then(function (response) {
-                        if(!response||!response.data||response.data.code!='0'){
+                        if(!response||!response.data){
                             ocmVM.$message({
                                 message: "接口调用失败",
+                                type: 'error'
+                            });
+                            return ;
+                        }
+                        if(response.data.code!='0'){
+                            ocmVM.$message({
+                                message: response.data.msg,
                                 type: 'error'
                             });
                             return ;
