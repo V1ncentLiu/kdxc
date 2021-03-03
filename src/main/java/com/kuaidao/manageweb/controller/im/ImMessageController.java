@@ -103,7 +103,7 @@ public class ImMessageController {
                 OrganizationQueryDTO dto = new OrganizationQueryDTO();
                 dto.setSystemCode(SystemCodeConstant.HUI_JU);
                 dto.setOrgType(OrgTypeConstant.DXZ);
-                dto.setBusinessLine(BusinessLineConstant.SHANGJI);
+                dto.setBusinessLine(BusinessLineConstant.CMZSJJ);
                 log.info("user.getBusinessLine={}", user.getBusinessLine());
                 JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
                 log.info("dzList-dzList={}", JSONUtil.toJSon(dzList));
@@ -518,7 +518,7 @@ public class ImMessageController {
             }
             Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
             // 电销顾问 & 业务线是的商机盒子的
-            if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.SHANGJI).equals(user.getBusinessLine())){
+            if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.CMZSJJ).equals(user.getBusinessLine())){
                 // 设置顾问Id
                 saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
                 JSONResult<Boolean> onlineLeave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
