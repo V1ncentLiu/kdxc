@@ -12,13 +12,13 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item>顾问IM授权管理</el-breadcrumb-item>
+        <el-breadcrumb-item>经纪IM授权管理</el-breadcrumb-item>
     </el-breadcrumb>  
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
-                <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable filterable @change="changeTeleGroup" :disabled="teleGroupDisabled">
+                <el-form-item label="经纪组:">
+                    <el-select v-model="form.teleGroupId" placeholder="经纪组" style="width: 100%;" clearable filterable @change="changeTeleGroup" :disabled="teleGroupDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -27,8 +27,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="顾问名称:">  
-                    <el-select v-model="form.teleSaleId" placeholder="顾问" style="width: 100%;" clearable filterable>
+                <el-form-item label="经纪名称:">
+                    <el-select v-model="form.teleSaleId" placeholder="经纪" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in teleSaleArr"
                             :key="item.id"
@@ -63,9 +63,9 @@
                 :data="tableData"
                 v-loading="loading">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="teleGroupName" align="center" label="电销组">
+                <el-table-column prop="teleGroupName" align="center" label="经纪组">
                 </el-table-column>
-                <el-table-column prop="teleSaleName" align="center" label="电销顾问">
+                <el-table-column prop="teleSaleName" align="center" label="经纪人">
                 </el-table-column>
                 <el-table-column prop="imStatus" align="center" label="IM状态">
                     <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
@@ -164,7 +164,7 @@
     var teleGroupId='';
     var teleSaleArr=[];
     var teleGroupDisabled=false;
-    if(roleCode=='DXZJ'){
+    if(roleCode=='JJJL'){
     	teleGroupId=orgId;
     	teleSaleArr=teleSale;
     	teleGroupDisabled=true;
@@ -223,7 +223,7 @@
                 }
                 var param = {};
                 param.orgId = selectedValue;
-                axios.post('/business/busAllocation/getSaleList', param)
+                axios.post('/custservice/saleIm/getSaleList', param)
                     .then(function (response) {
                         var result = response.data;
                         var table = result.data;

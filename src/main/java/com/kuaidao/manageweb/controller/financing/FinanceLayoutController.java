@@ -20,6 +20,7 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
@@ -71,6 +72,20 @@ public class FinanceLayoutController {
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList = organizationFeignClient.queryOrgByParam(orgDto);
+
+        // 部门类型为电销组组织
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        JSONResult<List<OrganizationRespDTO>> dxzList = organizationFeignClient.queryOrgByParam(orgDto);
+
+        if( null == swList.getData()){
+
+            swList.setData(Collections.emptyList());
+        }
+        if( null == dxzList.getData()){
+
+            dxzList.setData(Collections.emptyList());
+        }
+        swList.getData().addAll(dxzList.getData());
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
@@ -82,7 +97,7 @@ public class FinanceLayoutController {
             request.setAttribute("provinceList", getProviceList.getData());
         }
         List<UserInfoDTO> userList = getUserList();
-        request.setAttribute("swList", swList.getData());
+        request.setAttribute("swList", swList.getData() );
         request.setAttribute("userList", userList);
         return "financing/financeLayoutPage";
     }
