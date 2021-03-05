@@ -1,62 +1,13 @@
 package com.kuaidao.manageweb.controller.client;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.entity.*;
-import com.kuaidao.manageweb.feign.client.QimoFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.session.Session;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
-import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
-import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
-import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
-import com.kuaidao.aggregation.dto.client.ImportQimoClientDTO;
-import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
-import com.kuaidao.aggregation.dto.client.QimoClientQueryDTO;
-import com.kuaidao.aggregation.dto.client.QimoClientRespDTO;
-import com.kuaidao.aggregation.dto.client.QimoDataRespDTO;
-import com.kuaidao.aggregation.dto.client.QimoLoginReqDTO;
-import com.kuaidao.aggregation.dto.client.QueryQimoDTO;
-import com.kuaidao.aggregation.dto.client.QueryTrClientDTO;
-import com.kuaidao.aggregation.dto.client.TrClientDataRespDTO;
-import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
-import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
-import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
-import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
-import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
+import com.kuaidao.aggregation.dto.client.*;
 import com.kuaidao.callcenter.dto.QimoOutboundCallDTO;
 import com.kuaidao.callcenter.dto.QimoOutboundCallRespDTO;
 import com.kuaidao.callcenter.dto.TrAxbOutCallReqDTO;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RedisConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -64,12 +15,32 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
+import com.kuaidao.manageweb.feign.client.QimoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.netflix.hystrix.contrib.javanica.utils.CommonUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.session.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 坐席管理 controller 
@@ -135,7 +106,7 @@ public class ClientController {
      *  跳转七陌坐席页面
      * @return
      */
-    @RequiresPermissions("aggregation:qimoClient:view")
+    @RequiresPermissions("agentservice:qimoClient:view")
     @RequestMapping("/qimoClientIndex")
     public String qimoClientIndex(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
@@ -143,18 +114,19 @@ public class ClientController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+        // 电销总监 | 经济总监
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode) || RoleCodeEnum.JJJL.name().equals(roleCode) ) {
             //电销总监查他自己的组
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(String.valueOf(curLoginUser.getOrgId()));
             if(curOrgGroupByOrgId!=null) {
                 orgList.add(curOrgGroupByOrgId);
             }
             request.setAttribute("orgList", orgList);
-        } else {
+        }else {
             OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
             queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
             JSONResult<List<OrganizationRespDTO>> orgListJr =
-                organizationFeignClient.queryOrgByParam(queryDTO);
+                    organizationFeignClient.queryOrgByParam(queryDTO);
             if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
                 logger.error("跳转七陌坐席时，查询组织机构列表报错,res{{}}", orgListJr);
             } else {

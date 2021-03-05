@@ -116,7 +116,7 @@ public class ExtendClueDistributionedTaskController {
     @RequestMapping("/queryPageDistributionedTask")
     @ResponseBody
     public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(HttpServletRequest request,
-            @RequestBody ClueDistributionedTaskQueryDTO queryDto) {
+                                                                                       @RequestBody ClueDistributionedTaskQueryDTO queryDto) {
         UserInfoDTO user = getUser();
         queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
@@ -414,9 +414,23 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getRootWord());
                 if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                     curList.add(taskDTO.getConsultProjectTurn());
+                }else{
+                    curList.add("");
                 }
                 curList.add(taskDTO.getSaleLadder());
                 curList.add(taskDTO.getClueLadder());
+
+                //经纪人字段处理
+                if (null != taskDTO.getBusinessLine() && taskDTO.getBusinessLine().equals(15)) {
+                    //首次分配经纪组
+                    curList.add(taskDTO.getFirstAsssignTeleGroupName());
+                    //首次分配经纪人
+                    curList.add(taskDTO.getFirstAssignTeleSaleName());
+                    //现负责经纪组
+                    curList.add(taskDTO.getAgentGroupNames());
+                    //现负责经纪人
+                    curList.add(taskDTO.getAgentNames());
+                }
                 dataList.add(curList);
             }
         }
@@ -667,11 +681,24 @@ public class ExtendClueDistributionedTaskController {
                     // 咨询项目
                     if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                         curList.add(taskDTO.getConsultProjectTurn());
+                    }else{
+                        curList.add("");
                     }
                 }
                 if (!queryDto.getPhtraExport()) {
                     //阶段名称
                     curList.add(taskDTO.getPhaseName());
+                }
+                //经纪人字段处理
+                if (!queryDto.getPhtraExport() && null != taskDTO.getBusinessLine() && taskDTO.getBusinessLine().equals(15)) {
+                    //首次分配经纪组
+                    curList.add(taskDTO.getFirstAsssignTeleGroupName());
+                    //首次分配经纪人
+                    curList.add(taskDTO.getFirstAssignTeleSaleName());
+                    //现负责经纪组
+                    curList.add(taskDTO.getAgentGroupNames());
+                    //现负责经纪人
+                    curList.add(taskDTO.getAgentNames());
                 }
                 dataList.add(curList);
             }
@@ -711,90 +738,6 @@ public class ExtendClueDistributionedTaskController {
             }
             excelWriter.finish();
         }
-    }
-
-    /**
-     * 导出资源沟通情况
-     * @return
-     */
-    private List<Object> getCommunicateRecordsHeadTitleList() {
-        List<Object> headTitleList = new ArrayList<>();
-        headTitleList.add("资源ID");
-        headTitleList.add("客户级别");
-        headTitleList.add("创建时间");
-        headTitleList.add("资源类别");
-        headTitleList.add("媒介");
-        headTitleList.add("资源项目");
-        headTitleList.add("手机号");
-        headTitleList.add("手机号2");
-        headTitleList.add("QQ");
-        headTitleList.add("微信");
-        headTitleList.add("搜索词");
-        headTitleList.add("首次分配电销组");
-        headTitleList.add("首次分配电销组总监");
-        headTitleList.add("电销组");
-        headTitleList.add("电销顾问");
-        headTitleList.add("首次响应间隔");
-        headTitleList.add("是否接通");
-        headTitleList.add("是否有效");
-        headTitleList.add("第一次拨打时间");
-        headTitleList.add("第一次沟通时间");
-        headTitleList.add("第一次沟通内容");
-        headTitleList.add("第二次沟通时间");
-        headTitleList.add("第二次沟通内容");
-        headTitleList.add("第三次沟通时间");
-        headTitleList.add("第三次沟通内容");
-        headTitleList.add("留言时间");
-        headTitleList.add("资源专员");
-        headTitleList.add("所属组");
-        return headTitleList;
-    }
-
-    /**
-     * 导出资源情况
-     * @return
-     */
-    private List<Object> getHeadTitleList() {
-        List<Object> headTitleList = new ArrayList<>();
-        headTitleList.add("资源ID");
-        headTitleList.add("创建时间");
-        headTitleList.add("媒介");
-        headTitleList.add("广告位");
-        headTitleList.add("资源类型");
-        headTitleList.add("资源类别");
-        headTitleList.add("资源项目");
-        headTitleList.add("姓名");
-        headTitleList.add("手机1");
-        headTitleList.add("邮箱");
-        headTitleList.add("QQ");
-        headTitleList.add("手机2");
-        headTitleList.add("微信1");
-        headTitleList.add("微信2");
-        headTitleList.add("地址");
-        headTitleList.add("留言时间");
-        headTitleList.add("留言内容");
-        headTitleList.add("搜索词");
-        headTitleList.add("资源专员");
-        headTitleList.add("所属组");
-        headTitleList.add("行业类别");
-        headTitleList.add("备注");
-        headTitleList.add("电销组分公司");
-        headTitleList.add("电销组总监");
-        headTitleList.add("电销组");
-        headTitleList.add("是否接通");
-        headTitleList.add("是否有效");
-        headTitleList.add("是否重复");
-        headTitleList.add("是否自建");
-        headTitleList.add("首次分配话务组");
-        headTitleList.add("首次分配电销组");
-        headTitleList.add("首次分配电销组总监");
-        headTitleList.add("资源阶段");
-        headTitleList.add("话务是否接通");
-        headTitleList.add("话务是否有效");
-        headTitleList.add("手机号1归属地");
-        headTitleList.add("手机号2归属地");
-        headTitleList.add("客户级别");
-        return headTitleList;
     }
 
     /**
