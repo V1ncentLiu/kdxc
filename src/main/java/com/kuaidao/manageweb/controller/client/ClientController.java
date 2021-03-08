@@ -106,7 +106,7 @@ public class ClientController {
      *  跳转七陌坐席页面
      * @return
      */
-    @RequiresPermissions("agentservice:qimoClient:view")
+    @RequiresPermissions("aggregation:qimoClient:view")
     @RequestMapping("/qimoClientIndex")
     public String qimoClientIndex(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
