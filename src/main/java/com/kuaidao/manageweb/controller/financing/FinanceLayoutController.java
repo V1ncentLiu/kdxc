@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.financing;
 
 import com.kuaidao.aggregation.dto.financing.FinanceLayoutDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -19,10 +20,6 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +28,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @Auther: admin
@@ -65,17 +67,15 @@ public class FinanceLayoutController {
     public String financeLayoutList(HttpServletRequest request) {
         UserInfoDTO userInfoDTO = getUser();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-//        if(userInfoDTO.getBusinessLine() !=null){
-//            orgDto.setBusinessLine(userInfoDTO.getBusinessLine());
-//        }
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList = organizationFeignClient.queryOrgByParam(orgDto);
-
-        // 部门类型为电销组组织
-        orgDto.setOrgType(OrgTypeConstant.DXZ);
-        JSONResult<List<OrganizationRespDTO>> dxzList = organizationFeignClient.queryOrgByParam(orgDto);
+        // 经纪业务线
+        OrganizationQueryDTO orgDtoBusinessLine = new OrganizationQueryDTO();
+        orgDtoBusinessLine.setSystemCode(SystemCodeConstant.HUI_JU);
+        orgDtoBusinessLine.setBusinessLine(BusinessLineConstant.CMZSJJ);
+        JSONResult<List<OrganizationRespDTO>> dxzList = organizationFeignClient.queryOrgByParam(orgDtoBusinessLine);
 
         if( null == swList.getData()){
 
