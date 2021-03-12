@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.version;
 
+import com.alibaba.fastjson.JSON;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -9,6 +10,7 @@ import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.version.VersionFeignClient;
 import com.kuaidao.version.dto.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Created on: 2019-08-01-14:58
  */
+@Slf4j
 @Controller
 @RequestMapping("/version")
 public class VersionController {
@@ -70,6 +73,7 @@ public class VersionController {
   @PostMapping("/list")
   @ResponseBody
   public PageBean<VersionManageDTO> list(@RequestBody VersionManageListDTO versionManageListDTO) {
+    log.info("list-version=versionManageListDTO", JSON.toJSONString(versionManageListDTO));
     // 查询账号列表信息
     JSONResult<PageBean<VersionManageDTO>> listResult = versionFeignClient.list(versionManageListDTO);
     if (null != listResult && listResult.getCode().equals(Constants.SUCCESS)) {

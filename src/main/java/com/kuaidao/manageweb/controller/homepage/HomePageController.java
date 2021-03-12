@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.homepage;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.common.constant.BusinessLineConstant;
@@ -71,6 +72,19 @@ public class HomePageController {
         request.setAttribute("user", userInfoRespDTO);
 
         List<IndexModuleDTO> menuList = user.getMenuList();
+        if(CollectionUtils.isNotEmpty(menuList)){
+            menuList = menuList.stream().filter(a->{
+                if(a.getId()!=null&&a.getId()==15){
+                    return false;
+                }
+                return true;
+            }).filter(a->{
+                if(a.getParentId()!=null&&  a.getParentId()==15){
+                    return false;
+                }
+                return true;
+            }).collect(Collectors.toList());
+        }
         request.setAttribute("menuList", menuList);
         request.setAttribute("isUpdatePassword", isUpdatePassword);
         request.setAttribute("wsUrlHttp", wsUrlHttp);
