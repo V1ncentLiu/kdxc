@@ -76,19 +76,6 @@ public class CmHomePageController {
         request.setAttribute("user", userInfoRespDTO);
 
         List<IndexModuleDTO> menuList = user.getMenuList();
-        if(CollectionUtils.isNotEmpty(menuList)){
-            menuList = menuList.stream().filter(a->{
-                if(a.getId()!=null&&a.getId()==15){
-                    return false;
-                }
-                return true;
-            }).filter(a->{
-                if(a.getParentId()!=null&&  a.getParentId()==15){
-                    return false;
-                }
-                return true;
-            }).collect(Collectors.toList());
-        }
         request.setAttribute("menuList", menuList);
         request.setAttribute("isUpdatePassword", isUpdatePassword);
         request.setAttribute("wsUrlHttp", wsUrlHttp);
