@@ -3,8 +3,10 @@ package com.kuaidao.manageweb.controller.assignrule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -15,6 +17,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.businessconfig.dto.assignrule.TeleAssignRuleQueryDTO;
 import com.kuaidao.businessconfig.dto.assignrule.TelemarketingAssignRuleDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -60,8 +63,7 @@ public class TelemarketingAssignRuleContoller {
         orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.DXFGS);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        JSONResult<List<OrganizationRespDTO>> orgComJson =
-                organizationFeignClient.queryOrgByParam(orgDto);
+        JSONResult<List<OrganizationRespDTO>> orgComJson = organizationFeignClient.queryOrgByParam(orgDto);
         if (orgComJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("orgCompany", orgComJson.getData());
         }
@@ -69,8 +71,7 @@ public class TelemarketingAssignRuleContoller {
         orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.DZSYB);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        JSONResult<List<OrganizationRespDTO>> orgDeptJson =
-                organizationFeignClient.queryOrgByParam(orgDto);
+        JSONResult<List<OrganizationRespDTO>> orgDeptJson = organizationFeignClient.queryOrgByParam(orgDto);
         if (orgDeptJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("orgDept", orgDeptJson.getData());
         }
@@ -78,8 +79,7 @@ public class TelemarketingAssignRuleContoller {
         orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.DXZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        JSONResult<List<OrganizationRespDTO>> orgJson =
-                organizationFeignClient.queryOrgByParam(orgDto);
+        JSONResult<List<OrganizationRespDTO>> orgJson = organizationFeignClient.queryOrgByParam(orgDto);
         if (orgJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("orgSelect", orgJson.getData());
         }
@@ -88,14 +88,12 @@ public class TelemarketingAssignRuleContoller {
 
     /***
      * 展现电销分配规则页面
-     * 
      * @return
      */
     @RequestMapping("/queryTeleAssignRuleList")
     @ResponseBody
-    public JSONResult<PageBean<TelemarketingAssignRuleDTO>> queryTeleAssignRuleList(
-            @RequestBody TeleAssignRuleQueryDTO queryDTO, HttpServletRequest request,
-            HttpServletResponse response) {
+    public JSONResult<PageBean<TelemarketingAssignRuleDTO>> queryTeleAssignRuleList(@RequestBody TeleAssignRuleQueryDTO queryDTO,
+            HttpServletRequest request, HttpServletResponse response) {
         // 获取当前登录用户的机构信息//
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -107,32 +105,28 @@ public class TelemarketingAssignRuleContoller {
                 // 管理员查看所有
                 if (roleCode.equals(RoleCodeEnum.GLY.name())) {
                     orgList = getTelList(queryDTO);
-                    if (queryDTO.getTelemarketingId() != null || queryDTO.getTeleDepart() != null
-                            || queryDTO.getTeleCompany() != null) {
+                    if (queryDTO.getTelemarketingId() != null || queryDTO.getTeleDepart() != null || queryDTO.getTeleCompany() != null) {
                         queryDTO.setFieldList(orgList);
                     } else {
                         json = telemarketingAssignRuleFeignClient.queryTeleAssignRulePage(queryDTO);
                         return json;
                     }
 
-                } else if (roleCode.equals(RoleCodeEnum.DXZC.name())
-                        || roleCode.equals(RoleCodeEnum.DXZJL.name())
+                } else if (roleCode.equals(RoleCodeEnum.DXZC.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())
                         || roleCode.equals(RoleCodeEnum.DXFZ.name())) {
                     // 电销总裁、电销总经理、电销副总、查看所有下级电销的数据
                     List<Long> loginOrgList = this.queryTeleOrgInfoList(user.getOrgId());
-                    if (queryDTO.getTelemarketingId() != null || queryDTO.getTeleDepart() != null
-                            || queryDTO.getTeleCompany() != null) {
+                    if (queryDTO.getTelemarketingId() != null || queryDTO.getTeleDepart() != null || queryDTO.getTeleCompany() != null) {
                         orgList = getTelList(queryDTO);
                         loginOrgList.retainAll(orgList);
                     }
 
                     queryDTO.setFieldList(loginOrgList);
 
-                } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+                } else if (roleCode.equals(RoleCodeEnum.DXZJ.name()) || roleCode.equals(RoleCodeEnum.JJJL.name())) {
                     List<Long> orgLists = new ArrayList<>();
                     orgLists.add(user.getOrgId());
-                    if (queryDTO.getTelemarketingId() != null || queryDTO.getTeleDepart() != null
-                            || queryDTO.getTeleCompany() != null) {
+                    if (queryDTO.getTelemarketingId() != null || queryDTO.getTeleDepart() != null || queryDTO.getTeleCompany() != null) {
                         orgList = getTelList(queryDTO);
                         orgLists.retainAll(orgList);
                         queryDTO.setFieldList(orgLists);
@@ -152,8 +146,7 @@ public class TelemarketingAssignRuleContoller {
             json = telemarketingAssignRuleFeignClient.queryTeleAssignRulePage(queryDTO);
         } else {
             // 包装分页pageBean
-            PageBean<TelemarketingAssignRuleDTO> pageInfoDto =
-                    new PageBean<TelemarketingAssignRuleDTO>();
+            PageBean<TelemarketingAssignRuleDTO> pageInfoDto = new PageBean<TelemarketingAssignRuleDTO>();
             pageInfoDto.setCurrentPage(1);
             pageInfoDto.setPageSize(20);
             pageInfoDto.setTotal(0);
@@ -172,8 +165,7 @@ public class TelemarketingAssignRuleContoller {
         List<Long> departOrgList = new ArrayList<>();
         if (queryDTO.getTeleDepart() != null) {
             // 根据选择的电销事业部查询下面所有电销组
-            String teleDeptStr =
-                    this.queryTeleOrgInfoStr(queryDTO.getTeleDepart(), OrgTypeConstant.DXZ);
+            String teleDeptStr = this.queryTeleOrgInfoStr(queryDTO.getTeleDepart(), OrgTypeConstant.DXZ);
             if (org.apache.commons.lang.StringUtils.isNotBlank(teleDeptStr)) {
                 for (String str : teleDeptStr.split(",")) {
                     departOrgList.add(Long.parseLong(str));
@@ -187,12 +179,10 @@ public class TelemarketingAssignRuleContoller {
                 orgList = departOrgList;
             }
 
-
         }
         List<Long> companyorgList = new ArrayList<>();
         if (queryDTO.getTeleCompany() != null) {
-            String teleComStr =
-                    this.queryTeleOrgInfoStr(queryDTO.getTeleCompany(), OrgTypeConstant.DZSYB);
+            String teleComStr = this.queryTeleOrgInfoStr(queryDTO.getTeleCompany(), OrgTypeConstant.DZSYB);
             if (org.apache.commons.lang.StringUtils.isNotBlank(teleComStr)) {
                 for (String str : teleComStr.split(",")) {
                     companyorgList.add(Long.parseLong(str));
@@ -211,7 +201,6 @@ public class TelemarketingAssignRuleContoller {
 
     /**
      * 查询机构下的所有电销组
-     * 
      * @param parentId
      * @return
      */
@@ -227,8 +216,7 @@ public class TelemarketingAssignRuleContoller {
             dto.setOrgType(orgType);
             dto.setSystemCode(SystemCodeConstant.HUI_JU);
 
-            JSONResult<List<OrganizationDTO>> orgJson =
-                    organizationFeignClient.listDescenDantByParentId(dto);
+            JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listDescenDantByParentId(dto);
 
             List<Long> idList = new ArrayList<Long>();
 
@@ -253,7 +241,6 @@ public class TelemarketingAssignRuleContoller {
 
     /**
      * 查询机构下的所有电销组
-     * 
      * @param parentId
      * @return
      */
@@ -267,8 +254,7 @@ public class TelemarketingAssignRuleContoller {
 
             dto.setOrgType(OrgTypeConstant.DXZ);
 
-            JSONResult<List<OrganizationDTO>> orgJson =
-                    organizationFeignClient.listDescenDantByParentId(dto);
+            JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listDescenDantByParentId(dto);
 
             List<Long> idList = new ArrayList<Long>();
 
@@ -293,7 +279,6 @@ public class TelemarketingAssignRuleContoller {
 
     /***
      * 新增打开页面
-     * 
      * @return
      */
     @RequestMapping("/preSaveTeleAssignRule")
@@ -305,16 +290,14 @@ public class TelemarketingAssignRuleContoller {
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> saleList =
-                getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
+        List<UserInfoDTO> saleList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
         // “经纪人”人员
-        List<UserInfoDTO> jjSaleList =
-                getUserList(user.getOrgId(), RoleCodeEnum.JMJJ.name(), statusList);
-        if( null == saleList ){
+        List<UserInfoDTO> jjSaleList = getUserList(user.getOrgId(), RoleCodeEnum.JMJJ.name(), statusList);
+        if (null == saleList) {
 
             saleList = Collections.emptyList();
         }
-        if( null == jjSaleList ){
+        if (null == jjSaleList) {
 
             jjSaleList = Collections.emptyList();
         }
@@ -325,7 +308,6 @@ public class TelemarketingAssignRuleContoller {
 
     /***
      * 修改打开页面
-     * 
      * @return
      */
     @RequestMapping("/preUpdateTeleAssignRule")
@@ -337,14 +319,23 @@ public class TelemarketingAssignRuleContoller {
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> saleList =
-                getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
+        List<UserInfoDTO> saleList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
+        // “经纪人”人员
+        List<UserInfoDTO> jjSaleList = getUserList(user.getOrgId(), RoleCodeEnum.JMJJ.name(), statusList);
+        if (null == saleList) {
+
+            saleList = Collections.emptyList();
+        }
+        if (null == jjSaleList) {
+
+            jjSaleList = Collections.emptyList();
+        }
+        saleList.addAll(jjSaleList);
         model.addAttribute("orgUserList", saleList);
         String ruleId = request.getParameter("ruleId");
         TeleAssignRuleQueryDTO dto = new TeleAssignRuleQueryDTO();
         dto.setId(new Long(ruleId));
-        JSONResult<TelemarketingAssignRuleDTO> ruleDtoJson =
-                telemarketingAssignRuleFeignClient.queryTeleAssignRuleById(dto);
+        JSONResult<TelemarketingAssignRuleDTO> ruleDtoJson = telemarketingAssignRuleFeignClient.queryTeleAssignRuleById(dto);
         if (ruleDtoJson.getCode().equals(JSONResult.SUCCESS)) {
 
             model.addAttribute("updateRule", ruleDtoJson.getData());
@@ -356,15 +347,13 @@ public class TelemarketingAssignRuleContoller {
 
     /***
      * 保存电销分配规则
-     * 
      * @return
      */
     @RequestMapping("/saveTeleAssignRule")
     @ResponseBody
-    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.INSERT,
-            menuName = MenuEnum.ASSIGNRULE_TELE)
-    public JSONResult<String> saveTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto,
-            HttpServletRequest request, HttpServletResponse response) {
+    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.INSERT, menuName = MenuEnum.ASSIGNRULE_TELE)
+    public JSONResult<String> saveTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
+            HttpServletResponse response) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setCreateUser(user.getId());
@@ -374,79 +363,66 @@ public class TelemarketingAssignRuleContoller {
 
     /***
      * 修改电销分配规则
-     * 
      * @return
      */
     @RequestMapping("/updateTeleAssignRule")
     @ResponseBody
-    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE,
-            menuName = MenuEnum.ASSIGNRULE_TELE)
-    public JSONResult<String> updateTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto,
-            HttpServletRequest request, HttpServletResponse response) {
+    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_TELE)
+    public JSONResult<String> updateTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
+            HttpServletResponse response) {
         return telemarketingAssignRuleFeignClient.updateTeleAssignRule(dto);
     }
 
     /***
      * 删除电销分配规则
-     * 
      * @return
      */
     @RequestMapping("/deleteTeleAssignRule")
     @RequiresPermissions("teleAssignRule:delete")
-    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DELETE,
-            menuName = MenuEnum.ASSIGNRULE_TELE)
+    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DELETE, menuName = MenuEnum.ASSIGNRULE_TELE)
     @ResponseBody
-    public JSONResult<String> deleteTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto,
-            HttpServletRequest request, HttpServletResponse response) {
+    public JSONResult<String> deleteTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
+            HttpServletResponse response) {
         return telemarketingAssignRuleFeignClient.deleteTeleAssignRule(dto);
     }
 
     /***
      * 修改电销分配规则状态
-     * 
      * @return
      */
     @RequestMapping("/updateTeleAssignRuleStatus")
     @ResponseBody
-    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE,
-            menuName = MenuEnum.ASSIGNRULE_TELE)
-    public JSONResult<String> updateTeleAssignRuleStatus(
-            @RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
+    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_TELE)
+    public JSONResult<String> updateTeleAssignRuleStatus(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
         return telemarketingAssignRuleFeignClient.updateTeleAssignRuleStatus(dto);
     }
 
     /***
      * 修改电销分配规则状态
-     * 
      * @return
      */
     @RequestMapping("/queryTeleAssignRuleById")
     @ResponseBody
-    public JSONResult<TelemarketingAssignRuleDTO> queryTeleAssignRuleById(
-            @RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
+    public JSONResult<TelemarketingAssignRuleDTO> queryTeleAssignRuleById(@RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
         return telemarketingAssignRuleFeignClient.queryTeleAssignRuleById(dto);
     }
 
     /***
      * 修改电销分配规则状态
-     * 
      * @return
      */
     @RequestMapping("/queryTeleAssignRuleByName")
     @ResponseBody
-    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DISABLE,
-            menuName = MenuEnum.ASSIGNRULE_TELE)
-    public JSONResult<List<TelemarketingAssignRuleDTO>> queryTeleAssignRuleByName(
-            @RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
+    @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DISABLE, menuName = MenuEnum.ASSIGNRULE_TELE)
+    public JSONResult<List<TelemarketingAssignRuleDTO>> queryTeleAssignRuleByName(@RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
         return telemarketingAssignRuleFeignClient.queryTeleAssignRuleByName(dto);
     }
 
     /**
      * 根据机构和角色类型获取用户
-     * 
      * @param orgDTO
      * @return
      */
@@ -455,8 +431,7 @@ public class TelemarketingAssignRuleContoller {
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
-        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
     }
 }
