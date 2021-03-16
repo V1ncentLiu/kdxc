@@ -251,21 +251,19 @@ public class ExtendClueAgendaTaskController {
         queryDto.setPromotionCompany(user.getPromotionCompany());
         List<Long> idList = new ArrayList<Long>();
         // 推广总监，优化主管，优化文员，内勤经理可以在查看待分配资源列表中资源专员为管理员的数据
-        if (RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
+        if (RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
             idList.add(SysConstant.GLY_USER_ID);
         }
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
         } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YXZG.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.WLYHZZ.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.HWZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.YYZJ.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
@@ -287,7 +285,8 @@ public class ExtendClueAgendaTaskController {
             }
             idList.add(user.getId());
 
-        } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.TGZJ.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode()) || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         } else {
             return new JSONResult<PageBean<ClueAgendaTaskDTO>>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
