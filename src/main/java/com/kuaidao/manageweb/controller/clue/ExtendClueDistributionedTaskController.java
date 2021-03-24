@@ -432,28 +432,28 @@ public class ExtendClueDistributionedTaskController {
                     curList.add(taskDTO.getAgentNames());
                     //经纪顾问是否接通
                     String consultantIsCall = "";
-                    if (BusinessConfigConstant.YES.equals(taskDTO.getPhtraIsCall())) {
+                    if (BusinessConfigConstant.YES.equals(taskDTO.getConsultantIsCall())) {
                         consultantIsCall = "是";
-                    } else if (BusinessConfigConstant.NO.equals(taskDTO.getPhtraIsCall())) {
+                    } else {
                         consultantIsCall = "否";
                     }
                     //经纪顾问是否有效
                     String consultantStatus = "";
-                    if (BusinessConfigConstant.YES.equals(taskDTO.getPhstatus())) {
+                    if (BusinessConfigConstant.YES.equals(taskDTO.getConsultantStatus())) {
                         consultantStatus = "是";
                     } else {
                         consultantStatus = "否";
                     }
                     //经纪是否接通
                     String agentIsCall = "";
-                    if (BusinessConfigConstant.YES.equals(taskDTO.getIsCall())) {
+                    if (BusinessConfigConstant.YES.equals(taskDTO.getAgentIsCall())) {
                         agentIsCall = "是";
-                    } else if (BusinessConfigConstant.NO.equals(taskDTO.getIsCall())) {
+                    } else {
                         agentIsCall = "否";
                     }
                     //经纪是否有效
                     String agentStatus = "";
-                    if (BusinessConfigConstant.YES.equals(taskDTO.getStatus())) {
+                    if (BusinessConfigConstant.YES.equals(taskDTO.getAgentStatus())) {
                         agentStatus = "是";
                     } else {
                         agentStatus = "否";
