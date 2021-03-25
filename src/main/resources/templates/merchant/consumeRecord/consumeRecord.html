@@ -106,6 +106,12 @@
             <el-form-item label="提醒标题：" prop="title" :label-width="formLabelWidth">
                 <el-input v-model="formRemind.title" placeholder="" style="width: 290px;" maxLength="20"></el-input>
             </el-form-item>
+            <el-form-item label="提醒人手机号：" prop="phone" :label-width="formLabelWidth">
+                <el-input oninput = "value=value.replace(/[^0-9]/g,'')" v-model="formRemind.phone" placeholder="" style="width: 290px;" maxLength="11" ></el-input>
+            </el-form-item>
+            <el-form-item label="提醒人手机号2：" :label-width="formLabelWidth">
+                <el-input oninput = "value=value.replace(/[^0-9]/g,'')" v-model="formRemind.phone2" placeholder="" style="width: 290px;" maxLength="11" ></el-input>
+            </el-form-item>
             <el-form-item label="提醒内容：" prop="content" :label-width="formLabelWidth">
                 <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.content" style="width: 290px;" maxLength="50"></el-input>
             </el-form-item>
@@ -148,7 +154,9 @@
                 formRemind:{
                     amount:'',
                     title:'',
-                    content:''
+                    content:'',
+                    phone:'',
+                    phone2:''
                 },
                 todayNum:'',
                 todayAmount:'',
@@ -173,6 +181,22 @@
                     ],
                     content: [
                         { required: true, message: '提醒内容不能为空', trigger: 'blur' }
+                    ],
+                    phone: [
+                        { required: true, message: '请输入手机号', trigger: 'blur' },
+                        {
+                            validator: function (rule, value, callback) {
+                                if (/^[0-9]*$/.test(value) == false) {
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                if (value.length !== 11) {
+                                    callback(new Error("请输入11位数字"));
+                                    return
+                                }
+                                callback();
+                            }, trigger: 'blur'
+                        }
                     ],
                 },
             }        	  
@@ -270,6 +294,10 @@
             submitApplyForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        if(this.formRemind.phone2&&this.formRemind.phone2.length!=11){
+                            this.$message.warning(`手机号不能小于11位`);
+                            return 
+                        }
                         this.btnDisabled = true;
                         //分配
                         var param = {};
@@ -280,7 +308,6 @@
                         axios.post('/merchant/balanceWarnSetting/setting',param)
                         .then(function (response) {
                             var data =  response.data;
-                            debugger;
                             if(data.code=='0'){
                                 ocmVM.$message({message:'设置成功',type:'success',duration:2000,onClose:function(){
                                         ocmVM.remindFormVisible = false;

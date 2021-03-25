@@ -15,7 +15,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>充值管理</el-breadcrumb-item>
-        <el-breadcrumb-item>商家消费记录</el-breadcrumb-item>
+        <el-breadcrumb-item>{{userName}}消费记录</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">        
         <el-button type="warning" @click="exportFun">导出记录</el-button>
@@ -23,7 +23,7 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form"> 
-                <el-form-item label="消费商家:" label-width="auto">
+                <!-- <el-form-item label="消费商家:" label-width="auto">
                     <el-select v-model="form.userId" filterable  clearable placeholder="商家账户名">
                         <el-option
                             v-for="item in merchantUserListOptions"
@@ -32,7 +32,7 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item>                
+                </el-form-item>                 -->
                 <el-form-item label="消费日期:">
                     <el-date-picker
                         format="yyyy-MM-dd"  
@@ -67,10 +67,10 @@
             >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                <el-table-column align="center" prop="userName" label="商家名称"></el-table-column>
-                <el-table-column align="center" prop="createDate" label="消费日期"  :formatter="dateFormat" width="200"></el-table-column>                
-                <el-table-column align="center" prop="amount" label="消费金额" width="200"></el-table-column>
-                <el-table-column align="center" prop="clueNum" label="获取资源条数" width="200"></el-table-column>
+                <!-- <el-table-column align="center" prop="userName" label="商家名称"></el-table-column> -->
+                <el-table-column align="center" prop="createDate" label="消费日期"  :formatter="dateFormat"></el-table-column>                
+                <el-table-column align="center" prop="amount" label="消费金额"></el-table-column>
+                <el-table-column align="center" prop="clueNum" label="获取资源条数"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -103,6 +103,7 @@
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
+                userName:'',
             }        	  
         },
         methods: {
@@ -144,6 +145,7 @@
                     if(result.code==0){
                         var table=result.data;
                         ocmVM.dataTable= table.data;
+                        ocmVM.userName=table.data[0].userName
                         ocmVM.pager.total =  table.total;
                         ocmVM.pager.currentPage = table.currentPage;
                     }else{
