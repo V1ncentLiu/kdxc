@@ -48,7 +48,7 @@
                     </el-select>
                 </el-form-item>
                <el-form-item label="加盟顾问组:">
-                   <el-select v-model="form.teleGroupId" placeholder="经纪组" style="width: 100%;" clearable filterable @change="changeTeleGroup" :disabled="teleGroupDisabled">
+                   <el-select v-model="form.gwGroupId" placeholder="经纪组" style="width: 100%;" clearable filterable @change="changeConGroup" :disabled="teleGroupDisabled">
                        <el-option
                                v-for="item in gwGroupList"
                                :key="item.id"
@@ -58,9 +58,9 @@
                    </el-select>
                </el-form-item>
                <el-form-item label="加盟顾问名称:">
-                   <el-select v-model="form.teleSaleId" placeholder="经纪" style="width: 100%;" clearable filterable>
+                   <el-select v-model="form.teleConId" placeholder="经纪" style="width: 100%;" clearable filterable>
                        <el-option
-                               v-for="item in teleSaleArr"
+                               v-for="item in teleConArr"
                                :key="item.id"
                                :label="item.name"
                                :value="item.id">
@@ -108,7 +108,8 @@
                     <template slot-scope="scope">
                         <div v-if="scope.row.imAuthorizeStatus === 1">
                             已授权
-                        </div>                    
+                            已授权
+                        </div>
                         <div v-else-if="scope.row.imAuthorizeStatus === 2">
                             未授权
                         </div>
@@ -209,11 +210,14 @@
                     teleGroupId: teleGroupId,
                     teleSaleId: '',
                     imAuthorizeStatus: '',
+                    gwGroupId:'',
+                    teleConId:''
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
                 gwGroupList: gwGroupList, // 经纪顾问组
                 teleSaleArr: teleSaleArr, // 顾问
+                teleConArr:[],
                 isAuthorizeArr:[{
                     id:"",
                     name:'全部'
@@ -258,7 +262,25 @@
                     .catch(function (error) {
                         console.log(error);
                     });
-            }, 
+            },
+            changeConGroup(selectedValue) {//改变电销组
+                this.gwGroupList = [];
+                if (!selectedValue) {
+                    return;
+                }
+                var param = {};
+                param.orgId = selectedValue;
+                param.roleCode = "JMGW";
+                axios.post('/custservice/saleIm/getSaleList', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        var table = result.data;
+                        mainDivVM.teleConArr = table;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
             getRanklist(){// 职级
                 axios.get("/saleCard/getDictionaryRank")
                 .then(function (response) {
@@ -398,8 +420,18 @@
             },       
             searchTable(firstPage) {                
                 var param = {};
-                param.teleGroupId = this.form.teleGroupId;
-                param.teleSaleId = this.form.teleSaleId;
+                if(this.form.teleGroupId){
+                    param.teleGroupId = this.form.teleGroupId;
+                }
+                if(this.form.teleSaleId){
+                    param.teleSaleId = this.form.teleSaleId;
+                }
+                if(this.form.gwGroupId){
+                    param.teleGroupId = this.form.gwGroupId;
+                }
+                if(this.form.teleConId){
+                    param.teleSaleId = this.form.teleConId;
+                }
                 param.imAuthorizeStatus = this.form.imAuthorizeStatus;
                 param.pageNum = this.pager.currentPage
                 param.pageSize = this.pager.pageSize;                
