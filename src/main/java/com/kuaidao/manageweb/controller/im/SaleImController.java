@@ -112,7 +112,7 @@ public class SaleImController {
 
         OrganizationQueryDTO organizationQueryDTO1 = new OrganizationQueryDTO();
         organizationQueryDTO1.setBusinessLineList(businessLineList);
-        organizationQueryDTO1.setOrgType(OrgTypeConstant.SWZ);
+        organizationQueryDTO1.setOrgType(OrgTypeConstant.HWZ);
         if (RoleCodeEnum.JMGWZG.name().equals(roleCode)) {
             organizationQueryDTO1.setId(user.getOrgId());
         }
