@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="css/element-ui.css">
     <link rel="stylesheet" href="css/base.css">
     <style>
-        .lookInvoiceForm{
-            display: flex;
-            flex-direction: column;
+        
+        .lookInvoiceClass .el-form-item{
+            margin-bottom: 0 !important;
         }
     </style>
 </head>
@@ -91,29 +91,29 @@
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
-    <el-dialog title="查看发票 " :visible.sync="lookInvoiceVisible" width="540px">
+    <el-dialog class="lookInvoiceClass" title="查看发票 " :visible.sync="lookInvoiceVisible" width="540px">
         <div>
             <el-form :model="lookInvoiceForm" ref="lookInvoiceForm">
-                <el-form-item label="发票抬头：" prop="amount" :label-width="formLabelWidth">
-                    <span>12121212</span>
+                <el-form-item label="发票抬头：" prop="invoiceHeader" :label-width="formLabelWidth">
+                    <span>{{lookInvoiceForm.invoiceHeader}}</span>
                 </el-form-item>
-                <el-form-item label="纳税人识别号：" prop="title" :label-width="formLabelWidth">
-                    <span>12121212</span>
+                <el-form-item label="纳税人识别号：" prop="taxpayerIdentificationNum" :label-width="formLabelWidth">
+                    <span>{{lookInvoiceForm.taxpayerIdentificationNum}}</span>
                 </el-form-item>
-                <el-form-item label="邮寄地址：" prop="phone" :label-width="formLabelWidth">
-                    <span>12121212</span>
+                <el-form-item label="邮寄地址：" prop="address" :label-width="formLabelWidth">
+                    <span>{{lookInvoiceForm.address}}</span>
                 </el-form-item>
-                <el-form-item label="收件电话：" :label-width="formLabelWidth">
-                    <span>12121212</span>
+                <el-form-item label="收件电话：" prop="phone" :label-width="formLabelWidth">
+                    <span>{{lookInvoiceForm.phone}}</span>
                 </el-form-item>
-                <el-form-item label="收件人姓名：" prop="content" :label-width="formLabelWidth">
-                    <span>12121212</span>
+                <el-form-item label="收件人姓名：" prop="name" :label-width="formLabelWidth">
+                    <span>{{lookInvoiceForm.name}}</span>
                 </el-form-item>
-                <el-form-item label="开户银行：" prop="content" :label-width="formLabelWidth">
-                    <span>12121212</span>
+                <el-form-item label="开户银行：" prop="openingBank" :label-width="formLabelWidth">
+                    <span>{{lookInvoiceForm.openingBank}}</span>
                 </el-form-item>
-                <el-form-item label="银行账号：" prop="content" :label-width="formLabelWidth">
-                    <span>12121212</span>
+                <el-form-item label="银行账号：" prop="bankAccount" :label-width="formLabelWidth">
+                    <span>{{lookInvoiceForm.bankAccount}}</span>
                 </el-form-item>
             </el-form>
          </div>
@@ -146,11 +146,13 @@
                   createEndTime:'',
                 },
                 lookInvoiceForm:{
-                    amount:'',
-                    title:'',
-                    content:'',
+                    invoiceHeader:'',
+                    taxpayerIdentificationNum:'',
+                    address:'',
                     phone:'',
-                    phone2:''
+                    name:'',
+                    bankAccount:'',
+                    openingBank:''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -158,8 +160,21 @@
             }        	  
         },
         methods: {
-            lookInvoice(){
+            lookInvoice(id){
                 this.lookInvoiceVisible=true
+                axios.post('/merchant/merchantApplyInvoice/findMerchantApplyInvoiceDeatil', {id:id})
+                    .then(function (response) {
+                        var result =  response.data;
+                        console.log(result,'详情页数据');
+                        if (result.code == "0") {
+                            ocmVM.lookInvoiceForm=result.data
+                        }else{
+                        	  ocmVM.$message.error("操作失败");
+                        }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    });
             },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
