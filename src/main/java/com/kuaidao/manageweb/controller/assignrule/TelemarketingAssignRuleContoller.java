@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -92,7 +91,7 @@ public class TelemarketingAssignRuleContoller {
     @ResponseBody
     public JSONResult<PageBean<TelemarketingAssignRuleDTO>> queryTeleAssignRuleList(@RequestBody TeleAssignRuleQueryDTO queryDTO,
             HttpServletRequest request, HttpServletResponse response) {
-        /* 数据类型 1.经纪员工分配 */
+        /* 数据类型 1.电销员工分配  */
         queryDTO.setDataType(1);
         // 获取当前登录用户的机构信息//
         Subject subject = SecurityUtils.getSubject();
@@ -291,17 +290,6 @@ public class TelemarketingAssignRuleContoller {
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
         List<UserInfoDTO> saleList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
-        // “经纪人”人员
-        List<UserInfoDTO> jjSaleList = getUserList(user.getOrgId(), RoleCodeEnum.JMJJ.name(), statusList);
-        if (null == saleList) {
-
-            saleList = Collections.emptyList();
-        }
-        if (null == jjSaleList) {
-
-            jjSaleList = Collections.emptyList();
-        }
-        saleList.addAll(jjSaleList);
         model.addAttribute("orgUserList", saleList);
         return "assignrule/addtelemarketingRule";
     }
@@ -320,17 +308,6 @@ public class TelemarketingAssignRuleContoller {
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
         List<UserInfoDTO> saleList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
-        // “经纪人”人员
-        List<UserInfoDTO> jjSaleList = getUserList(user.getOrgId(), RoleCodeEnum.JMJJ.name(), statusList);
-        if (null == saleList) {
-
-            saleList = Collections.emptyList();
-        }
-        if (null == jjSaleList) {
-
-            jjSaleList = Collections.emptyList();
-        }
-        saleList.addAll(jjSaleList);
         model.addAttribute("orgUserList", saleList);
         String ruleId = request.getParameter("ruleId");
         TeleAssignRuleQueryDTO dto = new TeleAssignRuleQueryDTO();
@@ -358,7 +335,7 @@ public class TelemarketingAssignRuleContoller {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setCreateUser(user.getId());
         dto.setTelemarketingId(user.getOrgId());
-        /* 数据类型 1.经纪员工分配 */
+        /* 数据类型 1.电销员工分配  */
         dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.saveTeleAssignRule(dto);
     }
@@ -372,7 +349,7 @@ public class TelemarketingAssignRuleContoller {
     @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_TELE)
     public JSONResult<String> updateTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
-        /* 数据类型 1.经纪员工分配 */
+        /* 数据类型 1.电销员工分配  */
         dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.updateTeleAssignRule(dto);
     }
@@ -387,7 +364,7 @@ public class TelemarketingAssignRuleContoller {
     @ResponseBody
     public JSONResult<String> deleteTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
-        /* 数据类型 2.经纪员工分配 */
+        /* 数据类型 1.电销员工分配  */
         dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.deleteTeleAssignRule(dto);
     }
@@ -401,7 +378,7 @@ public class TelemarketingAssignRuleContoller {
     @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_TELE)
     public JSONResult<String> updateTeleAssignRuleStatus(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
-        /* 数据类型 2.经纪员工分配 */
+        /* 数据类型 1.电销员工分配  */
         dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.updateTeleAssignRuleStatus(dto);
     }
@@ -414,7 +391,7 @@ public class TelemarketingAssignRuleContoller {
     @ResponseBody
     public JSONResult<TelemarketingAssignRuleDTO> queryTeleAssignRuleById(@RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
-        /* 数据类型 2.经纪员工分配 */
+        /* 数据类型 1.电销员工分配  */
         dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.queryTeleAssignRuleById(dto);
     }
@@ -428,7 +405,7 @@ public class TelemarketingAssignRuleContoller {
     @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DISABLE, menuName = MenuEnum.ASSIGNRULE_TELE)
     public JSONResult<List<TelemarketingAssignRuleDTO>> queryTeleAssignRuleByName(@RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
-        /* 数据类型 2.经纪员工分配 */
+        /* 数据类型 1.电销员工分配  */
         dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.queryTeleAssignRuleByName(dto);
     }
