@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.constant.MenuEnum;
+import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -74,16 +76,29 @@ public class HomePageController {
         List<IndexModuleDTO> menuList = user.getMenuList();
         if(CollectionUtils.isNotEmpty(menuList)){
             menuList = menuList.stream().filter(a->{
-                if(a.getId()!=null&&a.getId()==15){
-                    return false;
-                }
-                return true;
-            }).filter(a->{
-                if(a.getParentId()!=null&&  a.getParentId()==15){
+                if((a.getId()!=null&&a.getId()==15) || (a.getParentId()!=null&&  a.getParentId()==15)){
                     return false;
                 }
                 return true;
             }).collect(Collectors.toList());
+
+            //小物种业务线电销相关角色不允许查看公有池，add by guoruiling 2021/3/29
+            if(null != user.getBusinessLine() && BusinessLineConstant.XIAOWUZHONG==user.getBusinessLine()){
+                menuList.forEach(m->{
+                    //电销管理所有菜单
+                    if (MenuEnum.TEL_SALE_MANAGE.getName().equals(m.getName())){
+                        List<ModuleInfoDTO> subMenus = m.getSubList();
+                        subMenus = subMenus.stream().filter(s->{
+                            //判断如果是公有池菜单则去除
+                            if (MenuEnum.TM_PUBLIC_POOL.getName().equals(s.getName())) {
+                                return false;
+                            }
+                            return true;
+                        }).collect(Collectors.toList());
+                        m.setSubList(subMenus);
+                    }
+                });
+            }
         }
         request.setAttribute("menuList", menuList);
         request.setAttribute("isUpdatePassword", isUpdatePassword);
