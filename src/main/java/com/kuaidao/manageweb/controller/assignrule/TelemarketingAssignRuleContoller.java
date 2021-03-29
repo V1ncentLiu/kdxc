@@ -1,23 +1,5 @@
 package com.kuaidao.manageweb.controller.assignrule;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.businessconfig.dto.assignrule.TeleAssignRuleQueryDTO;
 import com.kuaidao.businessconfig.dto.assignrule.TelemarketingAssignRuleDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -37,6 +19,22 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Controller
 @RequestMapping("/assignrule/teleAssignRule")
@@ -94,6 +92,8 @@ public class TelemarketingAssignRuleContoller {
     @ResponseBody
     public JSONResult<PageBean<TelemarketingAssignRuleDTO>> queryTeleAssignRuleList(@RequestBody TeleAssignRuleQueryDTO queryDTO,
             HttpServletRequest request, HttpServletResponse response) {
+        /* 数据类型 1.经纪员工分配 */
+        queryDTO.setDataType(1);
         // 获取当前登录用户的机构信息//
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -358,6 +358,8 @@ public class TelemarketingAssignRuleContoller {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setCreateUser(user.getId());
         dto.setTelemarketingId(user.getOrgId());
+        /* 数据类型 1.经纪员工分配 */
+        dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.saveTeleAssignRule(dto);
     }
 
@@ -370,6 +372,8 @@ public class TelemarketingAssignRuleContoller {
     @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_TELE)
     public JSONResult<String> updateTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
+        /* 数据类型 1.经纪员工分配 */
+        dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.updateTeleAssignRule(dto);
     }
 
@@ -383,6 +387,8 @@ public class TelemarketingAssignRuleContoller {
     @ResponseBody
     public JSONResult<String> deleteTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
+        /* 数据类型 2.经纪员工分配 */
+        dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.deleteTeleAssignRule(dto);
     }
 
@@ -395,6 +401,8 @@ public class TelemarketingAssignRuleContoller {
     @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_TELE)
     public JSONResult<String> updateTeleAssignRuleStatus(@RequestBody TelemarketingAssignRuleDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
+        /* 数据类型 2.经纪员工分配 */
+        dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.updateTeleAssignRuleStatus(dto);
     }
 
@@ -406,6 +414,8 @@ public class TelemarketingAssignRuleContoller {
     @ResponseBody
     public JSONResult<TelemarketingAssignRuleDTO> queryTeleAssignRuleById(@RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
+        /* 数据类型 2.经纪员工分配 */
+        dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.queryTeleAssignRuleById(dto);
     }
 
@@ -418,6 +428,8 @@ public class TelemarketingAssignRuleContoller {
     @LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DISABLE, menuName = MenuEnum.ASSIGNRULE_TELE)
     public JSONResult<List<TelemarketingAssignRuleDTO>> queryTeleAssignRuleByName(@RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request,
             HttpServletResponse response) {
+        /* 数据类型 2.经纪员工分配 */
+        dto.setDataType(1);
         return telemarketingAssignRuleFeignClient.queryTeleAssignRuleByName(dto);
     }
 
