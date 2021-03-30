@@ -46,7 +46,7 @@
 
         <!-- <el-button type="warning">查询重复</el-button> -->
         <shiro:hasPermission name="myCustomerInfo:add">
-            <el-button type="warning" @click="createClueData" >新建客户资源</a></el-button>
+            <el-button type="warning" @click="createClueData" v-if="isShowCreate">新建客户资源</a></el-button>
         </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
@@ -1009,6 +1009,7 @@
 <!-- 播放錄音 js -->
 <!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
 <script th:inline="javascript" >
+    var businessLine=[[${businessLine}]];//自定义字段
     var fieldList=[[${fieldList}]];//自定义字段
     var userFieldList=[[${userFieldList}]];//用户自定义字段
     var proSelect = [[${proSelect}]];//可签约项目
@@ -1021,6 +1022,7 @@
         el: '#myCustom',
         data: function() {
             return {
+                isShowCreate:true,//默认显示新建客户资源
                 recordDialoghover:true,
                 telemarketingLayout:telemarketingLayout,
                 dialogForm: {
@@ -2220,6 +2222,12 @@
 
         },
         created(){
+            // 判断3或者4不显示新建按钮
+            if(businessLine){
+                if(businessLine==3||businessLine==4){
+                    this.isShowCreate=false;
+                }                
+            }
             // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
 
             //是否已签约 -默认查未签约的
