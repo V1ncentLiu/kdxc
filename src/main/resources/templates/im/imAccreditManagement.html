@@ -46,8 +46,28 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item>  
-                <div class="mainSearchBtnBox">
+                </el-form-item>
+               <el-form-item label="加盟顾问组:">
+                   <el-select v-model="form.gwGroupId" placeholder="经纪组" style="width: 100%;" clearable filterable @change="changeConGroup" :disabled="teleGroupDisabled">
+                       <el-option
+                               v-for="item in gwGroupList"
+                               :key="item.id"
+                               :label="item.name"
+                               :value="item.id">
+                       </el-option>
+                   </el-select>
+               </el-form-item>
+               <el-form-item label="加盟顾问名称:">
+                   <el-select v-model="form.teleConId" placeholder="经纪" style="width: 100%;" clearable filterable>
+                       <el-option
+                               v-for="item in teleConArr"
+                               :key="item.id"
+                               :label="item.name"
+                               :value="item.id">
+                       </el-option>
+                   </el-select>
+               </el-form-item>
+               <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
@@ -63,9 +83,11 @@
                 :data="tableData"
                 v-loading="loading">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="teleGroupName" align="center" label="经纪组">
+                <el-table-column prop="roleCodeName" align="center" label="角色">
                 </el-table-column>
-                <el-table-column prop="teleSaleName" align="center" label="经纪人">
+                <el-table-column prop="teleGroupName" align="center" label="所属组">
+                </el-table-column>
+                <el-table-column prop="teleSaleName" align="center" label="姓名">
                 </el-table-column>
                 <el-table-column prop="imStatus" align="center" label="IM状态">
                     <!-- 在线状态 1-在线、2-忙碌、3-离线 -->
@@ -86,7 +108,8 @@
                     <template slot-scope="scope">
                         <div v-if="scope.row.imAuthorizeStatus === 1">
                             已授权
-                        </div>                    
+                            已授权
+                        </div>
                         <div v-else-if="scope.row.imAuthorizeStatus === 2">
                             未授权
                         </div>
@@ -157,11 +180,13 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+    var gwGroupList = [[${gwGroupList}]]; // 经纪顾问组
     var queryOrg=[[${teleGroupList}]]; // 电销组
     var teleSale = [[${teleSaleList}]];// 顾问
     var roleCode = [[${roleCode}]];// 角色
     var orgId = [[${orgId}]];// 当前账号机构id
     var teleGroupId='';
+    var gwGroupId="";
     var teleSaleArr=[];
     var teleGroupDisabled=false;
     if(roleCode=='JJJL'){
@@ -185,10 +210,14 @@
                     teleGroupId: teleGroupId,
                     teleSaleId: '',
                     imAuthorizeStatus: '',
+                    gwGroupId:'',
+                    teleConId:''
                 },
                 tableData: [],
                 orgTeleArr: queryOrg, // 电销组
+                gwGroupList: gwGroupList, // 经纪顾问组
                 teleSaleArr: teleSaleArr, // 顾问
+                teleConArr:[],
                 isAuthorizeArr:[{
                     id:"",
                     name:'全部'
@@ -223,6 +252,7 @@
                 }
                 var param = {};
                 param.orgId = selectedValue;
+                param.roleCode = "JMJJ";
                 axios.post('/custservice/saleIm/getSaleList', param)
                     .then(function (response) {
                         var result = response.data;
@@ -232,7 +262,25 @@
                     .catch(function (error) {
                         console.log(error);
                     });
-            }, 
+            },
+            changeConGroup(selectedValue) {//改变电销组
+                this.teleConArr = [];
+                if (!selectedValue) {
+                    return;
+                }
+                var param = {};
+                param.orgId = selectedValue;
+                param.roleCode = "JMGW";
+                axios.post('/custservice/saleIm/getSaleList', param)
+                    .then(function (response) {
+                        var result = response.data;
+                        var table = result.data;
+                        mainDivVM.teleConArr = table;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            },
             getRanklist(){// 职级
                 axios.get("/saleCard/getDictionaryRank")
                 .then(function (response) {
@@ -372,8 +420,18 @@
             },       
             searchTable(firstPage) {                
                 var param = {};
-                param.teleGroupId = this.form.teleGroupId;
-                param.teleSaleId = this.form.teleSaleId;
+                if(this.form.teleGroupId){
+                    param.teleGroupId = this.form.teleGroupId;
+                }
+                if(this.form.teleSaleId){
+                    param.teleSaleId = this.form.teleSaleId;
+                }
+                if(this.form.gwGroupId){
+                    param.teleGroupId = this.form.gwGroupId;
+                }
+                if(this.form.teleConId){
+                    param.teleSaleId = this.form.teleConId;
+                }
                 param.imAuthorizeStatus = this.form.imAuthorizeStatus;
                 param.pageNum = this.pager.currentPage
                 param.pageSize = this.pager.pageSize;                

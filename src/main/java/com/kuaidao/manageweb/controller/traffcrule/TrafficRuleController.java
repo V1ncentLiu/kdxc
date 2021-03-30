@@ -6,8 +6,10 @@ package com.kuaidao.manageweb.controller.traffcrule;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.traffcrule.TrafficAssignRuleDTO;
 import com.kuaidao.businessconfig.dto.traffcrule.TrafficAssignRulePageParam;
 import com.kuaidao.businessconfig.dto.traffcrule.TrafficAssignRuleReq;
@@ -46,7 +50,6 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * @author zxy
- *
  */
 
 @Controller
@@ -64,7 +67,6 @@ public class TrafficRuleController {
 
     /***
      * 话务分配规则列表页
-     * 
      * @return
      */
     @RequestMapping("/initRuleList")
@@ -79,7 +81,6 @@ public class TrafficRuleController {
 
     /***
      * 新增话务分配规则页
-     * 
      * @return
      */
     @RequestMapping("/initCreate")
@@ -90,8 +91,7 @@ public class TrafficRuleController {
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> userList =
-                getUserList(user.getOrgId(), RoleCodeEnum.HWY.name(), statusList);
+        List<UserInfoDTO> userList = getUserList(user.getOrgId(), RoleCodeEnum.HWY.name(), statusList);
         request.setAttribute("trafficList", userList);
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
@@ -102,7 +102,6 @@ public class TrafficRuleController {
 
     /***
      * 编辑话务分配规则页
-     * 
      * @return
      */
     @RequestMapping("/initUpdate")
@@ -110,15 +109,13 @@ public class TrafficRuleController {
     public String initUpdateProject(@RequestParam Long id, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询话务分配规则信息
-        JSONResult<TrafficAssignRuleDTO> jsonResult =
-                trafficRuleFeignClient.get(new IdEntityLong(id));
+        JSONResult<TrafficAssignRuleDTO> jsonResult = trafficRuleFeignClient.get(new IdEntityLong(id));
         request.setAttribute("trafficAssignRule", jsonResult.getData());
         // 查询话务组下话务员工
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> userList =
-                getUserList(user.getOrgId(), RoleCodeEnum.HWY.name(), statusList);
+        List<UserInfoDTO> userList = getUserList(user.getOrgId(), RoleCodeEnum.HWY.name(), statusList);
         request.setAttribute("trafficList", userList);
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
@@ -129,14 +126,12 @@ public class TrafficRuleController {
 
     /***
      * 话务分配规则列表
-     * 
      * @return
      */
     @PostMapping("/list")
     @ResponseBody
     @RequiresPermissions("trafficAssignRule:ruleManager:view")
-    public JSONResult<PageBean<TrafficAssignRuleDTO>> list(
-            @RequestBody TrafficAssignRulePageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<TrafficAssignRuleDTO>> list(@RequestBody TrafficAssignRulePageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
@@ -146,16 +141,15 @@ public class TrafficRuleController {
 
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
+        pageParam.setRuleType(BusinessConfigConstant.TRAFFIC_RULE_TYPE.TRAFFIC);
         // 话务分配规则
         JSONResult<PageBean<TrafficAssignRuleDTO>> list = trafficRuleFeignClient.list(pageParam);
 
         return list;
     }
 
-
     /**
      * 保存话务分配规则
-     * 
      * @param orgDTO
      * @return
      * @throws InvocationTargetException
@@ -164,10 +158,8 @@ public class TrafficRuleController {
     @PostMapping("/save")
     @ResponseBody
     @RequiresPermissions("trafficAssignRule:ruleManager:add")
-    @LogRecord(description = "新增话务分配规则", operationType = OperationType.INSERT,
-            menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
-    public JSONResult save(@Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq,
-            BindingResult result) {
+    @LogRecord(description = "新增话务分配规则", operationType = OperationType.INSERT, menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
+    public JSONResult save(@Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -179,23 +171,21 @@ public class TrafficRuleController {
             trafficAssignRuleReq.setTrafficId(user.getOrgId());
         }
         trafficAssignRuleReq.setCreateUser(user.getId());
+        trafficAssignRuleReq.setRuleType(BusinessConfigConstant.TRAFFIC_RULE_TYPE.TRAFFIC);
         // 插入类型为优化
         return trafficRuleFeignClient.create(trafficAssignRuleReq);
     }
 
     /**
      * 修改话务分配规则
-     * 
      * @param orgDTO
      * @return
      */
     @PostMapping("/update")
     @ResponseBody
     @RequiresPermissions("trafficAssignRule:ruleManager:edit")
-    @LogRecord(description = "修改话务分配规则信息", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
-    public JSONResult update(@Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq,
-            BindingResult result) {
+    @LogRecord(description = "修改话务分配规则信息", operationType = OperationType.UPDATE, menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
+    public JSONResult update(@Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -203,25 +193,21 @@ public class TrafficRuleController {
 
         Long id = trafficAssignRuleReq.getId();
         if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         return trafficRuleFeignClient.update(trafficAssignRuleReq);
     }
 
     /**
      * 启用规则
-     * 
      * @param orgDTO
      * @return
      */
     @PostMapping("/updateStatusEnable")
     @ResponseBody
     @RequiresPermissions("trafficAssignRule:ruleManager:edit")
-    @LogRecord(description = "启用话务分配规则", operationType = OperationType.ENABLE,
-            menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
-    public JSONResult updateStatusEnable(
-            @Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq, BindingResult result) {
+    @LogRecord(description = "启用话务分配规则", operationType = OperationType.ENABLE, menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
+    public JSONResult updateStatusEnable(@Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -229,25 +215,21 @@ public class TrafficRuleController {
 
         Long id = trafficAssignRuleReq.getId();
         if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         return trafficRuleFeignClient.updateStatus(trafficAssignRuleReq);
     }
 
     /**
      * 禁用规则
-     * 
      * @param orgDTO
      * @return
      */
     @PostMapping("/updateStatusDisable")
     @ResponseBody
     @RequiresPermissions("trafficAssignRule:ruleManager:edit")
-    @LogRecord(description = "禁用话务分配规则", operationType = OperationType.DISABLE,
-            menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
-    public JSONResult updateStatusDisable(
-            @Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq, BindingResult result) {
+    @LogRecord(description = "禁用话务分配规则", operationType = OperationType.DISABLE, menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
+    public JSONResult updateStatusDisable(@Valid @RequestBody TrafficAssignRuleReq trafficAssignRuleReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -255,33 +237,27 @@ public class TrafficRuleController {
 
         Long id = trafficAssignRuleReq.getId();
         if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         return trafficRuleFeignClient.updateStatus(trafficAssignRuleReq);
     }
 
-
     /**
      * 删除话务分配规则
-     * 
      * @param orgDTO
      * @return
      */
     @PostMapping("/delete")
     @ResponseBody
     @RequiresPermissions("trafficAssignRule:ruleManager:delete")
-    @LogRecord(description = "删除规则", operationType = OperationType.DELETE,
-            menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
+    @LogRecord(description = "删除规则", operationType = OperationType.DELETE, menuName = MenuEnum.TRAFFIC_RULE_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListLongReq idList) {
 
         return trafficRuleFeignClient.delete(idList);
     }
 
-
     /**
      * 获取当前登录账号
-     * 
      * @param orgDTO
      * @return
      */
@@ -291,18 +267,14 @@ public class TrafficRuleController {
         return user;
     }
 
-
     /**
      * 查询字典表
-     * 
      * @param code
      * @return
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
-        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
-        if (queryDicItemsByGroupCode != null
-                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
@@ -310,7 +282,6 @@ public class TrafficRuleController {
 
     /**
      * 根据机构和角色类型获取用户
-     * 
      * @param orgDTO
      * @return
      */
@@ -319,8 +290,7 @@ public class TrafficRuleController {
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
-        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
     }
 }
