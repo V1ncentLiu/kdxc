@@ -103,6 +103,11 @@
     <el-dialog title="图片" :visible.sync="ImgFormVisible" width="540px">
         <div style="text-align: center;"><img :src="imgUrl" alt=""></div>
     </el-dialog>
+    <el-dialog :before-close="handleClose" title="录入线下充值" :visible.sync="offlineRechargeVisible" width="600px">
+        <div v-loading="offlineRechargeLoading">
+            <iframe style="width: 100%;height: 300px;" :src="iframeUrl" frameborder="0"></iframe>        
+        </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -119,6 +124,9 @@
             return {
                 rechargeDTO:rechargeAccountDTO,
                 ImgFormVisible:false,
+                offlineRechargeVisible:false,
+                offlineRechargeLoading:false,
+                iframeUrl:'',
                 imgUrl:'',
                 pendingReviewNum:'',
                 multipleSelection: [],//选择行
@@ -139,6 +147,14 @@
             }             
         },
         methods: {
+            handleClose(){
+                this.iframeUrl=""
+                this.offlineRechargeVisible=false
+            },
+            chindRenClick(){
+                this.handleClose()
+                this.searchTable();
+            },
             numFormat(num) {
                 var c = (num.toString().indexOf ('.') !== -1) ? num.toLocaleString() : num.toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,');
                 return c;
@@ -199,7 +215,13 @@
               return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
             gotoAdd(){
-                window.location.href="/merchant/merchantRechargeRecordManage/initOfflinePayment"
+                this.iframeUrl='/merchant/merchantRechargeRecordManage/initOfflinePayment'
+                this.offlineRechargeVisible=true
+                this.offlineRechargeLoading=true
+                setTimeout(()=>{
+                    ocmVM.offlineRechargeLoading=false
+                },1000)
+                // window.location.href="/merchant/merchantRechargeRecordManage/initOfflinePayment"
             },
             openImg(url) {
                 this.ImgFormVisible = true;

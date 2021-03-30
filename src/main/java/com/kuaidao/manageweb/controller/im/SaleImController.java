@@ -102,16 +102,31 @@ public class SaleImController {
         }
         // 查询下级电销组(查询使用)
         JSONResult<List<OrganizationRespDTO>> listDescenDantByParentId = organizationFeignClient.queryOrgByParam(organizationQueryDTO);
+        //经纪组
         List<OrganizationRespDTO> data = listDescenDantByParentId.getData();
         // 餐盟严选所有电销顾问
         List<UserInfoDTO> userList = new ArrayList<>();
 
         userList = getUserListByBusliness(BusinessLineConstant.CMZSJJ, RoleCodeEnum.JMJJ.name(), user);
 
+
+        OrganizationQueryDTO organizationQueryDTO1 = new OrganizationQueryDTO();
+        organizationQueryDTO1.setBusinessLineList(businessLineList);
+        organizationQueryDTO1.setOrgType(OrgTypeConstant.HWZ);
+        if (RoleCodeEnum.JMGWZG.name().equals(roleCode)) {
+            organizationQueryDTO1.setId(user.getOrgId());
+        }
+        // 查询下级电销组(查询使用)
+        JSONResult<List<OrganizationRespDTO>> listDescenDantByParentId1 = organizationFeignClient.queryOrgByParam(organizationQueryDTO1);
+        //经纪顾问
+        List<OrganizationRespDTO> data1 = listDescenDantByParentId1.getData();
+
         request.setAttribute("teleGroupList", data);
         request.setAttribute("teleSaleList", userList);
         request.setAttribute("roleCode", roleCode);
         request.setAttribute("orgId", user.getOrgId() + "");
+
+        request.setAttribute("gwGroupList", data1);
 
         return "im/imAccreditManagement";
     }
@@ -122,21 +137,7 @@ public class SaleImController {
      */
     @PostMapping("/getSaleList")
     @ResponseBody
-    public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
-                                                     HttpServletRequest request) {
-
-        Long orgId = userOrgRoleReq.getOrgId();
-        IdEntity idEntity = new IdEntity();
-        idEntity.setId(String.valueOf(orgId));
-        JSONResult<OrganizationDTO> result = organizationFeignClient.queryOrgById(idEntity);
-        OrganizationDTO data = result.data();
-
-        if(data.getBusinessLine() == BusinessLineConstant.CMZSJJ){
-            userOrgRoleReq.setRoleCode(RoleCodeEnum.JMJJ.name());
-        }else{
-            userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
-        }
-
+    public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,HttpServletRequest request) {
         JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole;
     }
