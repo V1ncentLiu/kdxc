@@ -82,23 +82,7 @@ public class HomePageController {
                 return true;
             }).collect(Collectors.toList());
 
-            //小物种业务线电销相关角色不允许查看公有池，add by guoruiling 2021/3/29
-            if(null != user.getBusinessLine() && BusinessLineConstant.XIAOWUZHONG==user.getBusinessLine()){
-                menuList.forEach(m->{
-                    //电销管理所有菜单
-                    if (MenuEnum.TEL_SALE_MANAGE.getName().equals(m.getName())){
-                        List<ModuleInfoDTO> subMenus = m.getSubList();
-                        subMenus = subMenus.stream().filter(s->{
-                            //判断如果是公有池菜单则去除
-                            if (MenuEnum.TM_PUBLIC_POOL.getName().equals(s.getName())) {
-                                return false;
-                            }
-                            return true;
-                        }).collect(Collectors.toList());
-                        m.setSubList(subMenus);
-                    }
-                });
-            }
+
         }
         request.setAttribute("menuList", menuList);
         request.setAttribute("isUpdatePassword", isUpdatePassword);
