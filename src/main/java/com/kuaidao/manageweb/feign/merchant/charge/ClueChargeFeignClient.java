@@ -2,34 +2,33 @@ package com.kuaidao.manageweb.feign.merchant.charge;
 
 import java.util.List;
 
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
+
 import feign.hystrix.FallbackFactory;
 
 /**
  * 资源资费
- * 
  * @author: zxy
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchantClueCharge", fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service-zhang", path = "/merchant/merchantClueCharge",
+        fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
 public interface ClueChargeFeignClient {
     /***
      * 资源资费列表页
-     *
      * @return
      */
     @PostMapping("/queryPage")
@@ -37,18 +36,14 @@ public interface ClueChargeFeignClient {
 
     /**
      * 查询资源资费集合
-     * 
      * @param param
      * @return
      */
     @PostMapping("/listNoPage")
     public JSONResult<List<MerchantClueChargeDTO>> listNoPage(@RequestBody MerchantClueChargePageParam param);
 
-
-
     /**
      * 新增或修改资源资费
-     * 
      * @param req
      * @return
      */
@@ -57,7 +52,6 @@ public interface ClueChargeFeignClient {
 
     /**
      * 删除资源费用
-     *
      * @param merchantClueChargeReq
      * @return
      */
@@ -80,7 +74,6 @@ public interface ClueChargeFeignClient {
                     return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
                 }
 
-
                 @Override
                 public JSONResult<String> insertOrUpdate(@RequestBody MerchantClueChargeReq req) {
                     return fallBackError("新增或修改资源资费");
@@ -95,14 +88,13 @@ public interface ClueChargeFeignClient {
                 public JSONResult<PageBean<MerchantClueChargeDTO>> queryPage(MerchantClueChargeReq pageParam) {
                     return fallBackError("查询资源资费列表");
                 }
+
                 @Override
-                public JSONResult<String> delete( MerchantClueChargeReq merchantClueChargeReq){
+                public JSONResult<String> delete(MerchantClueChargeReq merchantClueChargeReq) {
                     return fallBackError("删除资费");
                 }
             };
         }
-
-
 
     }
 
