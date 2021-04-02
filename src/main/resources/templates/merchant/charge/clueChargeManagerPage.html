@@ -207,7 +207,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="选择商家：" :label-width="formLabelWidth" prop="mainAccountId">
+                    <el-form-item v-if="subAccountForm.iframemerchantType==2" label="选择商家：" :label-width="formLabelWidth" prop="mainAccountId">
                         <el-select v-model="subAccountForm.mainAccountId" style="width: 290px;" clearable
                             placeholder="选择商家">
                             <el-option v-for="item in merchantUserOptions" :key="item.id" :label="item.name"
@@ -321,6 +321,9 @@
                 iframemerchantType: [
                     { required: true, message: '商家所属不能为空', trigger: 'change' },
                 ],
+                mainAccountId:[
+                    { required: true, message: '选择商家不能为空', trigger: 'change' },
+                ]
 
             }
         },
@@ -336,6 +339,7 @@
             // 添加编辑删除
             seatOperation(type) {
                 if (this.$refs['subAccountForm'] !== undefined) {
+                    this.subAccountForm.mainAccountId=''
                     this.$refs['subAccountForm'].resetFields();
                 }
                 switch (type) {
@@ -426,7 +430,9 @@
                         param.category = this.selectionValue(this.subAccountForm.iframeaddress, this.categoryOptions)
                         param.source = this.selectionValue(this.subAccountForm.iframeaccountNo, this.mediumOptions)
                         param.charge = this.subAccountForm.iframesecretKey
-                        param.mainAccountId = this.subAccountForm.mainAccountId
+                        if(this.subAccountForm.iframemerchantType==2){
+                            param.mainAccountId = this.subAccountForm.mainAccountId
+                        }
                         param.merchantType = this.selectionValue(this.subAccountForm.iframemerchantType, this.merchantOwnedOptions)
                         if (this.title === '编辑资费设置') {
                             param.id = this.multipleSelection[0].id
