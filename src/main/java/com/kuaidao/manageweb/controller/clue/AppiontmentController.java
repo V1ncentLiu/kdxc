@@ -157,18 +157,25 @@ public class AppiontmentController {
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:appiontmentManager");
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        //TODO 业务线8 删除搜索词列
+        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("fieldList", data);
 
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setMenuCode("aggregation:appiontmentManager");
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
-        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        List<UserFieldDTO> data1 = queryFieldByUserAndMenu.getData();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data1) && businessLine.equals(8)){
+            data1.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("userFieldList", data1);
         request.setAttribute("userId", user.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", user.getOrgId().toString());

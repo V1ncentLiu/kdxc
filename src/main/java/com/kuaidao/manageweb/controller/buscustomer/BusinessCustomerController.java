@@ -70,6 +70,8 @@ public class BusinessCustomerController {
     @RequestMapping("/editCustomerInfo")
     public String customerEditInfo(HttpServletRequest request, @RequestParam String clueId) {
 
+        UserInfoDTO user = getUser();
+
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId);
         call.setPageSize(10000);
@@ -100,6 +102,10 @@ public class BusinessCustomerController {
                 request.setAttribute("customer", clueInfo.getData().getClueCustomer());
             }
             if (null != clueInfo.getData().getClueBasic()) {
+                Integer businessLine = user.getBusinessLine();
+                if(null != businessLine && businessLine.equals(8)){
+                    clueInfo.getData().getClueBasic().setSearchWord(null);
+                }
                 request.setAttribute("base", clueInfo.getData().getClueBasic());
             }
             if (null != clueInfo.getData().getClueIntention()) {
@@ -139,7 +145,7 @@ public class BusinessCustomerController {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
 
-        UserInfoDTO user = getUser();
+
 
         // 点击查看
         ClueAppiontmentReq req = new ClueAppiontmentReq();
@@ -153,6 +159,8 @@ public class BusinessCustomerController {
 
     @RequestMapping("/viewCustomerInfo")
     public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId) {
+
+        UserInfoDTO user = getUser();
 
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId);
@@ -185,6 +193,11 @@ public class BusinessCustomerController {
                 request.setAttribute("customer", new ArrayList());
             }
             if (null != clueInfo.getData().getClueBasic()) {
+                //TODO 业务线8 删除搜索词列
+                Integer businessLine = user.getBusinessLine();
+                if(null != businessLine && businessLine.equals(8)){
+                    clueInfo.getData().getClueBasic().setSearchWord(null);
+                }
                 request.setAttribute("base", clueInfo.getData().getClueBasic());
             } else {
                 request.setAttribute("base", new ArrayList());
@@ -234,7 +247,7 @@ public class BusinessCustomerController {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
 
-        UserInfoDTO user = getUser();
+
 
         ClueAppiontmentReq req = new ClueAppiontmentReq();
         req.setClueId(new Long(clueId));
