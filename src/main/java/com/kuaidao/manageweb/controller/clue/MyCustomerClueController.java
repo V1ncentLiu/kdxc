@@ -1880,7 +1880,18 @@ public class MyCustomerClueController {
     @RequestMapping("/getRepeatClueRecordDTOList")
     @ResponseBody
     public JSONResult<List<RepeatClueRecordDTO>> getRepeatClueRecordDTOList(@RequestBody RepeatClueRecordQueryDTO recordQueryDTO){
-        return repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        //TODO 业务线8 删除搜索词
+        JSONResult<List<RepeatClueRecordDTO>> listJSONResult = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        Integer businessLine = getUser().getBusinessLine();
+        if(null != businessLine && businessLine.equals(8)){
+            List<RepeatClueRecordDTO> data = listJSONResult.getData();
+            if(CollectionUtils.isNotEmpty(data)){
+                for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+                    repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+                }
+            }
+        }
+        return listJSONResult;
     }
     /**
      * @Description:构建电销今日跟访次数下拉列表值
