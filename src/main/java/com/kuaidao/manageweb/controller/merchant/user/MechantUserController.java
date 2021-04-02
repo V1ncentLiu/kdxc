@@ -132,7 +132,7 @@ public class MechantUserController {
         if (subaccountRoleDTOs != null && JSONResult.SUCCESS.equals(subaccountRoleDTOs.getCode())) {
             request.setAttribute("subaccountRoleDTOs", subaccountRoleDTOs.getData());
         }
-
+        request.setAttribute("ossUrl",ossUrl);
         return "merchant/user/userManagePage";
     }
     /***

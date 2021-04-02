@@ -3,40 +3,37 @@
  */
 package com.kuaidao.manageweb.controller.merchant.charge;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.PageBean;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.charge.ClueChargeFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author zxy
@@ -50,7 +47,8 @@ public class ClueChargeController {
     private ClueChargeFeignClient clueChargeFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-
+    @Autowired
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
     /***
      * 资源资费列表页
      * 
@@ -65,6 +63,10 @@ public class ClueChargeController {
         request.setAttribute("sourceList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
         //行业类别
         request.setAttribute("industryCategoryList", getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 商家账号
+        List<UserInfoDTO> userList = getMerchantUser(null);
+        request.setAttribute("merchantUserList",userList);
+
         return "merchant/charge/clueChargeManagerPage";
     }
 
@@ -163,4 +165,16 @@ public class ClueChargeController {
         return null;
     }
 
+    /**
+     * 查询商家账号
+     * @param arrayList
+     * @return
+     */
+    private List<UserInfoDTO> getMerchantUser(List<Integer> arrayList) {
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoDTO.setStatusList(arrayList);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        return merchantUserList.getData();
+    }
 }

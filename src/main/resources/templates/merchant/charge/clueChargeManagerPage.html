@@ -81,6 +81,14 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
+                        <el-form-item label="商家账号：" label-width="auto">
+                            <el-select v-model="clueChargeSearchForm.mainAccountId" filterable clearable
+                                placeholder="选择商家账号">
+                                <el-option v-for="item in merchantUserOptions" :key="item.id" :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
                     </div>
                     <div class="mainSearchBtnBox">
                         <el-button icon="el-icon-search" type="primary" class="searchBtn" @click="searchTable()">
@@ -114,7 +122,7 @@
                             </el-table-column>
                             <el-table-column align="center" prop="sourceName" label="资源媒介" min-width="80">
                             </el-table-column>
-                            <el-table-column align="center" prop="charge" label="价格（元）/条" min-width="95">
+                            <el-table-column align="center" prop="charge" label="餐盟币" min-width="95">
                                 <!-- <template slot-scope="scope">
                                     <el-form-item :prop="'dataTable.' + scope.$index + '.charge'" :rules='rules.charge'
                                         class="chargeBox">
@@ -130,8 +138,11 @@
                                     <span v-if="scope.row.merchantType==1">内部</span>
                                     <span v-if="scope.row.merchantType==2">外部</span>
                                 </template>
-
                             </el-table-column>
+                            
+                            <el-table-column align="center" prop="mainAccountName" label="选择商家" min-width="80">
+                            </el-table-column>
+                            
                             <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat"
                                 min-width="120">
                             </el-table-column>
@@ -196,6 +207,14 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item v-if="subAccountForm.iframemerchantType==2" label="选择商家：" :label-width="formLabelWidth" prop="mainAccountId">
+                        <el-select v-model="subAccountForm.mainAccountId" style="width: 290px;" clearable
+                            placeholder="选择商家">
+                            <el-option v-for="item in merchantUserOptions" :key="item.id" :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
 
                 </el-form>
                 <div slot="footer" class="dialog-footer" style="text-align:center;">
@@ -214,7 +233,9 @@
     var industryCategoryList = [{ name: '不限', value: '0' }].concat([[${ industryCategoryList }]]);//行业类别
     var categoryList = [{ name: '不限', value: '0' }].concat([[${ categoryList }]]);//资费类别
     var sourceList = [{ name: '不限', value: '0' }].concat([[${ sourceList }]]);//媒介
-
+    
+    var merchantUserList = [[${ merchantUserList }]];
+    
     var clueChargeVM = new Vue({
         el: '#clueChargeManage',
         data: {
@@ -223,11 +244,13 @@
                 category: '',
                 source: '',
                 merchantType: '',
+                mainAccountId: '',
             },
             categoryOptions: categoryList,
             industryOptions: industryCategoryList,
             mediumOptions: sourceList,
             merchantOwnedOptions: [{ name: '全部商家', value: '0' }, { name: '内部', value: '1' }, { name: '外部', value: '2' }],
+            merchantUserOptions: merchantUserList,
             pager: {
                 total: 0,
                 currentPage: 1,
@@ -240,6 +263,7 @@
                 iframeaccountNo: '',
                 iframesecretKey: '',
                 iframemerchantType: '',
+                mainAccountId: '',
             },
             title: '添加',
             dynamicValidateForm: {
@@ -297,6 +321,9 @@
                 iframemerchantType: [
                     { required: true, message: '商家所属不能为空', trigger: 'change' },
                 ],
+                mainAccountId:[
+                    { required: true, message: '选择商家不能为空', trigger: 'change' },
+                ]
 
             }
         },
@@ -312,6 +339,7 @@
             // 添加编辑删除
             seatOperation(type) {
                 if (this.$refs['subAccountForm'] !== undefined) {
+                    this.subAccountForm.mainAccountId=''
                     this.$refs['subAccountForm'].resetFields();
                 }
                 switch (type) {
@@ -322,18 +350,20 @@
                         this.subAccountForm.iframeaccountNo = '不限'
                         this.subAccountForm.iframesecretKey = ''
                         this.subAccountForm.iframemerchantType = '全部商家'
+                        this.subAccountForm.mainAccountId = ''
                         this.title = '添加资费设置'
                         this.centerDialogVisible = true
                         break;
                     case 'edit':
                         this.title = '编辑资费设置'
                         if (this.multipleSelection.length === 1) {
-                            const { chargeName, category, industryCategory, charge, merchantType, source } = this.multipleSelection[0]
+                            const { chargeName, category, industryCategory, charge, merchantType, source,mainAccountId } = this.multipleSelection[0]
                             this.subAccountForm.iframeseatNo = chargeName
                             this.subAccountForm.iframecompany = industryCategory
                             this.subAccountForm.iframeaddress = category
                             this.subAccountForm.iframeaccountNo = source
                             this.subAccountForm.iframesecretKey = charge
+                            this.subAccountForm.mainAccountId = mainAccountId
                             this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部' : '外部'
                             this.centerDialogVisible = true
                         } else if (this.multipleSelection.length === 0) {
@@ -400,6 +430,9 @@
                         param.category = this.selectionValue(this.subAccountForm.iframeaddress, this.categoryOptions)
                         param.source = this.selectionValue(this.subAccountForm.iframeaccountNo, this.mediumOptions)
                         param.charge = this.subAccountForm.iframesecretKey
+                        if(this.subAccountForm.iframemerchantType==2){
+                            param.mainAccountId = this.subAccountForm.mainAccountId
+                        }
                         param.merchantType = this.selectionValue(this.subAccountForm.iframemerchantType, this.merchantOwnedOptions)
                         if (this.title === '编辑资费设置') {
                             param.id = this.multipleSelection[0].id
@@ -457,6 +490,7 @@
                 param.category = this.clueChargeSearchForm.category;
                 param.source = this.clueChargeSearchForm.source;
                 param.merchantType = this.clueChargeSearchForm.merchantType;
+                param.mainAccountId = this.clueChargeSearchForm.mainAccountId;
 
                 // console.info(param);
                 axios.post('/merchant/clueChargeManager/queryPage', param)
