@@ -490,11 +490,19 @@ public class MyCustomerClueController {
         request.setAttribute("loginUserId", user.getId());
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
         recordQueryDTO.setClueId(Long.valueOf(clueId));
-        JSONResult<List<RepeatClueRecordDTO>> repeatJson =
-                repeatClueRecordFeignClient.queryList(recordQueryDTO);
-        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode())
-                && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
-            request.setAttribute("repeatClueList", repeatJson.getData());
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode()) && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+            //TODO 业务线8 删除搜索词
+            Integer businessLine = getUser().getBusinessLine();
+            List<RepeatClueRecordDTO> data = repeatJson.getData();
+            if(null != businessLine && businessLine.equals(8)){
+                if(CollectionUtils.isNotEmpty(data)){
+                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+                    }
+                }
+            }
+            request.setAttribute("repeatClueList", data);
             request.setAttribute("repeatClueStatus", 1);
         } else {
             request.setAttribute("repeatClueStatus", 0);
@@ -691,9 +699,18 @@ public class MyCustomerClueController {
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
         recordQueryDTO.setClueId(Long.valueOf(clueId));
         JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
-        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode()) && repeatJson.getData() != null
-                && repeatJson.getData().size() > 0) {
-            request.setAttribute("repeatClueList", repeatJson.getData());
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode()) && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+            //TODO 业务线8 删除搜索词
+            Integer businessLine = getUser().getBusinessLine();
+            List<RepeatClueRecordDTO> data = repeatJson.getData();
+            if(null != businessLine && businessLine.equals(8)){
+                if(CollectionUtils.isNotEmpty(data)){
+                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+                    }
+                }
+            }
+            request.setAttribute("repeatClueList", data);
             request.setAttribute("repeatClueStatus", 1);
         } else {
             request.setAttribute("repeatClueStatus", 0);
@@ -1880,7 +1897,18 @@ public class MyCustomerClueController {
     @RequestMapping("/getRepeatClueRecordDTOList")
     @ResponseBody
     public JSONResult<List<RepeatClueRecordDTO>> getRepeatClueRecordDTOList(@RequestBody RepeatClueRecordQueryDTO recordQueryDTO){
-        return repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        //TODO 业务线8 删除搜索词
+        JSONResult<List<RepeatClueRecordDTO>> listJSONResult = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        Integer businessLine = getUser().getBusinessLine();
+        if(null != businessLine && businessLine.equals(8)){
+            List<RepeatClueRecordDTO> data = listJSONResult.getData();
+            if(CollectionUtils.isNotEmpty(data)){
+                for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+                    repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+                }
+            }
+        }
+        return listJSONResult;
     }
     /**
      * @Description:构建电销今日跟访次数下拉列表值
