@@ -142,27 +142,35 @@ public class CustomerManagerController {
             request.setAttribute("queryOrg", data);
         }
 
+        //TODO 业务线8 删除搜索词列
+        Integer businessLine = user.getBusinessLine();
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("customerManager");
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setMenuCode("customerManager");
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        List<UserFieldDTO> data1 = queryFieldByUserAndMenu.getData();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data1) && businessLine.equals(8)){
+            data1.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
 
         TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
         //获取电销布局
         telemarketingLayoutDTO = getTelemarketingLayoutDTO(user,user.getRoleList().get(0).getRoleCode(),telemarketingLayoutDTO,OrgTypeConstant.DXZ);
         request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
 
-        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        request.setAttribute("userFieldList", data1);
         request.setAttribute("roleCode", user.getRoleList().get(0).getRoleCode());
         request.setAttribute("businessLine", user.getBusinessLine());
         Boolean canCopy = handleCanCopy(user.getBusinessLine());

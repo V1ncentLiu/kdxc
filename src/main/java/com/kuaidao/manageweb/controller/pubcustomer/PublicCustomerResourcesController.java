@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.aggregation.dto.clue.ReleasePublicClueDTO;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,17 +184,26 @@ public class PublicCustomerResourcesController {
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("PublicCustomer");
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        //TODO 业务线8 删除搜索词列
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        Integer businessLine = user.getBusinessLine();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setMenuCode("PublicCustomer");
         queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
-        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        List<UserFieldDTO> data1 = queryFieldByUserAndMenu.getData();
+        //TODO 业务线8 删除搜索词列
+        if(null != businessLine && CollectionUtils.isNotEmpty(data1) && businessLine.equals(8)){
+            data1.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("userFieldList", data1);
         long endTime = System.currentTimeMillis();
         // System.out.println("公共列： "+(endTime-startTime)+"ms");
 
