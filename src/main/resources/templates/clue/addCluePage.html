@@ -421,7 +421,7 @@
                             <li v-if="item.category" class="bg3">{{item.categoryName}}</li>
                             <li v-if="item.type">{{item.typeName}}</li>
                             <li v-if="item.searchWord" class="bg1">{{item.searchWord}}</li>
-                            <li v-if="item.classification" class="bg2">{{item.classification}}</li>
+                            <li v-if="item.classification" class="bg2">{{item.classificationName}}</li>
                         </ul>
                     </div>                    
                 </el-card>
@@ -999,6 +999,7 @@ if(notOptList){
                         if(this.form.industryCategory){
                             for(var i=0;i<industryCategoryList.length;i++){
                                 if(this.form.industryCategory==industryCategoryList[i].value){
+
                                     this.viewForm.industryCategoryName=industryCategoryList[i].name;
                                 }
                             }
@@ -1376,6 +1377,16 @@ if(notOptList){
                                 table.data[i].typeName=addClueVM.transformType(table.data[i].type);
                             }                        
                         }
+
+                    // 转换
+                    for(var i=0;i<table.data.length;i++){
+                        if(table.data[i].classification){
+                            table.data[i].classificationName=addClueVM.transformClassification(table.data[i].classification);
+
+
+                        }
+                    }
+                    console.log(table.data)
                 })
                 .catch(function (error) {
                      console.log(error);
@@ -1428,6 +1439,17 @@ if(notOptList){
           	  }
                 return text;
              },
+            transformClassification(cellValue) {
+                var text="";
+                if(industryCategoryList){
+                    for(var i=0;i<industryCategoryList.length;i++){
+                        if(cellValue==industryCategoryList[i].value){
+                            text=industryCategoryList[i].name;
+                        }
+                    }
+                }
+                return text;
+            },
             //资源类型转换方法
             // transformType(row, column, cellValue, index) {
             transformType(cellValue) {
