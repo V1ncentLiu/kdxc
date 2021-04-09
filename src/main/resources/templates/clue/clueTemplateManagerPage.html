@@ -81,7 +81,7 @@
                         <el-input v-model="clueTemplateSearchForm.name" placeholder="模板名称" class="input-with-select"></el-input>
                     </el-form-item>
                     <el-form-item label="行业类别：">
-                        <el-select v-model="clueTemplateForm.classification" placeholder="行业类别" clearable filterable>
+                        <el-select v-model="clueTemplateSearchForm.classification" placeholder="行业类别" clearable filterable>
                             <el-option
                                     v-for="item in industryCategoryList"
                                     :key="item.value"
@@ -90,12 +90,11 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-row v-show="isShow">
-                        <el-form-item  prop="searchWord" label="搜索词:" label-width="55px">
-                            <el-input v-model="clueTemplateSearchForm.name" placeholder="搜索词" class="input-with-select"></el-input>
-                        </el-form-item>
-                    </el-row>
+                    <el-form-item  prop="searchWord" label="搜索词:">
+                        <el-input v-model="clueTemplateSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
+                    </el-form-item>
                 </el-row>
+
 
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -224,7 +223,9 @@ var clueTemplateVM = new Vue({
 	        		category: '',
 	        		type: '',
 	        		source: '',
-	        		sourceType: ''
+	        		sourceType: '',
+                    searchWord:'',
+                    classification:''
 	            },
 	            clueTemplateForm: {
 	            	id:'',
@@ -273,6 +274,8 @@ var clueTemplateVM = new Vue({
                 param.type = this.clueTemplateSearchForm.type;
                 param.source = this.clueTemplateSearchForm.source;
                 param.sourceType = this.clueTemplateSearchForm.sourceType;
+                param.searchWord = this.clueTemplateSearchForm.searchWord;
+                param.classification = this.clueTemplateSearchForm.classification;
                 console.info(param);
                 axios.post('/aggregation/clueTemplate/list', param)
                 .then(function (response) {
@@ -344,6 +347,12 @@ var clueTemplateVM = new Vue({
                     	  if(data.data.sourceType){
 	                    	  clueTemplateVM.clueTemplateForm.sourceType= data.data.sourceType+"";
                     	  }
+                          if(data.data.classification){
+                              clueTemplateVM.clueTemplateForm.classification= data.data.classification+"";
+                          }
+                          if(data.data.searchWord){
+                              clueTemplateVM.clueTemplateForm.searchWord= data.data.searchWord+"";
+                          }
                       }else{
                       	console.error(data);
                       }
