@@ -11,7 +11,7 @@
         .elCardBox{border:0;}
         .elCardBox .el-card__body{height: 115px;}
         .elCardBox .title{margin-bottom: 15px;padding: 0 30px;}
-        .elCardBox ul{overflow: hidden;width: 405px;margin: 0 auto;}
+        .elCardBox ul{overflow: hidden;width: 550px;margin: 0 auto;}
         .elCardBox ul li{float: left;width: 125px;height: 32px;line-height: 32px;background: rgba(92,107,232,0.9);margin-right:10px;text-align: center;border-radius: 4px;color: #fff;margin-bottom: 10px;font-size: 13px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;}
         .elCardBox ul li.bg1{background: rgba(74,182,92,0.9);}
         .elCardBox ul li.bg2{background: rgba(230,162,60,0.9);}
@@ -350,7 +350,7 @@
     </el-dialog>    
     <!-- 选择模板 -->
     <!-- dialog -->
-    <el-dialog title="选择资源模板" :visible.sync="chooseVisible" width="1060px">
+    <el-dialog title="选择资源模板" :visible.sync="chooseVisible" width="1200px">
         <el-row class="marginB20 greybg padding20" style="padding-bottom: 0;">
             <el-form :inline="true" :model="clueTemplateSearchForm" class="demo-form-inline" ref="clueTemplateSearchForm">
         	    <el-form-item label="资源项目:" >
@@ -420,6 +420,8 @@
                             <li v-if="item.sourceType" class="bg2">{{item.sourceTypeName}}</li>
                             <li v-if="item.category" class="bg3">{{item.categoryName}}</li>
                             <li v-if="item.type">{{item.typeName}}</li>
+                            <li v-if="item.searchWord" class="bg1">{{item.searchWord}}</li>
+                            <li v-if="item.classification" class="bg2">{{item.classification}}</li>
                         </ul>
                     </div>                    
                 </el-card>
@@ -1317,6 +1319,16 @@ if(notOptList){
 　　　     		}else{
 　　　     			this.form.sourceType='';
 　　　     		}
+                if(row.searchWord){
+                    this.form.searchWord=row.searchWord+'';
+                }else{
+                    this.form.searchWord='';
+                }
+                if(row.classification){
+                    this.form.industryCategory=row.classification+'';
+                }else{
+                    this.form.industryCategory='';
+                }
 　　　     		this.categoryChange(this.form.category,row.clueProjectId);
             this.searchTable();
 　　　 	 	},
@@ -1454,6 +1466,17 @@ if(notOptList){
 	                	}
        	  		}
                   return text;
+            },
+            transformSource(cellValue) {
+                var text="";
+                if(mediumList){
+                    for(var i=0;i<mediumList.length;i++){
+                        if(cellValue==mediumList[i].value){
+                            text=mediumList[i].name;
+                        }
+                    }
+                }
+                return text;
             },
         },
         mounted(){
