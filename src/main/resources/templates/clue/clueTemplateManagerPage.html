@@ -80,7 +80,22 @@
                     <el-form-item  prop="name" label="模板名称:" label-width="55px">
                         <el-input v-model="clueTemplateSearchForm.name" placeholder="模板名称" class="input-with-select"></el-input>
                     </el-form-item>
+                    <el-form-item label="行业类别：">
+                        <el-select v-model="clueTemplateSearchForm.classification" placeholder="行业类别" clearable filterable>
+                            <el-option
+                                    v-for="item in industryCategoryList"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item  prop="searchWord" label="搜索词:">
+                        <el-input v-model="clueTemplateSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
+                    </el-form-item>
                 </el-row>
+
+
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -99,6 +114,8 @@
                 <el-table-column align="center" prop="sourceType" label="广告位"  :formatter="transformSourceType" width="110"></el-table-column>
                 <el-table-column align="center" prop="category" label="资源类别"  :formatter="transformCategory" width="85"></el-table-column>
                 <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType" width="85"></el-table-column>
+                <el-table-column align="center" prop="classification" label="行业类别"  :formatter="transformClassification" width="85"></el-table-column>
+                <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间" width="140"></el-table-column>
                <el-table-column align="center" prop="createUserName" label="创建人" width="110"></el-table-column>
             </el-table>
@@ -164,6 +181,19 @@
                         </el-option>
                     </el-select>
             </el-form-item>
+            <el-form-item label="行业类别：" :label-width="formLabelWidth" prop="classification">
+                <el-select v-model="clueTemplateForm.classification" clearable placeholder="请选择" style="width: 290px;">
+                    <el-option
+                            v-for="item in industryCategoryList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="搜索词：" :label-width="formLabelWidth" prop="searchWord">
+                <el-input v-model="clueTemplateForm.searchWord" autocomplete="off"  maxlength="50" style="width: 290px;"></el-input>
+            </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
             <el-button type="primary" :disabled="submitDisabled" @click="saveClueTemplate('clueTemplateForm')">提交</el-button>
@@ -181,6 +211,7 @@ var adsenseList=[[${adsenseList}]];//广告位集合
 var clueTypeList=[[${clueTypeList}]];//资源类型集合
 var mediumList=[[${mediumList}]];//媒介集合
 var userId=[[${userId}]];//媒介集合
+var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
 var clueTemplateVM = new Vue({
         el: '#clueTemplateManage',
         data: {
@@ -192,7 +223,9 @@ var clueTemplateVM = new Vue({
 	        		category: '',
 	        		type: '',
 	        		source: '',
-	        		sourceType: ''
+	        		sourceType: '',
+                    searchWord:'',
+                    classification:''
 	            },
 	            clueTemplateForm: {
 	            	id:'',
@@ -201,7 +234,9 @@ var clueTemplateVM = new Vue({
 	        		category: '',
 	        		type: '',
 	        		source: '',
-	        		sourceType: ''
+	        		sourceType: '',
+                    classification:'',
+                    searchWord:""
                 },
 	            dataTable:[],
 	            dialogFormVisible: false,
@@ -213,6 +248,7 @@ var clueTemplateVM = new Vue({
 	                pageSize: 20,
 	            },
 	            projectOptions:projectList,
+                industryCategoryList:industryCategoryList,
 	            sourceTypeOptions:adsenseList,
 	            typeOptions:clueTypeList,
 	            sourceOptions:mediumList,
@@ -238,6 +274,8 @@ var clueTemplateVM = new Vue({
                 param.type = this.clueTemplateSearchForm.type;
                 param.source = this.clueTemplateSearchForm.source;
                 param.sourceType = this.clueTemplateSearchForm.sourceType;
+                param.searchWord = this.clueTemplateSearchForm.searchWord;
+                param.classification = this.clueTemplateSearchForm.classification;
                 console.info(param);
                 axios.post('/aggregation/clueTemplate/list', param)
                 .then(function (response) {
@@ -309,6 +347,12 @@ var clueTemplateVM = new Vue({
                     	  if(data.data.sourceType){
 	                    	  clueTemplateVM.clueTemplateForm.sourceType= data.data.sourceType+"";
                     	  }
+                          if(data.data.classification){
+                              clueTemplateVM.clueTemplateForm.classification= data.data.classification+"";
+                          }
+                          if(data.data.searchWord){
+                              clueTemplateVM.clueTemplateForm.searchWord= data.data.searchWord+"";
+                          }
                       }else{
                       	console.error(data);
                       }
@@ -486,6 +530,18 @@ var clueTemplateVM = new Vue({
 	                		}
 	                	}
          	  		}
+                return text;
+            },
+            //
+            transformClassification(row, column, cellValue, index) {
+                var text="";
+                if(industryCategoryList){
+                    for(var i=0;i<industryCategoryList.length;i++){
+                        if(cellValue==industryCategoryList[i].value){
+                            text=industryCategoryList[i].name;
+                        }
+                    }
+                }
                 return text;
             },
             toogleClick(){
