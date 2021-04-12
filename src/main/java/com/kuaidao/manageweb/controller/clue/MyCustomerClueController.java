@@ -882,7 +882,7 @@ public class MyCustomerClueController {
     /**
      * 上传资源文件
      *
-     * @param request
+     * @param
      * @return
      */
     @RequestMapping("/uploadClueFile")
@@ -1225,6 +1225,8 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
+            dto.setApplyUserId(user.getId());
+            dto.setApplyOrgId(user.getOrgId());
             if (user.getBusinessLine() != null) {
                 dto.setBusinessLine(user.getBusinessLine());
             }
