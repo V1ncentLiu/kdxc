@@ -66,14 +66,15 @@ public class ClueTemplateController {
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
         // 查询非优化字典资源类别集合
-        request.setAttribute("clueCategoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        request.setAttribute("clueCategoryList",getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(DicCodeEnum.CLUETYPE.getCode()));
         // 查询字典广告位集合
         request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        // 查询字典行业类别集合
+        request.setAttribute("industryCategoryList", getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 当前账号id
         request.setAttribute("userId", getUserId());
 
