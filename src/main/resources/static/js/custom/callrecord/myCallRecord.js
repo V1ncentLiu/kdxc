@@ -250,7 +250,7 @@ var myCallRecordVm = new Vue({
                 		 if(callSource == 4){
                 		      decodeUrl = encodeURI(fileName.substring(0,fileName.lastIndexOf("/")));
                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                         }else if(callSource=='3'  ||callSource =='5'){
+                         }else if(callSource=='3'  ||callSource =='5' || callSource == '8'){
                 			  decodeUrl = encodeURI(url);
                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
                 		 }else if(callSource == 7){
