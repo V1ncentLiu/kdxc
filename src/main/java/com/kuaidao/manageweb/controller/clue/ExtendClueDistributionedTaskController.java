@@ -1,17 +1,46 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
-import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.aggregation.dto.clue.ClueDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
+import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
+import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.*;
+import com.kuaidao.common.entity.ClueCommunicateExportModel;
+import com.kuaidao.common.entity.ClueCommunicatePhtraExportModel;
+import com.kuaidao.common.entity.ClueExportModel;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -37,21 +66,6 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Controller
 @RequestMapping("/exetend/distributionedTaskManager")
@@ -116,7 +130,7 @@ public class ExtendClueDistributionedTaskController {
     @RequestMapping("/queryPageDistributionedTask")
     @ResponseBody
     public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(HttpServletRequest request,
-                                                                                       @RequestBody ClueDistributionedTaskQueryDTO queryDto) {
+            @RequestBody ClueDistributionedTaskQueryDTO queryDto) {
         UserInfoDTO user = getUser();
         queryDto.setPromotionCompany(user.getPromotionCompany());
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
@@ -414,44 +428,44 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getRootWord());
                 if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                     curList.add(taskDTO.getConsultProjectTurn());
-                }else{
+                } else {
                     curList.add("");
                 }
                 curList.add(taskDTO.getSaleLadder());
                 curList.add(taskDTO.getClueLadder());
 
-                //经纪人字段处理
+                // 经纪人字段处理
                 if (null != taskDTO.getBusinessLine() && taskDTO.getBusinessLine().equals(15)) {
-                    //首次分配经纪组
+                    // 首次分配经纪组
                     curList.add(taskDTO.getFirstAsssignTeleGroupName());
-                    //首次分配经纪人
+                    // 首次分配经纪人
                     curList.add(taskDTO.getFirstAssignTeleSaleName());
-                    //现负责经纪组
+                    // 现负责经纪组
                     curList.add(taskDTO.getAgentGroupNames());
-                    //现负责经纪人
+                    // 现负责经纪人
                     curList.add(taskDTO.getAgentNames());
-                    //经纪顾问是否接通
+                    // 经纪顾问是否接通
                     String consultantIsCall = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getConsultantIsCall())) {
                         consultantIsCall = "是";
                     } else {
                         consultantIsCall = "否";
                     }
-                    //经纪顾问是否有效
+                    // 经纪顾问是否有效
                     String consultantStatus = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getConsultantStatus())) {
                         consultantStatus = "是";
                     } else {
                         consultantStatus = "否";
                     }
-                    //经纪是否接通
+                    // 经纪是否接通
                     String agentIsCall = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getAgentIsCall())) {
                         agentIsCall = "是";
                     } else {
                         agentIsCall = "否";
                     }
-                    //经纪是否有效
+                    // 经纪是否有效
                     String agentStatus = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getAgentStatus())) {
                         agentStatus = "是";
@@ -462,6 +476,7 @@ public class ExtendClueDistributionedTaskController {
                     curList.add(consultantStatus);
                     curList.add(agentIsCall);
                     curList.add(agentStatus);
+                    curList.add(taskDTO.getRegisterTime());
 
                 }
                 dataList.add(curList);
@@ -714,23 +729,23 @@ public class ExtendClueDistributionedTaskController {
                     // 咨询项目
                     if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                         curList.add(taskDTO.getConsultProjectTurn());
-                    }else{
+                    } else {
                         curList.add("");
                     }
                 }
                 if (!queryDto.getPhtraExport()) {
-                    //阶段名称
+                    // 阶段名称
                     curList.add(taskDTO.getPhaseName());
                 }
-                //经纪人字段处理
+                // 经纪人字段处理
                 if (!queryDto.getPhtraExport() && null != taskDTO.getBusinessLine() && taskDTO.getBusinessLine().equals(15)) {
-                    //首次分配经纪组
+                    // 首次分配经纪组
                     curList.add(taskDTO.getFirstAsssignTeleGroupName());
-                    //首次分配经纪人
+                    // 首次分配经纪人
                     curList.add(taskDTO.getFirstAssignTeleSaleName());
-                    //现负责经纪组
+                    // 现负责经纪组
                     curList.add(taskDTO.getAgentGroupNames());
-                    //现负责经纪人
+                    // 现负责经纪人
                     curList.add(taskDTO.getAgentNames());
                 }
                 dataList.add(curList);
