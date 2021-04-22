@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,8 @@ import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.constant.ComConstant;
+import com.kuaidao.common.constant.CustomerStatusEnum;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -424,7 +427,12 @@ public class ExtendClueDistributionedTaskController {
                 }
 
                 curList.add(sourceFrom);
-                curList.add(taskDTO.getAscriptionProjectName());
+                // 如果「资源项目归属」为空，那么读取「咨询项目」字段内容
+                if (StringUtils.isBlank(taskDTO.getAscriptionProjectName())) {
+                    curList.add(taskDTO.getConsultProjectTurn());
+                } else {
+                    curList.add(taskDTO.getAscriptionProjectName());
+                }
                 curList.add(taskDTO.getRootWord());
                 if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                     curList.add(taskDTO.getConsultProjectTurn());
@@ -477,6 +485,33 @@ public class ExtendClueDistributionedTaskController {
                     curList.add(agentIsCall);
                     curList.add(agentStatus);
                     curList.add(taskDTO.getRegisterTime());
+                    curList.add(taskDTO.getPid());
+                    String isMatch = "";
+                    if (CustomerStatusEnum.STATUS__8TH.getCode().equals(taskDTO.getCustomerStatus())) {
+                        isMatch = "是";
+                    } else {
+                        isMatch = "否";
+                    }
+                    curList.add(isMatch);
+                    curList.add(taskDTO.getAgentBrandNames());
+                    curList.add(taskDTO.getAdBrandNames());
+                    String GroupTypeName = "";
+                    if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE1.equals(taskDTO.getFirstAssignGroupType())) {
+                        GroupTypeName = "电销顾问";
+                    } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE2.equals(taskDTO.getFirstAssignGroupType())) {
+                        GroupTypeName = "话务";
+                    } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE3.equals(taskDTO.getFirstAssignGroupType())) {
+                        GroupTypeName = "加盟经纪";
+                    } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE4.equals(taskDTO.getFirstAssignGroupType())) {
+                        GroupTypeName = "加盟顾问";
+                    }
+                    curList.add(GroupTypeName);
+                    curList.add(taskDTO.getFirstAssignGroupName());
+                    if (taskDTO.getPid() == null) {
+                        curList.add("直发资源");
+                    } else {
+                        curList.add("顾问匹配");
+                    }
 
                 }
                 dataList.add(curList);
