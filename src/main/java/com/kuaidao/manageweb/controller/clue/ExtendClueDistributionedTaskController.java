@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -426,7 +427,12 @@ public class ExtendClueDistributionedTaskController {
                 }
 
                 curList.add(sourceFrom);
-                curList.add(taskDTO.getAscriptionProjectName());
+                // 如果「资源项目归属」为空，那么读取「咨询项目」字段内容
+                if (StringUtils.isBlank(taskDTO.getAscriptionProjectName())) {
+                    curList.add(taskDTO.getConsultProjectTurn());
+                } else {
+                    curList.add(taskDTO.getAscriptionProjectName());
+                }
                 curList.add(taskDTO.getRootWord());
                 if (null != taskDTO.getConsultProjectIsShow() && BusinessConfigConstant.YES.equals(taskDTO.getConsultProjectIsShow())) {
                     curList.add(taskDTO.getConsultProjectTurn());
