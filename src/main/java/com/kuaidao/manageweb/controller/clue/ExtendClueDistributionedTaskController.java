@@ -500,7 +500,9 @@ public class ExtendClueDistributionedTaskController {
                 }
                 curList.add(taskDTO.getPid() == null ? "" : taskDTO.getPid() + "");
                 String isMatch = "";
-                if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
+                if (taskDTO.getPid() != null) {
+                    isMatch = "";
+                } else if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
                     isMatch = "是";
                 } else {
                     isMatch = "否";
