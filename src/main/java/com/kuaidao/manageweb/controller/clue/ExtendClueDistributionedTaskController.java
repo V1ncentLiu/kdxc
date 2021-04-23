@@ -26,6 +26,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import com.google.common.collect.Lists;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
@@ -373,7 +374,8 @@ public class ExtendClueDistributionedTaskController {
                 curList.add("否"); // 是否重复
                 // 是否自建
                 String inputName = "否 ";
-                if (BusinessConfigConstant.YES.equals(taskDTO.getInputType())) {
+                if (taskDTO.getInputType() != null && (AggregationConstant.INPUT_TYPE.TYPE_1 == taskDTO.getInputType()
+                        || AggregationConstant.INPUT_TYPE.TYPE_6 == taskDTO.getInputType())) {
                     inputName = "是";
                 }
                 curList.add(inputName);
@@ -485,34 +487,43 @@ public class ExtendClueDistributionedTaskController {
                     curList.add(agentIsCall);
                     curList.add(agentStatus);
                     curList.add(taskDTO.getRegisterTime());
-                    curList.add(taskDTO.getPid() == null ? "" : taskDTO.getPid() + "");
-                    String isMatch = "";
-                    if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
-                        isMatch = "是";
-                    } else {
-                        isMatch = "否";
-                    }
-                    curList.add(isMatch);
-                    curList.add(taskDTO.getAgentBrandNames());
-                    curList.add(taskDTO.getAdBrandNames());
-                    String GroupTypeName = "";
-                    if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE1.equals(taskDTO.getFirstAssignGroupType())) {
-                        GroupTypeName = "电销顾问";
-                    } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE2.equals(taskDTO.getFirstAssignGroupType())) {
-                        GroupTypeName = "话务";
-                    } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE3.equals(taskDTO.getFirstAssignGroupType())) {
-                        GroupTypeName = "加盟经纪";
-                    } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE4.equals(taskDTO.getFirstAssignGroupType())) {
-                        GroupTypeName = "加盟顾问";
-                    }
-                    curList.add(GroupTypeName);
-                    curList.add(taskDTO.getFirstAssignGroupName());
-                    if (taskDTO.getPid() == null) {
-                        curList.add("直发资源");
-                    } else {
-                        curList.add("顾问匹配");
-                    }
-
+                } else {
+                    curList.add("");
+                    curList.add("");
+                    curList.add("");
+                    curList.add("");
+                    curList.add("");
+                    curList.add("");
+                    curList.add("");
+                    curList.add("");
+                    curList.add("");
+                }
+                curList.add(taskDTO.getPid() == null ? "" : taskDTO.getPid() + "");
+                String isMatch = "";
+                if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
+                    isMatch = "是";
+                } else {
+                    isMatch = "否";
+                }
+                curList.add(isMatch);
+                curList.add(taskDTO.getAgentBrandNames());
+                curList.add(taskDTO.getAdBrandNames());
+                String GroupTypeName = "";
+                if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE1.equals(taskDTO.getFirstAssignGroupType())) {
+                    GroupTypeName = "电销顾问";
+                } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE2.equals(taskDTO.getFirstAssignGroupType())) {
+                    GroupTypeName = "话务";
+                } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE3.equals(taskDTO.getFirstAssignGroupType())) {
+                    GroupTypeName = "加盟经纪";
+                } else if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE4.equals(taskDTO.getFirstAssignGroupType())) {
+                    GroupTypeName = "加盟顾问";
+                }
+                curList.add(GroupTypeName);
+                curList.add(taskDTO.getFirstAssignGroupName());
+                if (taskDTO.getPid() == null) {
+                    curList.add("直发资源");
+                } else {
+                    curList.add("顾问匹配");
                 }
                 dataList.add(curList);
             }
