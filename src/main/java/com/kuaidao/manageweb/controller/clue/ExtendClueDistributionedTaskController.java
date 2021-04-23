@@ -485,7 +485,7 @@ public class ExtendClueDistributionedTaskController {
                     curList.add(agentIsCall);
                     curList.add(agentStatus);
                     curList.add(taskDTO.getRegisterTime());
-                    curList.add(taskDTO.getPid() + "");
+                    curList.add(taskDTO.getPid() == null ? "" : taskDTO.getPid() + "");
                     String isMatch = "";
                     if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
                         isMatch = "是";
