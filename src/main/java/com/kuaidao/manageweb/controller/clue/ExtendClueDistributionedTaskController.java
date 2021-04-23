@@ -500,14 +500,27 @@ public class ExtendClueDistributionedTaskController {
                 }
                 curList.add(taskDTO.getPid() == null ? "" : taskDTO.getPid() + "");
                 String isMatch = "";
-                if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
+                if (taskDTO.getPid() != null) {
+                    // 子资源不展示
+                    isMatch = "";
+                } else if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
                     isMatch = "是";
                 } else {
                     isMatch = "否";
                 }
                 curList.add(isMatch);
-                curList.add(taskDTO.getAgentBrandNames());
-                curList.add(taskDTO.getAdBrandNames());
+                // 子资源不展示
+                if (taskDTO.getPid() == null) {
+                    curList.add(taskDTO.getAgentBrandNames());
+                } else {
+                    curList.add("");
+                }
+                // 子资源不展示
+                if (taskDTO.getPid() == null) {
+                    curList.add(taskDTO.getAdBrandNames());
+                } else {
+                    curList.add("");
+                }
                 String GroupTypeName = "";
                 if (ComConstant.FIRST_ASSIGN_GROUP_TYPE.TYPE1.equals(taskDTO.getFirstAssignGroupType())) {
                     GroupTypeName = "电销顾问";
