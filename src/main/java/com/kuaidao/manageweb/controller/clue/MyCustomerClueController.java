@@ -144,7 +144,7 @@ public class MyCustomerClueController {
 
     /**
      * 初始化我的客户
-     * 
+     *
      * @param request
      * @param model
      * @return
@@ -153,21 +153,29 @@ public class MyCustomerClueController {
     @RequestMapping("/initmyCustomer")
     public String initmyCustomer(HttpServletRequest request, Model model, @RequestParam(required = false) Integer type, @RequestParam(required = false) Integer hJtype) {
         UserInfoDTO user = getUser();
+        //TODO 业务线8 删除搜索词列
+        Integer businessLine = user.getBusinessLine();
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("myCustomerInfo");
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setMenuCode("myCustomerInfo");
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
-        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        List<UserFieldDTO> data1 = queryFieldByUserAndMenu.getData();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data1) && businessLine.equals(8)){
+            data1.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("userFieldList", data1);
         request.setAttribute("ossUrl", ossUrl);
         // 添加重单字段限制的业务线
         String repetitionBusinessLine = getSysSetting(SysConstant.REPETITION_BUSINESSLINE);
@@ -198,7 +206,7 @@ public class MyCustomerClueController {
 
     /**
      * 我的客户分页查询
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -207,7 +215,7 @@ public class MyCustomerClueController {
     @RequestMapping("/findTeleClueInfo")
     @ResponseBody
     public JSONResult<PageBean<CustomerClueDTO>> findTeleClueInfo(HttpServletRequest request,
-            @RequestBody CustomerClueQueryDTO dto) {
+                                                                  @RequestBody CustomerClueQueryDTO dto) {
         long time1 = System.currentTimeMillis();
         java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (null != dto && null != dto.getDayTel()) {
@@ -251,7 +259,7 @@ public class MyCustomerClueController {
 
     /**
      * 我的客户创建资源
-     * 
+     *
      * @param request
      * @param model
      * @return
@@ -277,7 +285,7 @@ public class MyCustomerClueController {
 
     /**
      * 我的客户释放资源
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -285,7 +293,7 @@ public class MyCustomerClueController {
     @RequestMapping("/releaseClue")
     @ResponseBody
     public JSONResult<String> releaseClue(HttpServletRequest request,
-            @RequestBody ReleaseClueDTO dto) {
+                                          @RequestBody ReleaseClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -297,7 +305,7 @@ public class MyCustomerClueController {
 
     /**
      * 维护客户资源数据
-     * 
+     *
      * @param request
      * @param clueId
      * @return
@@ -389,7 +397,7 @@ public class MyCustomerClueController {
                 ClueCustomerDTO clueCustomerDTO = clueInfo.getData().getClueCustomer();
                 if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())
                         || StringUtils.isNotBlank(role)
-                                && role.equals(RoleCodeEnum.DXCYGW.name())) {
+                        && role.equals(RoleCodeEnum.DXCYGW.name())) {
                     setPhoneLocales(clueCustomerDTO);
                 }
                 clueCustomerDTO.setPhoneCreateTime(null);
@@ -407,10 +415,15 @@ public class MyCustomerClueController {
                     if (StringUtils.isNotBlank(telemarketingLayoutDTO.getCategory())
                             && clueBasicDTO.getCategory() != null
                             && ("," + telemarketingLayoutDTO.getCategory() + ",")
-                                    .contains("," + clueBasicDTO.getCategory().toString() + ",")) {
+                            .contains("," + clueBasicDTO.getCategory().toString() + ",")) {
                         mediumList = getDictionaryByCode(Constants.MEDIUM);
                         request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
                     }
+                }
+                //TODO 业务线8 删除搜索词列
+                Integer businessLine = user.getBusinessLine();
+                if(null != businessLine && businessLine.equals(8)){
+                    clueBasicDTO.setSearchWord(null);
                 }
                 request.setAttribute("base", clueBasicDTO);
             } else {
@@ -477,11 +490,19 @@ public class MyCustomerClueController {
         request.setAttribute("loginUserId", user.getId());
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
         recordQueryDTO.setClueId(Long.valueOf(clueId));
-        JSONResult<List<RepeatClueRecordDTO>> repeatJson =
-                repeatClueRecordFeignClient.queryList(recordQueryDTO);
-        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode())
-                && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
-            request.setAttribute("repeatClueList", repeatJson.getData());
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode()) && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+            //TODO 业务线8 删除搜索词
+            Integer businessLine = getUser().getBusinessLine();
+            List<RepeatClueRecordDTO> data = repeatJson.getData();
+            if(null != businessLine && businessLine.equals(8)){
+                if(CollectionUtils.isNotEmpty(data)){
+                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+                    }
+                }
+            }
+            request.setAttribute("repeatClueList", data);
             request.setAttribute("repeatClueStatus", 1);
         } else {
             request.setAttribute("repeatClueStatus", 0);
@@ -510,7 +531,7 @@ public class MyCustomerClueController {
 
     /**
      * 客户详情
-     * 
+     *
      * @param request
      * @param clueId
      * @param  telCreatePhoneAuditFlag  电销创建手机号审核按钮是否显示标志
@@ -518,7 +539,7 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/customerInfoReadOnly")
     public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId, @RequestParam(required = false) String commonPool,
-            @RequestParam(required = false) String repeatFlag, @RequestParam(required = false) String telCreatePhoneAuditFlag) {
+                                       @RequestParam(required = false) String repeatFlag, @RequestParam(required = false) String telCreatePhoneAuditFlag) {
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
         TelemarketingLayoutDTO telemarketingLayoutDTO = new TelemarketingLayoutDTO();
@@ -608,6 +629,11 @@ public class MyCustomerClueController {
                         request.setAttribute("telemarketingLayout", telemarketingLayoutDTO);
                     }
                 }
+                //TODO 业务线8 删除搜索词
+                Integer businessLine = user.getBusinessLine();
+                if(null != businessLine && businessLine.equals(8)){
+                    clueBasic.setSearchWord(null);
+                }
                 request.setAttribute("base", clueBasic);
             } else {
                 request.setAttribute("base", new ArrayList());
@@ -673,9 +699,18 @@ public class MyCustomerClueController {
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
         recordQueryDTO.setClueId(Long.valueOf(clueId));
         JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
-        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode()) && repeatJson.getData() != null
-                && repeatJson.getData().size() > 0) {
-            request.setAttribute("repeatClueList", repeatJson.getData());
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode()) && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+            //TODO 业务线8 删除搜索词
+            Integer businessLine = getUser().getBusinessLine();
+            List<RepeatClueRecordDTO> data = repeatJson.getData();
+            if(null != businessLine && businessLine.equals(8)){
+                if(CollectionUtils.isNotEmpty(data)){
+                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+                    }
+                }
+            }
+            request.setAttribute("repeatClueList", data);
             request.setAttribute("repeatClueStatus", 1);
         } else {
             request.setAttribute("repeatClueStatus", 0);
@@ -750,14 +785,14 @@ public class MyCustomerClueController {
 
     /**
      * 查询资源文件上传记录
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/findClueFile")
     @ResponseBody
     public JSONResult<List<ClueFileDTO>> findClueFile(HttpServletRequest request,
-            @RequestBody ClueQueryDTO dto) {
+                                                      @RequestBody ClueQueryDTO dto) {
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
@@ -793,28 +828,28 @@ public class MyCustomerClueController {
 
     /**
      * 更新最后拨打时间
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/updateCallTime")
     @ResponseBody
     public JSONResult<String> updateCallTime(HttpServletRequest request,
-            @RequestBody ClueQueryDTO dto) {
+                                             @RequestBody ClueQueryDTO dto) {
         // 获取已上传的文件数据
         return myCustomerFeignClient.updateCallTime(dto);
     }
 
     /**
      * 获取资源拨打记录
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/findCallData")
     @ResponseBody
     public JSONResult<List<CallRecordRespDTO>> findCallData(HttpServletRequest request,
-            @RequestBody ClueQueryDTO dto) {
+                                                            @RequestBody ClueQueryDTO dto) {
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(dto.getClueId() + "");
         JSONResult<List<CallRecordRespDTO>> callRecord =
@@ -824,14 +859,14 @@ public class MyCustomerClueController {
 
     /**
      * 删除已上传的资源文件
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/deleteClueFile")
     @ResponseBody
     public JSONResult<String> deleteClueFile(HttpServletRequest request,
-            @RequestBody ClueFileDTO dto) {
+                                             @RequestBody ClueFileDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
@@ -846,8 +881,8 @@ public class MyCustomerClueController {
 
     /**
      * 上传资源文件
-     * 
-     * @param request
+     *
+     * @param
      * @return
      */
     @RequestMapping("/uploadClueFile")
@@ -886,14 +921,14 @@ public class MyCustomerClueController {
     }
     /**
      * 查询跟进记录数据
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/findClueTracking")
     @ResponseBody
     public JSONResult<List<TrackingRespDTO>> findClueTracking(HttpServletRequest request,
-            @RequestBody TrackingInsertOrUpdateDTO dto) {
+                                                              @RequestBody TrackingInsertOrUpdateDTO dto) {
         // 获取资源流转数据
         TrackingReqDTO circDto = new TrackingReqDTO();
         circDto.setClueId(dto.getClueId());
@@ -904,14 +939,14 @@ public class MyCustomerClueController {
 
     /**
      * 保存跟进记录数据
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/saveClueTracking")
     @ResponseBody
     public JSONResult<List<TrackingRespDTO>> saveClueTracking(HttpServletRequest request,
-            @RequestBody TrackingInsertOrUpdateDTO dto) {
+                                                              @RequestBody TrackingInsertOrUpdateDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -927,14 +962,14 @@ public class MyCustomerClueController {
 
     /**
      * 删除资源跟进记录
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/deleteClueTracking")
     @ResponseBody
     public JSONResult<List<TrackingRespDTO>> deleteClueTracking(HttpServletRequest request,
-            @RequestBody IdListLongReq dto) {
+                                                                @RequestBody IdListLongReq dto) {
         trackingFeignClient.deleteTracking(dto);
         TrackingReqDTO queryDto = new TrackingReqDTO();
         dto.setClueId(dto.getClueId());
@@ -943,14 +978,14 @@ public class MyCustomerClueController {
 
     /**
      * 修改资源跟进记录
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/updateClueTracking")
     @ResponseBody
     public JSONResult<List<TrackingRespDTO>> updateClueTracking(HttpServletRequest request,
-            @RequestBody TrackingInsertOrUpdateDTO dto) {
+                                                                @RequestBody TrackingInsertOrUpdateDTO dto) {
         trackingFeignClient.updateTracking(dto);
         TrackingReqDTO queryDto = new TrackingReqDTO();
         dto.setClueId(dto.getClueId());
@@ -959,13 +994,13 @@ public class MyCustomerClueController {
 
     /**
      * 预约来访页面跳转
-     * 
+     *
      * @param request
      * @return
      */
     @RequestMapping("/inviteCustomer")
     public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam String cusName, @RequestParam String cusPhone, Model model) {
+                                 @RequestParam String cusName, @RequestParam String cusPhone, Model model) {
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
@@ -996,7 +1031,7 @@ public class MyCustomerClueController {
 
     /**
      * 预约来访数据保存
-     * 
+     *
      * @param request
      * @return
      */
@@ -1005,7 +1040,7 @@ public class MyCustomerClueController {
     @LogRecord(description = "添加预约来访", operationType = OperationType.INSERT,
             menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> inviteCustomerSave(HttpServletRequest request,
-            @RequestBody ClueAppiontmentDTO dto) {
+                                                 @RequestBody ClueAppiontmentDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
@@ -1056,7 +1091,7 @@ public class MyCustomerClueController {
 
     /**
      * 重单申请查询重单数据
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1064,13 +1099,13 @@ public class MyCustomerClueController {
     @RequestMapping("/queryRepeatClueTwo")
     @ResponseBody
     public JSONResult<List<RepeatClueDTO>> queryRepeatClueTwo(HttpServletRequest request,
-            @RequestBody RepeatClueQueryDTO dto) {
+                                                              @RequestBody RepeatClueQueryDTO dto) {
         return myCustomerFeignClient.queryRepeatClue(dto);
     }
 
     /**
      * 重单申请查询重单数据
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1078,7 +1113,7 @@ public class MyCustomerClueController {
     @RequestMapping("/queryRepeatClue")
     @ResponseBody
     public JSONResult<List<RepeatClueDTO>> queryRepeatClue(HttpServletRequest request,
-            @RequestBody RepeatClueQueryDTO dto) {
+                                                           @RequestBody RepeatClueQueryDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
@@ -1089,7 +1124,7 @@ public class MyCustomerClueController {
 
     /**
      * 总裁办重单申请保存
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1097,7 +1132,7 @@ public class MyCustomerClueController {
     @RequestMapping("/officesaveRepeatClue")
     @ResponseBody
     public JSONResult<String> officesaveRepeatClue(HttpServletRequest request,
-            @RequestBody RepeatClueSaveDTO dto) {
+                                                   @RequestBody RepeatClueSaveDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
@@ -1131,7 +1166,7 @@ public class MyCustomerClueController {
 
     /**
      * 重单申请查询被重单数据
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1139,7 +1174,7 @@ public class MyCustomerClueController {
     @RequestMapping("/queryRepeatCurClue")
     @ResponseBody
     public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
-            @RequestBody RepeatClueQueryDTO dto) {
+                                                              @RequestBody RepeatClueQueryDTO dto) {
         UserInfoDTO user = getUser();
         if (user.getBusinessLine() != null) {
             dto.setBusinessLine(user.getBusinessLine());
@@ -1149,7 +1184,7 @@ public class MyCustomerClueController {
 
     /**
      * 查询所有电销创业顾问
-     * 
+     *
      * @param request
      * @return
      */
@@ -1172,7 +1207,7 @@ public class MyCustomerClueController {
 
     /**
      * 重单申请保存
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1183,13 +1218,15 @@ public class MyCustomerClueController {
     @LogRecord(description = "重单申请保存", operationType = OperationType.INSERT,
             menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> saveRepeatClue(HttpServletRequest request,
-            @RequestBody RepeatClueSaveDTO dto) {
+                                             @RequestBody RepeatClueSaveDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
+            dto.setApplyUserId(user.getId());
+            dto.setApplyOrgId(user.getOrgId());
             if (user.getBusinessLine() != null) {
                 dto.setBusinessLine(user.getBusinessLine());
             }
@@ -1208,7 +1245,7 @@ public class MyCustomerClueController {
 
     /**
      * 新建资源保存
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1224,8 +1261,8 @@ public class MyCustomerClueController {
             if (RoleCodeEnum.DXCYGW.name().equals(user.getRoleList().get(0).getRoleCode())) {
                 if (null != user.getBusinessLine()
                         && (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)
-                                || user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)
-                                || user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))
+                        || user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)
+                        || user.getBusinessLine().equals(BusinessLineConstant.QUDAOTUOZHAN))
                         && CollectionUtils.isEmpty(dto.getClueFiles())) {
                     return new JSONResult<String>().fail("-1", VALIDATE_PHONE_WECHAT_MSG);
                 }
@@ -1238,7 +1275,7 @@ public class MyCustomerClueController {
                         if((StringUtils.isNotBlank(dto.getClueCustomer().getWechat())
                                 || StringUtils.isNotBlank(dto.getClueCustomer().getWechat2()))
                                 && CollectionUtils.isEmpty(dto.getClueFiles())){
-                                return new JSONResult<String>().fail("-1", VALIDATE_PHONE_WECHAT_MSG);
+                            return new JSONResult<String>().fail("-1", VALIDATE_PHONE_WECHAT_MSG);
                         }
                     }
                 }
@@ -1376,7 +1413,7 @@ public class MyCustomerClueController {
 
     /**
      * 维护资源(基本信息)提交
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1386,7 +1423,7 @@ public class MyCustomerClueController {
     @LogRecord(description = "维护资源(基本信息)提交", operationType = OperationType.UPDATE,
             menuName = MenuEnum.CUSTOMER_INFO)
     public JSONResult<String> updateCustomerBasicInfoClue(HttpServletRequest request,
-            @RequestBody ClueDTO dto) {
+                                                          @RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -1483,7 +1520,7 @@ public class MyCustomerClueController {
                         if (null != user.getBusinessLine()) {
                             if (user.getBusinessLine().equals(BusinessLineConstant.SHANGJI)
                                     || user.getBusinessLine().equals(BusinessLineConstant.XIAOWUZHONG)) {
-                                 String res = validateClueFile(clueCustomer, dto);
+                                String res = validateClueFile(clueCustomer, dto);
                                 //新增手机号 资料上传判断
                                 if(!"".equals(res)){
                                     return new JSONResult<String>().fail("-3",res);
@@ -1527,7 +1564,7 @@ public class MyCustomerClueController {
 
     /**
      * 保留客户资源
-     * 
+     *
      * @param request
      * @param dto
      * @return
@@ -1535,13 +1572,13 @@ public class MyCustomerClueController {
     @RequestMapping("/reserveClue")
     @ResponseBody
     public JSONResult<String> reserveClue(HttpServletRequest request,
-            @RequestBody ClueQueryDTO dto) {
+                                          @RequestBody ClueQueryDTO dto) {
         return myCustomerFeignClient.reserveClue(dto);
     }
 
     /**
      * 获取当前登录账号
-     * 
+     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -1552,7 +1589,7 @@ public class MyCustomerClueController {
 
     /**
      * 查询系统参数
-     * 
+     *
      * @param code
      * @return
      */
@@ -1862,7 +1899,18 @@ public class MyCustomerClueController {
     @RequestMapping("/getRepeatClueRecordDTOList")
     @ResponseBody
     public JSONResult<List<RepeatClueRecordDTO>> getRepeatClueRecordDTOList(@RequestBody RepeatClueRecordQueryDTO recordQueryDTO){
-        return repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        //TODO 业务线8 删除搜索词
+        JSONResult<List<RepeatClueRecordDTO>> listJSONResult = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        Integer businessLine = getUser().getBusinessLine();
+        if(null != businessLine && businessLine.equals(8)){
+            List<RepeatClueRecordDTO> data = listJSONResult.getData();
+            if(CollectionUtils.isNotEmpty(data)){
+                for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+                    repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+                }
+            }
+        }
+        return listJSONResult;
     }
     /**
      * @Description:构建电销今日跟访次数下拉列表值
@@ -1877,7 +1925,7 @@ public class MyCustomerClueController {
         // 获取外包业务线
         String todayFollowNumStr = getSysSetting(SysConstant.TODAYFOLLOWNUM);
         if (StringUtils.isBlank(todayFollowNumStr)) {
-           return  todayFollowNumList;
+            return  todayFollowNumList;
         }
         String []  todayFollowNumArr = todayFollowNumStr.split(",");
         for (String str : todayFollowNumArr) {

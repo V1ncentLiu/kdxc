@@ -58,6 +58,7 @@ var homePageVM=new Vue({
 		   	isRongLianClient:false,//容联坐席是否登录
             isLcClient:false,//乐创坐席是否登录
             isZkClient:false,//中科坐席是否登录
+            isOkccClient:false,//赤晨坐席是否登录
 	    	callTitle:'呼叫中心',
 	    	dialogLoginClientVisible:false,//登录坐席dialog 
 	    	dialogLogoutClientVisible:false,
@@ -97,6 +98,9 @@ var homePageVM=new Vue({
                 {
                     value: 7,
                     label: '登录中科呼叫中心'
+                },{
+                    value: 8,
+                    label: '登录赤晨呼叫中心'
                 }],
             bindPhoneTypeOptions: [
                 	{
@@ -242,6 +246,11 @@ var homePageVM=new Vue({
                 ],
             },
             zkClientFormRules:{
+                loginClient:[
+                    { required: true, message: '登录坐席不能为空',trigger: 'change'}
+                ],
+            },
+            okccClientFormRules:{
                 loginClient:[
                     { required: true, message: '登录坐席不能为空',trigger: 'change'}
                 ],
@@ -697,6 +706,9 @@ var homePageVM=new Vue({
                 }else if(this.isZkClient){
                     this.loginClientForm.clientType=7;
                     this.dialogLogoutClientVisible  = true;
+                }else if(this.isOkccClient){
+                    this.loginClientForm.clientType=8;
+                    this.dialogLogoutClientVisible  = true;
                 }else{
         			 if (this.$refs.loginClientForm !==undefined) {
         				  this.$refs.loginClientForm.resetFields();
@@ -770,6 +782,9 @@ var homePageVM=new Vue({
                  }else if(clientType==7){
                      this.loginZkClient();
                  }
+                 else if(clientType==8){
+                     this.loginOkccClient();
+                 }
              } else {
                return false;
              }
@@ -808,6 +823,7 @@ var homePageVM=new Vue({
 	                 homePageVM.isRongLianClient = false;
                      homePageVM.isLcClient = false;
                      homePageVM.isZkClient = false;
+                     homePageVM.isOkccClient = false;
 	                 homePageVM.isKeTianClient = false;
 	                 //sessionStorage.setItem("loginClient","qimo");
 	                 //sessionStorage.setItem("accountId",homePageVM.accountId);
@@ -872,6 +888,7 @@ var homePageVM=new Vue({
                      homePageVM.isRongLianClient=false;
                      homePageVM.isLcClient=false;
                      homePageVM.isZkClient=false;
+                     homePageVM.isOkccClient=false;
                      //sessionStorage.setItem("loginClient","qimo");
                      //sessionStorage.setItem("accountId",homePageVM.accountId);
                      var clientInfo={};
@@ -1026,6 +1043,7 @@ var homePageVM=new Vue({
 			                     homePageVM.isRongLianClient = false;
                                  homePageVM.isLcClient = false;
                                  homePageVM.isZkClient = false;
+                                 homePageVM.isOkccClient = false;
 			                     //sessionStorage.setItem("loginClient","tr");
 			                    // sessionStorage.setItem("accountId",homePageVM.accountId);
 			                     
@@ -1271,6 +1289,7 @@ var homePageVM=new Vue({
 					homePageVM.isRongLianClient = false;
                     homePageVM.isLcClient = false;
                     homePageVM.isZkClient = false;
+                    homePageVM.isOkccClient = false;
 					var clientInfo={};
 					clientInfo.loginClientType="ketian";
 					clientInfo.clientType = homePageVM.loginClientForm.clientType;
@@ -1314,6 +1333,7 @@ var homePageVM=new Vue({
                         homePageVM.isRongLianClient=true;
                         homePageVM.isLcClient=false;
                         homePageVM.isZkClient=false;
+                        homePageVM.isOkccClient=false;
                         var clientInfo={};
                         clientInfo.loginClientType="ronglian";
                         clientInfo.loginClient = homePageVM.loginClientForm.loginClient
@@ -1352,6 +1372,7 @@ var homePageVM=new Vue({
                         homePageVM.isRongLianClient = false;
                         homePageVM.isLcClient = true;
                         homePageVM.isZkClient = false;
+                        homePageVM.isOkccClient = false;
                         homePageVM.isKeTianClient = false;
 
                         var clientInfo={};
@@ -1390,10 +1411,49 @@ var homePageVM=new Vue({
                         homePageVM.isRongLianClient = false;
                         homePageVM.isLcClient = false;
                         homePageVM.isZkClient = true;
+                        homePageVM.isOkccClient = true;
                         homePageVM.isKeTianClient = false;
 
                         var clientInfo={};
                         clientInfo.loginClientType="zk";
+                        clientInfo.loginClient = homePageVM.loginClientForm.loginClient;
+                        localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+                        console.info("clientInfo"+JSON.stringify(clientInfo));
+                    }else{
+                        console.error(data);
+                        homePageVM.$message({message:"登录失败:"+data.msg,type:'error'});
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                    // always executed
+                });
+        },
+        loginOkccClient(){//赤晨登录
+            var loginClient = this.loginClientForm.loginClient;
+            var param={};
+            param.loginClient = loginClient;
+            axios.post('/client/okccClient/okccLogin',param)
+                .then(function (response) {
+                    var data =  response.data;
+                    if(data.code=='0'){
+                        var resData = data.data;
+                        homePageVM.$message({message:"登录成功",type:'success'});
+                        homePageVM.callTitle="呼叫中心（赤晨ON）";
+                        homePageVM.dialogLoginClientVisible =false;
+                        homePageVM.isHeliClient=false;
+                        homePageVM.isTrClient=false;
+                        homePageVM.isQimoClient = false;
+                        homePageVM.isRongLianClient = false;
+                        homePageVM.isLcClient = false;
+                        homePageVM.isZkClient = false;
+                        homePageVM.isOkccClient = true;
+                        homePageVM.isKeTianClient = false;
+
+                        var clientInfo={};
+                        clientInfo.loginClientType="okcc";
                         clientInfo.loginClient = homePageVM.loginClientForm.loginClient;
                         localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
                         console.info("clientInfo"+JSON.stringify(clientInfo));
@@ -1425,6 +1485,7 @@ var homePageVM=new Vue({
                          homePageVM.isRongLianClient=false;
                          homePageVM.isLcClient=false;
                          homePageVM.isZkClient=false;
+                         homePageVM.isOkccClient=false;
                      	// sessionStorage.removeItem("loginClient");
                      	// sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
@@ -1498,6 +1559,7 @@ var homePageVM=new Vue({
                             homePageVM.isRongLianClient=false;
                             homePageVM.isLcClient=false;
                             homePageVM.isZkClient=false;
+                            homePageVM.isOkccClient=false;
                             localStorage.removeItem("clientInfo");
                             homePageVM.$message({message:"退出成功",type:'success'});
                         }else{
@@ -1537,6 +1599,34 @@ var homePageVM=new Vue({
                     .then(function () {
                         // always executed
                     });
+            }else if(this.isOkccClient){//赤晨
+                axios.post('/client/okccClient/okccLogout',{})
+                    .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                            homePageVM.dialogLogoutClientVisible =false;
+                            homePageVM.$message({message:"退出成功",type:'success'});
+                            homePageVM.callTitle="呼叫中心";
+                            homePageVM.isQimoClient=false;
+                            homePageVM.isTrClient=false;
+                            homePageVM.isHeliClient=false;
+                            homePageVM.isKeTianClient=false;
+                            homePageVM.isRongLianClient=false;
+                            homePageVM.isLcClient=false;
+                            homePageVM.isZkClient=false;
+                            homePageVM.isOkccClient=false;
+                            localStorage.removeItem("clientInfo");
+                            homePageVM.$message({message:"退出成功",type:'success'});
+                        }else{
+                            homePageVM.$message({message:data.msg,type:'error'});
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
             }else if(this.isRongLianClient){//容联退出
                 var loginClient = this.loginClientForm.loginClient;
                 var param={};
@@ -1555,6 +1645,7 @@ var homePageVM=new Vue({
                          homePageVM.isRongLianClient=false;
                          homePageVM.isLcClient=false;
                          homePageVM.isZkClient=false;
+                         homePageVM.isOkccClient=false;
                       // sessionStorage.removeItem("loginClient");
                       // sessionStorage.removeItem("accountId");
                          localStorage.removeItem("clientInfo");
@@ -1589,6 +1680,7 @@ var homePageVM=new Vue({
                  homePageVM.isRongLianClient = false;
                  homePageVM.isLcClient = false;
                  homePageVM.isZkClient = false;
+                 homePageVM.isOkccClient = false;
              	// sessionStorage.removeItem("loginClient");
              	// sessionStorage.removeItem("accountId");
                  localStorage.removeItem("clientInfo");
@@ -1626,6 +1718,7 @@ var homePageVM=new Vue({
                      homePageVM.isRongLianClient = false;
                      homePageVM.isLcClient = false;
                      homePageVM.isZkClient = false;
+                     homePageVM.isOkccClient = false;
                      homePageVM.callTitle="呼叫中心";
                     // sessionStorage.removeItem("loginClient");
                    //  sessionStorage.removeItem("accountId");
@@ -1676,6 +1769,7 @@ var homePageVM=new Vue({
 			homePageVM.isRongLianClient = false;
             homePageVM.isLcClient = false;
             homePageVM.isZkClient = false;
+            homePageVM.isOkccClient = false;
 		},
         RongLianClientLogout(){
 
@@ -1988,6 +2082,8 @@ var homePageVM=new Vue({
                 return this.lcClientFormRules;
             }else if(clientType==7){
                 return this.zkClientFormRules;
+            }else if(clientType==8){
+                return this.okccClientFormRules;
             }
 	    }
 	 }

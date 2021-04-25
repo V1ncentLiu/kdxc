@@ -303,7 +303,7 @@ var myCallRecordVm = new Vue({
             if (url) {
               var fileName = url.split('?')[0];
               var fileNameArr = fileName.split("/");
-              if (callSource == '3') {
+              if (callSource == '3' || callSource =='8') {
                 var decodeUrl = encodeURI(url);
                 url = "/client/heliClient/downloadHeliClientAudio?url=" + decodeUrl;
               }
