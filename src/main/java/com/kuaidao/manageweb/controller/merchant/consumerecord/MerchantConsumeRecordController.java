@@ -85,23 +85,23 @@ public class MerchantConsumeRecordController {
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
     public JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant(@RequestBody MerchantConsumeRecordPageParam pageParam,
             HttpServletRequest request) {
-        UserInfoDTO user = getUser();
+//        UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
-        pageParam.setMainAccountId(user.getId());
+//        pageParam.setMainAccountId(user.getId());
+//        List<RoleInfoDTO> roleList = user.getRoleList();
+//        if (roleList != null) {
+//            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+//        }
+//        List<UserInfoDTO> userInfoDTOS = buildUserList();
+//        userInfoDTOS.add(user);
+//        if (CollectionUtils.isNotEmpty(userInfoDTOS)) {
+//            // 构建用户id集合
+//            List<Long> userIds = userInfoDTOS.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+//            pageParam.setUserList(userIds);
+//        }
 
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if (roleList != null) {
-            pageParam.setRoleCode(roleList.get(0).getRoleCode());
-        }
-        List<UserInfoDTO> userInfoDTOS = buildUserList();
-        userInfoDTOS.add(user);
-        if (CollectionUtils.isNotEmpty(userInfoDTOS)) {
-            // 构建用户id集合
-            List<Long> userIds = userInfoDTOS.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
-            pageParam.setUserList(userIds);
-        }
         // 商家所属
-        pageParam.setMerchantType(user.getMerchantType());
+        pageParam.setMerchantType(SysConstant.MerchantType.TYPE2);
         // 消费记录
         JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant = merchantConsumeRecordFeignClient.countListMerchant(pageParam);
 
@@ -149,14 +149,13 @@ public class MerchantConsumeRecordController {
     @ResponseBody
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
     public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(@RequestBody MerchantConsumeRecordPageParam pageParam) {
-        UserInfoDTO user = getUser();
-        // 插入当前用户、角色信息
-        pageParam.setMainAccountId(user.getId());
-
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if (roleList != null) {
-            pageParam.setRoleCode(roleList.get(0).getRoleCode());
-        }
+//        UserInfoDTO user = getUser();
+//        // 插入当前用户、角色信息
+//        pageParam.setMainAccountId(user.getId());
+//        List<RoleInfoDTO> roleList = user.getRoleList();
+//        if (roleList != null) {
+//            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+//        }
         // 消费记录
         JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
 
