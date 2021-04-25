@@ -149,14 +149,13 @@ public class MerchantConsumeRecordController {
     @ResponseBody
     @RequiresPermissions("merchant:merchantConsumeRecord:view")
     public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(@RequestBody MerchantConsumeRecordPageParam pageParam) {
-        UserInfoDTO user = getUser();
-        // 插入当前用户、角色信息
-        pageParam.setMainAccountId(user.getId());
-
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if (roleList != null) {
-            pageParam.setRoleCode(roleList.get(0).getRoleCode());
-        }
+//        UserInfoDTO user = getUser();
+//        // 插入当前用户、角色信息
+//        pageParam.setMainAccountId(user.getId());
+//        List<RoleInfoDTO> roleList = user.getRoleList();
+//        if (roleList != null) {
+//            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+//        }
         // 消费记录
         JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
 
