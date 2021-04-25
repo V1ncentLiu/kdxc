@@ -193,44 +193,22 @@ public class MerchantConsumeRecordController {
 
     /**
      * * 外部商家-商家账号：当前登录商家主账号加子账号 * 内部商家-商家账户：电销布局里绑定的电销组
-     * 
+     * 修改为：
+     *   查询所有外部商家账户
      * @author: Fanjd
-     * @param
-     * @return:
      * @Date: 2019/10/23 10:55
      * @since: 1.0.0
      **/
     private List<UserInfoDTO> buildUserList() {
         UserInfoDTO user = getUser();
         List<UserInfoDTO> userList = new ArrayList<>();
-        // 商家所属
-        Integer merchantType = user.getMerchantType();
-        // 内部商家
-        if (SysConstant.MerchantType.TYPE1 == merchantType) {
-            TelemarketingLayoutDTO reqDto = new TelemarketingLayoutDTO();
-            reqDto.setCompanyGroupId(user.getId());
-            JSONResult<List<OrganizationDTO>> result = telemarketingLayoutFeignClient.getdxListByCompanyGroupId(reqDto);
-            List<OrganizationDTO> orgList = result.getData();
-            if (result.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(result.getData())) {
-                for (OrganizationDTO organizationDTO : orgList) {
-                    UserInfoDTO userInfoDTO = new UserInfoDTO();
-                    BeanUtils.copyProperties(organizationDTO,userInfoDTO);
-                    userList.add(userInfoDTO);
-                }
-
-            }
-        }
-        // 外部商家
-        if (SysConstant.MerchantType.TYPE2 == merchantType) {
-            userList.add(user);
-            // 状态集合
-            List<Integer> status = new ArrayList<>();
-            // 启用
-            status.add(SysConstant.USER_STATUS_ENABLE);
-            // 锁定
-            status.add(SysConstant.USER_STATUS_LOCK);
-            userList = getMerchantUser(user.getId(), status);
-        }
-        return userList;
+        List<Integer> status = new ArrayList<>();
+        status.add(SysConstant.USER_STATUS_ENABLE);
+        status.add(SysConstant.USER_STATUS_LOCK);
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setMerchantType(SysConstant.MerchantType.TYPE2);
+        userInfoDTO.setStatusList(status);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        return merchantUserList.data();
     }
 }
