@@ -4,26 +4,32 @@
 package com.kuaidao.manageweb.controller.merchant.charge;
 
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.EmailSend;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.charge.ClueChargeFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
 import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,8 +38,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zxy
@@ -49,6 +59,15 @@ public class ClueChargeController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
+
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
+
+    @Autowired
+    private EmailSend emailSend;
+
+    @Autowired
+    private Configuration configuration;
     /***
      * 资源资费列表页
      * 
@@ -134,11 +153,42 @@ public class ClueChargeController {
             merchantClueChargeReq.setCreateUser(userId);
 
         }
+        IdEntityLong idEntityLong = new IdEntityLong(merchantClueChargeReq.getId());
+        JSONResult<MerchantClueChargeDTO> jsonResult =  clueChargeFeignClient.get(idEntityLong);
+        if(!JSONResult.SUCCESS.equals(jsonResult.getCode())){
+            return new JSONResult().fail(JSONResult.FAIL,"查询失败！");
+        }
         merchantClueChargeReq.setUpdateUser(userId);
-        return clueChargeFeignClient.insertOrUpdate(merchantClueChargeReq);
+        JSONResult<String> jsonResult1 = clueChargeFeignClient.insertOrUpdate(merchantClueChargeReq);
+        if(JSONResult.SUCCESS.equals(jsonResult1.getCode())){
+            MerchantClueChargeDTO data = jsonResult.getData();
+            if(data!=null && merchantClueChargeReq.getCharge().compareTo(data.getCharge())!=0){
+                sendEmail(merchantClueChargeReq);
+            }
+        }
+
+        return  jsonResult1;
     }
 
-
+    private void sendEmail(MerchantClueChargeReq merchantClueChargeReq) {
+        //发送邮件
+        try {
+            if(merchantClueChargeReq.getId()!=null && merchantClueChargeReq.getMainAccountId()!=null){
+                //根据ID查询
+                JSONResult<UserInfoDTO> userInfoDTOJSONResult = userInfoFeignClient.get(new IdEntityLong(merchantClueChargeReq.getMainAccountId()));
+                if(JSONResult.SUCCESS.equals(userInfoDTOJSONResult.getCode()) && userInfoDTOJSONResult.getData()!=null && StringUtils.isNotBlank(userInfoDTOJSONResult.getData().getEmail())){
+                    Map<String,Object> dataMap = new HashMap<>();
+                    dataMap.put("name",userInfoDTOJSONResult.getData().getName());
+                    dataMap.put("charge",merchantClueChargeReq.getCharge());
+                    dataMap.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")));
+                    String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(this.configuration.getTemplate("email/huijuMerchantCharge.html"),dataMap);
+                    emailSend.sendEmail("【招商宝】资费调整通知",emailContent,userInfoDTOJSONResult.getData().getEmail());
+                }
+            }
+        } catch (Exception e) {
+            log.error("ClueChargeController sendEmail e{}",e);
+        }
+    }
     /**
      * 获取当前登录账号ID
      * 
