@@ -1,7 +1,13 @@
 package com.kuaidao.manageweb.feign.merchant.charge;
 
-import java.util.List;
-
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
+import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
+import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
+import feign.hystrix.FallbackFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -9,14 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
-
-import feign.hystrix.FallbackFactory;
+import java.util.List;
 
 /**
  * 资源资费
@@ -57,6 +56,14 @@ public interface ClueChargeFeignClient {
     @PostMapping("/delete")
     JSONResult<String> delete(@RequestBody MerchantClueChargeReq merchantClueChargeReq);
 
+    /**
+     * 根据ID查询资费信息
+     * @param idEntityLong
+     * @return
+     */
+    @PostMapping("/get")
+    JSONResult<MerchantClueChargeDTO> get(@RequestBody IdEntityLong idEntityLong);
+
     @Component
     static class HystrixClientFallback implements FallbackFactory<ClueChargeFeignClient> {
 
@@ -91,6 +98,11 @@ public interface ClueChargeFeignClient {
                 @Override
                 public JSONResult<String> delete(MerchantClueChargeReq merchantClueChargeReq) {
                     return fallBackError("删除资费");
+                }
+
+                @Override
+                public JSONResult<MerchantClueChargeDTO> get(IdEntityLong idEntityLong) {
+                    return fallBackError("根据ID查询资费信息");
                 }
             };
         }

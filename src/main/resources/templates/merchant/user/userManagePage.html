@@ -182,7 +182,8 @@
             </el-form-item>
             <el-form-item label="登录密码：" :label-width="formLabelWidth" prop="password">
                 <el-input v-model="clueTemplateForm.password" autocomplete="off" maxlength="30" style="width: 290px;"
-                          @keyup.native="passwordVal"></el-input>
+                          onKeyUp="value=value.replace(/[\W]/g,'')"
+                ></el-input>
             </el-form-item>
             <el-form-item label="登录用户名：" :label-width="formLabelWidth" prop="username">
                 <!-- <el-input v-model="clueTemplateForm.username" :disabled="loginDisabled" onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input> -->
@@ -256,6 +257,11 @@
                     <el-input v-model="clueTemplateForm.contactNumber" autocomplete="off" maxlength="11" style="width: 290px;">
                     </el-input>
                 </el-form-item>
+                <el-form-item label="邮箱：" :label-width="formLabelWidth" prop="email">
+                    <el-input v-model="clueTemplateForm.email" style="width: 290px;"></el-input>
+                </el-form-item>
+
+
                 <el-form-item class="selectTime" label="不计费时间：" :label-width="formLabelWidth" >
                     <el-date-picker
                             v-model="clueTemplateForm.noChargeTimeStart"
@@ -333,7 +339,8 @@
             </el-form-item>
             <el-form-item label="登录密码：" :label-width="formLabelWidth" prop="password">
                 <el-input v-model="subAccountForm.password" autocomplete="off" maxlength="30" style="width: 290px;"
-                          @keyup.native="passwordVal"></el-input>
+                          onKeyUp="value=value.replace(/[\W]/g,'')"
+                ></el-input>
             </el-form-item>
             <el-form-item label="登录用户名：" :label-width="formLabelWidth" prop="username">
                 <!-- <el-input v-model="subAccountForm.username"  onkeyup="value=value.replace(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g,'')" autocomplete="off"  maxlength="30" style="width: 290px;"></el-input> -->
@@ -458,7 +465,8 @@
                 isCharge: "",
                 merchantType: "",
                 id: "",
-                roleId: ""
+                roleId: "",
+                email:''
             },
             addOrModifyDialogTitle: '添加商家账号',
             subAccountRules: {
@@ -521,6 +529,10 @@
                 ],
                 KAPortraitUrl:[
                     { required: true, message: 'KA头像不能为空', trigger: 'change' }
+                ],
+                email:[
+                    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
                 ],
                 contactNumber:[
                     { required: true, message: '联系电话不能为空', trigger: 'blur' }
@@ -791,8 +803,8 @@
             },
             passwordVal() {
                 //只能输入字母／数字
-                this.clueTemplateForm.password = this.clueTemplateForm.password.replace(/[^\a-\z\A-\Z0-9]/g, '');
-                this.subAccountForm.password = this.subAccountForm.password.replace(/[^\a-\z\A-\Z0-9]/g, '');
+                this.clueTemplateForm.password = this.clueTemplateForm.password.replace(/[^A-Za-z0-9]/g, '');
+                this.subAccountForm.password = this.subAccountForm.password.replace(/[^A-Za-z0-9]/g, '');
             },
             textVal() {
                 //只能输入中文英文数字
@@ -887,7 +899,7 @@
                         param.noChargeNum = formData.noChargeNumber
                         param.noChargeTimeStart = formData.noChargeTimeStart
                         param.noChargeTimeEnd = formData.noChargeTimeEnd
-
+                        param.email = formData.email
                         param.userType = 2;
                         param.status = 1;
                         param.id = formData.id;
@@ -1068,7 +1080,6 @@
                         if (result.code == "0") {
                             var user = result.data;
                             userVM.clueTemplateForm.username = user.username;
-                            userVM.clueTemplateForm.password = "******";
                             userVM.clueTemplateForm.phone = user.phone;
                             userVM.clueTemplateForm.name = user.name;
                             userVM.clueTemplateForm.orgId = user.orgId;
@@ -1084,6 +1095,8 @@
                             userVM.clueTemplateForm.noChargeNumber = user.noChargeNum 
                             userVM.clueTemplateForm.noChargeTimeStart = user.noChargeTimeStart
                             userVM.clueTemplateForm.noChargeTimeEnd = user.noChargeTimeEnd
+                            userVM.clueTemplateForm.email = user.email;
+                            userVM.clueTemplateForm.password = "******";
                             if (userVM.clueTemplateForm.merchantType === 1) {
                                 userVM.showIsCharge = true;
                             } else {
