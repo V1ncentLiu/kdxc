@@ -204,6 +204,10 @@ public class SaleImController {
 //        businessLineList.add(BusinessLineConstant.SHANGJI);
         businessLineList.add(BusinessLineConstant.CMZSJJ);
         pageParam.setBusinessLineList(businessLineList);
+        List<String> roleCodeList = new ArrayList<>();
+        roleCodeList.add(RoleCodeEnum.JMJJ.name());
+        roleCodeList.add(RoleCodeEnum.JMGW.name());
+        pageParam.setRoleCodeList(roleCodeList);
         JSONResult<PageBean<SaleImDTO>> list = saleImFeignClient.list(pageParam);
 
         return list;
