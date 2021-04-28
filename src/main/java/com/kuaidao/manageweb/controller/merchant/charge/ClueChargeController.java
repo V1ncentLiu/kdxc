@@ -169,7 +169,7 @@ public class ClueChargeController {
         JSONResult<String> jsonResult1 = clueChargeFeignClient.insertOrUpdate(merchantClueChargeReq);
         if(JSONResult.SUCCESS.equals(jsonResult1.getCode())){
             MerchantClueChargeDTO data = jsonResult.getData();
-            if(data!=null && merchantClueChargeReq.getCharge().compareTo(data.getCharge())!=0){
+            if(data!=null && merchantClueChargeReq.getId()!=null && merchantClueChargeReq.getCharge().compareTo(data.getCharge())!=0){
                 sendEmail(merchantClueChargeReq);
             }
         }
