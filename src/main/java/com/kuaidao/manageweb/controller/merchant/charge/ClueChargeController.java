@@ -184,7 +184,7 @@ public class ClueChargeController {
                 //根据ID查询
                 JSONResult<UserInfoDTO> userInfoDTOJSONResult = userInfoFeignClient.get(new IdEntityLong(merchantClueChargeReq.getMainAccountId()));
                 if(JSONResult.SUCCESS.equals(userInfoDTOJSONResult.getCode()) && userInfoDTOJSONResult.getData()!=null && StringUtils.isNotBlank(userInfoDTOJSONResult.getData().getEmail())){
-                    String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+                    String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
                     pushMessage(merchantClueChargeReq.getMainAccountId(), "资费调整通知", "于"+time+" 已调整了您的资源计费规则，详情如下，请知晓。<br/>\n" +
                             "账户名称：\n" +
                             "\n" +
@@ -198,7 +198,7 @@ public class ClueChargeController {
                     Map<String,Object> dataMap = new HashMap<>();
                     dataMap.put("name",userInfoDTOJSONResult.getData().getName());
                     dataMap.put("charge",merchantClueChargeReq.getCharge());
-                    dataMap.put("time",time ));
+                    dataMap.put("time",time);
                     String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(this.configuration.getTemplate("email/huijuMerchantCharge.html"),dataMap);
                     emailSend.sendEmail("【招商宝】资费调整通知",emailContent,userInfoDTOJSONResult.getData().getEmail());
                 }
