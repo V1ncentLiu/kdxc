@@ -185,16 +185,9 @@ public class ClueChargeController {
                 JSONResult<UserInfoDTO> userInfoDTOJSONResult = userInfoFeignClient.get(new IdEntityLong(merchantClueChargeReq.getMainAccountId()));
                 if(JSONResult.SUCCESS.equals(userInfoDTOJSONResult.getCode()) && userInfoDTOJSONResult.getData()!=null && StringUtils.isNotBlank(userInfoDTOJSONResult.getData().getEmail())){
                     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
-                    pushMessage(merchantClueChargeReq.getMainAccountId(), "资费调整通知", "于"+time+" 已调整了您的资源计费规则，详情如下，请知晓。<br/>\n" +
-                            "账户名称：\n" +
-                            "\n" +
-                            "计费标准：\n" +
-                            "\n" +
-                            "账户信息\n" +
-                            "\n" +
-                            userInfoDTOJSONResult.getData().getName()+
-                            "\n" +
-                            "每条资源 "+merchantClueChargeReq.getCharge()+"个餐盟币", merchantClueChargeReq.getId()+"");
+                    pushMessage(merchantClueChargeReq.getMainAccountId(), "资费调整通知", "于"+time+" 已调整了您的资源计费规则，详情如下，请知晓\n" +
+                            "    账户信息\n" +
+                            "             账户名称：" +   userInfoDTOJSONResult.getData().getName()+  "        计费标准：" +"每条资源 "+merchantClueChargeReq.getCharge()+"个餐盟币", merchantClueChargeReq.getId()+"");
                     Map<String,Object> dataMap = new HashMap<>();
                     dataMap.put("name",userInfoDTOJSONResult.getData().getName());
                     dataMap.put("charge",merchantClueChargeReq.getCharge());
