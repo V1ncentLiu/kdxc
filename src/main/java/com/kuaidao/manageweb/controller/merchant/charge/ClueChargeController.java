@@ -48,6 +48,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author zxy
@@ -193,7 +195,10 @@ public class ClueChargeController {
                     dataMap.put("charge",merchantClueChargeReq.getCharge());
                     dataMap.put("time",time);
                     String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(this.configuration.getTemplate("email/huijuMerchantCharge.html"),dataMap);
-                    emailSend.sendEmail("【招商宝】资费调整通知",emailContent,userInfoDTOJSONResult.getData().getEmail());
+                    ExecutorService executors = Executors.newSingleThreadExecutor();
+                    executors.submit(()-> {
+                        emailSend.sendEmail("【招商宝】资费调整通知", emailContent, userInfoDTOJSONResult.getData().getEmail());
+                    });
                 }
             }
         } catch (Exception e) {
