@@ -1,17 +1,31 @@
 package com.kuaidao.manageweb.demo.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ * redis 中应用的各种方式
+ *   两种大模式：
+ *      1：cache-aside
+ *      2：cache as Ros
+ */
+
+@Slf4j
 @Controller
 @RequestMapping("/redis")
 public class RedisController {
@@ -20,111 +34,13 @@ public class RedisController {
     private RedisTemplate redisTemplate;
 
 
+    @ResponseBody
     @RequestMapping("/get")
-    public String  get() {
-
-        return "success";
-    }
-
-    /**
-     * redis 字符串相关操作
-     */
-    private void stringOperations(){
-        final String prifix = "demo:";
-        redisTemplate.opsForValue().set(prifix+"1","1");
-        redisTemplate.opsForValue().get("");
-        Long start = 1L;
-        Long end = 10L;
-        redisTemplate.opsForValue().get("",start,end);
-        redisTemplate.opsForValue().multiGet(Arrays.asList("key1","key2"));
-        // 同时设置多个值
-        Map map = new HashMap();
-        redisTemplate.opsForValue().multiSet(map);
-        redisTemplate.opsForValue().setIfAbsent("",""); // 如果不存在时候进行设置
-        // 自增计算,自增1，自增指定长整形，自增指定浮点数
-        redisTemplate.opsForValue().increment("");
-        // 自减操纵
-        redisTemplate.opsForValue().decrement("");
-        // 追加操纵
-        redisTemplate.opsForValue().append("","wewe");
-    }
-
-
-
-    /**
-     redis中hash操作
-    **/
-    private void hashOperations(){
-        // 删除一个或是多个hash表字段
-        hashObj().delete("",Arrays.asList("","",""));
-        // 查询Hash表中的字段是否存在架
-        hashObj().hasKey("key","field");
-        // 获取hash中的指定字段
-        hashObj().get("key","field");
-        // 获取对象中的指定的多个字段
-        hashObj().multiGet("key",Arrays.asList(""));
-        // 指定字段增量计算
-        hashObj().increment("key","field",1);
-        // 获取hash中的所有key
-        hashObj().keys("key");
-        // 设置指定字段的value
-        hashObj().put("key","field","value");
-        // 获取key中的全部字段的值
-        hashObj().values("key");
-        // 设置全部的值
-        hashObj().putAll("key",new HashMap());
-        // 如果字段不存在怎新增一个字段
-        hashObj().putIfAbsent("","","sss");
-        // 这个东西是做什么的
-        hashObj().size("key");
-        // 这种运行在redis上的循环遍历是怎样的操作
-        //DOTO java操作的这种东西还是还是需要更加详细的理解啊
-        ScanOptions.ScanOptionsBuilder scanOptionsBuilder = ScanOptions.scanOptions();
-        ScanOptions build = scanOptionsBuilder.build();
-        hashObj().scan("key",build);
+    public void  get() {
+//        redisTemplate.watch("key");
 
     }
-    private HashOperations hashObj(){
-        return  redisTemplate.opsForHash();
-    }
 
-    private void listOperations(){
-        // 获取数组中的第一个值
-        listObj().index("key",1);
-        listObj().size("key");// 列表长度
-        listObj().leftPop("key");// 移除并获取列表中的第一个元素
-        // 移除并获取第一个元素，如果没有则等待对应超时时间
-        listObj().leftPop("key",10,TimeUnit.MILLISECONDS);
-        // 左侧添加元素
-        listObj().leftPush("","");
-        // 同时将两个值插入
-        listObj().leftPush("key","2","3");
-        // 插入多个值
-        listObj().leftPushAll("ke","2","2",2,3,4,5);
-        // 同时插入多个值
-        listObj().leftPushAll("kye",Arrays.asList(""));
-        // 这个东西是干啥用的
-        Long aLong = listObj().leftPushIfPresent("", 1);
-        // 返回指定方位元素
-        listObj().range("key",1,10);
-//        listObj().trim(); // 列表截取
-        // 修改指定序号下的值
-        listObj().set("key",1,"wewe");
-        // 右侧弹出左侧添加.将一个元素转移到另一个列表中
-        listObj().rightPopAndLeftPush("","");
-        // 移除列表元素
-        listObj().remove("key",1,"333"); // zhege
-      }
-
-
-
-
-    /**
-     * redis 中的列表操作
-     */
-    private ListOperations listObj(){
-        return redisTemplate.opsForList();
-    }
 
     private void setOperations(){
         setObj().add("","");
@@ -244,9 +160,11 @@ public class RedisController {
         List list = redisTemplate.executePipelined(new SessionCallback<Object>() {
             @Override
             public <K, V> Object execute(RedisOperations<K, V> redisOperations) throws DataAccessException {
+                HashOperations<K, Object, Object> kObjectObjectHashOperations = redisOperations.opsForHash();
                 return null;
             }
         });
+
         // 这里面添加了相关的序列化器
         redisTemplate.executePipelined(new SessionCallback<Object>() {
             @Override
@@ -296,5 +214,145 @@ public class RedisController {
     }
 
 
+    /**
+     * redis 字符串相关操作
+     */
+    private void stringOperations(){
+        final String key = "yangbiao";
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        BoundValueOperations boundValueOperations = valueOperations.getOperations().boundValueOps(key);
+        Object o = boundValueOperations.get();
+        if(o==null){
+            boundValueOperations.set("this is demo");
+            o = boundValueOperations.get();
+        }
+        // 这个是啥意思啊
+//        boundValueOperations.append("  appppppp");
+//        o = boundValueOperations.get();
+        // redis 中的自增操作
+        valueOperations.set("inc",1);
+        valueOperations.increment("inc");
+        log.info("inc value::{}",valueOperations.get("inc"));
+        valueOperations.increment("inc",100L);
+        log.info("inc value::{}",valueOperations.get("inc"));
+        valueOperations.decrement("inc",10);
+        log.info("inc value::{}",valueOperations.get("inc"));
 
+        // 获取多个值
+        List list = valueOperations.multiGet(Arrays.asList("inc", key));
+        log.info("list value::{}",list);
+        Long size = valueOperations.size(key);
+        log.info("size value::{}",size);
+        // 存储对象.在key-value中存储对象其实就是一个序列化和反序列化的过程
+        Datas datas = new Datas();
+        datas.setAge(11);
+        datas.setDate(new Date());
+        datas.setId(111L);
+        datas.setName("yangbiao");
+        valueOperations.set("obj",datas);
+        log.info("obj value::{}",valueOperations.get("obj"));
+
+        boundValueOperations.set("设置超时时间", Duration.ofMinutes(1000));
+        DataType type = boundValueOperations.getType();
+        Object key1 = boundValueOperations.getKey();
+        // 这里面是按照秒进行的输出
+        Long expire = boundValueOperations.getExpire();
+        log.info("key::{}",key1);
+        log.info("value::{}",o);
+        log.info("DataType,{}",type);
+        log.info("expire,{}",expire);
+    }
+
+    /**
+     redis中hash操作
+     **/
+    private void hashOperations(){
+        final String key = "yangHash";
+        BoundHashOperations boundHashOperations = redisTemplate.boundHashOps(key);
+        Object o = boundHashOperations.get(key);
+        Datas datas = new Datas();
+        datas.setAge(23);
+        datas.setId(11L);
+        datas.setName("yangbiao");
+        if(o==null){
+            boundHashOperations.put("id",datas);
+            o = boundHashOperations.get("id");
+        }
+        log.info("value:{}",o);
+        HashMap<String, Object> stringMap = new HashMap<>();
+        stringMap.put("key1","111");
+        stringMap.put("key2",111);
+        stringMap.put("key3",datas);
+        stringMap.put("key4",new ArrayList<>());
+        boundHashOperations.putAll(stringMap);
+        Map entries = boundHashOperations.entries();
+        log.info("value:{}",entries);
+        boundHashOperations.delete("key1");
+        log.info("value:{}",boundHashOperations.entries());
+        log.info("value:{}", boundHashOperations.multiGet(Arrays.asList("key1","key2","key4")));
+        log.info("keys:{}",boundHashOperations.keys());
+        log.info("values:{}",boundHashOperations.values());
+        // 在redis端遍历数据
+        /**
+         * keys的操作会导致数据库暂时被锁住，其他的请求都会被堵塞；业务量大的时候会出问题
+         */
+        Cursor<Map.Entry<Object,Object>> cursor = boundHashOperations.scan(ScanOptions.scanOptions().match("*").count(1).build());
+        try{
+            while (cursor.hasNext()) {
+                Map.Entry<Object,Object> entry = cursor.next();
+                log.info("scan:{},{}",entry.getKey(),entry.getValue());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            //cursor.close(); 游标一定要关闭，不然连接会一直增长
+            //如果不关闭，连接会一直增长，直到卡死redis应用端连接池
+            try {
+                cursor.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private HashOperations hashObj(){
+        return  redisTemplate.opsForHash();
+    }
+
+
+    private void listOperations(){
+        // 获取数组中的第一个值
+        listObj().index("key",1);
+        listObj().size("key");// 列表长度
+        listObj().leftPop("key");// 移除并获取列表中的第一个元素
+        // 移除并获取第一个元素，如果没有则等待对应超时时间
+        listObj().leftPop("key",10,TimeUnit.MILLISECONDS);
+        // 左侧添加元素
+        listObj().leftPush("","");
+        // 同时将两个值插入
+        listObj().leftPush("key","2","3");
+        // 插入多个值
+        listObj().leftPushAll("ke","2","2",2,3,4,5);
+        // 同时插入多个值
+        listObj().leftPushAll("kye",Arrays.asList(""));
+        // 这个东西是干啥用的
+        Long aLong = listObj().leftPushIfPresent("", 1);
+        // 返回指定方位元素
+        listObj().range("key",1,10);
+//        listObj().trim(); // 列表截取
+        // 修改指定序号下的值
+        listObj().set("key",1,"wewe");
+        // 右侧弹出左侧添加.将一个元素转移到另一个列表中
+        listObj().rightPopAndLeftPush("","");
+        // 移除列表元素
+        listObj().remove("key",1,"333"); // zhege
+    }
+
+
+    /**
+     * redis 中的列表操作
+     */
+    private ListOperations listObj(){
+        return redisTemplate.opsForList();
+    }
 }
