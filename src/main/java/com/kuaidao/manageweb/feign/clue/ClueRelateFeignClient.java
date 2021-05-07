@@ -27,14 +27,25 @@ public interface ClueRelateFeignClient {
      * @author: Fanjd
      * @param clueRelateReq
      * @return:
+     * @Date: 2021/05/07 16:12
+     * @since: 1.0.0
+     **/
+    @PostMapping("/updateClueRelateByAgentSaleId")
+
+    JSONResult<String> updateClueRelateByAgentSaleId(@RequestBody ClueRelateReq clueRelateReq);
+
+    /**
+     * 根据创业顾问id更新所在电销组组织信息
+     *
+     * @author: Fanjd
+     * @param clueRelateReq
+     * @return:
      * @Date: 2019/6/17 16:12
      * @since: 1.0.0
      **/
     @PostMapping("/updateClueRelateByTeleSaleId")
 
     JSONResult<String> updateClueRelateByTeleSaleId(@RequestBody ClueRelateReq clueRelateReq);
-
-
 
     @Component
     class HystrixClientFallback implements ClueRelateFeignClient {
@@ -47,6 +58,11 @@ public interface ClueRelateFeignClient {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(), SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
         }
 
+
+        @Override
+        public JSONResult<String> updateClueRelateByAgentSaleId(ClueRelateReq clueRelateReq) {
+            return fallBackError("根据加盟经纪id更新所在电销组组织信息失败");
+        }
 
         @Override
         public JSONResult<String> updateClueRelateByTeleSaleId(@RequestBody ClueRelateReq clueRelateReq) {
