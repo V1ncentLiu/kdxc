@@ -26,6 +26,7 @@ import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.rule.TeleMarketingAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.service.im.ImMassageService;
@@ -90,7 +91,8 @@ public class UserController {
     private ImMassageService imMassageService;
     @Autowired
     private ClientFeignClient clientFeignClient;
-
+    @Autowired
+    private TeleMarketingAssignRuleFeignClient teleMarketingAssignRuleFeignClient;
     /***
      * 用户列表页
      *
@@ -378,6 +380,13 @@ public class UserController {
             clientFeignClient.changOrgIdModifyCache(userInfoReq);
             logger.info("修改资源所属组织共耗时：{}", System.currentTimeMillis() - start1);
         }
+        //禁用加盟经纪时 删除员工分配规则
+        if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode()) && SysConstant.USER_STATUS_DISABLE.equals(userInfoReq.getStatus())) {
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(id);
+            teleMarketingAssignRuleFeignClient.deleteAssignRuleByMemberId(idEntityLong);
+        }
+
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
         logger.info("修改用户共耗时：{}", System.currentTimeMillis() - start);
         return jsonResult;
@@ -426,6 +435,16 @@ public class UserController {
             logger.info("onlineLeave-user={}" ,  JSON.toJSONString(user));
             imMassageService.transOnlineLeaveLogUpdateStatusEnable(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         }
+        //禁用加盟经纪时 删除员工分配规则
+        String roleCode = CommUtil.getRoleCode(user);
+        if (RoleCodeEnum.JMJJ.name().equals(roleCode)) {
+            IdEntityLong idEntityLong = new IdEntityLong();
+            idEntityLong.setId(id);
+            teleMarketingAssignRuleFeignClient.deleteAssignRuleByMemberId(idEntityLong);
+        }
+
+
+
         return update;
     }
 
