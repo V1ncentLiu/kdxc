@@ -24,6 +24,7 @@ import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.consultantProject.ConsultantProjectFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.rule.TeleMarketingAssignRuleFeignClient;
@@ -94,7 +95,7 @@ public class UserController {
     @Autowired
     private TeleMarketingAssignRuleFeignClient teleMarketingAssignRuleFeignClient;
     @Autowired
-    private ConsultantProjectFeignClient consultantProjectFeignClient;
+    private ConsultantProjectFeignClient  consultantProjectFeignClient;
     /***
      * 用户列表页
      *
@@ -384,9 +385,7 @@ public class UserController {
         }
         //禁用加盟经纪时 删除员工分配规则
         if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode()) && SysConstant.USER_STATUS_DISABLE.equals(userInfoReq.getStatus())) {
-            IdEntityLong idEntityLong = new IdEntityLong();
-            idEntityLong.setId(id);
-            teleMarketingAssignRuleFeignClient.deleteAssignRuleByMemberId(idEntityLong);
+            deleteProSettingAndRule(id);
         }
 
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
@@ -440,9 +439,7 @@ public class UserController {
         //禁用加盟经纪时 删除员工分配规则
         String roleCode = CommUtil.getRoleCode(user);
         if (RoleCodeEnum.JMJJ.name().equals(roleCode)) {
-            IdEntityLong idEntityLong = new IdEntityLong();
-            idEntityLong.setId(id);
-            teleMarketingAssignRuleFeignClient.deleteAssignRuleByMemberId(idEntityLong);
+            deleteProSettingAndRule(id);
         }
 
 
@@ -906,5 +903,16 @@ public class UserController {
             userList = userInfoJson.getData();
         }
         return userList;
+    }
+
+    /**
+     * 删除项目设置和分配规则
+     * @param id 用户id
+     */
+    private void deleteProSettingAndRule(Long id){
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(id);
+        teleMarketingAssignRuleFeignClient.deleteAssignRuleByMemberId(idEntityLong);
+        consultantProjectFeignClient.deleteByConsultantId(idEntityLong);
     }
 }
