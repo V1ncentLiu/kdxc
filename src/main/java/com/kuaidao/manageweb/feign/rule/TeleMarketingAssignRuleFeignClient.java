@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * 资源分配规则
- * @author: zxy
- * @date: 2019年3月14日
+ * 分配规则
+ * @author: fanjd
+ * @date: 2031年05月08日
  * @version V1.0
  */
 @FeignClient(name = "business-config-service", path = "/businessConfig/assignrule/telemarketingAssignRule",
