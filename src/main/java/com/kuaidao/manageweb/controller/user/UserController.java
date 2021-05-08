@@ -93,6 +93,8 @@ public class UserController {
     private ClientFeignClient clientFeignClient;
     @Autowired
     private TeleMarketingAssignRuleFeignClient teleMarketingAssignRuleFeignClient;
+    @Autowired
+    private ConsultantProjectFeignClient consultantProjectFeignClient;
     /***
      * 用户列表页
      *
