@@ -1,11 +1,46 @@
 package com.kuaidao.manageweb.controller.im;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
-import com.kuaidao.common.constant.*;
+import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -32,27 +67,8 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
@@ -69,12 +85,13 @@ public class ImMessageController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
+
     /**
      * 聊天记录跳转
      */
-    @RequiresPermissions("message:record:view")
+    @RequiresPermissions("saleMessage:record:view")
     @GetMapping("/chatRecordIndex")
-    public String chatRecordIndex( HttpServletRequest request ){
+    public String chatRecordIndex(HttpServletRequest request) {
         List dxzList = getCommonDxzList();
         request.setAttribute("dzList", dxzList);
         return "im/imChattingRecords";
@@ -82,7 +99,7 @@ public class ImMessageController {
 
     @RequiresPermissions("message:monitor:view")
     @GetMapping("/saleMonitorIndex")
-    public String saleMonitorIndex( HttpServletRequest request ){
+    public String saleMonitorIndex(HttpServletRequest request) {
         List dxzList = getCommonDxzList();
         request.setAttribute("dzList", dxzList);
         return "im/imManagement";
@@ -97,8 +114,8 @@ public class ImMessageController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         List dxzList = new ArrayList(0);
         // 管理员
-        if(roleList != null
-                && ( RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode()) || RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode()))){
+        if (roleList != null && (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
+                || RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode()))) {
             if (CollectionUtils.isNotEmpty(roleList) && roleList.get(0) != null) {
                 OrganizationQueryDTO dto = new OrganizationQueryDTO();
                 dto.setSystemCode(SystemCodeConstant.HUI_JU);
@@ -110,7 +127,7 @@ public class ImMessageController {
                 dxzList = dzList.getData();
             }
             return dxzList;
-        }else{
+        } else {
             // 非管理员
             OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
             organizationQueryDTO.setParentId(user.getOrgId());
@@ -119,25 +136,25 @@ public class ImMessageController {
             dxzList = organizationDTOList.getData();
             // 当前用户组织名称
             IdEntity idEntity = new IdEntity();
-            idEntity.setId( null == user.getOrgId() ? "-1" : user.getOrgId() + "");
+            idEntity.setId(null == user.getOrgId() ? "-1" : user.getOrgId() + "");
             JSONResult<OrganizationDTO> singleOrganizationDTOResult = organizationFeignClient.queryOrgById(idEntity);
             // 当前登陆人所属组织
-            OrganizationDTO myOrganizationDTO  = null ;
+            OrganizationDTO myOrganizationDTO = null;
             if (null != singleOrganizationDTOResult && JSONResult.SUCCESS.equals(singleOrganizationDTOResult.getCode())) {
                 OrganizationDTO organizationDTO = singleOrganizationDTOResult.getData();
                 // 当前登录人的组织是否是DXZ
-                if(null != organizationDTO && OrgTypeConstant.DXZ.equals(organizationDTO.getOrgType())){
+                if (null != organizationDTO && OrgTypeConstant.DXZ.equals(organizationDTO.getOrgType())) {
                     myOrganizationDTO = new OrganizationDTO();
                     myOrganizationDTO.setId(user.getOrgId());
                     // 设置当前登陆人组织名
                     myOrganizationDTO.setName(organizationDTO.getName());
                 }
             }
-            if(CollectionUtils.isEmpty(dxzList)){
+            if (CollectionUtils.isEmpty(dxzList)) {
 
                 dxzList = new ArrayList(1);
             }
-            if(null != myOrganizationDTO){
+            if (null != myOrganizationDTO) {
 
                 dxzList.add(myOrganizationDTO);
             }
@@ -151,26 +168,26 @@ public class ImMessageController {
      */
     @SuppressWarnings("all")
     @PostMapping("/getChatRecordPage")
-    public @ResponseBody JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq ){
+    public @ResponseBody JSONPageResult<List<MessageRecordData>> getChatRecordPage(@RequestBody MessageRecordPageReq messageRecordPageReq) {
         // 查询条件无顾问Id
-        if(StringUtils.isBlank(messageRecordPageReq.getTeleSaleId())){
+        if (StringUtils.isBlank(messageRecordPageReq.getTeleSaleId())) {
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             String roleCode = CommUtil.getRoleCode(curLoginUser);
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
 
             // 当前登陆用户不是管理员!
-            if (CollectionUtils.isNotEmpty(roleList) &&
-                    !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
-                     && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())){
+            if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
+                    && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())) {
                 // 当前登录人组织下所有人员
                 List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                if(CollectionUtils.isEmpty(userList)) {
+                if (CollectionUtils.isEmpty(userList)) {
                     JSONPageResult jsonPageResult = new JSONPageResult();
                     jsonPageResult.setPageSize(messageRecordPageReq.getPageSize());
                     jsonPageResult.setPageNum(messageRecordPageReq.getPageNum());
                     return new JSONPageResult().success(new ArrayList<>());
                 }
-                List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
+                List<Long> idList = userList.parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3).map(user -> user.getId())
+                        .collect(Collectors.toList());
                 // 当前登陆人Id
                 idList.add(curLoginUser.getId());
                 // 封装多个电销顾问ID
@@ -178,9 +195,9 @@ public class ImMessageController {
             }
         }
         JSONPageResult<List<MessageRecordData>> chatRecordPage = imFeignClient.getChatRecordPage(messageRecordPageReq);
-        if(null != chatRecordPage){
+        if (null != chatRecordPage) {
             // 对象结果参数转化
-            transChatRecord(chatRecordPage.getData(),false);
+            transChatRecord(chatRecordPage.getData(), false);
         }
         return chatRecordPage;
     }
@@ -191,19 +208,21 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/listChatRecord")
-    public @ResponseBody JSONPageResult<List<MessageRecordData>> listChatRecord(@Valid @RequestBody MessageRecordPageReq messageRecordPageReq , BindingResult result ){
+    public @ResponseBody JSONPageResult<List<MessageRecordData>> listChatRecord(@Valid @RequestBody MessageRecordPageReq messageRecordPageReq,
+            BindingResult result) {
         if (result.hasErrors()) {
             return validateParam(result);
         }
         // 封装客户Id
-        Map<String,Object> map = new HashMap<>();
-        map.put("clueId",messageRecordPageReq.getCusId());
+        Map<String, Object> map = new HashMap<>();
+        map.put("clueId", messageRecordPageReq.getCusId());
         JSONResult<List<CustomerInfoDTO>> listJSONResult = customerInfoFeignClient.getCustomerInfoListByClueId(map);
-        if(null == listJSONResult || !"0".equals(listJSONResult.getCode())){
-            return new JSONPageResult<List<MessageRecordData>>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        if (null == listJSONResult || !"0".equals(listJSONResult.getCode())) {
+            return new JSONPageResult<List<MessageRecordData>>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),
+                                                                      SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
         }
-        List<CustomerInfoDTO> data ;
-        if(CollectionUtils.isEmpty(data = listJSONResult.getData())){
+        List<CustomerInfoDTO> data;
+        if (CollectionUtils.isEmpty(data = listJSONResult.getData())) {
             // 直接返回
             JSONPageResult jsonPageResult = new JSONPageResult();
             jsonPageResult.setPageSize(messageRecordPageReq.getPageSize());
@@ -212,16 +231,17 @@ public class ImMessageController {
         }
         CustomerInfoDTO customerInfoDTO = data.get(0);
         // 客户Im无值
-        if(StringUtils.isBlank(customerInfoDTO.getImId())){
+        if (StringUtils.isBlank(customerInfoDTO.getImId())) {
 
-            return new JSONPageResult<List<MessageRecordData>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONPageResult<List<MessageRecordData>>().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                                                                      SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         // 设置accId
         messageRecordPageReq.setAccId(customerInfoDTO.getImId());
         JSONPageResult<List<MessageRecordData>> listJSONPageResult = imFeignClient.listChatRecord(messageRecordPageReq);
-        if(null != listJSONPageResult){
+        if (null != listJSONPageResult) {
             // 对象结果参数转化
-            transChatRecord(listJSONPageResult.getData(),false);
+            transChatRecord(listJSONPageResult.getData(), false);
         }
         return listJSONPageResult;
     }
@@ -232,22 +252,22 @@ public class ImMessageController {
      * @param response
      */
     @PostMapping("/export")
-    public void export(@RequestBody MessageRecordExportSearchReq messageRecordExportSearchReq , HttpServletResponse response){
+    public void export(@RequestBody MessageRecordExportSearchReq messageRecordExportSearchReq, HttpServletResponse response) {
         // 查询条件无顾问Id
-        if(StringUtils.isBlank(messageRecordExportSearchReq.getTeleSaleId())){
+        if (StringUtils.isBlank(messageRecordExportSearchReq.getTeleSaleId())) {
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
             // 当前登陆用户不是管理员!
-            if (CollectionUtils.isNotEmpty(roleList)
-                    && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
-                    && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())){
+            if (CollectionUtils.isNotEmpty(roleList) && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
+                    && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())) {
                 // 当前登录人组织下所有人员
                 List<UserInfoDTO> userList = getTeleSaleByOrgId(curLoginUser.getOrgId());
-                if(CollectionUtils.isEmpty(userList)) {
+                if (CollectionUtils.isEmpty(userList)) {
                     // 避免数据库条件多拉取!
                     messageRecordExportSearchReq.setTeleSaleId("-1");
-                }else{
-                    List<Long> idList = userList.parallelStream().filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
+                } else {
+                    List<Long> idList = userList.parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3)
+                            .map(user -> user.getId()).collect(Collectors.toList());
                     idList.add(curLoginUser.getId());
                     // 封装多个电销顾问ID
                     messageRecordExportSearchReq.setTeleSaleId(Joiner.on(",").join(idList));
@@ -259,10 +279,11 @@ public class ImMessageController {
             JSONPageResult<List<MessageRecordData>> chatRecordList = imFeignClient.getChatRecordList(messageRecordExportSearchReq);
             List<List<Object>> dataList = new ArrayList<>();
             dataList.add(getHeadTitleList());
-            if(null != chatRecordList && JSONResult.SUCCESS.equals(chatRecordList.getCode()) && chatRecordList.getData() != null && chatRecordList.getData().size() != 0) {
+            if (null != chatRecordList && JSONResult.SUCCESS.equals(chatRecordList.getCode()) && chatRecordList.getData() != null
+                    && chatRecordList.getData().size() != 0) {
                 List<MessageRecordData> resultList = chatRecordList.getData();
                 // 对象结果参数转化
-                transChatRecord(resultList , true );
+                transChatRecord(resultList, true);
                 int size = resultList.size();
                 for (int i = 0; i < size; i++) {
                     MessageRecordData dto = resultList.get(i);
@@ -276,14 +297,14 @@ public class ImMessageController {
                     // 会话客户
                     t.add(dto.getCusName());
                     // 聊天时间
-                    if(StringUtils.isNotBlank(dto.getMsgTimestamp())){
-                        t.add(DateUtil.timeStampMills2Str(dto.getMsgTimestamp(),null));
+                    if (StringUtils.isNotBlank(dto.getMsgTimestamp())) {
+                        t.add(DateUtil.timeStampMills2Str(dto.getMsgTimestamp(), null));
                     }
                     // 聊天内容
                     t.add(dto.getBody());
                     dataList.add(t);
                 }
-             }
+            }
             // 创建一个工作薄
             XSSFWorkbook workBook = new XSSFWorkbook();
             // 创建一个工作薄对象sheet
@@ -304,9 +325,9 @@ public class ImMessageController {
             wbWorkbook.write(outputStream);
             outputStream.close();
         } catch (IOException e) {
-            log.error("导出聊天记录io-e",e);
-        }catch (Exception e){
-            log.error("导出聊天记录e",e);
+            log.error("导出聊天记录io-e", e);
+        } catch (Exception e) {
+            log.error("导出聊天记录e", e);
         }
     }
 
@@ -315,34 +336,36 @@ public class ImMessageController {
      * @param messageRecordDataList
      * @param isCal
      */
-     void transChatRecord(List<MessageRecordData> messageRecordDataList , boolean isCal) {
-        if(CollectionUtils.isEmpty(messageRecordDataList)){  return ; }
-        Map<String,String> productCardMap = new LinkedHashMap<>();
-        productCardMap.put("investmentStr","我的总价预算");
-        productCardMap.put("expectedArea","开店区域");
-        productCardMap.put("hasStore","店面");
-        productCardMap.put("job","职业");
-        productCardMap.put("ageStr","年龄");
-        productCardMap.put("intentionBrand","意向品牌");
-        productCardMap.put("interestBrandCategoryList","意向品类");
-        productCardMap.put("remark","备注");
-        productCardMap.put("repastExperience","是否有餐饮相关经验");
+    void transChatRecord(List<MessageRecordData> messageRecordDataList, boolean isCal) {
+        if (CollectionUtils.isEmpty(messageRecordDataList)) {
+            return;
+        }
+        Map<String, String> productCardMap = new LinkedHashMap<>();
+        productCardMap.put("investmentStr", "我的总价预算");
+        productCardMap.put("expectedArea", "开店区域");
+        productCardMap.put("hasStore", "店面");
+        productCardMap.put("job", "职业");
+        productCardMap.put("ageStr", "年龄");
+        productCardMap.put("intentionBrand", "意向品牌");
+        productCardMap.put("interestBrandCategoryList", "意向品类");
+        productCardMap.put("remark", "备注");
+        productCardMap.put("repastExperience", "是否有餐饮相关经验");
 
-        Map<String,String> brandMap = new LinkedHashMap<>();
-        brandMap.put("titleName","");
-        brandMap.put("subTitle","投资区间");
-        brandMap.put("mainPoint","");
-        brandMap.put("city","");
+        Map<String, String> brandMap = new LinkedHashMap<>();
+        brandMap.put("titleName", "");
+        brandMap.put("subTitle", "投资区间");
+        brandMap.put("mainPoint", "");
+        brandMap.put("city", "");
 
-        Integer cardType = 18,brandType = 8;
-        String hiType = "17" , audioType = "AUDIO" , pictureType = "PICTURE" , videoType = "VIDEO" , fileType="FILE";
+        Integer cardType = 18, brandType = 8;
+        String hiType = "17", audioType = "AUDIO", pictureType = "PICTURE", videoType = "VIDEO", fileType = "FILE";
 
-        for (MessageRecordData messageRecordData : messageRecordDataList){
-            if(StringUtils.isNotBlank(messageRecordData.getBody())){
-                continue ;
+        for (MessageRecordData messageRecordData : messageRecordDataList) {
+            if (StringUtils.isNotBlank(messageRecordData.getBody())) {
+                continue;
             }
             String attach = messageRecordData.getAttach();
-            if(StringUtils.isBlank(attach)){
+            if (StringUtils.isBlank(attach)) {
                 continue;
             }
             // 项目卡
@@ -352,53 +375,53 @@ public class ImMessageController {
 
             JSONObject childRenData = (JSONObject) jsonObject.get("data");
             // 项目卡片
-            if(cardType.equals(jsonObject.get("type")) && null != childRenData){
-                for (Map.Entry<String, String> map:productCardMap.entrySet()){
+            if (cardType.equals(jsonObject.get("type")) && null != childRenData) {
+                for (Map.Entry<String, String> map : productCardMap.entrySet()) {
                     String key = map.getKey();
                     String value = map.getValue();
-                    if(null != childRenData.get(key)){
+                    if (null != childRenData.get(key)) {
                         content.append(value).append(":").append(childRenData.get(key)).append("\t");
                     }
                 }
             }
             // 品牌卡片
-            if(brandType.equals(jsonObject.get("type")) && null != childRenData){
-                for (Map.Entry<String, String> map : brandMap.entrySet()){
+            if (brandType.equals(jsonObject.get("type")) && null != childRenData) {
+                for (Map.Entry<String, String> map : brandMap.entrySet()) {
                     String key = map.getKey();
                     String value = map.getValue();
-                    if(StringUtils.isBlank(value)){
+                    if (StringUtils.isBlank(value)) {
                         content.append(childRenData.get(key)).append("\t");
-                    }else{
-                        if(null != childRenData.get(key)){
+                    } else {
+                        if (null != childRenData.get(key)) {
                             content.append(value).append(":").append(childRenData.get(key)).append("\t");
                         }
                     }
                 }
             }
             // 打招呼
-            if(hiType.equals(jsonObject.get("type")) && null != childRenData && null != childRenData.get("data")){
+            if (hiType.equals(jsonObject.get("type")) && null != childRenData && null != childRenData.get("data")) {
                 JSONArray data = (JSONArray) childRenData.get("data");
-                for (Object o : data){
+                for (Object o : data) {
                     JSONObject json = (JSONObject) o;
                     content.append(json.get("comText")).append("\t");
                 }
             }
-            if(isCal){
+            if (isCal) {
                 // 图片
-                if(pictureType.equals(messageRecordData.getMsgType()) &&  null != jsonObject.get("url")){
+                if (pictureType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")) {
                     content.append("图片").append(":").append(jsonObject.get("url"));
                 }
                 // 语音
-                if(audioType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                if (audioType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")) {
                     // 语音
                     content.append("语音").append(":").append(jsonObject.get("url"));
                 }
                 // 视频
-                if(videoType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                if (videoType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")) {
                     // 视频
                     content.append("视频").append(":").append(jsonObject.get("url"));
                 }
-                if(fileType.equals(messageRecordData.getMsgType())  && null != jsonObject.get("url")){
+                if (fileType.equals(messageRecordData.getMsgType()) && null != jsonObject.get("url")) {
                     // 视频
                     content.append("文件").append(":").append(jsonObject.get("url"));
                 }
@@ -424,37 +447,35 @@ public class ImMessageController {
         return headTitleList;
     }
 
-
     /**
      * 顾问监控分页
      * @param tSaleMonitorReq
      * @return
      */
     @PostMapping("/saleMonitor")
-    public @ResponseBody JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(@RequestBody TSaleMonitorReq tSaleMonitorReq){
-        if( null == tSaleMonitorReq.getTeleSaleId()){
+    public @ResponseBody JSONResult<PageBean<SaleMonitorDTO>> getSaleMonitor(@RequestBody TSaleMonitorReq tSaleMonitorReq) {
+        if (null == tSaleMonitorReq.getTeleSaleId()) {
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             Long orgId = curLoginUser.getOrgId();
             List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
             // 当前登陆用户不是管理员!
-            if(CollectionUtils.isNotEmpty(roleList)
-                    && CollectionUtils.isNotEmpty(roleList)
+            if (CollectionUtils.isNotEmpty(roleList) && CollectionUtils.isNotEmpty(roleList)
                     && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
                     && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())) {
-                    // 当前登录人组织下所有人员
-                    List<UserInfoDTO> userList = getTeleSaleByOrgId(orgId);
-                    if(CollectionUtils.isEmpty(userList)) {
-                        // 避免数据库条件多拉取!
-                        tSaleMonitorReq.setTeleSaleIds(Arrays.asList(-1L));
-                    }else{
-                        List<Long> idList = userList.parallelStream()
-                                .filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
-                        idList.add(curLoginUser.getId());
-                        // 封装多个电销顾问ID
-                        tSaleMonitorReq.setTeleSaleIds(idList);
-                    }
+                // 当前登录人组织下所有人员
+                List<UserInfoDTO> userList = getTeleSaleByOrgId(orgId);
+                if (CollectionUtils.isEmpty(userList)) {
+                    // 避免数据库条件多拉取!
+                    tSaleMonitorReq.setTeleSaleIds(Arrays.asList(-1L));
+                } else {
+                    List<Long> idList = userList.parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3)
+                            .map(user -> user.getId()).collect(Collectors.toList());
+                    idList.add(curLoginUser.getId());
+                    // 封装多个电销顾问ID
+                    tSaleMonitorReq.setTeleSaleIds(idList);
+                }
             }
-        }else{
+        } else {
 
             tSaleMonitorReq.setTeleSaleIds(Arrays.asList(tSaleMonitorReq.getTeleSaleId()));
         }
@@ -467,23 +488,23 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/getSaleImStateNum")
-    public @ResponseBody JSONResult<List<Map<String, Object>>> getSaleImStateNum(){
+    public @ResponseBody JSONResult<List<Map<String, Object>>> getSaleImStateNum() {
         UserInfoDTO userCurrent = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = userCurrent.getRoleList();
-        Map<String,Object> paramMap = new HashMap<>();
+        Map<String, Object> paramMap = new HashMap<>();
         // 非管理员时
-        if(roleList != null && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
-                && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())){
+        if (roleList != null && !RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())
+                && !RoleCodeEnum.YYZJ.name().equals(roleList.get(0).getRoleCode())) {
             // 当前组织下面人员
             List<UserInfoDTO> userList = getTeleSaleByOrgId(userCurrent.getOrgId());
-            if(CollectionUtils.isNotEmpty(userList)){
-                List<Long> idList = userList.parallelStream()
-                        .filter(user->user.getStatus() ==1 || user.getStatus() ==3).map(user->user.getId()).collect(Collectors.toList());
-                paramMap.put("saleIdList",idList);
-            }else{
+            if (CollectionUtils.isNotEmpty(userList)) {
+                List<Long> idList = userList.parallelStream().filter(user -> user.getStatus() == 1 || user.getStatus() == 3).map(user -> user.getId())
+                        .collect(Collectors.toList());
+                paramMap.put("saleIdList", idList);
+            } else {
                 ArrayList<Long> longs = new ArrayList<>(1);
                 longs.add(-1L);
-                paramMap.put("saleIdList",longs);
+                paramMap.put("saleIdList", longs);
             }
         }
         JSONResult<List<Map<String, Object>>> result = customerInfoFeignClient.getSaleImStateNum(paramMap);
@@ -496,42 +517,43 @@ public class ImMessageController {
      * @return
      */
     @PostMapping("/onlineleave")
-    public @ResponseBody JSONResult<Boolean> onlineleave(@Valid @RequestBody  SaleOnlineLeaveLogReq saleOnlineLeaveLogReq , BindingResult result , HttpServletRequest request){
-        log.info("web-onlineleave入参={}" , JSON.toJSONString(saleOnlineLeaveLogReq));
-        String agent=request.getHeader("User-Agent");
-        log.info("web-agent浏览器={}" , agent);
+    public @ResponseBody JSONResult<Boolean> onlineleave(@Valid @RequestBody SaleOnlineLeaveLogReq saleOnlineLeaveLogReq, BindingResult result,
+            HttpServletRequest request) {
+        log.info("web-onlineleave入参={}", JSON.toJSONString(saleOnlineLeaveLogReq));
+        String agent = request.getHeader("User-Agent");
+        log.info("web-agent浏览器={}", agent);
         if (result.hasErrors()) {
             // 参数校验
             return CommonUtil.validateParam(result);
         }
         // 顾问Id不存在直接从session中获得
-        if(null == saleOnlineLeaveLogReq.getTeleSaleId()){
+        if (null == saleOnlineLeaveLogReq.getTeleSaleId()) {
             UserInfoDTO user = CommUtil.getCurLoginUser();
-            if(null == user ){
+            if (null == user) {
                 log.warn("user-is-null!");
-                return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+                return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(), SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
             }
             List<RoleInfoDTO> roleList = user.getRoleList();
-            if(CollectionUtils.isEmpty(roleList)){
+            if (CollectionUtils.isEmpty(roleList)) {
                 log.warn("roleList-is-null");
-                return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+                return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(), SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
             }
             Map<String, String> roleMap = roleList.stream().map(RoleInfoDTO::getRoleCode).collect(Collectors.toMap(k -> k, v -> v, (x, y) -> x));
             // 电销顾问 & 业务线是的商机盒子的
-            if(roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.CMZSJJ).equals(user.getBusinessLine())){
+            if (roleMap.containsKey(RoleCodeEnum.DXCYGW.name()) && ((Integer) BusinessLineConstant.CMZSJJ).equals(user.getBusinessLine())) {
                 // 设置顾问Id
                 saleOnlineLeaveLogReq.setTeleSaleId(user.getId());
                 JSONResult<Boolean> onlineLeave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-                log.info("session返回结果={}" , onlineLeave);
-                return onlineLeave ;
+                log.info("session返回结果={}", onlineLeave);
+                return onlineLeave;
             }
-        }else{
+        } else {
             // 顾问Id存在直接设置在线离线
             JSONResult<Boolean> onlineLeave = customerInfoFeignClient.onlineleave(saleOnlineLeaveLogReq);
-            log.info("无session返回结果={}" , onlineLeave);
-            return onlineLeave ;
+            log.info("无session返回结果={}", onlineLeave);
+            return onlineLeave;
         }
-        return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(),SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
+        return new JSONResult<Boolean>().fail(SysErrorCodeEnum.ERR_AUTH_LIMIT.getCode(), SysErrorCodeEnum.ERR_AUTH_LIMIT.getMessage());
     }
 
     /**
@@ -549,22 +571,19 @@ public class ImMessageController {
 
     /**
      * 根据orgId 获取创业顾问
-     *
      * @param orgId
      * @return
      */
     @SuppressWarnings("all")
     private List<UserInfoDTO> getTeleSaleByOrgId(Long orgId) {
-        log.info("callrecord-orgId {{}}",orgId);
+        log.info("callrecord-orgId {{}}", orgId);
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(orgId);
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
-        log.info("callrecord-userJr {{}}",userJr);
+        log.info("callrecord-userJr {{}}", userJr);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-            log.error(
-                    "查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
-                    orgId, userJr);
+            log.error("查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}", orgId, userJr);
             return null;
         }
         return userJr.getData();
