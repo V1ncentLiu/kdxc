@@ -340,7 +340,13 @@ public class UserController {
                 boolean flag = jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null
                         && jsonResult.getData() > 0;
                 if (flag) {
-                    return new JSONResult().fail(SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getCode(), SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getMessage());
+                    String  code = SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getCode();
+                    String  msg = SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getMessage();
+                    if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode())) {
+                          code = SysErrorCodeEnum.AGENT_ERR_EXISTS_CLUE_FAIL.getCode();
+                          msg = SysErrorCodeEnum.AGENT_ERR_EXISTS_CLUE_FAIL.getMessage();
+                    }
+                    return new JSONResult().fail(code, msg);
                 }
 
             }
@@ -361,7 +367,6 @@ public class UserController {
                     // 更新电销顾问电销组组织相关信息
                     clueRelateFeignClient.updateClueRelateByAgentSaleId(clueRelateReq);
                 }
-
                 // 添加换组记录
                 ChangeOrgRecordReqDto changeOrgRecordReqDto =  ChangeOrgRecordReqDto.newBuilder()
                                     //主键
@@ -381,6 +386,10 @@ public class UserController {
             }
             //更新组织修改坐席缓存
             clientFeignClient.changOrgIdModifyCache(userInfoReq);
+            //换组时 删除员工分配规则
+            if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode())) {
+                deleteProSettingAndRule(id);
+            }
             logger.info("修改资源所属组织共耗时：{}", System.currentTimeMillis() - start1);
         }
         //禁用加盟经纪时 删除员工分配规则
