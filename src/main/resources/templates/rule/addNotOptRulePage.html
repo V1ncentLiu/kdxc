@@ -340,7 +340,7 @@
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="orgId" label="话务组/顾问组*">
                     <template slot-scope="scope">
-                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 160px;margin:0 auto;height: 57px;">
                             <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
                                 <el-option
                                     v-for="item in trafficOptions"
@@ -355,14 +355,14 @@
                 <el-table-column align="center" prop="proportion" label="比例*">
                     <span style="color: #f56c6c;">*</span>
                     <template slot-scope="scope">
-                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.proportion'" :rules='rules.proportion' style="width: 200px;margin:0 auto;height: 57px;">
+                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.proportion'" :rules='rules.proportion' style="width: 160px;margin:0 auto;height: 57px;">
                             <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.teleRuleTeamList)" v-model="scope.row.proportion"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="resourceMaxNum" label="资源条数*">
+                <el-table-column align="center" prop="resourceMaxNum" label="资源条数*"  width="160">
                     <template slot-scope="scope">
-                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 200px;margin:0 auto;height: 57px;">
+                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 130px;margin:0 auto;height: 57px;">
                             <!-- input值 -->
                             <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.trafficRuleTeamList)" v-model="scope.row.resourceMaxNum" ></el-input>
                             <!-- 不限按钮    -->
@@ -374,13 +374,38 @@
                 </el-table-column>
                 <el-table-column align="center" prop="isPrior" label="优先分配*">
                     <template slot-scope="scope">
-                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.isPrior'" :rules='rules.isPrior' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.isPrior'" :rules='rules.isPrior' style="width: 130px;margin:0 auto;height: 57px;">
                             <el-select v-model="scope.row.isPrior" placeholder="请选择">
                                 <el-option
                                     v-for="item in priorOptions"
                                     :key="item.value"
                                     :label="item.name"
                                     :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="接收时间段">
+                    <template slot-scope="scope">
+                        <el-form-item label="" :prop="'trafficRuleTeamList.' + scope.$index + '.orgDayTimeStart'" label-width="0" style="width: 70px;display: inline-block;">
+                            <el-time-picker type="datetime" placeholder="选择时间" v-model="scope.row.orgDayTimeStart" style="width: 70px;" format="HH:mm:ss" value-format="HH:mm:ss" :editable="false" :clearable="false"></el-time-picker>
+                        </el-form-item>
+                        <span>—</span>
+                        <el-form-item label="" :prop="'trafficRuleTeamList.' + scope.$index + '.orgDayTimeEnd'" style="width: 70px;display: inline-block;">
+                            <el-time-picker type="datetime" placeholder="选择时间" v-model="scope.row.orgDayTimeEnd" style="width: 70px;" format="HH:mm:ss" value-format="HH:mm:ss" :editable="false" :clearable="false"></el-time-picker>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="projectId" label="资源项目归属">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.ascriptionProjectId'" :rules='rules.projectId' style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-select  filterable clearable v-model="scope.row.ascriptionProjectId" placeholder="请选择">
+                                <el-option
+                                        v-for="item in noSingProjectList"
+                                        :key="item.id"
+                                        :label="item.projectName"
+                                        :value="item.id">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -805,6 +830,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                     proportion:'',
                     resourceMaxNum:'',
                     isPrior: 0,//默认非优先
+                    orgDayTimeStart:'00:00:00',//新增时间段
+                    orgDayTimeEnd:'23:59:59',//新增时间段
                     unlimited:'',//不限层
                     unlimitedVal:'',//不限层取值
                     unlimitedShow:false,//默认不显示
