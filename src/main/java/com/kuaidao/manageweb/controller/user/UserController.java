@@ -3,11 +3,46 @@
  */
 package com.kuaidao.manageweb.controller.user;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSON;
 import com.kuaidao.aggregation.dto.changeorg.ChangeOrgRecordReqDto;
 import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
 import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.common.constant.*;
+import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -24,9 +59,10 @@ import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.consultantProject.ConsultantProjectFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.preference.PreferenceFeignClient;
+import com.kuaidao.manageweb.feign.rule.TeleMarketingAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.service.im.ImMassageService;
@@ -39,29 +75,18 @@ import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.*;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
+import com.kuaidao.sys.dto.user.UserInfoReq;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * @author gpc
- *
  */
 
 @Controller
@@ -90,10 +115,13 @@ public class UserController {
     private ImMassageService imMassageService;
     @Autowired
     private ClientFeignClient clientFeignClient;
+    @Autowired
+    private TeleMarketingAssignRuleFeignClient teleMarketingAssignRuleFeignClient;
+    @Autowired
+    private ConsultantProjectFeignClient consultantProjectFeignClient;
 
     /***
      * 用户列表页
-     *
      * @return
      */
     @RequestMapping("/initUserList")
@@ -122,8 +150,6 @@ public class UserController {
     }
 
     /**
-     *
-     *
      * @param request
      * @return
      */
@@ -135,7 +161,7 @@ public class UserController {
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         userRole.setOrgId(req.getOrgId());
         userRole.setRoleCode(req.getRoleCode());
-        if(req.getStatusList() != null && req.getStatusList().size()>0){
+        if (req.getStatusList() != null && req.getStatusList().size() > 0) {
             userRole.setStatusList(req.getStatusList());
         }
         if (userInfoDTO.getBusinessLine() != null) {
@@ -146,7 +172,6 @@ public class UserController {
 
     /***
      * 新增用户页
-     *
      * @return
      */
     @RequestMapping("/initCreateUser")
@@ -194,7 +219,6 @@ public class UserController {
 
     /***
      * 编辑用户页
-     *
      * @return
      */
     @RequestMapping("/initUpdateUser")
@@ -261,7 +285,6 @@ public class UserController {
 
     /***
      * 用户列表
-     *
      * @return
      */
     @PostMapping("/list")
@@ -277,7 +300,6 @@ public class UserController {
 
     /**
      * 保存用户
-     *
      * @param orgDTO
      * @return
      * @throws InvocationTargetException
@@ -298,7 +320,6 @@ public class UserController {
 
     /**
      * 修改用户信息
-     *
      * @param userInfoReq
      * @return
      */
@@ -321,47 +342,77 @@ public class UserController {
             long start1 = System.currentTimeMillis();
             // 不带走资源判断当前电销顾问手里有没有资源（我的客户列表是否有数据）
             if (Constants.NOT_TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
+                JSONResult<Integer> jsonResult = null;
                 // 获取我的客户列表
                 CustomerClueQueryDTO dto = new CustomerClueQueryDTO();
-                dto.setTeleSale(userInfoReq.getId());
-                JSONResult<Integer> jsonResult = myCustomerFeignClient.getUnAssignCustomerNum(dto);
+                if (RoleCodeEnum.DXCYGW.name().equals(userInfoReq.getRoleCode())) {
+                    dto.setTeleSale(userInfoReq.getId());
+                    jsonResult = myCustomerFeignClient.getUnAssignCustomerNum(dto);
+                }
+                if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode())) {
+                    dto.setAgentSaleId(String.valueOf(userInfoReq.getId()));
+                    jsonResult = myCustomerFeignClient.getAgentUnAssignCustomerNum(dto);
+                }
                 boolean flag = jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null
                         && jsonResult.getData() > 0;
                 if (flag) {
-                    return new JSONResult().fail(SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getCode(), SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getMessage());
+                    String code = SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getCode();
+                    String msg = SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getMessage();
+                    if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode())) {
+                        code = SysErrorCodeEnum.AGENT_ERR_EXISTS_CLUE_FAIL.getCode();
+                        msg = SysErrorCodeEnum.AGENT_ERR_EXISTS_CLUE_FAIL.getMessage();
+                    }
+                    return new JSONResult().fail(code, msg);
                 }
 
             }
             // 带走资源将原属于本电销顾问的资源带着一起流转到此电销顾问新调整的所属组中。旧的组电销总监看不到此资源，新的组电销总监可以查看到此资源
             if (Constants.TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
-                //当前时间
-                Date now  = new Date();
-                ClueRelateReq clueRelateReq = getTeleSaleOrg(userInfoReq.getOrgId());
-                clueRelateReq.setTeleSaleId(userInfoReq.getId());
-                clueRelateReq.setCreateTime(now);
-                // 更新电销顾问电销组组织相关信息
-                clueRelateFeignClient.updateClueRelateByTeleSaleId(clueRelateReq);
+                // 当前时间
+                Date now = new Date();
+                ClueRelateReq clueRelateReq = new ClueRelateReq();
+                if (RoleCodeEnum.DXCYGW.name().equals(userInfoReq.getRoleCode())) {
+                    clueRelateReq = getTeleSaleOrg(userInfoReq.getOrgId(), userInfoReq.getId());
+                    clueRelateReq.setCreateTime(now);
+                    // 更新电销顾问电销组组织相关信息
+                    clueRelateFeignClient.updateClueRelateByTeleSaleId(clueRelateReq);
+                }
+                if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode())) {
+                    clueRelateReq = getAgentSaleOrg(userInfoReq.getOrgId(), userInfoReq.getId());
+                    clueRelateReq.setCreateTime(now);
+                    // 更新电销顾问电销组组织相关信息
+                    clueRelateFeignClient.updateClueRelateByAgentSaleId(clueRelateReq);
+                }
                 // 添加换组记录
-                ChangeOrgRecordReqDto changeOrgRecordReqDto =  ChangeOrgRecordReqDto.newBuilder()
-                                    //主键
-                                    .id(IdUtil.getUUID())
-                                    //用户id
-                                    .userId(userInfoReq.getId())
-                                    //换组之后组织
-                                    .newOrgId(userInfoReq.getOrgId())
-                                    //换组之前组织
-                                     .oldOrgId(userInfoReq.getOldOrgId())
-                                    //创建人
-                                    .createUser(CommUtil.getCurLoginUser().getId())
-                                    //创建时间
-                                    .createTime(now).build();
+                ChangeOrgRecordReqDto changeOrgRecordReqDto = ChangeOrgRecordReqDto.newBuilder()
+                        // 主键
+                        .id(IdUtil.getUUID())
+                        // 用户id
+                        .userId(userInfoReq.getId())
+                        // 换组之后组织
+                        .newOrgId(userInfoReq.getOrgId())
+                        // 换组之前组织
+                        .oldOrgId(userInfoReq.getOldOrgId())
+                        // 创建人
+                        .createUser(CommUtil.getCurLoginUser().getId())
+                        // 创建时间
+                        .createTime(now).build();
                 changeOrgFeignClient.insert(changeOrgRecordReqDto);
 
             }
-            //更新组织修改坐席缓存
+            // 更新组织修改坐席缓存
             clientFeignClient.changOrgIdModifyCache(userInfoReq);
+            // 换组时 删除员工分配规则
+            if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode())) {
+                deleteProSettingAndRule(id);
+            }
             logger.info("修改资源所属组织共耗时：{}", System.currentTimeMillis() - start1);
         }
+        // 禁用加盟经纪时 删除员工分配规则
+        if (RoleCodeEnum.JMJJ.name().equals(userInfoReq.getRoleCode()) && SysConstant.USER_STATUS_DISABLE.equals(userInfoReq.getStatus())) {
+            deleteProSettingAndRule(id);
+        }
+
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
         logger.info("修改用户共耗时：{}", System.currentTimeMillis() - start);
         return jsonResult;
@@ -369,7 +420,6 @@ public class UserController {
 
     /**
      * 禁用
-     *
      * @param orgDTO
      * @return
      */
@@ -393,7 +443,13 @@ public class UserController {
         UserInfoDTO user = getbyUserName.getData();
 
         String sessionid = SecurityUtils.getSubject().getSession().getId().toString();
-        String string = redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
+        String key = "";
+        if (BusinessLineConstant.CMZSJJ == user.getBusinessLine()) {
+            key = Constants.AGENT_SESSION_ID + user.getId();
+        } else {
+            key = Constants.SESSION_ID + user.getId();
+        }
+        String string = redisTemplate.opsForValue().get(key);
         if (Constants.IS_LOGIN_UP.equals(user.getIsLogin())) {
             // 发送下线通知
             new Thread(new Runnable() {
@@ -406,16 +462,21 @@ public class UserController {
         userInfoReq.setDisableTime(new Date());
         JSONResult<String> update = userInfoFeignClient.update(userInfoReq);
         // 禁用更改用户Im离线
-        if(null!= update && JSONResult.SUCCESS.equals(update.getCode())){
-            logger.info("onlineLeave-user={}" ,  JSON.toJSONString(user));
-            imMassageService.transOnlineLeaveLogUpdateStatusEnable(user, user.getRoleList() , SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
+        if (null != update && JSONResult.SUCCESS.equals(update.getCode())) {
+            logger.info("onlineLeave-user={}", JSON.toJSONString(user));
+            imMassageService.transOnlineLeaveLogUpdateStatusEnable(user, user.getRoleList(), SaleOLOperationTypeEnum.QUIT_TYPE.getCode());
         }
+        // 禁用加盟经纪时 删除员工分配规则
+        String roleCode = CommUtil.getRoleCode(user);
+        if (RoleCodeEnum.JMJJ.name().equals(roleCode)) {
+            deleteProSettingAndRule(id);
+        }
+
         return update;
     }
 
     /**
      * 启用
-     *
      * @param orgDTO
      * @return
      */
@@ -441,7 +502,6 @@ public class UserController {
 
     /**
      * 修改密码
-     *
      * @param orgDTO
      * @return
      */
@@ -482,7 +542,7 @@ public class UserController {
                 return updatePwdRes;
             } else {
                 return new JSONResult().fail(UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getCode(),
-                        UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getMessage());
+                                             UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getMessage());
             }
         } else {
             return new JSONResult().fail(UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getCode(), UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getMessage());
@@ -492,7 +552,6 @@ public class UserController {
 
     /**
      * 查询用户信息
-     *
      * @param orgDTO
      * @return
      */
@@ -505,7 +564,6 @@ public class UserController {
 
     /**
      * 修改密码安全设置
-     *
      * @param orgDTO
      * @return
      */
@@ -544,7 +602,6 @@ public class UserController {
 
     /**
      * 查询系统参数
-     *
      * @param code
      * @return
      */
@@ -574,7 +631,6 @@ public class UserController {
 
     /**
      * 根据条件查询用户集合
-     * 
      * @param
      * @author: Fanjd
      * @return:
@@ -590,8 +646,7 @@ public class UserController {
 
     /**
      * 首页 修改密码
-     *
-     * @param orgDTO
+     * @param updateUserPasswordReq
      * @return
      */
     @PostMapping("/updatePwd")
@@ -641,7 +696,6 @@ public class UserController {
 
     /**
      * 查询字典表
-     *
      * @param code
      * @return
      */
@@ -655,7 +709,6 @@ public class UserController {
 
     /**
      * 获取当前登录账号
-     *
      * @return
      */
     private UserInfoDTO getUser() {
@@ -666,22 +719,22 @@ public class UserController {
 
     /**
      * 获取创业顾问所在电销组的其他组织信息
-     * 
      * @author: Fanjd
      * @param orgId 电销组ID
      * @return: com.kuaidao.aggregation.dto.clue.ClueRelateDTO
      * @Date: 2019/6/17 15:22
      * @since: 1.0.0
      **/
-    private ClueRelateReq getTeleSaleOrg(Long orgId) {
+    private ClueRelateReq getTeleSaleOrg(Long orgId, Long userId) {
         // 电销关联数据
         ClueRelateReq releateReq = new ClueRelateReq();
+        releateReq.setTeleSaleId(userId);
         // 电销组id
         releateReq.setTeleGorupId(orgId);
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
         userRole.setOrgId(orgId);
-        //账号状态集合
+        // 账号状态集合
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
@@ -706,7 +759,7 @@ public class UserController {
                     UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
                     userRoleInfo.setRoleCode(RoleCodeEnum.DXFZ.name());
                     userRoleInfo.setOrgId(org.getId());
-                    //账号状态集合
+                    // 账号状态集合
                     userRoleInfo.setStatusList(statusList);
                     JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient.listByOrgAndRole(userRoleInfo);
                     if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
@@ -738,6 +791,47 @@ public class UserController {
     }
 
     /**
+     * 获取加盟经纪所在电销组的其他组织信息
+     * @author: Fanjd
+     * @param orgId 加盟经纪组ID
+     * @return:
+     * @Date: 2021/05/07 15:22
+     * @since: 1.0.0
+     **/
+    private ClueRelateReq getAgentSaleOrg(Long orgId, Long userId) {
+        // 电销关联数据
+        ClueRelateReq releateReq = new ClueRelateReq();
+        releateReq.setAgentSaleId(userId);
+        releateReq.setAgentGroupId(orgId);
+        // 经纪总监
+        Long agentDirectorId = null;
+        // 经纪事业部
+        Long agentDeptId = null;
+        List<UserInfoDTO> dxzjList = listUserByRoleAndOrg(userId, RoleCodeEnum.DXZJ.name());
+        if (CollectionUtils.isNotEmpty(dxzjList)) {
+            // 经纪总监
+            agentDirectorId = dxzjList.get(0).getId();
+            // 查询用户的上级
+            OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+            orgDto.setId(orgId);
+            orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+            // 查询所有上级机构
+            JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listParentsUntilOrg(orgDto);
+            if (JSONResult.isNotNull(orgJson)) {
+                for (OrganizationDTO org : orgJson.getData()) {
+                    if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
+                        // 经纪事业部
+                        agentDeptId = org.getId();
+                    }
+                }
+            }
+        }
+        releateReq.setAgentDirectorId(agentDirectorId);
+        releateReq.setAgentDeptId(agentDeptId);
+        return releateReq;
+    }
+
+    /**
      * 查询 当前组织机构下所有用户
      */
     @PostMapping("/listUserInfoByOrgId")
@@ -747,8 +841,8 @@ public class UserController {
 
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String roleCode = CommUtil.getRoleCode(curLoginUser);
-        if(!RoleCodeEnum.GLY.name().equals(roleCode)){
-            //非管理员角色,查询同组织用户
+        if (!RoleCodeEnum.GLY.name().equals(roleCode)) {
+            // 非管理员角色,查询同组织用户
             reqDTO.setOrgId(curLoginUser.getOrgId());
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
@@ -760,14 +854,13 @@ public class UserController {
             UserOrgRoleReq userRole = new UserOrgRoleReq();
             userRole.setRoleCode(RoleCodeEnum.JMJJ.name());
             userRole.setStatusList(statusList);
-            JSONResult<List<UserInfoDTO>> userInfoJson =
-                    userInfoFeignClient.listByOrgAndRole(userRole);
+            JSONResult<List<UserInfoDTO>> userInfoJson = userInfoFeignClient.listByOrgAndRole(userRole);
 
-            if( null == listJSONResult.getData()){
+            if (null == listJSONResult.getData()) {
 
                 listJSONResult.setData(Collections.emptyList());
             }
-            if(JSONResult.isNotNull(userInfoJson)){
+            if (JSONResult.isNotNull(userInfoJson)) {
 
                 listJSONResult.getData().addAll(userInfoJson.getData());
             }
@@ -794,12 +887,47 @@ public class UserController {
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         userRole.setOrgId(req.getOrgId());
         userRole.setRoleCode(req.getRoleCode());
-        if(req.getStatusList() != null && req.getStatusList().size()>0){
+        if (req.getStatusList() != null && req.getStatusList().size() > 0) {
             userRole.setStatusList(req.getStatusList());
         }
-        if (userInfoDTO.getBusinessLine() != null && userInfoDTO.getBusinessLine() !=BusinessLineConstant.XIAOWUZHONG && userInfoDTO.getBusinessLine() !=BusinessLineConstant.TILIANG) {
+        if (userInfoDTO.getBusinessLine() != null && userInfoDTO.getBusinessLine() != BusinessLineConstant.XIAOWUZHONG
+                && userInfoDTO.getBusinessLine() != BusinessLineConstant.TILIANG) {
             userRole.setBusinessLine(userInfoDTO.getBusinessLine());
         }
         return userInfoFeignClient.listByOrgAndRole(userRole);
+    }
+
+    /**
+     * 根据组织id和角色编码查询用户
+     * @param orgId
+     * @param roleCode
+     * @return
+     */
+    private List<UserInfoDTO> listUserByRoleAndOrg(long orgId, String roleCode) {
+        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
+        UserOrgRoleReq userRole = new UserOrgRoleReq();
+        userRole.setOrgId(orgId);
+        userRole.setRoleCode(roleCode);
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        userRole.setStatusList(statusList);
+        JSONResult<List<UserInfoDTO>> userInfoJson = userInfoFeignClient.listByOrgAndRole(userRole);
+        if (userInfoJson != null && JSONResult.SUCCESS.equals(userInfoJson.getCode()) && userInfoJson.getData() != null
+                && userInfoJson.getData().size() > 0) {
+            userList = userInfoJson.getData();
+        }
+        return userList;
+    }
+
+    /**
+     * 删除项目设置和分配规则
+     * @param id 用户id
+     */
+    private void deleteProSettingAndRule(Long id) {
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(id);
+        teleMarketingAssignRuleFeignClient.deleteAssignRuleByMemberId(idEntityLong);
+        consultantProjectFeignClient.deleteByConsultantId(idEntityLong);
     }
 }

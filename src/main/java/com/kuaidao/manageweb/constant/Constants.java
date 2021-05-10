@@ -2,7 +2,6 @@ package com.kuaidao.manageweb.constant;
 
 /**
  * manageweb 常量類
- * 
  * @author: Chen Chengxue
  * @date: 2018年12月26日 上午8:56:29
  * @version V1.0
@@ -30,6 +29,8 @@ public class Constants {
     public static String PASSWORD_ERROR = "huiju:sys:passworderror:";
     // redis前缀 sessionid
     public static String SESSION_ID = "huiju:sys:sessionid:";
+    // 经纪端redis前缀 sessionid
+    public static String AGENT_SESSION_ID = "huiju:sys:agent:sessionid:";
     // redis前缀 验证码MsgID
     public static String MSG_ID = "huiju:sys:msgid:";
 
@@ -103,7 +104,7 @@ public class Constants {
     /** redis前缀 看板计数-电销顾问计数-今日 **/
     public static final String NOTTODAY_TELE_SALE = "huiju:dashboard:nottodaytelesale:";
     /** 餐盟首次登录 **/
-    public static final String  CM_DXGW_FIRST_LOGIN = "huiju:sys:cmfirstlogin:";
+    public static final String CM_DXGW_FIRST_LOGIN = "huiju:sys:cmfirstlogin:";
     /**
      * 返回码成功
      */
@@ -111,17 +112,17 @@ public class Constants {
     /**
      * 收款户名
      */
-    //todo
+    // todo
     public static final String PAYMENT_NAME = "???";
     /**
      * 收款银行
      */
-    //todo
+    // todo
     public static final String BANK = "???";
     /**
      * 收款账号
      */
-    //todo
+    // todo
     public static final String PAYMENT_ACCOUNT = "???";
     /**
      * 商家主账号
@@ -136,18 +137,17 @@ public class Constants {
      */
     public static final String BIND_TYPE_ONE = "1";
 
+    // 慧聚
+    public static Integer USER_TYPE_ONE = 1;
+    // 商家主账号
+    public static Integer USER_TYPE_TWO = 2;
+    // 商家子账号
+    public static Integer USER_TYPE_THREE = 3;
 
-    //慧聚
-    public  static  Integer USER_TYPE_ONE = 1;
-    //商家主账号
-    public  static  Integer USER_TYPE_TWO = 2;
-    //商家子账号
-    public  static  Integer USER_TYPE_THREE = 3;
-
-    //支付宝
-    public  static  Integer RECHARGE_WAY_ALI_PAY = 1;
-    //微信
-    public  static  Integer RECHARGE_WAY_WEXIN_PAY = 2;
+    // 支付宝
+    public static Integer RECHARGE_WAY_ALI_PAY = 1;
+    // 微信
+    public static Integer RECHARGE_WAY_WEXIN_PAY = 2;
 
     // redis前缀 验证码MsgID
     public static String REDIS_NEXT_PREFIX = "huiju:user:next:";

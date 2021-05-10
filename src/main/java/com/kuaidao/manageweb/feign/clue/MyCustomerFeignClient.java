@@ -1,7 +1,11 @@
 package com.kuaidao.manageweb.feign.clue;
 
-import java.util.List;
-
+import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -10,12 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.kuaidao.aggregation.dto.clue.*;
-import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
+import java.util.List;
 
 @FeignClient(name = "aggregation-service", path = "/aggregation/clue/myCustomer",
         fallback = MyCustomerFeignClient.HystrixClientFallback.class)
@@ -38,6 +37,16 @@ public interface MyCustomerFeignClient {
      */
     @RequestMapping("/getUnAssignCustomerNum")
     JSONResult<Integer> getUnAssignCustomerNum( CustomerClueQueryDTO queryDto);
+
+    /**
+     * 查询加盟经纪未分配的我的客户数
+     *
+     * @param queryDto
+     * @return
+     */
+    @RequestMapping("/getAgentUnAssignCustomerNum")
+    JSONResult<Integer> getAgentUnAssignCustomerNum( CustomerClueQueryDTO queryDto);
+
     /**
      * 我的客户创建数据
      * 
@@ -204,6 +213,12 @@ public interface MyCustomerFeignClient {
        public JSONResult<Integer> getUnAssignCustomerNum( CustomerClueQueryDTO queryDto){
             return fallBackError("获取未分配客户数失败");
         }
+
+        @Override
+        public JSONResult<Integer> getAgentUnAssignCustomerNum(CustomerClueQueryDTO queryDto) {
+            return fallBackError("获取加盟经纪未分配客户数失败");
+        }
+
         @Override
         public JSONResult<String> createCustomerClue(ClueDTO dto) {
             // TODO Auto-generated method stub
