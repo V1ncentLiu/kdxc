@@ -37,11 +37,22 @@ public class OrganitionWapper {
      * 获取全部电销组
      */
     public List<OrganizationRespDTO> findAllDXZ(){
+        return findOrgsByType(OrgTypeConstant.DXZ);
+    }
+    /**
+     * 获取全部话务组
+     */
+    public List<OrganizationRespDTO> findAllHWZ(){
+        return findOrgsByType(OrgTypeConstant.HWZ);
+    }
+
+    public List<OrganizationRespDTO> findOrgsByType(Integer orgType){
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+        organizationQueryDTO.setOrgType(orgType);
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam = organizationFeignClient.queryOrgByParam(organizationQueryDTO);
         return queryOrgByParam.data();
     }
+
 
     public OrganizationDTO findOrgById(Long orgId){
         IdEntity idEntity = new IdEntity();
