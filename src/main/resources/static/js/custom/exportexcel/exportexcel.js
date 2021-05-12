@@ -1,6 +1,6 @@
 function distributeExportFun(falgNew,param){
     var methodStr;
-    if(falgNew==1  || falgNew==3){ // 沟通情况
+    if(falgNew==1  || falgNew==3 || falgNew==4){ // 沟通情况
         methodStr = 'findCommunicateRecords';
     }else{ // 资源记录
         methodStr = 'findClues';
@@ -28,6 +28,15 @@ function distributeExportFun(falgNew,param){
                 duration: 0
             });
             localStorage.removeItem("distributeExport3");
+        }else if(falgNew == 4){ // 导出话务沟通情况
+            homePageVM.$notify({
+                type: 'success',
+                title: '提示',
+                message: '顾问/经纪跟进记录 下载完成',
+                position: 'bottom-right',
+                duration: 0
+            });
+            localStorage.removeItem("distributeExport4");
         }else{ // 资源记录
             homePageVM.$notify({
                 type: 'success',
@@ -56,6 +65,7 @@ function distributeExportFun(falgNew,param){
         localStorage.removeItem("distributeExport1");
         localStorage.removeItem("distributeExport2");
         localStorage.removeItem("distributeExport3");
+        localStorage.removeItem("distributeExport4");
     }).then(function(){
     });
 }
