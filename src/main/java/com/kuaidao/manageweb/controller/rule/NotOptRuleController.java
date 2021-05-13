@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
+import com.kuaidao.manageweb.feign.organization.OrganitionWapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -87,6 +88,9 @@ public class NotOptRuleController {
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
 
+    @Autowired
+    private OrganitionWapper organitionWapper;
+
     /***
      * 非优化规则列表页
      * 
@@ -115,14 +119,15 @@ public class NotOptRuleController {
         if (roleList != null && roleList.size() != 0) {
             request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         }
-        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-        orgDto.setOrgType(OrgTypeConstant.DXZ);
-        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        // 电销小组
-        JSONResult<List<OrganizationRespDTO>> dzList =
-                organizationFeignClient.queryOrgByParam(orgDto);
-        List<OrganizationRespDTO> data = dzList.getData();
-        request.setAttribute("queryOrg", data);
+//        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+//        orgDto.setOrgType(OrgTypeConstant.DXZ);
+//        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+//        JSONResult<List<OrganizationRespDTO>> dzList =
+//                organizationFeignClient.queryOrgByParam(orgDto);
+//        List<OrganizationRespDTO> data = dzList.getData();
+        request.setAttribute("queryOrg", organitionWapper.findAllHWZ());
+        request.setAttribute("hwzOrgs", organitionWapper.findAllHWZ());
+
         return "rule/notOptRuleManagerPage";
     }
 
