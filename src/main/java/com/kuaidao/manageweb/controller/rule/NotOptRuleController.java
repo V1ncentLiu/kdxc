@@ -125,7 +125,7 @@ public class NotOptRuleController {
 //        JSONResult<List<OrganizationRespDTO>> dzList =
 //                organizationFeignClient.queryOrgByParam(orgDto);
 //        List<OrganizationRespDTO> data = dzList.getData();
-        request.setAttribute("queryOrg", organitionWapper.findAllHWZ());
+        request.setAttribute("queryOrg", organitionWapper.findAllDXZ());
         request.setAttribute("hwzOrgs", organitionWapper.findAllHWZ());
 
         return "rule/notOptRuleManagerPage";
