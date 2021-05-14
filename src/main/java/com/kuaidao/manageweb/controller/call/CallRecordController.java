@@ -853,6 +853,17 @@ public class CallRecordController {
         return callRecordFeign.getRecordFile(idEntity);
     }
 
+    @PostMapping("/getRecordFileWithAgent")
+    @ResponseBody
+    public JSONResult<String> getRecordFileWithAgent(@RequestBody IdEntity idEntity) {
+        JSONResult<String> recordFile = callRecordFeign.getRecordFile(idEntity);
+        if(JSONResult.SUCCESS.equals(recordFile.getCode())&&recordFile.data()==null){
+            return agentServiceWapper.getRecordFile(idEntity);
+        }
+        return recordFile;
+    }
+
+
     /**
      * 根据clueId List 分组统计 拨打次数
      *

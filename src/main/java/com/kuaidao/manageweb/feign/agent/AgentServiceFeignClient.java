@@ -7,6 +7,7 @@ import com.kuaidao.agentservice.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.agentservice.dto.tracking.AgentClueTrackingDTO;
 import com.kuaidao.agentservice.dto.tracking.TrackingReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import feign.hystrix.FallbackFactory;
 import org.slf4j.Logger;
@@ -43,6 +44,10 @@ public interface AgentServiceFeignClient {
     @PostMapping("/call/callRecord/listAgentCallRecordByParamsNoPage")
     public JSONResult<List<CallRecordRespDTO>> listAgentCallRecordByParamsNoPage (@RequestBody CallRecordReqDTO myCallRecordReqDTO);
 
+
+    @PostMapping("/call/callRecord/getRecordFile")
+    public JSONResult<String> getRecordFile(@RequestBody IdEntity idEntity);
+
     @Component
     static class HystrixClientFallback implements FallbackFactory<AgentServiceFeignClient> {
 
@@ -77,6 +82,11 @@ public interface AgentServiceFeignClient {
                 @Override
                 public JSONResult<List<CallRecordRespDTO>> listAgentCallRecordByParamsNoPage(CallRecordReqDTO myCallRecordReqDTO) {
                     return fallBackError("查询通话记录");
+                }
+
+                @Override
+                public JSONResult<String> getRecordFile(IdEntity idEntity) {
+                    return null;
                 }
 
             };

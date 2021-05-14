@@ -5,6 +5,7 @@ import com.kuaidao.agentservice.dto.call.CallRecordReqDTO;
 import com.kuaidao.agentservice.dto.call.CallRecordRespDTO;
 import com.kuaidao.agentservice.dto.tracking.AgentClueTrackingDTO;
 import com.kuaidao.agentservice.dto.tracking.TrackingReqDTO;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,12 @@ public class AgentServiceWapper {
     public List<CallRecordRespDTO> listAgentCallRecordByParamsNoPage (String clueId){
         CallRecordReqDTO dto = new CallRecordReqDTO();
         dto.setClueId(clueId);
+
         return agentServiceFeignClient.listAgentCallRecordByParamsNoPage(dto).data(new ArrayList<>());
+    }
+
+    public JSONResult<String> getRecordFile(@RequestBody IdEntity idEntity){
+        return agentServiceFeignClient.getRecordFile(idEntity);
     }
 
 
