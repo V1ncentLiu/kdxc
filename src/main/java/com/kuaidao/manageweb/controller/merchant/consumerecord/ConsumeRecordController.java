@@ -404,20 +404,6 @@ public class ConsumeRecordController {
     }
 
     /**
-     * 查询所有商家账号
-     *
-     * @param
-     * @return
-     */
-    private List<UserInfoDTO> getMerchantUser(Integer userType, List<Integer> arrayList) {
-        UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setUserType(userType);
-        userInfoDTO.setStatusList(arrayList);
-        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
-        return merchantUserList.getData();
-    }
-
-    /**
      * 获取所有组织组并将电销组id和名字转换成用户的id和名字
      *
      * @return
@@ -438,5 +424,19 @@ public class ConsumeRecordController {
             }
         }
         return userList;
+    }
+
+    /**
+     * 查询所有商家账号
+     *
+     * @param
+     * @return
+     */
+    private List<UserInfoDTO> getMerchantUser(Integer userType, List<Integer> arrayList) {
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(userType);
+        userInfoDTO.setStatusList(arrayList);
+        JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        return merchantUserList.getData();
     }
 }

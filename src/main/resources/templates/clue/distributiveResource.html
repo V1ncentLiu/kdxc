@@ -49,6 +49,11 @@
             <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源情况中</el-button>
         </shiro:hasPermission>
 
+        <shiro:hasPermission name="DistributiveResource:exportTrackRecord">
+            <el-button v-if="isExport4" icon="el-icon-download" type="warning" @click="exportFun(4)">导出顾问/经纪跟进记录</el-button>
+            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出顾问/经纪跟进记录中</el-button>
+        </shiro:hasPermission>
+
     </el-row>
     <div class="mainSearchBg">
         <div class="mainSearchFormBox">
@@ -329,6 +334,30 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+
+                    <el-form-item label="首次分配部门:">
+                        <el-select v-model="form.firstAssignGroupId" placeholder="首次分配部门" clearable filterable multiple>
+                            <el-option
+                                    v-for="item in firstAssignGroupArr"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源项目归属:">
+                        <el-input v-model="form.ascriptionProject" placeholder="资源项目归属"></el-input>
+                    </el-form-item>
+                    <el-form-item label="首次下发类别:">
+                        <el-select v-model="form.firstAssignGroupType" placeholder="首次下发类别" clearable multiple>
+                            <el-option
+                                    v-for="item in groupTypeArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
@@ -353,6 +382,14 @@
                     <template slot-scope="scope">
                         <div v-if="scope.row.isTrack ==1">
                             <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
+                        </div>
+                        <div v-else></div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums"  v-if="item.fieldCode == 'hasCallRecord'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.hasCallRecord ==1">
+                            <el-button @click="openCallRecordDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
                         </div>
                         <div v-else></div>
                     </template>
@@ -517,12 +554,59 @@
             </el-form-item>
         </el-form>
     </el-dialog>
+
+    <el-dialog title="通话记录" :visible.sync="callRecordParam.callRecordDialogVisible" width="1000px">
+        <el-table ref="multipleTable" :data="callRecordParam.tableData" tooltip-effect="dark" style="width: 100%" border >
+            <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+            <el-table-column prop="startTime" label="通话时间" :formatter="getStartTimeText"  align="center" width="140"></el-table-column>
+            <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
+            <el-table-column prop="accountName" label="姓名" align="center"  width="120"></el-table-column>
+            <el-table-column prop="talkTime" label="接通时长"  :formatter="getTalkTimeText"  align="center" width="140"></el-table-column>
+            <el-table-column prop="callStatus" label="是否接通" align="center"  width="120"></el-table-column>
+            <el-table-column label="操作" align="center">
+                <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+                    <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+                        <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
+                    </a>
+                    <a class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-dialog>
+
 </div>
 </body>
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+
+<style>
+    .fa-play-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_play.png);
+        background-repeat: no-repeat;
+    }
+    .fa-stop-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_stop.png);
+        background-repeat: no-repeat;
+    }
+    .download_img {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_download.png);
+        background-repeat: no-repeat;
+    }
+</style>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
     var proSelect=[[${proSelect}]];
+    var orgs=[[${orgs}]];
     var userList=[[${userList}]];
     var hwzyUserList=[[${hwzyUserList}]];
     var fieldList=[[${fieldList}]];//自定义字段
@@ -536,6 +620,7 @@
                 isExport1:true,
                 isExport2:true,
                 isExport3:true,
+                isExport4:true,
                 oldPage:1,
                 paginationShow: false,
                 isShow:false,
@@ -584,6 +669,9 @@
                     im:"",
                     sourceFrom:'',
                     haveParent:'',
+                    firstAssignGroupId:[],
+                    firstAssignGroupType:[],
+                    ascriptionProject:""
                 },
                 pager:{
                     total: 0,
@@ -595,10 +683,15 @@
                     trackingDialogVisible:false,
                     tableData:[]
                 },
+                callRecordParam:{
+                    callRecordDialogVisible:false,
+                    tableData:[]
+                },
                 dialogForm:{},
                 formLabelWidth: '120px',
                 dxBusinessList:[],
                 hwzyGroupList:[],
+                firstAssignGroupArr:orgs,
                 industryCategoryArr:[],
                 categoryArr:[],
                 typeArr:[],
@@ -626,6 +719,12 @@
                     {value:"",name:"全部"},
                     {value:"0",name:"直发资源"},
                     {value:"1",name:"顾问匹配"}
+                ],
+                groupTypeArr:[
+                    {value:"1",name:"电销顾问"},
+                    {value:"2",name:"话务"},
+                    {value:"3",name:"加盟经纪"},
+                    {value:"4",name:"加盟顾问"}
                 ],
                 buildSelfArr:[
                     {value:"",name:"全部"},
@@ -686,7 +785,7 @@
             openTrackingDialog(cid){
                 var param = {};
                 param.clueId = cid;
-                axios.post('/aggregation/tracking/queryList', param)
+                axios.post('/aggregation/tracking/queryListWithSale', param)
                     .then(function (response) {
                         // console.log(response.data)
                         if (response.data.code == 0) {
@@ -698,6 +797,131 @@
                     }).catch(function (error) {
                     console.log(error);
                 });
+            },
+            openCallRecordDialog(cid){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/call/callRecord/listCallReacordNoPage', param)
+                    .then(function (response) {
+                        if (response.data.code == 0) {
+                            ocmVM.callRecordParam.tableData = response.data.data
+                            ocmVM.callRecordParam.callRecordDialogVisible = true;
+                        } else {
+                            ocmVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            getStartTimeText(row, column, value, index){
+                var valText="";
+                if(value){
+                    valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                }
+                return valText;
+            },
+
+
+            getTalkTimeText(row, column, value, index){
+                var valText="";
+                if(value){
+                    valText =  this.formatSeconds(value);
+                }
+                return valText;
+            },
+            formatSeconds(s){
+                var t="";
+                var hour = Math.floor(s/3600);
+                var min = Math.floor(s/60) % 60;
+                var sec = s % 60;
+                if(hour<10){
+                    t+="0";
+                }
+                t+=hour+":";
+                if(min < 10){
+                    t += "0";
+                }
+                t += min + ":";
+                if(sec < 10){
+                    t += "0";
+                }
+                t+=sec;
+                // t += sec.toFixed(2);
+                return t;
+            },
+            switchSoundBtn(id, url, callSource) {
+                // this.audioShow=true;
+                if (callSource == '2') {
+                    // switchSound(id, url);
+                    window.parent.open(url)
+                    return;
+                }
+                if(callSource == '6'){
+                    var httpUrl = url.replace("https","http");
+                    var page = window.open();
+                    var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+httpUrl+"' controls='controls' autoplay></audio></div></body>";
+                    page.document.write(html);
+                    return;
+                }
+                var newWindow = window.open();
+                var param = {};
+                param.id = id;
+                axios.post('/call/callRecord/getRecordFileWithAgent', param)
+                    .then(function (response) {
+                        var data = response.data
+                        if (data.code == '0') {
+                            var url = data.data;
+                            // switchSound(id, url);
+                            newWindow.location.href = url;
+                        } else {
+                            console.error(data);
+                            myCallRecordVm.$message({message: data.msg, type: 'error'});
+                        }
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function () {
+                });
+            },
+            downloadAudio(id,url,callSource){
+                var param = {};
+                param.id=id;
+                axios.post('/call/callRecord/getRecordFileWithAgent', param)
+                    .then(function (response) {
+                        var data = response.data;
+                        if (data.code == '0') {
+                            var url = data.data;
+                            if (url) {
+                                var fileName = url.split('?')[0];
+                                var fileNameArr = fileName.split("/");
+//                                download(url, fileNameArr[fileNameArr.length - 1]);
+                                if(callSource=='3'){
+                                    var decodeUrl = encodeURI(url);
+                                    url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                                }else if(callSource == 7){
+                                    var httpUrl = url.replace("https","http");
+                                    window.parent.open(httpUrl);
+                                    return;
+                                }
+                                var x=new XMLHttpRequest();
+                                x.open("GET", url, true);
+                                x.responseType = 'blob';
+                                x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/\\*' ); }
+                                x.send();
+                            }
+
+                        }else{
+                            console.error(data);
+                            addCustomerVM.$message({message:data.msg,type:'error'});
+                        }
+
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
+                });
+
             },
             initTableData(){
                 var param = {};
@@ -757,7 +981,9 @@
                 param.im = this.form.im;
                 param.sourceFrom = this.form.sourceFrom;
                 param.haveParent = this.form.haveParent;
-
+                param.firstAssignGroupId=this.form.firstAssignGroupId;
+                param.firstAssignGroupType=this.form.firstAssignGroupType;
+                param.ascriptionProject=this.form.ascriptionProject;
 
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
@@ -933,12 +1159,6 @@
                     ocmVM.basic=response.data.data.clueBasic;
                 })
 
-
-
-
-
-
-
                 this.dialogFormVisible = true
             },
             number(){
@@ -1104,6 +1324,7 @@
                 param.im = this.form.im;
                 param.sourceFrom = this.form.sourceFrom;
                 param.haveParent = this.form.haveParent;
+                param.falg = falg;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -1155,6 +1376,9 @@
                             ocmVM.isExport3=false;
                             // 存localstorage
                             localStorage.setItem('distributeExport3','3');
+                        }else if(falg == 4){
+                            ocmVM.isExport4=false;
+                            localStorage.setItem('distributeExport4','4');
                         }else{ // 资源记录
                             ocmVM.isExport2=false;
                             // 存localstorage
@@ -1180,6 +1404,7 @@
                 var storageDistributeExport1 = localStorage.getItem("distributeExport1");
                 var storageDistributeExport2 = localStorage.getItem("distributeExport2");
                 var storageDistributeExport3 = localStorage.getItem("distributeExport3");
+                var storageDistributeExport4 = localStorage.getItem("distributeExport4");
                 if(storageDistributeExport1){
                     this.isExport1=false;
                 }else{
@@ -1195,8 +1420,15 @@
                 }else{
                     this.isExport3=true;
                 }
+                if(storageDistributeExport4){
+                    this.isExport4=false;
+                }else{
+                    this.isExport4=true;
+                }
 
-                if(storageDistributeExport1||storageDistributeExport2||storageDistributeExport3){
+
+
+                if(storageDistributeExport1||storageDistributeExport2||storageDistributeExport3||storageDistributeExport4){
                     this.timer=setInterval(this.timedown,1000)
                 }else{
                     clearInterval(this.timer)

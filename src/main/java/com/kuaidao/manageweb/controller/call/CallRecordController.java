@@ -1,16 +1,17 @@
 package com.kuaidao.manageweb.controller.call;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.common.constant.*;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.manageweb.feign.SysFeign;
+import com.kuaidao.manageweb.feign.agent.AgentServiceWapper;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.user.UserFeignWapper;
+import com.kuaidao.manageweb.util.StreamUtil;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
@@ -21,6 +22,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -54,12 +56,16 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
+import static java.util.Collections.addAll;
+
 @Controller
 @RequestMapping("/call/callRecord")
 public class CallRecordController {
 
     private static Logger logger = LoggerFactory.getLogger(CallRecordController.class);
 
+    @Autowired
+    UserFeignWapper userFeignWapper;
     @Autowired
     CallRecordFeign callRecordFeign;
     @Autowired
@@ -78,6 +84,9 @@ public class CallRecordController {
     private String missedCallBusiness;
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
+    @Autowired
+    private AgentServiceWapper agentServiceWapper;
+
     /**
      * 记录拨打时间
      */
@@ -796,6 +805,43 @@ public class CallRecordController {
         return callRecordFeign.listTmCallReacordByParamsNoPage(myCallRecordReqDTO);
     }
 
+
+    @PostMapping("/listCallReacordNoPage")
+    @ResponseBody
+    JSONResult<List<CallRecordRespDTO>> listCallReacordNoPage(
+            @RequestBody CallRecordReqDTO myCallRecordReqDTO) {
+        JSONResult<List<CallRecordRespDTO>> result = callRecordFeign.listTmCallReacordByParamsNoPage(myCallRecordReqDTO);
+        List<CallRecordRespDTO> collect = agentServiceWapper.listAgentCallRecordByParamsNoPage(myCallRecordReqDTO.getClueId())
+                .stream().map(a -> {
+                    CallRecordRespDTO dto = new CallRecordRespDTO();
+                    BeanUtils.copyProperties(a, dto);
+                    return dto;
+                }).collect(Collectors.toList());
+
+        if(CollectionUtils.isEmpty(collect)){
+            return result;
+        }
+        List<UserInfoDTO> userInfoDTOS = userFeignWapper.listById(
+                collect.parallelStream()
+                        .map(CallRecordRespDTO::getAccountId)
+                        .filter(Objects::nonNull)
+                        .map(a -> Long.valueOf(a)).collect(Collectors.toList())
+        );
+
+        final Map<Long, String> nameMap = StreamUtil.toMap(userInfoDTOS, UserInfoDTO::getId, UserInfoDTO::getUsername);
+        final Map<Long, String> roleNameMap = StreamUtil.toMap(userInfoDTOS, UserInfoDTO::getId, UserInfoDTO::getRoleName);
+        collect.stream().forEach(a->{
+            a.setRoleName(roleNameMap.get(Long.valueOf(a.getAccountId())));
+            a.setAccountName(nameMap.get(Long.valueOf(a.getAccountId())));
+        });
+
+        List<CallRecordRespDTO> data = result.data(new ArrayList<>());
+        data.addAll(collect);
+        result.setData(data);
+        return result;
+    }
+
+
     /**
      *  获取天润通话记录地址 根据 记录Id
      * @param idEntity
@@ -806,6 +852,17 @@ public class CallRecordController {
     public JSONResult<String> getRecordFile(@RequestBody IdEntity idEntity) {
         return callRecordFeign.getRecordFile(idEntity);
     }
+
+    @PostMapping("/getRecordFileWithAgent")
+    @ResponseBody
+    public JSONResult<String> getRecordFileWithAgent(@RequestBody IdEntity idEntity) {
+        JSONResult<String> recordFile = callRecordFeign.getRecordFile(idEntity);
+        if(JSONResult.SUCCESS.equals(recordFile.getCode())&&recordFile.data()==null){
+            return agentServiceWapper.getRecordFile(idEntity);
+        }
+        return recordFile;
+    }
+
 
     /**
      * 根据clueId List 分组统计 拨打次数

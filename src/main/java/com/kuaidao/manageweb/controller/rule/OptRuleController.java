@@ -17,6 +17,7 @@ import javax.validation.Valid;
 
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
+import com.kuaidao.manageweb.feign.organization.OrganitionWapper;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -86,6 +87,9 @@ public class OptRuleController {
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
 
+    @Autowired
+    OrganitionWapper organitionWapper;
+
     /***
      * 优化规则列表页
      *
@@ -109,14 +113,8 @@ public class OptRuleController {
         if (roleList != null && roleList.size() != 0) {
             request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         }
-        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-        orgDto.setOrgType(OrgTypeConstant.DXZ);
-        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        // 电销小组
-        JSONResult<List<OrganizationRespDTO>> dzList =
-                organizationFeignClient.queryOrgByParam(orgDto);
-        List<OrganizationRespDTO> data = dzList.getData();
-        request.setAttribute("queryOrg", data);
+        request.setAttribute("queryOrg", organitionWapper.findAllDXZ());
+        request.setAttribute("hwzOrgs", organitionWapper.findAllHWZ());
         return "rule/optRuleManagerPage";
     }
 

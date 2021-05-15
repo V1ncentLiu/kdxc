@@ -9,6 +9,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kuaidao.manageweb.feign.organization.OrganitionWapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
@@ -85,6 +86,10 @@ public class ExtendClueDistributionedTaskController {
     private CustomFieldFeignClient customFieldFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+
+    @Autowired
+    private OrganitionWapper organitionWapper;
+
     @Autowired
     private MyCustomerFeignClient myCustomerFeignClient;
     @Autowired
@@ -128,6 +133,18 @@ public class ExtendClueDistributionedTaskController {
         queryFieldByUserAndMenuReq.setMenuCode("DistributiveResource");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+
+        List<OrganizationRespDTO> allDXZ = organitionWapper.findAllDXZ();
+        List<OrganizationRespDTO> allHWZ = organitionWapper.findAllHWZ();
+        List<OrganizationRespDTO> orgs = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty(allDXZ)){
+            orgs.addAll(allDXZ);
+        }
+        if(CollectionUtils.isNotEmpty(allHWZ)){
+            orgs.addAll(allHWZ);
+        }
+        request.setAttribute("orgs",orgs);
+
         return "clue/distributiveResource";
     }
 
@@ -813,13 +830,17 @@ public class ExtendClueDistributionedTaskController {
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             String title = "";
             if (queryDto != null && queryDto.getPhtraExport() != null) {
-                if (queryDto.getPhtraExport()) {
-                    title = "话务";
-                } else {
-                    title = "电销";
+                if(queryDto.getFalg()==4){
+                    title = "顾问∕经纪跟进记录";
+                }else{
+                    if (queryDto.getPhtraExport()) {
+                        title = "话务资源沟通记录";
+                    } else {
+                        title = "电销资源沟通记录";
+                    }
                 }
             }
-            String name = title + "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            String name = title +""+ DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
             response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
