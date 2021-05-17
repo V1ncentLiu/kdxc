@@ -206,7 +206,7 @@ public class CallRecordController {
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:telCallRecord");
         queryFieldByRoleAndMenuReq.setId(curLoginUser.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        //TODO 业务线8 删除搜索词列
+        //TODO  业务线8 删除搜索词列
         Integer businessLine = curLoginUser.getBusinessLine();
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
         if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
