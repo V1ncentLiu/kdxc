@@ -866,7 +866,9 @@ public class CallRecordController {
     public JSONResult<String> getRecordFileWithAgent(@RequestBody IdEntity idEntity) {
         JSONResult<String> recordFile = callRecordFeign.getRecordFile(idEntity);
         if(JSONResult.SUCCESS.equals(recordFile.getCode())&&recordFile.data()==null){
-            return agentServiceWapper.getRecordFile(idEntity);
+            JSONResult<String> result = agentServiceWapper.getRecordFile(idEntity);
+            result.setData(result.getData()+"#+#flag");
+            return result;
         }
         return recordFile;
     }
