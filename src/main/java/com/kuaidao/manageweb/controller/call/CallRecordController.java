@@ -201,21 +201,29 @@ public class CallRecordController {
         //电销事业部
         getTeleDeptList(request,roleCode,orgId,curLoginUser.getBusinessLine());
 
-    // 根据角色查询页面字段
+        // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:telCallRecord");
         queryFieldByRoleAndMenuReq.setId(curLoginUser.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        //TODO 业务线8 删除搜索词列
+        Integer businessLine = curLoginUser.getBusinessLine();
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setRoleId(curLoginUser.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setId(curLoginUser.getId());
         queryFieldByUserAndMenuReq.setMenuCode("aggregation:telCallRecord");
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
-        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        List<UserFieldDTO> data1 = queryFieldByUserAndMenu.getData();
+        if(null != businessLine && CollectionUtils.isNotEmpty(data1) && businessLine.equals(8)){
+            data1.removeIf(s -> s.getFieldCode().equals("searchWord"));
+        }
+        request.setAttribute("userFieldList", data1);
         request.setAttribute("userId", curLoginUser.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
         request.setAttribute("orgId", curLoginUser.getOrgId().toString());
