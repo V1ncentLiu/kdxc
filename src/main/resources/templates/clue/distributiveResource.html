@@ -891,18 +891,35 @@
                     .then(function (response) {
                         var data = response.data;
                         if (data.code == '0') {
-                            var url = data.data;
+                            var datas = data.data.split("#+#");
+                            var url = datas[0];
                             if (url) {
-                                var fileName = url.split('?')[0];
-                                var fileNameArr = fileName.split("/");
+                                if(datas.length>1){
+                                    var fileName = url.split('?')[0];
+                                    var fileNameArr = fileName.split("/");
 //                                download(url, fileNameArr[fileNameArr.length - 1]);
-                                if(callSource=='3'){
-                                    var decodeUrl = encodeURI(url);
-                                    url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                                }else if(callSource == 7){
-                                    var httpUrl = url.replace("https","http");
-                                    window.parent.open(httpUrl);
-                                    return;
+                                    if(callSource == 4){
+                                        decodeUrl = encodeURI(fileName.substring(0,fileName.lastIndexOf("/")));
+                                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                                    }else if(callSource=='3'||callSource =='5' || callSource =='8'){
+                                        var decodeUrl = encodeURI(url);
+                                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                                    }else if(callSource == 7|| callSource == 2){
+                                        var httpUrl = url.replace("https","http");
+                                        window.parent.open(httpUrl);
+                                        return;
+                                    }
+                                }else{
+                                    var fileName = url.split('?')[0];
+                                    var fileNameArr = fileName.split("/");
+                                    if(callSource=='3'){
+                                        var decodeUrl = encodeURI(url);
+                                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
+                                    }else if(callSource == 7){
+                                        var httpUrl = url.replace("https","http");
+                                        window.parent.open(httpUrl);
+                                        return;
+                                    }
                                 }
                                 var x=new XMLHttpRequest();
                                 x.open("GET", url, true);
