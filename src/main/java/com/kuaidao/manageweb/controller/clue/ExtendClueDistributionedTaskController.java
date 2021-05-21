@@ -9,6 +9,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.kuaidao.common.constant.*;
 import com.kuaidao.manageweb.feign.organization.OrganitionWapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,12 +36,6 @@ import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
-import com.kuaidao.common.constant.BusinessLineConstant;
-import com.kuaidao.common.constant.ComConstant;
-import com.kuaidao.common.constant.CustomerStatusEnum;
-import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.ClueCommunicateExportModel;
 import com.kuaidao.common.entity.ClueCommunicatePhtraExportModel;
 import com.kuaidao.common.entity.ClueExportModel;
@@ -342,6 +337,13 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss")); // 创建时间
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
+                //如果资源类别为餐盟平台，则将留言重点放入渠道字段
+                String channel = "";
+                if(CategoryConstant.CMPT.equals(taskDTO.getCategory())){
+                    channel = taskDTO.getMessagePoint();
+                }
+                curList.add(channel);
+
                 curList.add(taskDTO.getTypeName()); // 资源类型
                 curList.add(taskDTO.getCategoryName()); // 资源类别
                 curList.add(taskDTO.getProjectName()); // 资源项目
@@ -475,28 +477,28 @@ public class ExtendClueDistributionedTaskController {
                     String consultantIsCall = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getConsultantIsCall())) {
                         consultantIsCall = "是";
-                    } else {
+                    } else if(BusinessConfigConstant.NO.equals(taskDTO.getConsultantIsCall())){
                         consultantIsCall = "否";
                     }
                     // 经纪顾问是否有效
                     String consultantStatus = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getConsultantStatus())) {
                         consultantStatus = "是";
-                    } else {
+                    } else if(BusinessConfigConstant.NO.equals(taskDTO.getConsultantStatus())) {
                         consultantStatus = "否";
                     }
                     // 经纪是否接通
                     String agentIsCall = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getAgentIsCall())) {
                         agentIsCall = "是";
-                    } else {
+                    } else if(BusinessConfigConstant.NO.equals(taskDTO.getAgentIsCall())){
                         agentIsCall = "否";
                     }
                     // 经纪是否有效
                     String agentStatus = "";
                     if (BusinessConfigConstant.YES.equals(taskDTO.getAgentStatus())) {
                         agentStatus = "是";
-                    } else {
+                    } else if(BusinessConfigConstant.NO.equals(taskDTO.getAgentStatus())){
                         agentStatus = "否";
                     }
                     curList.add(consultantIsCall);
