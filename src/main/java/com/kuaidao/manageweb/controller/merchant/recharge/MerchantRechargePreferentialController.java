@@ -1,16 +1,14 @@
 package com.kuaidao.manageweb.controller.merchant.recharge;
 
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.controller.merchant.charge.ClueChargeController;
-import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
 import com.kuaidao.account.dto.recharge.MerchantRechargePreferentialDTO;
 import com.kuaidao.account.dto.recharge.MerchantRechargePreferentialReq;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.feign.merchant.recharge.MerchantRechargePreferentialFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -23,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
 /**
  * Created on: 2019-09-23-9:33
  */
@@ -34,6 +35,8 @@ public class MerchantRechargePreferentialController {
 
     @Autowired
     private MerchantRechargePreferentialFeignClient merchantRechargePreferentialFeignClient;
+    @Autowired
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
 
     /***
      * 线下付款页面
@@ -60,7 +63,9 @@ public class MerchantRechargePreferentialController {
     @RequestMapping("/initRechargePreferential")
     @RequiresPermissions("merchant:merchantRechargePreferential:view")
     public String initRechargePreferential(HttpServletRequest request) {
-
+        // 商家账号
+        List<UserInfoDTO> userList = getMerchantUser(null);
+        request.setAttribute("merchantUserList",userList);
         return "merchant/chargeSetting/chargeSetting";
     }
 
@@ -124,4 +129,20 @@ public class MerchantRechargePreferentialController {
         @RequestBody MerchantRechargePreferentialReq req) {
         return merchantRechargePreferentialFeignClient.findAllRechargePreferential(req);
     }
+
+    /**
+     * 查询商家账号
+     *
+     * @param arrayList
+     * @return
+     */
+    private List<UserInfoDTO> getMerchantUser(List<Integer> arrayList) {
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        userInfoDTO.setStatusList(arrayList);
+        JSONResult<List<UserInfoDTO>> merchantUserList =
+                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        return merchantUserList.getData();
+    }
+
 }
