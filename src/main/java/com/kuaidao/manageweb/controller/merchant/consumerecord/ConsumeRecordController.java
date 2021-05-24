@@ -3,15 +3,17 @@
  */
 package com.kuaidao.manageweb.controller.merchant.consumerecord;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.google.common.collect.Lists;
 import com.kuaidao.account.dto.consume.ConsumeRecordNumDTO;
 import com.kuaidao.account.dto.consume.CountConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordPageParam;
 import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -103,7 +106,7 @@ public class ConsumeRecordController {
 
     /**
      * 消费记录列表(管理端) 导出
-     * 
+     *
      * @param
      * @return
      */
@@ -207,7 +210,7 @@ public class ConsumeRecordController {
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
     public JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant(@RequestBody MerchantConsumeRecordPageParam pageParam,
-            HttpServletRequest request) {
+                                                                         HttpServletRequest request) {
         // 消费记录
         JSONResult<PageBean<CountConsumeRecordDTO>> countListMerchant = merchantConsumeRecordFeignClient.countListMerchant(pageParam);
 
@@ -216,7 +219,7 @@ public class ConsumeRecordController {
 
     /**
      * 单个商家消费记录(管理端) 导出
-     * 
+     *
      * @param
      * @return
      */
@@ -310,6 +313,63 @@ public class ConsumeRecordController {
         JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
 
         return list;
+    }
+
+    /***
+     * 消费明细列表(管理段)
+     *
+     * @return
+     */
+    @PostMapping("/exportList")
+    @RequiresPermissions("merchant:consumeRecord:view")
+    @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.CONSUME_RECORD)
+    public void exportList(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletResponse response) {
+        if (null == pageParam.getUserId()) {
+            pageParam.setMerchantUserList(pageParam.getUserList());
+        }
+        // 消费记录
+        JSONResult<List<MerchantConsumeRecordDTO>> jsonResult =merchantConsumeRecordFeignClient.listDeatilExport(pageParam);
+        List<MerchantConsumeDetailExportModel> merchantConsumeDetailExportModelList = new ArrayList();
+        if (jsonResult.getCode().equals(JSONResult.SUCCESS)) {
+            List<MerchantConsumeRecordDTO> data = jsonResult.getData();
+            if (CollectionUtils.isNotEmpty(data)) {
+                for (int i = 0; i < data.size(); i++) {
+                    MerchantConsumeRecordDTO merchantConsumeRecordDTO = data.get(i);
+                    MerchantConsumeDetailExportModel merchantConsumeDetailExportModel = new MerchantConsumeDetailExportModel();
+                    BeanUtils.copyProperties(merchantConsumeRecordDTO, merchantConsumeDetailExportModel);
+                    int flag =i+1;
+                    merchantConsumeDetailExportModel.setId(flag);
+                    merchantConsumeDetailExportModelList.add(merchantConsumeDetailExportModel);
+                }
+            }
+
+        }
+
+        try (ServletOutputStream outputStream = response.getOutputStream()) {
+            String name = "商家消费明细" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+            response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+            response.setContentType("application/octet-stream");
+            ExcelWriter excelWriter = EasyExcel.write(outputStream, MerchantConsumeDetailExportModel.class).build();
+            if (merchantConsumeDetailExportModelList != null && merchantConsumeDetailExportModelList.size() > 0) {
+                List<List<MerchantConsumeDetailExportModel>> partition = Lists.partition(merchantConsumeDetailExportModelList, 50000);
+                for (int i = 0; i < partition.size(); i++) {
+                    // 每次都要创建writeSheet 这里注意必须指定sheetNo 而且sheetName必须不一样
+                    WriteSheet writeSheet = EasyExcel.writerSheet(i, "Sheet" + i).build();
+                    // 分页去数据库查询数据 这里可以去数据库查询每一页的数据
+                    excelWriter.write(partition.get(i), writeSheet);
+                }
+            } else {
+                // 实例化表单
+                WriteSheet writeSheet = EasyExcel.writerSheet(0, "客户列表").build();
+                excelWriter.write(merchantConsumeDetailExportModelList, writeSheet);
+            }
+
+            excelWriter.finish();
+            outputStream.close();
+        } catch (IOException e) {
+
+        }
     }
 
     /**
