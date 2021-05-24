@@ -12,6 +12,9 @@
         .el-date-picker__time-header {
             display: none;
         }
+        .optimize-download {
+            margin: 15px 0;
+        }
     </style>
 </head>
 
@@ -22,6 +25,9 @@
             <el-breadcrumb-item>充值管理</el-breadcrumb-item>
             <el-breadcrumb-item>商家消费明细</el-breadcrumb-item>
         </el-breadcrumb>
+        <div class="optimize-download" @click="onDownload">
+            <el-button type="warning">导出商家消费明细</el-button>
+        </div>
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
                 <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
@@ -63,7 +69,11 @@
                     </el-table-column>
                     <el-table-column align="center" prop="clueId" label="资源ID" width="200"></el-table-column>
                     <el-table-column align="center" prop="cusName" label="客户姓名" ></el-table-column>
-                    <el-table-column align="center" prop="cusPhone" label="手机号" ></el-table-column>
+                    <el-table-column align="center" prop="cusPhone" label="手机号" >
+                        <template slot-scope="scope">
+                            {{changeCusPhone(scope.row.cusPhone)}}
+                        </template>
+                    </el-table-column>
 
                     <!--                    <el-table-column align="center" prop="clueId" label="资源ID" width="200">-->
 <!--                        <template slot-scope="scope">-->
@@ -72,8 +82,11 @@
 <!--                            </el-button>-->
 <!--                        </template>-->
 <!--                    </el-table-column>-->
-                    <el-table-column align="center" prop="categoryName" label="资源类别" width="200"></el-table-column>
+                    <el-table-column align="center" prop="matchBrandName" label="咨询项目" width="200"></el-table-column>
                     <el-table-column align="center" prop="amount" label="消费金额" width="200"></el-table-column>
+                    <el-table-column align="center" prop="rechargeDeductAmount " label="消费充值餐盟币" width="200"></el-table-column>
+                    <el-table-column align="center" prop="giftDeductAmount " label="消费赠送餐盟币" width="200"></el-table-column>
+                    <el-table-column align="center" prop="financialIncome " label="财务收入" width="200"></el-table-column>
                 </el-table>
                 <table-pagination :pager="pager" @change="searchTable"></table-pagination>
             </el-row>
@@ -114,6 +127,14 @@
             }
         },
         methods: {
+            changeCusPhone(tel) {
+                var reg = /^(\d{3})\d{4}(\d{4})$/;
+                 if(tel) {
+                    return tel.replace(reg, "$1****$2");
+
+                 }
+
+            },
             clickRow(row) {
                 this.$refs.multipleTable.toggleRowSelection(row)
             },
@@ -133,6 +154,19 @@
                     url = '/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId=' + data.clueId;
                 }
                 window.location.href = url;
+            },
+            onDownload() {
+                const params = {
+                    userId: this.form.mainAccountId,
+                    createDateStart: this.form.createDateStart,
+                    createDateEnd: this.form.createDateEnd,
+                    clueId: this.form.clueId,
+                    createDate: this.getQueryString('createDate'),
+                    userList: this.userList
+                }
+                axios.post('/merchant/consumeRecord/exportList', params).then(res => {
+                    this.$message('导出成功')
+                })
             },
             searchTable() {
                 var startTime = this.form.createDateStart;
