@@ -84,9 +84,15 @@
 <!--                    </el-table-column>-->
                     <el-table-column align="center" prop="matchBrandName" label="咨询项目" width="200"></el-table-column>
                     <el-table-column align="center" prop="amount" label="消费金额" width="200"></el-table-column>
-                    <el-table-column align="center" prop="rechargeDeductAmount " label="消费充值餐盟币" width="200"></el-table-column>
-                    <el-table-column align="center" prop="giftDeductAmount " label="消费赠送餐盟币" width="200"></el-table-column>
-                    <el-table-column align="center" prop="financialIncome " label="财务收入" width="200"></el-table-column>
+                    <el-table-column align="center" prop="rechargeDeductAmount" label="消费充值餐盟币" width="200">
+                  
+                    </el-table-column>
+                    <el-table-column align="center" prop="giftDeductAmount" label="消费赠送餐盟币" width="200">
+                    
+                    </el-table-column>
+                    <el-table-column align="center" prop="financialIncome" label="财务收入" width="200">
+                   
+                    </el-table-column>
                 </el-table>
                 <table-pagination :pager="pager" @change="searchTable"></table-pagination>
             </el-row>
@@ -164,8 +170,15 @@
                     createDate: this.getQueryString('createDate'),
                     userList: this.userList
                 }
-                axios.post('/merchant/consumeRecord/exportList', params).then(res => {
+                axios.post('/merchant/consumeRecord/exportList', params).then(response => {
+                    console.log(response)
+                    var data = response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
                     this.$message('导出成功')
+                }).catch((error) => {
+                    console.log(error);
+
                 })
             },
             searchTable() {
@@ -195,6 +208,7 @@
                         if (result.code == 0) {
                             var table = result.data;
                             ocmVM.dataTable = table.data;
+                            console.log(ocmVM.dataTable)
                             ocmVM.pager.total = table.total;
                             ocmVM.pager.currentPage = table.currentPage;
                         } else {

@@ -319,19 +319,23 @@
                     </el-table-column>
                     <el-table-column align="center" prop="time" label="有效时间" width="200">
                         <template slot-scope="scope">
-                            <div>
-                                起: {{scope.row.startTime}}
-                             </div>
-                             <div>
-                                止: {{scope.row.endTime}}
-                             </div>
+                            <div v-if="+scope.row.type === 1">
+                               永久有效
+                            </div>
+                            <div v-else>
+                                <div>起: {{scope.row.startTime}}</div>
+                                <div>
+                                    止: {{scope.row.endTime}}
+                                </div>
+
+                            </div>
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="updateUserName" label="更新人" width="200"></el-table-column>
                     <el-table-column align="center" prop="updateTime" label="更新时间" width="200"></el-table-column>
                     <el-table-column align="center" prop="status" label="状态">
                         <template slot-scope="scope">
-                           {{searchStatus[scope.row.status]}}
+                           {{searchAllStatus[scope.row.status]}}
                         </template>
 
 
@@ -615,7 +619,7 @@
                         label: '已删除'
                     }, {
                         id: 1,
-                        label: '有效中'
+                        label: '生效中'
                     }, {
                         id: 2,
                         label: '未开始'
@@ -624,16 +628,17 @@
                         label: '已过期'
                     }
                 ],
-                searchStatus: {
-                    0: '已删除',
-                    1:'有效中',
-                    2: '未开始',
-                    3: '已过期'
+                searchAllStatus: {
+                    'all': '全部',
+                    '0': '已删除',
+                    '1':'有效中',
+                    '2': '未开始',
+                    '3': '已过期'
 
                 },
                 searchTime: [],
                 searchList: [],
-                searchStatus: '',
+                searchStatus: 1,
                 searchName: '',
                 discountName: '',
                 deleteVisible: false, // 是否显示删除弹框
@@ -686,7 +691,6 @@
             },
             handleSelectionChange(val) {
                this.multipleSelection = val;
-               console.log(val)
             },
             // 校验
             checkActivity(domains = []) {
@@ -776,7 +780,6 @@
                     this.innerVisible = true;
                     this.timer = setInterval(() => {
                         this.colseTime--
-                        console.log(this.colseTime)
                         if (this.colseTime === 0) {
                             this.dialogVisible = false;
                             this.innerVisible = false;
@@ -797,7 +800,6 @@
                 this.formInline.domains.pop()
             },
             addInput() {
-                console.log(this.formInline.length)
                 if (+this.formInline.domains.length > 9) {
                     this.$message('最多可创建10条优惠规则');
                     return
@@ -812,7 +814,20 @@
             },
             // 新建
             newBuild() {
-                console.log(this.selectList)
+                this.input = '';
+                this.formInline = {
+                    domains: [{
+                        recharge: '',
+                        gift: '',
+                        isDisabled: false,
+                        givenAmount: ''
+                    }]
+                };
+                this.isShowPicker = true;
+                this.time = [];
+                this.startPlaceholder = '开始日期';
+                this.endPlaceholder = '结束日期';
+                this.selectList = [];
 
                 this.dialogVisible = true;
 
@@ -832,8 +847,8 @@
             const {
                 activityName, //优惠名称
                 amountList, // 充值优惠
-                startTime, // 开始时间
-                endTime, // 结束时间
+                startTime = '开始日期', // 开始时间
+                endTime = '结束日期', // 结束时间
                 id,  // 商家id
                 type, // 时间是否开始
                 userIds = ''
@@ -850,7 +865,10 @@
                 })
                 this.startPlaceholder = startTime;
                 this.endPlaceholder = endTime;
-                this.time = [startTime, endTime];
+                if(startTime !== '开始日期') {
+                    this.time = [startTime, endTime];
+
+                }
 
                 this.selectList = userIds.split(',');
                 this.dialogVisible = true;
@@ -913,13 +931,26 @@
 
                 }
                 axios.post('/merchant/chargePreFerential/findPageList', params).then(res => {
-                    let data = res.data.data;
+                    let data = res.data.data.data;
+
                     data = data.map((item, index) => {
                         item.index = index;
+                        if (item['startTime']) {
+                        item.startTime = addClueVM.changTimeStatus(item[startTime])
+                        }
+                        if (item['endTime']) {
+                            item.endTime = addClueVM.changTimeStatus(item[endTime])
+                        }
+                        if(item['updateTime']) {
+                            item.updateTime = addClueVM.changTimeStatus(item[endTime])
+
+                        }
+
+         
                         return item;
                     })
 
-                    this.dataTable = data;
+                    addClueVM.dataTable = data;
 
                 })
             },
@@ -954,9 +985,14 @@
                 }, '')
                 return ids;
 
-        }
-
         },
+         //日期数据格式化方法
+        changTimeStatus(cellValue) {
+            return moment(cellValue).format("YYYY-MM-DD");
+        }
+        },
+     
+
        
         // methods: {
         //     number(){
