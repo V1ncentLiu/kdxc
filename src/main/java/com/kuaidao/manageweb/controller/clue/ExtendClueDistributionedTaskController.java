@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.kuaidao.common.constant.*;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.manageweb.feign.organization.OrganitionWapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,11 +37,6 @@ import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.businessconfig.constant.BusinessConfigConstant;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
-import com.kuaidao.common.entity.ClueCommunicateExportModel;
-import com.kuaidao.common.entity.ClueCommunicatePhtraExportModel;
-import com.kuaidao.common.entity.ClueExportModel;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -700,35 +696,41 @@ public class ExtendClueDistributionedTaskController {
 
                 // 首次响应间隔
                 curList.add(taskDTO.getFirstResponseInterval());
-                // 这两个要进行转换
-                String isCall = null;
-                Integer call;
-                if (queryDto.getPhtraExport()) {
-                    call = taskDTO.getPhtraIsCall();
-                } else {
-                    call = taskDTO.getIsCall();
+                if(queryDto.getFalg()==4){
+                    //转换经纪和顾问接通和有效状态
+                    curList.add(transTrueAndFalse(taskDTO.getAgentIsCall()));
+                    curList.add(transTrueAndFalse(taskDTO.getAgentStatus()));
+                }else{
+                    // 这两个要进行转换
+                    String isCall = null;
+                    Integer call;
+                    if (queryDto.getPhtraExport()) {
+                        call = taskDTO.getPhtraIsCall();
+                    } else {
+                        call = taskDTO.getIsCall();
+                    }
+                    if (null != call && BusinessConfigConstant.YES.equals(call)) {
+                        isCall = "是";
+                    } else {
+                        isCall = "否";
+                    }
+                    // 是否接通
+                    curList.add(isCall);
+                    String statusStr = null;
+                    Integer status;
+                    if (queryDto.getPhtraExport()) {
+                        status = taskDTO.getPhstatus();
+                    } else {
+                        status = taskDTO.getStatus();
+                    }
+                    if (null != status && BusinessConfigConstant.YES.equals(status)) {
+                        statusStr = "是";
+                    } else {
+                        statusStr = "否";
+                    }
+                    // 是否有效
+                    curList.add(statusStr);
                 }
-                if (null != call && BusinessConfigConstant.YES.equals(call)) {
-                    isCall = "是";
-                } else {
-                    isCall = "否";
-                }
-                // 是否接通
-                curList.add(isCall);
-                String statusStr = null;
-                Integer status;
-                if (queryDto.getPhtraExport()) {
-                    status = taskDTO.getPhstatus();
-                } else {
-                    status = taskDTO.getStatus();
-                }
-                if (null != status && BusinessConfigConstant.YES.equals(status)) {
-                    statusStr = "是";
-                } else {
-                    statusStr = "否";
-                }
-                // 是否有效
-                curList.add(statusStr);
                 if (queryDto.getPhtraExport()) {
                     // 第一次拨打时间
                     curList.add(DateUtil.convert2String(taskDTO.getPhtraFirstCallTime(), "yyyy/MM/dd HH:mm:ss"));
@@ -826,6 +828,12 @@ public class ExtendClueDistributionedTaskController {
                     // 现负责经纪人
                     curList.add(taskDTO.getAgentNames());
                 }
+
+                if(queryDto.getFalg()==4){
+                    curList.add(transTrueAndFalse(taskDTO.getConsultantIsCall()));
+                    curList.add(transTrueAndFalse(taskDTO.getConsultantStatus()));
+                }
+
                 dataList.add(curList);
             }
         }
@@ -847,10 +855,15 @@ public class ExtendClueDistributionedTaskController {
             response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
             response.setContentType("application/octet-stream");
             ExcelWriter excelWriter = null;
-            if (queryDto.getPhtraExport()) {
-                excelWriter = EasyExcel.write(outputStream, ClueCommunicatePhtraExportModel.class).build();
-            } else {
-                excelWriter = EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+            if(queryDto.getFalg()==4){
+                excelWriter = EasyExcel.write(outputStream, ClueCommunicateAgentExportModel.class).build();
+            }else{
+                if (queryDto.getPhtraExport()) {
+                    excelWriter = EasyExcel.write(outputStream, ClueCommunicatePhtraExportModel.class).build();
+                } else {
+                    excelWriter = EasyExcel.write(outputStream, ClueCommunicateExportModel.class).build();
+                }
+
             }
 
             if (CollectionUtils.isNotEmpty(dataList)) {
@@ -869,6 +882,18 @@ public class ExtendClueDistributionedTaskController {
             excelWriter.finish();
         }
     }
+
+    private String transTrueAndFalse(Integer i){
+        if (i==null) {
+            return "";
+        }
+        if(i==BusinessConfigConstant.YES){
+            return "是";
+        }else{
+            return "否";
+        }
+    }
+
 
     /**
      * 查询所有资源专员
