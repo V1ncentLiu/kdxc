@@ -13,7 +13,6 @@ import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -102,7 +101,7 @@ public class MerchantChargePreferentialController {
         if(CollectionUtils.isEmpty(merchantChargePreferentialReq.getAmountReqList())){
             return new JSONResult<Boolean>().fail("-1","请填写充值优惠！");
         }
-        if(StringUtils.isBlank(merchantChargePreferentialReq.getUserIds())){
+        if(CollectionUtils.isEmpty(merchantChargePreferentialReq.getUserIdList())){
             return new JSONResult<Boolean>().fail("-1","请选择商户！");
         }
         List<Integer> collect = merchantChargePreferentialReq.getAmountReqList().stream().map(MerchantChargePreferentialAmountReq::getRechargeAmount).distinct().collect(Collectors.toList());
