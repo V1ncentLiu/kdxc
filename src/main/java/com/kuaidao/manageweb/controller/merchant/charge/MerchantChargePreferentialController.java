@@ -48,7 +48,7 @@ public class MerchantChargePreferentialController {
         // 管理端查询申请状态为已申请和已开具的发票记录
         log.info("查询客户管理申请列表参数" + merchantChargePreferentialReq.toString());
         if(merchantChargePreferentialReq.getEndTime()!=null){
-          merchantChargePreferentialReq.setEndTime( new Date( merchantChargePreferentialReq.getEndTime().getTime()+86439));
+          merchantChargePreferentialReq.setEndTime( new Date( merchantChargePreferentialReq.getEndTime().getTime()+86399000));
         }
         JSONResult<PageBean<MerchantChargePreferentialDto>> jsonResult = merchantChargePreferentialFeignClient.findPageList(merchantChargePreferentialReq);
         return jsonResult;
