@@ -931,20 +931,21 @@
             },
             getPageList() {
                 const {currentPage, pageSize} = this.pager;
-                const userId = this.getIds(this.searchList);
+                const userIdList = this.getIds(this.searchList);
                 const startTime = this.searchTime[0];
                 const endTime = this.searchTime[1];
                 const params = {
                     activityName: this.searchName,
-                    userId,
+                    userIdList,
                     startTime,
                     endTime,
                     pageSize: pageSize,
-                    pageNum: currentPage
+                    pageNum: currentPage,
+                    status: this.searchStatus
 
                 }
-                if(status !== 'all') {
-                    params.status = this.searchStatus;
+                if(status === 'all') {
+                    params.status = '';
                 }
                 axios.post('/merchant/chargePreFerential/findPageList', params).then(res => {
                     let data = res.data.data.data;
