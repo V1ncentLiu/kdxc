@@ -320,10 +320,10 @@ public class ConsumeRecordController {
      *
      * @return
      */
-    @PostMapping("/exportList")
+    @RequestMapping("/exportList")
     @RequiresPermissions("merchant:consumeRecord:view")
     @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.CONSUME_RECORD)
-    public void exportList(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletResponse response) {
+    public void exportList(MerchantConsumeRecordPageParam pageParam, HttpServletResponse response) {
         if (null == pageParam.getUserId()) {
             pageParam.setMerchantUserList(pageParam.getUserList());
         }

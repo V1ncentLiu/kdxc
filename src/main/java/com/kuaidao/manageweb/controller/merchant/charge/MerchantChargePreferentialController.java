@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.merchant.charge;
 
+import com.kuaidao.account.dto.recharge.MerchantChargePreferentialAmountReq;
 import com.kuaidao.account.dto.recharge.MerchantChargePreferentialDto;
 import com.kuaidao.account.dto.recharge.MerchantChargePreferentialReq;
 import com.kuaidao.common.constant.MerchantChargeStatusEnum;
@@ -11,7 +12,8 @@ import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,6 +47,9 @@ public class MerchantChargePreferentialController {
     public JSONResult<PageBean<MerchantChargePreferentialDto>> findPageList(@RequestBody MerchantChargePreferentialReq merchantChargePreferentialReq) {
         // 管理端查询申请状态为已申请和已开具的发票记录
         log.info("查询客户管理申请列表参数" + merchantChargePreferentialReq.toString());
+        if(merchantChargePreferentialReq.getEndTime()!=null){
+          merchantChargePreferentialReq.setEndTime( new Date( merchantChargePreferentialReq.getEndTime().getTime()+86439));
+        }
         JSONResult<PageBean<MerchantChargePreferentialDto>> jsonResult = merchantChargePreferentialFeignClient.findPageList(merchantChargePreferentialReq);
         return jsonResult;
     }
@@ -60,11 +65,19 @@ public class MerchantChargePreferentialController {
         // 管理端查询申请状态为已申请和已开具的发票记录
         log.info("新增修改充值会优惠" + merchantChargePreferentialReq.toString());
         Date date = new Date();
+
+        JSONResult<Boolean> jsonResult1 = checkParam(merchantChargePreferentialReq);
+        if(!jsonResult1.getCode().equals(JSONResult.SUCCESS)){
+            return  jsonResult1;
+        }
         //判断是否全部
-        if(merchantChargePreferentialReq.getUserIds().equals("all")){
-            List<UserInfoDTO> merchantUserList = getMerchantUser(null);
-            String userIds = String.join(",", ListUtils.emptyIfNull(merchantUserList).stream().map(UserInfoDTO::getId).map(String::valueOf).collect(Collectors.toList()));
-            merchantChargePreferentialReq.setUserIds(userIds);
+//        if(merchantChargePreferentialReq.getUserIds().equals("all")){
+//            List<UserInfoDTO> merchantUserList = getMerchantUser(null);
+//            String userIds = String.join(",", ListUtils.emptyIfNull(merchantUserList).stream().map(UserInfoDTO::getId).map(String::valueOf).collect(Collectors.toList()));
+//            merchantChargePreferentialReq.setUserIds(userIds);
+//        }
+        if(merchantChargePreferentialReq.getEndTime()!=null){
+            merchantChargePreferentialReq.setEndTime( new Date( merchantChargePreferentialReq.getEndTime().getTime()+86399000));
         }
         if(merchantChargePreferentialReq.getId()!=null){
             merchantChargePreferentialReq.setUpdateTime(date);
@@ -83,6 +96,20 @@ public class MerchantChargePreferentialController {
         }
         JSONResult<Boolean> jsonResult = merchantChargePreferentialFeignClient.addOrUpdate(merchantChargePreferentialReq);
         return jsonResult;
+    }
+
+    private JSONResult<Boolean> checkParam(MerchantChargePreferentialReq merchantChargePreferentialReq) {
+        if(CollectionUtils.isEmpty(merchantChargePreferentialReq.getAmountReqList())){
+            return new JSONResult<Boolean>().fail("-1","请填写充值优惠！");
+        }
+        if(StringUtils.isBlank(merchantChargePreferentialReq.getUserIds())){
+            return new JSONResult<Boolean>().fail("-1","请选择商户！");
+        }
+        List<Integer> collect = merchantChargePreferentialReq.getAmountReqList().stream().map(MerchantChargePreferentialAmountReq::getRechargeAmount).distinct().collect(Collectors.toList());
+        if(merchantChargePreferentialReq.getAmountReqList().size()!=collect.size()){
+            return new JSONResult<Boolean>().fail("-1","存在重复优惠！");
+        }
+        return new JSONResult<Boolean>().success(null);
     }
 
     /**
