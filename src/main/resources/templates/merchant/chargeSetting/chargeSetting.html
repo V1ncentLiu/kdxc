@@ -162,7 +162,7 @@
             height: 40px;
             display: flex;
             justify-content: center;
-            /* align-items: center; */
+            align-items: center;
             background: #eef8e9;
             border-radius: 5px;
             top: 10%;
@@ -749,15 +749,15 @@
                     return
 
                 }
-                const userIds = this.selectList.reduce((mome, item) => {
-                    mome = item + ',' + mome
-                    return mome;
-                }, '')
+                // const userIds = this.selectList.reduce((mome, item) => {
+                //     mome = item + ',' + mome
+                //     return mome;
+                // }, '')
 
                 const params = {
                     type: 1,
                     activityName: this.input,
-                    userIds,
+                    userIdList: this.selectList,
                     amountReqList,
 
                 }
@@ -865,8 +865,9 @@
                 endTime = '结束日期', // 结束时间
                 id,  // 商家id
                 type, // 时间是否开始
-                userIds = ''
+                userIdList = []
             } = this.multipleSelection[0];
+            console.log(this.multipleSelection[0])
                 this.title = '编辑优惠';
                 this.input = activityName;
                 this.isShowPicker = +type === 1;
@@ -885,7 +886,7 @@
 
                 }
 
-                this.selectList = userIds.split(',');
+                this.selectList = userIdList;
                 this.dialogVisible = true;
             },
             // 删除确定
@@ -931,7 +932,7 @@
             },
             getPageList() {
                 const {currentPage, pageSize} = this.pager;
-                const userIdList = this.getIds(this.searchList);
+                const userIdList = this.searchList;
                 const startTime = this.searchTime[0];
                 const endTime = this.searchTime[1];
                 const params = {
@@ -948,7 +949,7 @@
                     params.status = '';
                 }
                 axios.post('/merchant/chargePreFerential/findPageList', params).then(res => {
-                    let data = res.data.data.data;
+                    let data = (res.data && res.data.data && res.data.data.data) || [];
 
                     data = data.map((item, index) => {
                         item.index = index;
