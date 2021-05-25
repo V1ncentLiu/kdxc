@@ -162,9 +162,10 @@
             height: 40px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            /* align-items: center; */
             background: #eef8e9;
             border-radius: 5px;
+            top: 10%;
 
         }
 
@@ -332,7 +333,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column align="center" prop="updateUserName" label="更新人" width="200"></el-table-column>
-                    <el-table-column align="center" prop="updateTime" label="更新时间" width="200"></el-table-column>
+                    <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat" width="200"></el-table-column>
                     <el-table-column align="center" prop="status" label="状态">
                         <template slot-scope="scope">
                            {{searchAllStatus[scope.row.status]}}
@@ -433,7 +434,7 @@
     
                         <span slot="footer" class="dialog-footer">
                             <el-button @click="onClose" class="button-close">取 消</el-button>
-                            <el-button type="primary" @click="onSubmit">提 交</el-button>
+                            <el-button type="primary" @click="onSubmit":loading="loading" >提 交</el-button>
                         </span>
     
                     </el-dialog>
@@ -602,6 +603,8 @@
         el: '#resourceApply',
         data: function () {
             return {
+                id: '',
+                loading: false,
                 multipleSelection: [],//选择行
                 pager:{
                   total: 0,
@@ -758,6 +761,10 @@
                     amountReqList,
 
                 }
+                if (this.id) {
+                    params.id = this.id;
+
+                }
                 if (!this.isShowPicker) {
                     if (!this.time.length) {
                         this.$message('请选择开始时间和结束时间');
@@ -774,16 +781,21 @@
                     params.startTime = startTime;
                     params.endTime = endTime;
                 }
+                this.loading = true;
 
 
                 axios.post('/merchant/chargePreFerential/addOrUpdate', params).then(res => {
-                    this.innerVisible = true;
-                    this.timer = setInterval(() => {
-                        this.colseTime--
-                        if (this.colseTime === 0) {
-                            this.dialogVisible = false;
-                            this.innerVisible = false;
-                            clearInterval(this.timer)
+                    addClueVM.innerVisible = true;
+                    addClueVM.loading = false;
+                    addClueVM.getPageList();
+                    addClueVM.multipleSelection = [];
+
+                    addClueVM.timer = setInterval(() => {
+                        addClueVM.colseTime--
+                        if (addClueVM.colseTime === 0) {
+                            addClueVM.dialogVisible = false;
+                            addClueVM.innerVisible = false;
+                            clearInterval(addClueVM.timer)
                         }
 
                     }, 1000)
@@ -823,18 +835,20 @@
                         givenAmount: ''
                     }]
                 };
+                this.id = '';
                 this.isShowPicker = true;
                 this.time = [];
                 this.startPlaceholder = '开始日期';
                 this.endPlaceholder = '结束日期';
                 this.selectList = [];
+                this.colseTime = 3;
 
                 this.dialogVisible = true;
 
             },
             // 编辑
             editBuild() {
-
+                this.colseTime = 3;
                 if(this.multipleSelection.length > 1) {
                     this.$message('只允许选择一条数据进行编辑');
                     return
@@ -865,6 +879,7 @@
                 })
                 this.startPlaceholder = startTime;
                 this.endPlaceholder = endTime;
+                this.id = id;
                 if(startTime !== '开始日期') {
                     this.time = [startTime, endTime];
 
@@ -919,16 +934,17 @@
                 const userId = this.getIds(this.searchList);
                 const startTime = this.searchTime[0];
                 const endTime = this.searchTime[1];
-                const status = this.searchStatus;
                 const params = {
                     activityName: this.searchName,
                     userId,
                     startTime,
                     endTime,
-                    status,
                     pageSize: pageSize,
                     pageNum: currentPage
 
+                }
+                if(status !== 'all') {
+                    params.status = this.searchStatus;
                 }
                 axios.post('/merchant/chargePreFerential/findPageList', params).then(res => {
                     let data = res.data.data.data;
@@ -936,15 +952,15 @@
                     data = data.map((item, index) => {
                         item.index = index;
                         if (item['startTime']) {
-                        item.startTime = addClueVM.changTimeStatus(item[startTime])
+                        item.startTime = addClueVM.changTimeStatus(item['startTime'])
                         }
                         if (item['endTime']) {
-                            item.endTime = addClueVM.changTimeStatus(item[endTime])
+                            item.endTime = addClueVM.changTimeStatus(item['endTime'])
                         }
-                        if(item['updateTime']) {
-                            item.updateTime = addClueVM.changTimeStatus(item[endTime])
+                        // if(item['updateTime']) {
+                        //     item.updateTime = addClueVM.changTimeStatus(item['updateTime'])
 
-                        }
+                        // }
 
          
                         return item;
@@ -989,7 +1005,14 @@
          //日期数据格式化方法
         changTimeStatus(cellValue) {
             return moment(cellValue).format("YYYY-MM-DD");
-        }
+        },
+          //日期数据格式化方法
+          dateFormat(row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
         },
      
 
