@@ -700,8 +700,6 @@ public class ExtendClueDistributionedTaskController {
                     //转换经纪和顾问接通和有效状态
                     curList.add(transTrueAndFalse(taskDTO.getAgentIsCall()));
                     curList.add(transTrueAndFalse(taskDTO.getAgentStatus()));
-                    curList.add(transTrueAndFalse(taskDTO.getConsultantIsCall()));
-                    curList.add(transTrueAndFalse(taskDTO.getConsultantStatus()));
                 }else{
                     // 这两个要进行转换
                     String isCall = null;
@@ -830,6 +828,12 @@ public class ExtendClueDistributionedTaskController {
                     // 现负责经纪人
                     curList.add(taskDTO.getAgentNames());
                 }
+
+                if(queryDto.getFalg()==4){
+                    curList.add(transTrueAndFalse(taskDTO.getConsultantIsCall()));
+                    curList.add(transTrueAndFalse(taskDTO.getConsultantStatus()));
+                }
+
                 dataList.add(curList);
             }
         }
