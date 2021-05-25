@@ -320,10 +320,10 @@ public class ConsumeRecordController {
      *
      * @return
      */
-    @RequestMapping("/exportList")
+    @PostMapping("/exportList")
     @RequiresPermissions("merchant:consumeRecord:view")
     @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.CONSUME_RECORD)
-    public void exportList(MerchantConsumeRecordPageParam pageParam, HttpServletResponse response) {
+    public void exportList(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletResponse response) {
         if (null == pageParam.getUserId()) {
             pageParam.setMerchantUserList(pageParam.getUserList());
         }
@@ -361,12 +361,11 @@ public class ConsumeRecordController {
                 }
             } else {
                 // 实例化表单
-                WriteSheet writeSheet = EasyExcel.writerSheet(0, "客户列表").build();
+                WriteSheet writeSheet = EasyExcel.writerSheet(0, "商家消费明细").build();
                 excelWriter.write(merchantConsumeDetailExportModelList, writeSheet);
             }
 
             excelWriter.finish();
-            outputStream.close();
         } catch (IOException e) {
 
         }
