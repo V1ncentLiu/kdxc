@@ -371,17 +371,12 @@
                                 <div class="dialog-el-form">
                                     <el-form :inline="true" :model="formInline" class="demo-form-inline">
                                         <div v-for="(item, index) in formInline.domains" :key="index" class="dialog-form">
-                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'"
-                                                :rules="[
-                                          { required: true, message: '充值信息不能为空', trigger: 'blur' },
-                                          { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }]">
+                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'">
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
                                                     v-model="item.recharge" placeholder="" @input="getCount(item.recharge)"
                                                     :disabled="item.isDisabled"></el-input>
                                             </el-form-item>
-                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'" :rules="[
-                                         { required: true, message: '赠信息不能为空', trigger: 'blur' },
-                                         { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }]">
+                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'" >
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
                                                     v-model="item.gift" placeholder="" @input="getCount(item.gift)"
                                                     :disabled="item.isDisabled"></el-input>
@@ -465,13 +460,13 @@
 
 
         </div>
-        <div class="content-message" v-if="innerVisible">
+        <!-- <div class="content-message" v-if="innerVisible">
             <span class="message-icon">
                 <i class="el-icon-success"></i>
             </span>
             <span class="message-title">提交成功 {{colseTime}}s</span>
 
-        </div>
+        </div> -->
     </div>
 </body>
 <!-- import Vue before Element -->
@@ -633,10 +628,7 @@
                     return
 
                 }
-                // const userIds = this.selectList.reduce((mome, item) => {
-                //     mome = item + ',' + mome
-                //     return mome;
-                // }, '')
+
 
                 const params = {
                     type: 1,
@@ -673,16 +665,21 @@
                     addClueVM.loading = false;
                     addClueVM.getPageList();
                     addClueVM.multipleSelection = [];
+                    addClueVM.dialogVisible = false;
+                    this.$message({
+                        message: '提交成功',
+                        type: 'success'
+                    })
 
-                    addClueVM.timer = setInterval(() => {
-                        addClueVM.colseTime--
-                        if (addClueVM.colseTime === 0) {
-                            addClueVM.dialogVisible = false;
-                            addClueVM.innerVisible = false;
-                            clearInterval(addClueVM.timer)
-                        }
+                    // addClueVM.timer = setInterval(() => {
+                    //     addClueVM.colseTime--
+                    //     if (addClueVM.colseTime === 0) {
+                    //         addClueVM.dialogVisible = false;
+                    //         addClueVM.innerVisible = false;
+                    //         clearInterval(addClueVM.timer)
+                    //     }
 
-                    }, 1000)
+                    // }, 1000)
 
                 }).catch(err => {
                     console.log(err)
@@ -911,210 +908,7 @@
                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
         },
-     
 
-       
-        // methods: {
-        //     number(){
-        //         var domains=this.dynamicValidateForm.domains;
-        //         for(var i=0;i<domains.length;i++){
-        //         　　this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace(/[^\.\d]/g,'');
-        //             this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace('.','');
-        //             this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace(/[^\.\d]/g,'');
-        //             this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace('.','');
-        //         }
-        //     },
-        //     formSigningAmountPerformance() {
-        //         var domains=this.dynamicValidateForm.domains;
-        //         for(var i=0;i<domains.length;i++){
-        //             var aone = parseFloat(domains[i].rechargeAmount);
-        //             var atwo = parseFloat(domains[i].givenAmount);
-        //             if (isNaN(aone)) aone = 0
-        //             if (isNaN(atwo)) atwo = 0
-        //             this.dynamicValidateForm.domains[i].totalAmount = (aone + atwo) + ""
-        //         }                
-        //     },
-        //     submitForm(formName) {
-        //         this.$refs[formName].validate((valid) => {
-        //             if (valid) {
-        //                 var param={};
-        //                 // var param=[];
-        //                 // var paramObj={};
-        //                 // paramObj.rechargeAmount = "200";   
-        //                 // paramObj.givenAmount = "10";   
-        //                 // paramObj.totalAmount = "210";
-        //                 // var paramObj1={};
-        //                 // paramObj1.rechargeAmount = "100";   
-        //                 // paramObj1.givenAmount = "20";   
-        //                 // paramObj1.totalAmount = "120";
-        //                 // param.push(paramObj,paramObj1)
-
-        //                 var url="";
-        //                 var hiddenVal=$("#hiddenVal").val();
-        //                 var domains = this.dynamicValidateForm.domains;
-        //                 if(hiddenVal=="1"){
-        //                     var filterArr = domains.filter((item) => !item.id);
-        //                     param = filterArr
-        //                     console.log(param)
-        //                     url="/merchant/merchantRechargePreferential/saveBatchRechargePreferential" //批量新增保存
-        //                 }else{
-        //                     param = domains 
-        //                     console.log(param)
-        //                     url="/merchant/merchantRechargePreferential/updateBatchRechargePreferential" //批量修改保存
-        //                 } 
-        //                 console.log(url)                  
-        //                 console.log(param)                  
-
-        //                 axios.post(url,param).then(function (response) {
-        //                       console.log(response);
-        //                     if(null !==response && response.data !=null && response.data.code=='0'){
-        //                         window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-        //                     }else{
-        //                         addClueVM.$message({
-        //                              message: response.data.msg,
-        //                              type: 'warning'
-        //                         });
-        //                         return ;
-        //                      } 
-        //                 }).catch(function (error) {
-        //                     console.log(error);
-        //                 })
-        //                 .then(function () {
-        //                     // always executed
-        //                 });  
-
-        //             } else {
-        //                 console.log('error submit!!');
-        //             return false;
-        //             }
-        //         });
-        //     },
-        //     resetForm(formName) {
-        //         this.$refs[formName].resetFields();
-        //     },
-        //     cancel(){
-        //         window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-        //     },
-        //     removeDomain(item) {    
-        //         this.$refs['dynamicValidateForm'].clearValidate();            
-        //         var index = this.dynamicValidateForm.domains.indexOf(item)
-        //         if(this.dynamicValidateForm.domains[index].id){//true为不可编辑                    
-        //             // 条件改为根据后台返回的标识判断是否可编辑
-        //             this.$confirm("确定要删除吗?", '提示', {
-        //                 confirmButtonText: '确定',
-        //                 cancelButtonText: '取消',
-        //                 type: 'warning'
-        //             }).then(() => {
-        //                 // 查询 table 需要数据
-        //                 var param = {};
-        //                 param.id=item.id;
-        //                 axios.post('/merchant/merchantRechargePreferential/deleteBatchRechargePreferential',param).then(function (response) {
-        //                       console.log(response);
-        //                     if(null !==response && response.data !=null && response.data.code=='0'){
-        //                         // window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-        //                         if(index !== -1) {
-        //                             addClueVM.dynamicValidateForm.domains.splice(index, 1)
-        //                         }
-        //                         if(addClueVM.dynamicValidateForm.domains.length==0){//如果编辑的删除没了，则新建按钮可点击,编辑按钮不可点击
-        //                             addClueVM.addIsDisabled=false;
-        //                             addClueVM.editIsDisabled=true;
-        //                         }
-        //                         // if (addClueVM.$refs['dynamicValidateForm']!=undefined) {
-        //                         //     addClueVM.$refs['dynamicValidateForm'].resetFields();
-        //                         // }
-        //                     }else{
-        //                         addClueVM.$message({
-        //                              message: response.data.msg,
-        //                              type: 'warning'
-        //                         });
-        //                         return ;
-        //                      } 
-        //                 }).catch(function (error) {
-        //                     console.log(error);
-        //                 })
-        //                 .then(function () {
-        //                     // always executed
-        //                 });  
-
-
-        //             }).catch(() => {
-        //                 this.$message({
-        //                     type: 'info',
-        //                     message: '已取消删除'
-        //                 });          
-        //             });
-        //         }else{
-        //             if(index !== -1) {
-        //                 this.dynamicValidateForm.domains.splice(index, 1)
-        //             }
-        //             if(!this.dynamicValidateForm.domains[index].isShowDel){//如果新增的删除没了，则编辑按钮可点击
-        //                 this.editIsDisabled=false;
-        //             }
-        //         }
-        //     },
-        //     addDomain() {
-        //         $("#hiddenVal").val("1");
-        //         this.editIsDisabled=true;//新增时候禁止编辑                
-        //         this.dynamicValidateForm.domains.unshift({
-        //             rechargeAmount: '',
-        //             givenAmount: '',
-        //             totalAmount: '',
-        //             isDisabled:false,
-        //             isShowDel:true
-        //         });
-        //     },
-        //     editDomain() {
-        //         this.addIsDisabled=true;//编辑时候禁止新增 
-        //         $("#hiddenVal").val("2");
-        //         var param ={};
-        //         axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
-        //         .then(function (response) {
-        //             console.log(response)
-        //             var result =  response.data;
-        //             if(result.code=="0"){
-        //                 addClueVM.dynamicValidateForm.domains=result.data
-        //                 for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
-        //                     addClueVM.dynamicValidateForm.domains[i].isDisabled=false;
-        //                     addClueVM.dynamicValidateForm.domains[i].isShowDel=true;
-        //                 }
-        //             }else{
-        //                 addClueVM.$message.error(result.msg);
-        //             }
-        //         })
-        //         .catch(function (error) {
-        //              console.log(error);
-        //         }); 
-        //     },
-        //     searchTable() {
-        //         var param ={};
-        //         axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
-        //         .then(function (response) {
-        //             console.log(response)
-        //             var result =  response.data;
-        //             if(result.code=="0"){
-        //                 addClueVM.dynamicValidateForm.domains=result.data
-        //                 for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
-        //                     addClueVM.dynamicValidateForm.domains[i].isDisabled=true;
-        //                 }
-        //                 console.log(result.data)
-        //                 if(result.data&&result.data.length>0){
-        //                     addClueVM.editIsDisabled=false;
-        //                 }
-        //             }else{
-        //                 addClueVM.$message.error(result.msg);
-        //             }
-        //         })
-        //         .catch(function (error) {
-        //              console.log(error);
-        //         });                
-        //     },
-        // },
-        // created(){
-        //     //var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        //     //if(localVal){this.pager.pageSize = localVal;}
-        //     // console.info("create method");
-        //     this.searchTable();
-        // },
         mounted() {
             document.getElementById('resourceApply').style.display = 'block';
             this.getPageList()
