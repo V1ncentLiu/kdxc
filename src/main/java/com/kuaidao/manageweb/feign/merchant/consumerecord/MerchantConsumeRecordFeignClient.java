@@ -1,18 +1,17 @@
 package com.kuaidao.manageweb.feign.merchant.consumerecord;
 
 import com.kuaidao.account.dto.consume.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import feign.hystrix.FallbackFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -87,6 +86,8 @@ public interface MerchantConsumeRecordFeignClient {
     @PostMapping("/exportCompanyConsumeRecord")
     public JSONResult<List<CompanyConsumeRecordDTO>> exportCompanyConsumeRecord(@RequestBody CompanyConsumeRecordReq req);
 
+    @PostMapping("/listDeatilExport")
+    public JSONResult<List<MerchantConsumeRecordDTO>> listDeatilExport(@RequestBody MerchantConsumeRecordPageParam pageParam) ;
 
     @Component
     static class HystrixClientFallback
@@ -143,6 +144,11 @@ public interface MerchantConsumeRecordFeignClient {
                 @Override
                 public JSONResult<List<CompanyConsumeRecordDTO>> exportCompanyConsumeRecord(CompanyConsumeRecordReq req) {
                     return fallBackError("导出分公司消费记录");
+                }
+
+                @Override
+                public JSONResult<List<MerchantConsumeRecordDTO>> listDeatilExport(MerchantConsumeRecordPageParam pageParam) {
+                    return fallBackError("导出明细");
                 }
 
             };

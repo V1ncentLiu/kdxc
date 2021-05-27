@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <meta charset="UTF-8">
@@ -7,296 +9,911 @@
     <link rel="stylesheet" href="css/element-ui.css">
     <link rel="stylesheet" href="css/base.css">
     <style>
-        html,body{background: #eff3f6}
-        .titleLine{border-bottom: 1px solid #ecedf2;font-size: 16px;padding-bottom: 10px;padding-left: 10px;margin-bottom: 10px;}
-        .headerBox{width: 150px;height: 150px;border-radius: 50%;overflow: hidden;margin-bottom: 10px;border:1px solid #ecedf2;}
-        .headerBox img{width: 150px;height: 150px;border-radius: 50%;}
-        .changeHeaderImg{width: 150px;}
+        html,
+        body {
+            background: #eff3f6
+        }
+        .content-box {
+            background-color: #fff;
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .titleLine {
+            border-bottom: 1px solid #ecedf2;
+            font-size: 16px;
+            padding-bottom: 10px;
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+
+        .headerBox {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 1px solid #ecedf2;
+        }
+
+        .headerBox img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+        }
+
+        .changeHeaderImg {
+            width: 150px;
+        }
+
+        .content {
+            margin-top: 20px;
+        }
+
+        .dialog-box-operate {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .switch-box {
+            height: 30px;
+        }
+
+        .activity {
+            align-items: start;
+        }
+
+        .dialog-box-operate .dialog-discount {
+            width: 300px;
+        }
+
+        .dialog-box-operate .dialog-discount .el-input {
+            /* width: 50%; */
+        }
+
+        .dialog-box-operate .dialog-box-name {
+            margin-right: 15px;
+        }
+
+        .dialog-box-operate .name {
+            margin-top: 7px;
+        }
+
+        .dialog-form {
+            display: flex;
+        }
+        .sign {
+            color: red;
+        }
+
+        .dialog-form .el-input {
+            width: 100%;
+        }
+
+        .dialog-form .el-form-item {
+            margin-right: 15px;
+        }
+
+        .dialog-form .el-form-item__label {
+            padding-right: 10px;
+        }
+
+        .dialog-form .icon {
+            font-size: 25px;
+            cursor: pointer
+        }
+
+        .dialog-form .icon-circle {
+            margin-right: 10px;
+            color: #1f9ada;
+        }
+
+        .dialog-box-switch {
+            display: flex;
+            align-items: center;
+        }
+
+        .dialog-box-switch-title {
+            margin-right: 10px;
+            font-size: 12px;
+        }
+
+        .switch {
+            margin-right: 10px;
+        }
+
+        .el-date-editor .el-range-separator {
+            line-height: 22px;
+        }
+
+        .el-date-editor .el-range__icon {
+            line-height: 22px;
+        }
+
+        .dialog-box-operate .el-select {
+            width: 250px;
+        }
+
+        .el-select__tags {
+            max-height: 80px;
+            overflow-y: scroll;
+        }
+
+        .el-select__tags::-webkit-scrollbar {
+            display: none;
+        }
+
+        .button-close {
+            background: #fff;
+            border: 1px solid #dcdfe6;
+            color: #606266;
+        }
+
+        .el-date-editor .el-range__close-icon {
+            line-height: 25px;
+        }
+
+        .content-message {
+            z-index: 9999 !important;
+            position: fixed;
+            left: 50%;
+            width: 200px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #eef8e9;
+            border-radius: 5px;
+            top: 10%;
+
+        }
+
+        .message-icon {
+            position: absolute;
+            left: 15px;
+            color: #5aba3e;
+            font-size: 15px;
+        }
+
+        .message-title {
+            color: #5aba3e;
+            font-size: 14px;
+        }
+
+        .delete-box {
+            display: flex;
+            justify-content: center;
+        }
+
+        .dialog-delete-title {
+            /* text-align: center; */
+            width: 290px;
+        }
+
+        .icon-warning {
+            color: #ff545c;
+            margin-right: 10px;
+        }
+        .content-search {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            height: 100px;
+            padding-right: 20px;
+        }
+        .search-discount {
+            display: flex;
+            align-items: center;
+        }
+        .content-search-box {
+            /* flex: 1; */
+            /* margin-right: 50px; */
+            display: flex;
+            align-items: center;
+        }
+        .content-search-box .el-button--primary {
+            width: 150px;
+        }
+        .content-search-box .el-select {
+            width: 200px;
+        }
+        .content-search-input .el-input {
+            width: 200px;
+        }
+        .content-search-name {
+            margin-right: 10px;
+            width: 70px;
+            text-align: right;
+        }
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 15px;
+        }
+        .content-tabel {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
     </style>
 </head>
+
 <body>
-<div id="resourceApply" class="resourceApply mainPadding" style="display: none;"> 
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>充值管理</el-breadcrumb-item>
-        <el-breadcrumb-item>充值优惠设置</el-breadcrumb-item>
-    </el-breadcrumb>     
-    <el-row class="borderbox padding20">         
-        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" :inline="true">
-            <div class="clearFix marginB20">
-                充值送金额：<el-button type="primary" @click="addDomain" :disabled="addIsDisabled"><i class="el-icon-plus"></i>新建优惠档</el-button>
-                <el-button type="success" class="f-fr" @click="editDomain" :disabled="editIsDisabled"><i class="el-icon-edit"></i>编辑</el-button>
+    <div id="resourceApply" class="resourceApply mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>充值管理</el-breadcrumb-item>
+            <el-breadcrumb-item>充值优惠设置</el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="content">
+            <div class="content-button">
+                <el-button type="success" @click="newBuild">新建优惠</el-button>
+                <el-button type="warning" @click="editBuild">编辑优惠</el-button>
+                <el-button type="danger" @click="deleteBuild">删除优惠</el-button>
             </div>
-            <el-row v-for="(domain, index) in dynamicValidateForm.domains">
-                <el-form-item
-                :label="'充值'"
-                :prop="'domains.' + index + '.rechargeAmount'"
-                :rules="[
-                    { required: true, message: '充值信息不能为空', trigger: 'blur' },
-                    { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }
-                ]"
-                >
-                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
-                </el-form-item>
-                <el-form-item
-                :label="'送'"
-                :prop="'domains.' + index + '.givenAmount'"
-                :rules="[
-                    { required: true, message: '赠送信息不能为空', trigger: 'blur' },
-                    { pattern: /^\+?[1-9][0-9]*$/, message: '赠送信息仅可输入正整数', trigger: 'blur,change' }
-                ]"
-                >
-                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
-                </el-form-item>
-                <el-form-item
-                :label="'总得'"
-                :prop="'domains.' + index + '.totalAmount'">
-                    <el-input v-model="domain.totalAmount" disabled></el-input>                    
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-if="domain.isShowDel" style="margin-left: 10px;">删除</el-button>
-                </el-form-item>
-            </el-row>
-            <el-row class="f-tac">
-                <el-form-item>
-                    <el-button type="primary" @click="submitForm('dynamicValidateForm')">保存设置</el-button>
-                    <el-button @click="cancel">取消</el-button>
-                </el-form-item>
-            </el-row>
-        </el-form>
-    </el-row> 
-    <input type="hidden" value="" id="hiddenVal">
-</div>
+            <div class="content-box">
+                <div class="content-search">
+                    <div class="content-search-box search-discount">
+                        <span class="content-search-name">
+                            优惠名称:
+                        </span>
+                        <div class="content-search-input">
+                            <el-input v-model="searchName" placeholder="请输入优惠名称">
+                        </div>
+                    </div>
+                    <div class="content-search-box">
+                        <span class="content-search-name">
+                            商家名称:
+                        </span>
+                        <el-select v-model="searchList" multiple placeholder="请选择" filterable>
+                            <el-option v-for="item in options" :key="item.id" :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </div>
+                    <div class="content-search-box">
+                        <span class="content-search-name">
+                            有效时间:
+                        </span>
+                        <el-date-picker v-model="searchTime" type="daterange" range-separator="至"
+                            start-placeholder="选择开始时间" end-placeholder="选择结束时间"
+                            value-format="yyyy-MM-dd" unlink-panels
+                            >
+                        </el-date-picker>
+                    </div>
+                    <div class="content-search-box">
+                        <span class="content-search-name">
+                            状态:
+                        </span>
+                        <el-select v-model="searchStatus" placeholder="">
+                            <el-option v-for="item in searchOptions" :key="item.id" :label="item.label"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </div>
+                    <div class="content-search-box" @click="onSearch">
+                        <el-button type="primary">搜索</el-button>
+                    </div>
+                </div>
+                <div class="content-tabel">
+
+                    <el-table
+                       tooltip-effect="dark"
+                       style="width: 100%"
+                       :data="dataTable"
+                       border
+                       @selection-change="handleSelectionChange"
+
+                    >
+                    <el-table-column align="center" type="selection" width="55" fixed></el-table-column>
+                    <el-table-column align="center" type="index" label="序号"  width="55" fixed></el-table-column>
+                    <el-table-column align="center" prop="activityName" label="优惠名称" width="230"></el-table-column>
+                    <el-table-column align="center" prop="userBrandNames" label="商家名称" width="300"></el-table-column>
+                    <el-table-column align="center" prop="amountList" label="优惠活动" width="250">
+                        <template slot-scope="scope">
+                            <div v-for="(item, index) in scope.row.amountList" :key="index">
+                                <span>
+                                    充{{item.rechargeAmount}}
+                                    赠{{item.givingAmount}}
+                                </span>
+                             </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="time" label="有效时间" width="200">
+                        <template slot-scope="scope">
+                            <div v-if="+scope.row.type === 1">
+                               永久有效
+                            </div>
+                            <div v-else>
+                                <div>起: {{scope.row.startTime}}</div>
+                                <div>
+                                    止: {{scope.row.endTime}}
+                                </div>
+
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" prop="updateUserName" label="更新人" width="200"></el-table-column>
+                    <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat" width="200"></el-table-column>
+                    <el-table-column align="center" prop="status" label="状态">
+                        <template slot-scope="scope">
+                           {{searchAllStatus[scope.row.status]}}
+                        </template>
+
+
+                    </el-table-column>
+                    </el-table>
+
+                </div>
+                <div class="pagination">
+                    <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+
+                </div>
+                <div class="content-dialog">
+                    <el-dialog :title="title" :visible.sync="dialogVisible" width="800px">
+                        <div class="dialog-box">
+                            <div class="dialog-box-operate">
+                                <div class="dialog-box-name">
+                                    <span class="sign">*</span>
+                                    <span class="name">优惠名称:</span>
+                                </div>
+                                <div class="dialog-discount">
+                                    <el-input v-model="input" placeholder="请输入优惠名称" maxlength="20" :disabled="disabled">
+                                    </el-input>
+    
+                                </div>
+                            </div>
+                            <div class="dialog-box-operate activity">
+                                <div class="dialog-box-name name">
+                                    <span class="sign">*</span>
+                                    <span class="name">优惠活动:</span>
+                                </div>
+                                <div class="dialog-el-form">
+                                    <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                                        <div v-for="(item, index) in formInline.domains" :key="index" class="dialog-form">
+                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'">
+                                                <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                    v-model="item.recharge" placeholder="" @input="getCount(item.recharge)"
+                                                    :disabled="item.isDisabled"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'" >
+                                                <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                    v-model="item.gift" placeholder="" @input="getCount(item.gift)"
+                                                    :disabled="item.isDisabled"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label='总得' :prop="'domains.' + index + '.givenAmount'">
+                                                <el-input v-model='item.givenAmount' disabled></el-input>
+                                            </el-form-item>
+                                            <div class="icon icon-circle" @click="addInput">
+                                                <i class="el-icon-circle-plus-outline"></i>
+                                            </div>
+                                            <div class="icon" @click="deleteInput" v-if="index > 0">
+                                                <i class="el-icon-remove-outline"></i>
+                                            </div>
+    
+                                        </div>
+    
+                                    </el-form>
+                                </div>
+    
+                            </div>
+                            <div class="dialog-box-operate switch-box">
+                                <div class="dialog-box-name">
+                                    <span class="sign">*</span>
+                                    <span class="name">有效时间:</span>
+                                </div>
+                                <div class="dialog-box-switch">
+                                    <span class="dialog-box-switch-title">永久有效</span>
+                                    <el-switch v-model="isShowPicker" class="switch" inactive-color="#cdcdcd"></el-switch>
+                                    <el-date-picker v-show="!isShowPicker" v-model="time" type="daterange"
+                                        range-separator="至" :start-placeholder="startPlaceholder"
+                                        :end-placeholder="endPlaceholder" value-format="yyyy-MM-dd" unlink-panels>
+                                    </el-date-picker>
+                                </div>
+                            </div>
+                            <div class="dialog-box-operate">
+                                <div class="dialog-box-name">
+                                    <span class="sign">*</span>
+                                    <span class="name">商家名称:</span>
+                                </div>
+                                <div>
+                                    <el-select v-model="selectList" multiple placeholder="请选择" filterable>
+                                        <el-option v-for="item in options" :key="item.id" :label="item.name"
+                                            :value="item.id">
+                                        </el-option>
+    
+                                    </el-select>
+                                </div>
+                            </div>
+    
+                        </div>
+    
+                        <span slot="footer" class="dialog-footer">
+                            <el-button @click="onClose" class="button-close">取 消</el-button>
+                            <el-button type="primary" @click="onSubmit":loading="loading" >提 交</el-button>
+                        </span>
+    
+                    </el-dialog>
+    
+                    <el-dialog title="删除优惠" :visible.sync="deleteVisible" width="500px">
+                        <div class="delete-box">
+                            <div class="icon-warning">
+                                <i class="el-icon-warning"></i>
+                            </div>
+                            <div class="dialog-delete-title">
+                                确认要删除
+                                <span class="dialog-delete-name">“{{discountName}}”</span>
+                                优惠设置吗
+                            </div>
+    
+                        </div>
+                        <span slot="footer" class="dialog-footer">
+                            <el-button @click="dialogClosed" class="button-close">取 消</el-button>
+                            <el-button type="primary" @click="onDeleteSubmit">提 交</el-button>
+                        </span>
+    
+                    </el-dialog>
+                </div>
+            </div>
+
+
+
+
+        </div>
+        <!-- <div class="content-message" v-if="innerVisible">
+            <span class="message-icon">
+                <i class="el-icon-success"></i>
+            </span>
+            <span class="message-title">提交成功 {{colseTime}}s</span>
+
+        </div> -->
+    </div>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 
+
 <!-- import common js-->
 <script th:inline="javascript">
+    var merchantUserList=[[${merchantUserList}]];//商户集合
+
     var addClueVM = new Vue({
         el: '#resourceApply',
-        data: function() {
+        data: function () {
             return {
-                addIsDisabled:false,
-                editIsDisabled:true,//默认不可点击
-                dynamicValidateForm: {
-                    domains: [
-                        // {
-                        //     id:'',
-                        //     rechargeAmount: '',
-                        //     givenAmount: '',
-                        //     totalAmount: '',
-                        //     isDisabled:null,
-                        //     isShowDel:null
-                        // }
-                    ]
-                }
-            }      	  
+                id: '',
+                loading: false,
+                multipleSelection: [],//选择行
+                pager:{
+                  total: 0,
+                  currentPage: 1,
+                  pageSize: 20,
+                },
+                dataTable: [],
+                searchOptions: [
+                    {
+                        id: 'all',
+                        label: '全部'
+                    },
+                    {
+                        id: 0,
+                        label: '已删除'
+                    }, {
+                        id: 1,
+                        label: '生效中'
+                    }, {
+                        id: 2,
+                        label: '未开始'
+                    }, {
+                        id: 3,
+                        label: '已过期'
+                    }
+                ],
+                searchAllStatus: {
+                    'all': '全部',
+                    '0': '已删除',
+                    '1':'有效中',
+                    '2': '未开始',
+                    '3': '已过期'
+
+                },
+                searchTime: [],
+                searchList: [],
+                searchStatus: 1,
+                searchName: '',
+                discountName: '',
+                deleteVisible: false, // 是否显示删除弹框
+                //弹窗内层
+                innerVisible: false,
+                colseTime: 3,
+                timer: null,
+                input: '',
+                selectList: [],
+                startPlaceholder: "开始日期",
+                endPlaceholder: '结束日期',
+                time: [],
+                addIsDisabled: false,
+                // editIsDisabled:true,//默认不可点击
+                isShowPicker: true,
+                title: '新建优惠',
+                dialogVisible: false,
+                disabled: false,
+                formInline: {
+                    domains: [{
+                        recharge: '',
+                        gift: '',
+                        isDisabled: false,
+                        givenAmount: ''
+                    }]
+                },
+                options: merchantUserList,
+                
+
+                // dynamicValidateForm: {
+                //     domains: [
+                //         // {
+                //         //     id:'',
+                //         //     rechargeAmount: '',
+                //         //     givenAmount: '',
+                //         //     totalAmount: '',
+                //         //     isDisabled:null,
+                //         //     isShowDel:null
+                //         // }
+                //     ]
+                // }
+            }
         },
+
+
         methods: {
-            number(){
-                var domains=this.dynamicValidateForm.domains;
-                for(var i=0;i<domains.length;i++){
-                　　this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace(/[^\.\d]/g,'');
-                    this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace('.','');
-                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace(/[^\.\d]/g,'');
-                    this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace('.','');
-                }
-            },
-            formSigningAmountPerformance() {
-                var domains=this.dynamicValidateForm.domains;
-                for(var i=0;i<domains.length;i++){
-                    var aone = parseFloat(domains[i].rechargeAmount);
-                    var atwo = parseFloat(domains[i].givenAmount);
-                    if (isNaN(aone)) aone = 0
-                    if (isNaN(atwo)) atwo = 0
-                    this.dynamicValidateForm.domains[i].totalAmount = (aone + atwo) + ""
-                }                
-            },
-            submitForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        var param={};
-                        // var param=[];
-                        // var paramObj={};
-                        // paramObj.rechargeAmount = "200";   
-                        // paramObj.givenAmount = "10";   
-                        // paramObj.totalAmount = "210";
-                        // var paramObj1={};
-                        // paramObj1.rechargeAmount = "100";   
-                        // paramObj1.givenAmount = "20";   
-                        // paramObj1.totalAmount = "120";
-                        // param.push(paramObj,paramObj1)
-
-                        var url="";
-                        var hiddenVal=$("#hiddenVal").val();
-                        var domains = this.dynamicValidateForm.domains;
-                        if(hiddenVal=="1"){
-                            var filterArr = domains.filter((item) => !item.id);
-                            param = filterArr
-                            console.log(param)
-                            url="/merchant/merchantRechargePreferential/saveBatchRechargePreferential" //批量新增保存
-                        }else{
-                            param = domains 
-                            console.log(param)
-                            url="/merchant/merchantRechargePreferential/updateBatchRechargePreferential" //批量修改保存
-                        } 
-                        console.log(url)                  
-                        console.log(param)                  
-                       
-                        axios.post(url,param).then(function (response) {
-                              console.log(response);
-                            if(null !==response && response.data !=null && response.data.code=='0'){
-                                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-                            }else{
-                                addClueVM.$message({
-                                     message: response.data.msg,
-                                     type: 'warning'
-                                });
-                                return ;
-                             } 
-                        }).catch(function (error) {
-                            console.log(error);
-                        })
-                        .then(function () {
-                            // always executed
-                        });  
-
-                    } else {
-                        console.log('error submit!!');
-                    return false;
-                    }
-                });
-            },
-            resetForm(formName) {
-                this.$refs[formName].resetFields();
-            },
-            cancel(){
-                window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-            },
-            removeDomain(item) {    
-                this.$refs['dynamicValidateForm'].clearValidate();            
-                var index = this.dynamicValidateForm.domains.indexOf(item)
-                if(this.dynamicValidateForm.domains[index].id){//true为不可编辑                    
-                    // 条件改为根据后台返回的标识判断是否可编辑
-                    this.$confirm("确定要删除吗?", '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        // 查询 table 需要数据
-                        var param = {};
-                        param.id=item.id;
-                        axios.post('/merchant/merchantRechargePreferential/deleteBatchRechargePreferential',param).then(function (response) {
-                              console.log(response);
-                            if(null !==response && response.data !=null && response.data.code=='0'){
-                                // window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-                                if(index !== -1) {
-                                    addClueVM.dynamicValidateForm.domains.splice(index, 1)
-                                }
-                                if(addClueVM.dynamicValidateForm.domains.length==0){//如果编辑的删除没了，则新建按钮可点击,编辑按钮不可点击
-                                    addClueVM.addIsDisabled=false;
-                                    addClueVM.editIsDisabled=true;
-                                }
-                                // if (addClueVM.$refs['dynamicValidateForm']!=undefined) {
-                                //     addClueVM.$refs['dynamicValidateForm'].resetFields();
-                                // }
-                            }else{
-                                addClueVM.$message({
-                                     message: response.data.msg,
-                                     type: 'warning'
-                                });
-                                return ;
-                             } 
-                        }).catch(function (error) {
-                            console.log(error);
-                        })
-                        .then(function () {
-                            // always executed
-                        });  
-                          
-
-                    }).catch(() => {
-                        this.$message({
-                            type: 'info',
-                            message: '已取消删除'
-                        });          
-                    });
-                }else{
-                    if(index !== -1) {
-                        this.dynamicValidateForm.domains.splice(index, 1)
-                    }
-                    if(!this.dynamicValidateForm.domains[index].isShowDel){//如果新增的删除没了，则编辑按钮可点击
-                        this.editIsDisabled=false;
-                    }
-                }
-            },
-            addDomain() {
-                $("#hiddenVal").val("1");
-                this.editIsDisabled=true;//新增时候禁止编辑                
-                this.dynamicValidateForm.domains.unshift({
-                    rechargeAmount: '',
-                    givenAmount: '',
-                    totalAmount: '',
-                    isDisabled:false,
-                    isShowDel:true
-                });
-            },
-            editDomain() {
-                this.addIsDisabled=true;//编辑时候禁止新增 
-                $("#hiddenVal").val("2");
-                var param ={};
-                axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
-                .then(function (response) {
-                    console.log(response)
-                    var result =  response.data;
-                    if(result.code=="0"){
-                        addClueVM.dynamicValidateForm.domains=result.data
-                        for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
-                            addClueVM.dynamicValidateForm.domains[i].isDisabled=false;
-                            addClueVM.dynamicValidateForm.domains[i].isShowDel=true;
-                        }
-                    }else{
-                        addClueVM.$message.error(result.msg);
-                    }
-                })
-                .catch(function (error) {
-                     console.log(error);
-                }); 
-            },
             searchTable() {
-                var param ={};
-                axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
-                .then(function (response) {
-                    console.log(response)
-                    var result =  response.data;
-                    if(result.code=="0"){
-                        addClueVM.dynamicValidateForm.domains=result.data
-                        for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
-                            addClueVM.dynamicValidateForm.domains[i].isDisabled=true;
+
+                this.getPageList()
+
+            },
+            handleSelectionChange(val) {
+               this.multipleSelection = val;
+            },
+            // 校验
+            checkActivity(domains = []) {
+                let isFill = false;
+                let isRepeat = false;
+                const amountReqList = [];
+                domains.forEach(item => {
+                    if (!item.recharge || !item.gift) {
+                        isFill = true;
+                    }
+                    amountReqList.push({
+                        rechargeAmount: item.recharge,
+                        givingAmount: item.gift
+                    })
+                })
+                domains.reduce((mome, item) => {
+                    mome.length && mome.forEach(subItem => {
+                        if (subItem.recharge === item.recharge && subItem.recharge === subItem.recharge) {
+                            isRepeat = true
                         }
-                        console.log(result.data)
-                        if(result.data&&result.data.length>0){
-                            addClueVM.editIsDisabled=false;
-                        }
-                    }else{
-                        addClueVM.$message.error(result.msg);
+                    })
+                    mome.push({
+                        recharge: item.recharge,
+                        gift: item.gift
+                    })
+                    return mome
+                }, [])
+                return {
+                    isFill,
+                    isRepeat,
+                    amountReqList
+                }
+
+            },
+            onSubmit() {
+
+                if (!this.input) {
+                    this.$message('请输入优惠名称');
+                    return
+                }
+                const domains = this.formInline.domains;
+                const { isFill, isRepeat, amountReqList } = this.checkActivity(domains)
+                if (isFill) {
+                    this.$message('请输入优惠活动，充值金额与赠送金额均必填');
+                    return
+                }
+                if (isRepeat) {
+                    this.$message('一个优惠活动中多条优惠规则间不可重复');
+                    return
+                }
+                if (!this.selectList.length) {
+                    this.$message('请选择商家名称');
+                    return
+
+                }
+
+
+                const params = {
+                    type: 1,
+                    activityName: this.input,
+                    userIdList: this.selectList,
+                    amountReqList,
+
+                }
+                if (this.id) {
+                    params.id = this.id;
+
+                }
+                if (!this.isShowPicker) {
+                    if (!this.time.length) {
+                        this.$message('请选择开始时间和结束时间');
+                        return
+
+                    }
+                    const startTime = this.time[0];
+                    const endTime = this.time[1];
+                    /[^\d]/g
+                    const start = startTime.replace(/-/g, '');
+                    const end = endTime.replace(/-/g, '');
+
+                    params.type = 0;
+                    params.startTime = startTime;
+                    params.endTime = endTime;
+                }
+                this.loading = true;
+
+
+                axios.post('/merchant/chargePreFerential/addOrUpdate', params).then(res => {
+                    addClueVM.innerVisible = true;
+                    addClueVM.loading = false;
+                    addClueVM.getPageList();
+                    addClueVM.multipleSelection = [];
+                    addClueVM.dialogVisible = false;
+                    this.$message({
+                        message: '提交成功',
+                        type: 'success'
+                    })
+
+                    // addClueVM.timer = setInterval(() => {
+                    //     addClueVM.colseTime--
+                    //     if (addClueVM.colseTime === 0) {
+                    //         addClueVM.dialogVisible = false;
+                    //         addClueVM.innerVisible = false;
+                    //         clearInterval(addClueVM.timer)
+                    //     }
+
+                    // }, 1000)
+
+                }).catch(err => {
+                    console.log(err)
+                })
+
+            },
+            onClose() {
+                this.dialogVisible = false;
+                this.startPlaceholder = '开始日期';
+                this.endPlaceholder = '结束日期';
+                this.time = [];
+            },
+            deleteInput() {
+                this.formInline.domains.pop()
+            },
+            addInput() {
+                if (+this.formInline.domains.length > 9) {
+                    this.$message('最多可创建10条优惠规则');
+                    return
+
+                }
+                this.formInline.domains.push({
+                    recharge: '',
+                    gift: '',
+                    isDisabled: false,
+                    givenAmount: ''
+                })
+            },
+            // 新建
+            newBuild() {
+                this.input = '';
+                this.formInline = {
+                    domains: [{
+                        recharge: '',
+                        gift: '',
+                        isDisabled: false,
+                        givenAmount: ''
+                    }]
+                };
+                this.id = '';
+                this.isShowPicker = true;
+                this.time = [];
+                this.startPlaceholder = '开始日期';
+                this.endPlaceholder = '结束日期';
+                this.selectList = [];
+                this.colseTime = 3;
+                this.title = '新建优惠';
+
+                this.dialogVisible = true;
+
+            },
+            // 编辑
+            editBuild() {
+                this.colseTime = 3;
+                if(this.multipleSelection.length > 1) {
+                    this.$message('只允许选择一条数据进行编辑');
+                    return
+                }
+                if(!this.multipleSelection.length) {
+                    this.$message('请先选择需要修改的数据');
+                    return
+
+                }
+            const {
+                activityName, //优惠名称
+                amountList, // 充值优惠
+                startTime = '开始日期', // 开始时间
+                endTime = '结束日期', // 结束时间
+                id,  // 商家id
+                type, // 时间是否开始
+                userIdList = []
+            } = this.multipleSelection[0];
+                this.title = '编辑优惠';
+                this.input = activityName;
+                this.isShowPicker = +type === 1;
+                this.formInline.domains = amountList.map(item => {
+                    return {
+                        recharge: item.rechargeAmount,
+                        gift: item.givingAmount,
+                        givenAmount: +item.givingAmount + +item.rechargeAmount
                     }
                 })
-                .catch(function (error) {
-                     console.log(error);
-                });                
+                console.log(type)
+                if(+type === 1) {
+                    this.startPlaceholder = '开始日期';
+                    this.endPlaceholder = '结束日期';
+                    this.time = [];
+
+                }
+                this.startPlaceholder = startTime;
+                this.endPlaceholder = endTime;
+                this.id = id;
+                if(startTime !== '开始日期') {
+                    this.time = [startTime, endTime];
+
+                }
+
+                this.selectList = userIdList;
+                this.dialogVisible = true;
+            },
+            // 删除确定
+            onDeleteSubmit() {
+                const ids = this.multipleSelection.reduce((mome, item, index) => {
+                    if(index === 0) {
+                        mome = item.id
+                    } else {
+                        mome = item.id + ',' + mome
+                    }
+                    return mome;
+                }, '')
+                const params = {
+                    ids
+                }
+                axios.post('/merchant/chargePreFerential/batchDel', params).then(res => {
+                    this.$message('删除成功');
+                    addClueVM.deleteVisible = false;
+                    addClueVM.getPageList();
+                })
+
+            },
+            // 删除弹框
+            deleteBuild() {
+                if(!this.multipleSelection.length) {
+                    this.$message('请先选择需要删除的数据');
+                    return
+
+                }
+                const activityName = this.multipleSelection || [];
+                this.discountName = activityName.reduce((mome, item, index) => {
+                    if(index === 0) {
+                        mome = item.activityName;
+                    } else {
+                        mome = item.activityName + '、' + mome;
+                    }
+                    return mome
+                }, '')
+                this.deleteVisible = true
+            },
+            dialogClosed() {
+                this.$message('已取消删除');
+                this.deleteVisible = false;
+            },
+            getPageList() {
+                const {currentPage, pageSize} = this.pager;
+                const userIdList = this.searchList;
+                const startTime = this.searchTime[0];
+                const endTime = this.searchTime[1];
+                const params = {
+                    activityName: this.searchName,
+                    userIdList,
+                    startTime,
+                    endTime,
+                    pageSize: pageSize,
+                    pageNum: currentPage,
+                    status: this.searchStatus
+
+                }
+                if(this.searchStatus === 'all') {
+                    params.status = '';
+                }
+                axios.post('/merchant/chargePreFerential/findPageList', params).then(res => {
+                    let data = (res.data && res.data.data && res.data.data.data) || [];
+
+                    data = data.map((item, index) => {
+                        item.index = index;
+                        if (item['startTime']) {
+                        item.startTime = addClueVM.changTimeStatus(item['startTime'])
+                        }
+                        if (item['endTime']) {
+                            item.endTime = addClueVM.changTimeStatus(item['endTime'])
+                        }
+                        // if(item['updateTime']) {
+                        //     item.updateTime = addClueVM.changTimeStatus(item['updateTime'])
+
+                        // }
+
+         
+                        return item;
+                    })
+
+                    addClueVM.dataTable = data;
+
+                })
+            },
+            getCount(type) {
+                if (!type.match(/^\d+$/)) {
+                    this.$message('不支持输入非正整数');
+                    return
+
+                }
+
+                this.formInline.domains.forEach(item => {
+
+                    item.givenAmount = +item.recharge + +item.gift;
+
+                });
+
+            },
+            onSearch() {
+                this.getPageList()
+
+            },
+            getIds(list) {
+            const ids = list.reduce((mome, item, index) => {
+                if(index === 0) {
+                    mome = item
+
+                } else {
+                    mome = item + ',' + mome
+
+                }
+                    return mome;
+                }, '')
+                return ids;
+
+        },
+         //日期数据格式化方法
+        changTimeStatus(cellValue) {
+            return moment(cellValue).format("YYYY-MM-DD");
+        },
+          //日期数据格式化方法
+          dateFormat(row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
         },
-        created(){
-            //var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            //if(localVal){this.pager.pageSize = localVal;}
-            // console.info("create method");
-            this.searchTable();
-        },
-        mounted(){
+
+        mounted() {
             document.getElementById('resourceApply').style.display = 'block';
+            this.getPageList()
         }
-  })
+    })
 </script>
+
 </html>
