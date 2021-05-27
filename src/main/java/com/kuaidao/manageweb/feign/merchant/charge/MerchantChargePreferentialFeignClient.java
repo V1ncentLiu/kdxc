@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "account-service-3", path = "/account/merchantChargePreFerential", fallbackFactory = MerchantChargePreferentialFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "account-service", path = "/account/merchantChargePreFerential", fallbackFactory = MerchantChargePreferentialFeignClient.HystrixClientFallback.class)
 public interface MerchantChargePreferentialFeignClient {
 
     /**
