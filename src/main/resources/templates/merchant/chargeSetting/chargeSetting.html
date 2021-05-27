@@ -277,7 +277,8 @@
                         </span>
                         <el-date-picker v-model="searchTime" type="daterange" range-separator="至"
                             start-placeholder="选择开始时间" end-placeholder="选择结束时间"
-                            value-format="yyyy-MM-dd" unlink-panels>
+                            value-format="yyyy-MM-dd" unlink-panels
+                            >
                         </el-date-picker>
                     </div>
                     <div class="content-search-box">
@@ -370,17 +371,12 @@
                                 <div class="dialog-el-form">
                                     <el-form :inline="true" :model="formInline" class="demo-form-inline">
                                         <div v-for="(item, index) in formInline.domains" :key="index" class="dialog-form">
-                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'"
-                                                :rules="[
-                                          { required: true, message: '充值信息不能为空', trigger: 'blur' },
-                                          { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }]">
+                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'">
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
                                                     v-model="item.recharge" placeholder="" @input="getCount(item.recharge)"
                                                     :disabled="item.isDisabled"></el-input>
                                             </el-form-item>
-                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'" :rules="[
-                                         { required: true, message: '赠信息不能为空', trigger: 'blur' },
-                                         { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }]">
+                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'" >
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
                                                     v-model="item.gift" placeholder="" @input="getCount(item.gift)"
                                                     :disabled="item.isDisabled"></el-input>
@@ -464,58 +460,13 @@
 
 
         </div>
-        <div class="content-message" v-if="innerVisible">
+        <!-- <div class="content-message" v-if="innerVisible">
             <span class="message-icon">
                 <i class="el-icon-success"></i>
             </span>
             <span class="message-title">提交成功 {{colseTime}}s</span>
 
-        </div>
-        <!-- <el-row class="borderbox padding20">          -->
-        <!-- <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" :inline="true">
-            <div class="clearFix marginB20">
-                充值送金额：<el-button type="primary" @click="addDomain" :disabled="addIsDisabled"><i class="el-icon-plus"></i>新建优惠档</el-button>
-                <el-button type="success" class="f-fr" @click="editDomain" :disabled="editIsDisabled"><i class="el-icon-edit"></i>编辑</el-button>
-            </div>
-            <el-row v-for="(domain, index) in dynamicValidateForm.domains">
-                <el-form-item
-                :label="'充值'"
-                :prop="'domains.' + index + '.rechargeAmount'"
-                :rules="[
-                    { required: true, message: '充值信息不能为空', trigger: 'blur' },
-                    { pattern: /^\+?[1-9][0-9]*$/, message: '充值信息仅可输入正整数', trigger: 'blur,change' }
-                ]"
-                >
-                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.rechargeAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
-                </el-form-item>
-                <el-form-item
-                :label="'送'"
-                :prop="'domains.' + index + '.givenAmount'"
-                :rules="[
-                    { required: true, message: '赠送信息不能为空', trigger: 'blur' },
-                    { pattern: /^\+?[1-9][0-9]*$/, message: '赠送信息仅可输入正整数', trigger: 'blur,change' }
-                ]"
-                >
-                    <el-input @input="formSigningAmountPerformance" @keyup.native="number" v-model="domain.givenAmount" maxLength="9" :disabled="domain.isDisabled"></el-input>                    
-                </el-form-item>
-                <el-form-item
-                :label="'总得'"
-                :prop="'domains.' + index + '.totalAmount'">
-                    <el-input v-model="domain.totalAmount" disabled></el-input>                    
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-if="domain.isShowDel" style="margin-left: 10px;">删除</el-button>
-                </el-form-item>
-            </el-row>
-            <el-row class="f-tac">
-                <el-form-item>
-                    <el-button type="primary" @click="submitForm('dynamicValidateForm')">保存设置</el-button>
-                    <el-button @click="cancel">取消</el-button>
-                </el-form-item>
-            </el-row>
-        </el-form> -->
-        <!-- </el-row>  -->
-        <!-- <input type="hidden" value="" id="hiddenVal"> -->
+        </div> -->
     </div>
 </body>
 <!-- import Vue before Element -->
@@ -525,80 +476,7 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList=[[${merchantUserList}]];//商户集合
-    // const merchantUserList = [{
-    //                 id: '1',
-    //                 name: '黄金糕'
-    //             }, {
-    //                 id: '2',
-    //                 name: '双皮奶'
-    //             }, {
-    //                 id: '3',
-    //                 name: '蚵仔煎'
-    //             }, {
-    //                 id: '4',
-    //                 name: '龙须面'
-    //             }, {
-    //                 id: '6',
-    //                 name: '北京烤鸭'
-    //             }, {
-    //                 id: '7',
-    //                 name: '北京烤鸭'
-    //             }, {
-    //                 id: '8',
-    //                 name: '北京烤鸭'
-    //             }, {
-    //                 id: '9',
-    //                 name: '北京烤鸭'
-    //             }, {
-    //                 id: '10',
-    //                 name: '北京烤鸭'
-    //             }]
-    //    console.log(merchantUserList)
-    // const dataList = [{
-    //     id: 1,
-    //     activityName: '十一活动',
-    //     userIds: '1,2,3,4',
-    //     userBrandNames: '彬之心集团（小满茶田、coco）；商家A（喜茶）',
-    //     amountList:[{
-    //         rechargeAmount: 100,
-    //         givingAmount: 10
-    //     }, {
-    //         rechargeAmount: 120,
-    //         givingAmount: 20
-    //     }],
-    //     // time: [{
-    //     //     startTime: '2021-04-20',
-    //     //     endTime: '2021-05-20'
-    //     // }],
-    //     startTime: '2021-04-20',
-    //     endTime: '2021-05-20',
-    //     type: 0,
-    //     status: 0,
-    //     updateUserName: '娜娜',
-    //     updateTime: "2021-03-20"
-    // }, {
-    //     id: 2,
-    //     activityName: '五一活动',
-    //     userIds: '1,2,3,4',
-    //     userBrandNames: '彬之心集团（小满茶田、coco）；商家A（喜茶）',
-    //     amountList:[{
-    //         rechargeAmount: 100,
-    //         givingAmount: 10
-    //     }, {
-    //         rechargeAmount: 120,
-    //         givingAmount: 20
-    //     }],
-    //     startTime: '2021-04-20',
-    //         endTime: '2021-05-20',
-    //     // time: [{
-    //     //     startTime: '2021-04-20',
-    //     //     endTime: '2021-05-20'
-    //     // }],
-    //     type: 1,
-    //     status: 0,
-    //     updateUserName: '娜娜',
-    //     updateTime: "2021-03-20"
-    // }]
+
     var addClueVM = new Vue({
         el: '#resourceApply',
         data: function () {
@@ -668,7 +546,8 @@
                         givenAmount: ''
                     }]
                 },
-                options: merchantUserList
+                options: merchantUserList,
+                
 
                 // dynamicValidateForm: {
                 //     domains: [
@@ -749,10 +628,7 @@
                     return
 
                 }
-                // const userIds = this.selectList.reduce((mome, item) => {
-                //     mome = item + ',' + mome
-                //     return mome;
-                // }, '')
+
 
                 const params = {
                     type: 1,
@@ -789,16 +665,21 @@
                     addClueVM.loading = false;
                     addClueVM.getPageList();
                     addClueVM.multipleSelection = [];
+                    addClueVM.dialogVisible = false;
+                    this.$message({
+                        message: '提交成功',
+                        type: 'success'
+                    })
 
-                    addClueVM.timer = setInterval(() => {
-                        addClueVM.colseTime--
-                        if (addClueVM.colseTime === 0) {
-                            addClueVM.dialogVisible = false;
-                            addClueVM.innerVisible = false;
-                            clearInterval(addClueVM.timer)
-                        }
+                    // addClueVM.timer = setInterval(() => {
+                    //     addClueVM.colseTime--
+                    //     if (addClueVM.colseTime === 0) {
+                    //         addClueVM.dialogVisible = false;
+                    //         addClueVM.innerVisible = false;
+                    //         clearInterval(addClueVM.timer)
+                    //     }
 
-                    }, 1000)
+                    // }, 1000)
 
                 }).catch(err => {
                     console.log(err)
@@ -807,6 +688,9 @@
             },
             onClose() {
                 this.dialogVisible = false;
+                this.startPlaceholder = '开始日期';
+                this.endPlaceholder = '结束日期';
+                this.time = [];
             },
             deleteInput() {
                 this.formInline.domains.pop()
@@ -842,6 +726,7 @@
                 this.endPlaceholder = '结束日期';
                 this.selectList = [];
                 this.colseTime = 3;
+                this.title = '新建优惠';
 
                 this.dialogVisible = true;
 
@@ -867,7 +752,6 @@
                 type, // 时间是否开始
                 userIdList = []
             } = this.multipleSelection[0];
-            console.log(this.multipleSelection[0])
                 this.title = '编辑优惠';
                 this.input = activityName;
                 this.isShowPicker = +type === 1;
@@ -878,6 +762,13 @@
                         givenAmount: +item.givingAmount + +item.rechargeAmount
                     }
                 })
+                console.log(type)
+                if(+type === 1) {
+                    this.startPlaceholder = '开始日期';
+                    this.endPlaceholder = '结束日期';
+                    this.time = [];
+
+                }
                 this.startPlaceholder = startTime;
                 this.endPlaceholder = endTime;
                 this.id = id;
@@ -904,6 +795,7 @@
                 }
                 axios.post('/merchant/chargePreFerential/batchDel', params).then(res => {
                     this.$message('删除成功');
+                    addClueVM.deleteVisible = false;
                     addClueVM.getPageList();
                 })
 
@@ -1016,210 +908,7 @@
                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
             },
         },
-     
 
-       
-        // methods: {
-        //     number(){
-        //         var domains=this.dynamicValidateForm.domains;
-        //         for(var i=0;i<domains.length;i++){
-        //         　　this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace(/[^\.\d]/g,'');
-        //             this.dynamicValidateForm.domains[i].rechargeAmount=(this.dynamicValidateForm.domains[i].rechargeAmount+"").replace('.','');
-        //             this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace(/[^\.\d]/g,'');
-        //             this.dynamicValidateForm.domains[i].givenAmount=(this.dynamicValidateForm.domains[i].givenAmount+"").replace('.','');
-        //         }
-        //     },
-        //     formSigningAmountPerformance() {
-        //         var domains=this.dynamicValidateForm.domains;
-        //         for(var i=0;i<domains.length;i++){
-        //             var aone = parseFloat(domains[i].rechargeAmount);
-        //             var atwo = parseFloat(domains[i].givenAmount);
-        //             if (isNaN(aone)) aone = 0
-        //             if (isNaN(atwo)) atwo = 0
-        //             this.dynamicValidateForm.domains[i].totalAmount = (aone + atwo) + ""
-        //         }                
-        //     },
-        //     submitForm(formName) {
-        //         this.$refs[formName].validate((valid) => {
-        //             if (valid) {
-        //                 var param={};
-        //                 // var param=[];
-        //                 // var paramObj={};
-        //                 // paramObj.rechargeAmount = "200";   
-        //                 // paramObj.givenAmount = "10";   
-        //                 // paramObj.totalAmount = "210";
-        //                 // var paramObj1={};
-        //                 // paramObj1.rechargeAmount = "100";   
-        //                 // paramObj1.givenAmount = "20";   
-        //                 // paramObj1.totalAmount = "120";
-        //                 // param.push(paramObj,paramObj1)
-
-        //                 var url="";
-        //                 var hiddenVal=$("#hiddenVal").val();
-        //                 var domains = this.dynamicValidateForm.domains;
-        //                 if(hiddenVal=="1"){
-        //                     var filterArr = domains.filter((item) => !item.id);
-        //                     param = filterArr
-        //                     console.log(param)
-        //                     url="/merchant/merchantRechargePreferential/saveBatchRechargePreferential" //批量新增保存
-        //                 }else{
-        //                     param = domains 
-        //                     console.log(param)
-        //                     url="/merchant/merchantRechargePreferential/updateBatchRechargePreferential" //批量修改保存
-        //                 } 
-        //                 console.log(url)                  
-        //                 console.log(param)                  
-
-        //                 axios.post(url,param).then(function (response) {
-        //                       console.log(response);
-        //                     if(null !==response && response.data !=null && response.data.code=='0'){
-        //                         window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-        //                     }else{
-        //                         addClueVM.$message({
-        //                              message: response.data.msg,
-        //                              type: 'warning'
-        //                         });
-        //                         return ;
-        //                      } 
-        //                 }).catch(function (error) {
-        //                     console.log(error);
-        //                 })
-        //                 .then(function () {
-        //                     // always executed
-        //                 });  
-
-        //             } else {
-        //                 console.log('error submit!!');
-        //             return false;
-        //             }
-        //         });
-        //     },
-        //     resetForm(formName) {
-        //         this.$refs[formName].resetFields();
-        //     },
-        //     cancel(){
-        //         window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-        //     },
-        //     removeDomain(item) {    
-        //         this.$refs['dynamicValidateForm'].clearValidate();            
-        //         var index = this.dynamicValidateForm.domains.indexOf(item)
-        //         if(this.dynamicValidateForm.domains[index].id){//true为不可编辑                    
-        //             // 条件改为根据后台返回的标识判断是否可编辑
-        //             this.$confirm("确定要删除吗?", '提示', {
-        //                 confirmButtonText: '确定',
-        //                 cancelButtonText: '取消',
-        //                 type: 'warning'
-        //             }).then(() => {
-        //                 // 查询 table 需要数据
-        //                 var param = {};
-        //                 param.id=item.id;
-        //                 axios.post('/merchant/merchantRechargePreferential/deleteBatchRechargePreferential',param).then(function (response) {
-        //                       console.log(response);
-        //                     if(null !==response && response.data !=null && response.data.code=='0'){
-        //                         // window.location.href="/merchant/merchantRechargePreferential/initRechargePreferential"; 
-        //                         if(index !== -1) {
-        //                             addClueVM.dynamicValidateForm.domains.splice(index, 1)
-        //                         }
-        //                         if(addClueVM.dynamicValidateForm.domains.length==0){//如果编辑的删除没了，则新建按钮可点击,编辑按钮不可点击
-        //                             addClueVM.addIsDisabled=false;
-        //                             addClueVM.editIsDisabled=true;
-        //                         }
-        //                         // if (addClueVM.$refs['dynamicValidateForm']!=undefined) {
-        //                         //     addClueVM.$refs['dynamicValidateForm'].resetFields();
-        //                         // }
-        //                     }else{
-        //                         addClueVM.$message({
-        //                              message: response.data.msg,
-        //                              type: 'warning'
-        //                         });
-        //                         return ;
-        //                      } 
-        //                 }).catch(function (error) {
-        //                     console.log(error);
-        //                 })
-        //                 .then(function () {
-        //                     // always executed
-        //                 });  
-
-
-        //             }).catch(() => {
-        //                 this.$message({
-        //                     type: 'info',
-        //                     message: '已取消删除'
-        //                 });          
-        //             });
-        //         }else{
-        //             if(index !== -1) {
-        //                 this.dynamicValidateForm.domains.splice(index, 1)
-        //             }
-        //             if(!this.dynamicValidateForm.domains[index].isShowDel){//如果新增的删除没了，则编辑按钮可点击
-        //                 this.editIsDisabled=false;
-        //             }
-        //         }
-        //     },
-        //     addDomain() {
-        //         $("#hiddenVal").val("1");
-        //         this.editIsDisabled=true;//新增时候禁止编辑                
-        //         this.dynamicValidateForm.domains.unshift({
-        //             rechargeAmount: '',
-        //             givenAmount: '',
-        //             totalAmount: '',
-        //             isDisabled:false,
-        //             isShowDel:true
-        //         });
-        //     },
-        //     editDomain() {
-        //         this.addIsDisabled=true;//编辑时候禁止新增 
-        //         $("#hiddenVal").val("2");
-        //         var param ={};
-        //         axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
-        //         .then(function (response) {
-        //             console.log(response)
-        //             var result =  response.data;
-        //             if(result.code=="0"){
-        //                 addClueVM.dynamicValidateForm.domains=result.data
-        //                 for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
-        //                     addClueVM.dynamicValidateForm.domains[i].isDisabled=false;
-        //                     addClueVM.dynamicValidateForm.domains[i].isShowDel=true;
-        //                 }
-        //             }else{
-        //                 addClueVM.$message.error(result.msg);
-        //             }
-        //         })
-        //         .catch(function (error) {
-        //              console.log(error);
-        //         }); 
-        //     },
-        //     searchTable() {
-        //         var param ={};
-        //         axios.post('/merchant/merchantRechargePreferential/findAllRechargePreferential', param)
-        //         .then(function (response) {
-        //             console.log(response)
-        //             var result =  response.data;
-        //             if(result.code=="0"){
-        //                 addClueVM.dynamicValidateForm.domains=result.data
-        //                 for(var i=0;i<addClueVM.dynamicValidateForm.domains.length;i++){
-        //                     addClueVM.dynamicValidateForm.domains[i].isDisabled=true;
-        //                 }
-        //                 console.log(result.data)
-        //                 if(result.data&&result.data.length>0){
-        //                     addClueVM.editIsDisabled=false;
-        //                 }
-        //             }else{
-        //                 addClueVM.$message.error(result.msg);
-        //             }
-        //         })
-        //         .catch(function (error) {
-        //              console.log(error);
-        //         });                
-        //     },
-        // },
-        // created(){
-        //     //var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-        //     //if(localVal){this.pager.pageSize = localVal;}
-        //     // console.info("create method");
-        //     this.searchTable();
-        // },
         mounted() {
             document.getElementById('resourceApply').style.display = 'block';
             this.getPageList()
