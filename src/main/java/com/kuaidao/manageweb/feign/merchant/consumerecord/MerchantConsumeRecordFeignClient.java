@@ -22,7 +22,7 @@ import java.util.List;
  * @date: 2019年3月14日
  * @version V1.0
  */
-@FeignClient(name = "account-service-3", path = "/account/consumeRecord",
+@FeignClient(name = "account-service", path = "/account/consumeRecord",
         fallbackFactory = MerchantConsumeRecordFeignClient.HystrixClientFallback.class)
 public interface MerchantConsumeRecordFeignClient {
     /**
