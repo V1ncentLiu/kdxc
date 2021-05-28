@@ -339,6 +339,7 @@ public class ConsumeRecordController {
                     BeanUtils.copyProperties(merchantConsumeRecordDTO, merchantConsumeDetailExportModel);
                     int flag =i+1;
                     merchantConsumeDetailExportModel.setId(flag);
+                    merchantConsumeDetailExportModel.setCustomerTime(DateUtil.convert2String(merchantConsumeRecordDTO.getCreateTime(),DateUtil.ymdhms));
                     merchantConsumeDetailExportModel.setClueId(merchantConsumeRecordDTO.getClueId()+"");
                     merchantConsumeDetailExportModelList.add(merchantConsumeDetailExportModel);
                 }
