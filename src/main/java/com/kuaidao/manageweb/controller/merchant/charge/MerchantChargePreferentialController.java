@@ -104,7 +104,7 @@ public class MerchantChargePreferentialController {
         if(CollectionUtils.isEmpty(merchantChargePreferentialReq.getUserIdList())){
             return new JSONResult<Boolean>().fail("-1","请选择商户！");
         }
-        List<Integer> collect = merchantChargePreferentialReq.getAmountReqList().stream().map(MerchantChargePreferentialAmountReq::getRechargeAmount).distinct().collect(Collectors.toList());
+        List<String> collect = merchantChargePreferentialReq.getAmountReqList().stream().map(MerchantChargePreferentialAmountReq::getRechargeAmount).map(String::valueOf).distinct().collect(Collectors.toList());
         if(merchantChargePreferentialReq.getAmountReqList().size()!=collect.size()){
             return new JSONResult<Boolean>().fail("-1","存在重复优惠！");
         }
@@ -136,7 +136,7 @@ public class MerchantChargePreferentialController {
         Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) attribute;
         if(user==null){
-          return   1085777377507803136L;
+          return   0L;
         }
         return user.getId();
     }
