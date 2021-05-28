@@ -303,10 +303,11 @@
                        :data="dataTable"
                        border
                        @selection-change="handleSelectionChange"
+                       empty-text="暂未找到该数据"
 
                     >
-                    <el-table-column align="center" type="selection" width="55" fixed></el-table-column>
-                    <el-table-column align="center" type="index" label="序号"  width="55" fixed></el-table-column>
+                    <el-table-column align="center" type="selection" width="55"></el-table-column>
+                    <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
                     <el-table-column align="center" prop="activityName" label="优惠名称" width="230"></el-table-column>
                     <el-table-column align="center" prop="userBrandNames" label="商家名称" width="300"></el-table-column>
                     <el-table-column align="center" prop="amountList" label="优惠活动" width="250">
@@ -373,12 +374,12 @@
                                         <div v-for="(item, index) in formInline.domains" :key="index" class="dialog-form">
                                             <el-form-item label='充值' :prop="'domains.' + index + '.recharge'">
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
-                                                    v-model="item.recharge" placeholder="" @input="getCount(item.recharge)"
+                                                    v-model="item.recharge" placeholder="请输入充值金额" @input="getCount(item.recharge)"
                                                     :disabled="item.isDisabled"></el-input>
                                             </el-form-item>
                                             <el-form-item label='赠' :prop="'domains.' + index + '.gift'" >
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
-                                                    v-model="item.gift" placeholder="" @input="getCount(item.gift)"
+                                                    v-model="item.gift" placeholder="请输入赠送金额" @input="getCount(item.gift)"
                                                     :disabled="item.isDisabled"></el-input>
                                             </el-form-item>
                                             <el-form-item label='总得' :prop="'domains.' + index + '.givenAmount'">
@@ -387,7 +388,7 @@
                                             <div class="icon icon-circle" @click="addInput">
                                                 <i class="el-icon-circle-plus-outline"></i>
                                             </div>
-                                            <div class="icon" @click="deleteInput" v-if="index > 0">
+                                            <div class="icon" @click="deleteInput(index)" v-if="index > 0">
                                                 <i class="el-icon-remove-outline"></i>
                                             </div>
     
@@ -500,7 +501,7 @@
                         label: '已删除'
                     }, {
                         id: 1,
-                        label: '生效中'
+                        label: '有效中'
                     }, {
                         id: 2,
                         label: '未开始'
@@ -534,7 +535,7 @@
                 time: [],
                 addIsDisabled: false,
                 // editIsDisabled:true,//默认不可点击
-                isShowPicker: true,
+                isShowPicker: false,
                 title: '新建优惠',
                 dialogVisible: false,
                 disabled: false,
@@ -628,6 +629,11 @@
                     return
 
                 }
+                amountReqList.forEach(item => {
+                    item.givingAmount = +item.givingAmount;
+                    item.rechargeAmount = +item.rechargeAmount;
+                })
+                console.log(amountReqList)
 
 
                 const params = {
@@ -692,8 +698,10 @@
                 this.endPlaceholder = '结束日期';
                 this.time = [];
             },
-            deleteInput() {
-                this.formInline.domains.pop()
+            deleteInput(index) {
+                console.log(index)
+                console.log(this.formInline.domains)
+                this.formInline.domains = this.formInline.domains.filter((item, domainsIndex) => +domainsIndex !== +index)
             },
             addInput() {
                 if (+this.formInline.domains.length > 9) {
@@ -720,7 +728,7 @@
                     }]
                 };
                 this.id = '';
-                this.isShowPicker = true;
+                this.isShowPicker = false;
                 this.time = [];
                 this.startPlaceholder = '开始日期';
                 this.endPlaceholder = '结束日期';
@@ -757,8 +765,8 @@
                 this.isShowPicker = +type === 1;
                 this.formInline.domains = amountList.map(item => {
                     return {
-                        recharge: item.rechargeAmount,
-                        gift: item.givingAmount,
+                        recharge: +item.rechargeAmount,
+                        gift: +item.givingAmount,
                         givenAmount: +item.givingAmount + +item.rechargeAmount
                     }
                 })
@@ -824,9 +832,12 @@
             },
             getPageList() {
                 const {currentPage, pageSize} = this.pager;
+
                 const userIdList = this.searchList;
-                const startTime = this.searchTime[0];
-                const endTime = this.searchTime[1];
+
+                const startTime = (this.searchTime && this.searchTime.length && this.searchTime[0]) || "";
+                const endTime = (this.searchTime && this.searchTime.length && this.searchTime[1]) || '';
+
                 const params = {
                     activityName: this.searchName,
                     userIdList,
@@ -841,7 +852,12 @@
                     params.status = '';
                 }
                 axios.post('/merchant/chargePreFerential/findPageList', params).then(res => {
+
+                    
                     let data = (res.data && res.data.data && res.data.data.data) || [];
+                    addClueVM.pager.total =  res.data.data.total;
+                    addClueVM.pager.currentPage = res.data.data.currentPage;
+
 
                     data = data.map((item, index) => {
                         item.index = index;
@@ -851,10 +867,7 @@
                         if (item['endTime']) {
                             item.endTime = addClueVM.changTimeStatus(item['endTime'])
                         }
-                        // if(item['updateTime']) {
-                        //     item.updateTime = addClueVM.changTimeStatus(item['updateTime'])
 
-                        // }
 
          
                         return item;
@@ -865,15 +878,33 @@
                 })
             },
             getCount(type) {
-                if (!type.match(/^\d+$/)) {
+                console.log(type[0])
+                if(type.indexOf('0') > -1 && +type[0] === 0) {
+                    this.$message('不支持输入非正整数');
+                    return
+
+                }
+              
+                
+                if (type && !type.match(/^\d+$/)) {
                     this.$message('不支持输入非正整数');
                     return
 
                 }
 
-                this.formInline.domains.forEach(item => {
 
-                    item.givenAmount = +item.recharge + +item.gift;
+                this.formInline.domains.forEach(item => {
+                    const recharge = +item.recharge;
+                    const gift = +item.gift;
+
+                    let givenAmount = recharge + gift;
+                    if(!recharge && !gift) {
+                        item.givenAmount = ''
+
+                    } else {
+                        item.givenAmount = givenAmount
+                    }
+                    
 
                 });
 
