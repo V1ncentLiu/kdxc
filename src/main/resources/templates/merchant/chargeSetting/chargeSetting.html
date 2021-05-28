@@ -372,7 +372,7 @@
                                 <div class="dialog-el-form">
                                     <el-form :inline="true" :model="formInline" class="demo-form-inline">
                                         <div v-for="(item, index) in formInline.domains" :key="index" class="dialog-form">
-                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'">
+                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'" >
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
                                                     v-model="item.recharge" placeholder="请输入充值金额" @input="getCount(item.recharge)"
                                                     :disabled="item.isDisabled"></el-input>
@@ -418,7 +418,7 @@
                                     <span class="name">商家名称:</span>
                                 </div>
                                 <div>
-                                    <el-select v-model="selectList" multiple placeholder="请选择" filterable>
+                                    <el-select v-model="selectList" multiple placeholder="请选择" filterable reserve-keyword>
                                         <el-option v-for="item in options" :key="item.id" :label="item.name"
                                             :value="item.id">
                                         </el-option>
@@ -504,18 +504,18 @@
                         label: '有效中'
                     }, {
                         id: 2,
-                        label: '未开始'
+                        label: '未生效'
                     }, {
                         id: 3,
-                        label: '已过期'
+                        label: '已失效'
                     }
                 ],
                 searchAllStatus: {
                     'all': '全部',
                     '0': '已删除',
                     '1':'有效中',
-                    '2': '未开始',
-                    '3': '已过期'
+                    '2': '未生效',
+                    '3': '已失效'
 
                 },
                 searchTime: [],
@@ -615,6 +615,43 @@
                     return
                 }
                 const domains = this.formInline.domains;
+
+                console.log(domains)
+
+                domains.forEach(item => {
+                    if(typeof item.gift === 'number') {
+                        item.gift = item.gift.toString()
+                    }
+                    if(typeof item.recharge === 'number') {
+                        item.recharge = item.recharge.toString()
+
+                    }
+                })
+
+                // console.log(domains)
+
+
+                let isAmountReq = false;
+
+                domains.forEach(item => {
+                    const gift = item.gift;
+                    const recharge = item.recharge;
+                    console.log(item.gift[0])
+
+                    if((gift.indexOf('0') > -1 && gift[0] == 0) || (recharge.indexOf('0') > -1 && recharge[0] == 0)) {
+                        isAmountReq = true;
+
+                    }
+
+                })
+                if(isAmountReq) {
+                    this.$message('不支持输入非正整数');
+                    return;
+
+                }
+
+
+
                 const { isFill, isRepeat, amountReqList } = this.checkActivity(domains)
                 if (isFill) {
                     this.$message('请输入优惠活动，充值金额与赠送金额均必填');
@@ -629,6 +666,8 @@
                     return
 
                 }
+
+
                 amountReqList.forEach(item => {
                     item.givingAmount = +item.givingAmount;
                     item.rechargeAmount = +item.rechargeAmount;
@@ -878,7 +917,7 @@
                 })
             },
             getCount(type) {
-                console.log(type[0])
+                // console.log(type)
                 if(type.indexOf('0') > -1 && +type[0] === 0) {
                     this.$message('不支持输入非正整数');
                     return
@@ -891,6 +930,10 @@
                     return
 
                 }
+
+                console.log(this.formInline.domains)
+
+
 
 
                 this.formInline.domains.forEach(item => {
