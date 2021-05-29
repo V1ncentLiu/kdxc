@@ -13,6 +13,7 @@
         body {
             background: #eff3f6
         }
+
         .content-box {
             background-color: #fff;
             margin-top: 20px;
@@ -83,6 +84,7 @@
         .dialog-form {
             display: flex;
         }
+
         .sign {
             color: red;
         }
@@ -97,6 +99,7 @@
 
         .dialog-form .el-form-item__label {
             padding-right: 10px;
+            font-size: 14px;
         }
 
         .dialog-form .icon {
@@ -116,7 +119,7 @@
 
         .dialog-box-switch-title {
             margin-right: 10px;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .switch {
@@ -195,6 +198,7 @@
             color: #ff545c;
             margin-right: 10px;
         }
+
         .content-search {
             display: flex;
             flex-wrap: wrap;
@@ -202,38 +206,56 @@
             height: 100px;
             padding-right: 20px;
         }
+
         .search-discount {
             display: flex;
             align-items: center;
         }
+
         .content-search-box {
             /* flex: 1; */
             /* margin-right: 50px; */
             display: flex;
             align-items: center;
         }
+
         .content-search-box .el-button--primary {
             width: 150px;
         }
+
         .content-search-box .el-select {
             width: 200px;
         }
+
         .content-search-input .el-input {
             width: 200px;
         }
+
         .content-search-name {
             margin-right: 10px;
             width: 70px;
             text-align: right;
         }
+
         .pagination {
             display: flex;
             justify-content: flex-end;
             padding-right: 15px;
         }
+
         .content-tabel {
             padding-left: 15px;
             padding-right: 15px;
+        }
+
+        .line {
+            width: 14px;
+            height: 1px;
+            border-top: solid #ACC0D8 1px;
+            margin: 0 5px;
+        }
+        .el-date-picker__time-header {
+            display: none;
         }
     </style>
 </head>
@@ -266,8 +288,7 @@
                             商家名称:
                         </span>
                         <el-select v-model="userId" placeholder="请选择" filterable clearable>
-                            <el-option v-for="item in options" :key="item.id" :label="item.name"
-                                :value="item.id">
+                            <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id">
                             </el-option>
                         </el-select>
                     </div>
@@ -275,10 +296,12 @@
                         <span class="content-search-name">
                             有效时间:
                         </span>
-                        <el-date-picker v-model="searchTime" type="daterange" range-separator="至"
-                            start-placeholder="选择开始时间" end-placeholder="选择结束时间"
-                            value-format="yyyy-MM-dd" unlink-panels
-                            >
+                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="startTime" type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                        <span class="line"></span>
+                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="endTime" type="datetime"
+                            placeholder="选择日期时间">
                         </el-date-picker>
                     </div>
                     <div class="content-search-box">
@@ -297,97 +320,85 @@
                 </div>
                 <div class="content-tabel">
 
-                    <el-table
-                       tooltip-effect="dark"
-                       style="width: 100%"
-                       :data="dataTable"
-                       border
-                       @selection-change="handleSelectionChange"
-                       empty-text="暂未找到该数据"
+                    <el-table tooltip-effect="dark" style="width: 100%" :data="dataTable" border
+                        @selection-change="handleSelectionChange" empty-text="暂未找到该数据">
+                        <el-table-column align="center" type="selection" width="55"></el-table-column>
+                        <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                        <el-table-column align="center" prop="activityName" label="优惠名称" width="230"></el-table-column>
+                        <el-table-column align="center" prop="userBrandNames" label="商家名称" width="300">
 
-                    >
-                    <el-table-column align="center" type="selection" width="55"></el-table-column>
-                    <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-                    <el-table-column align="center" prop="activityName" label="优惠名称" width="230"></el-table-column>
-                    <el-table-column align="center" prop="userBrandNames" label="商家名称" width="300">
+                            <template slot-scope="scope">
 
-                        <template slot-scope="scope" >
-
-                   
-        
-
-                        <el-popover trigger="hover" placement="top">
-                            <div style="width: 400px;">
-                                {{scope.row.userBrandNames}}
-                            </div>
-                            <div slot="reference" class="name-wrapper">
-                                <span style="overflow: hidden; text-overflow: ellipsis;
-                                display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;">{{scope.row.userBrandNames}}</span>
-                            </div>
-                        </el-popover>
-
-
-                        </template>
-
-                    </el-table-column>
-                    <el-table-column align="center" prop="amountList" label="优惠活动" width="250">
-                        <template slot-scope="scope" >
-
-
-                            <div v-for="(item, index) in scope.row.amountList" :key="index">
-                                <span>
-                                    充{{item.rechargeAmount}}
-                                    赠{{item.givingAmount}}
-                                </span>
-                             </div>
-                            <!-- <div style="overflow: hidden; text-overflow: ellipsis;
-                            display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;">
-                             <div v-for="(item, index) in scope.row.amountList" :key="index">
-                                <span>
-                                    充{{item.rechargeAmount}}
-                                    赠{{item.givingAmount}}
-                                </span>
-                             </div>
-                            </div> -->
-
-<!-- 
-                            <el-popover trigger="hover" placement="top">
-                                
-                                    <div style="width: 400px;" v-for="(item, index) in scope.row.amountList" :key="index">
-                                        充{{item.rechargeAmount}}
-                                        赠{{item.givingAmount}}
+                                <el-popover trigger="hover" placement="top">
+                                    <div style="width: 400px;">
+                                        {{scope.row.userBrandNames}}
                                     </div>
-                                        <div slot="reference" class="name-wrapper" v-for="(item, index) in scope.row.amountList" :key="index" >
-                                            <span >充{{item.rechargeAmount}}
-                                            赠{{item.givingAmount}}</span>
-                                        </div>
-                            </el-popover> -->
-                           
-                        </template>
-                    </el-table-column>
-                    <el-table-column align="center" prop="time" label="有效时间" width="200">
-                        <template slot-scope="scope">
-                            <div v-if="+scope.row.type === 1">
-                               永久有效
-                            </div>
-                            <div v-else>
-                                <div>起: {{scope.row.startTime}}</div>
-                                <div>
-                                    止: {{scope.row.endTime}}
+                                    <div slot="reference" class="name-wrapper">
+                                        <span
+                                            style="overflow: hidden; text-overflow: ellipsis;
+                                display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;">{{scope.row.userBrandNames}}</span>
+                                    </div>
+                                </el-popover>
+
+
+                            </template>
+
+                        </el-table-column>
+                        <el-table-column align="center" prop="amountList" label="优惠活动" width="250">
+                            <template slot-scope="scope">
+                                <div v-if="scope.row.amountList.length < 5">
+                                    <div v-for="(item, index) in scope.row.amountList" :key="index">
+                                        <span>
+                                            充{{item.rechargeAmount}}
+                                            赠{{item.givingAmount}}
+                                        </span>
+                                    </div>
+
                                 </div>
 
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column align="center" prop="updateUserName" label="更新人" width="200"></el-table-column>
-                    <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat" width="200"></el-table-column>
-                    <el-table-column align="center" prop="status" label="状态">
-                        <template slot-scope="scope">
-                           {{searchAllStatus[scope.row.status]}}
-                        </template>
+                                <ul v-else>
+                                    <li v-for="(item, index) in scope.row.amountList" :key="index">
+                                        <el-popover trigger="hover" placement="top">
+                                            <div v-for="(subItem, subIndex) in scope.row.amountList" :key="subIndex">
+                                                充{{subItem.rechargeAmount}}
+                                                赠{{subItem.givingAmount}}
+                                            </div>
+                                            <div class="meta" slot="reference">
+                                                <div v-if="index < 5">
+                                                    充{{item.rechargeAmount}}
+                                                    赠{{item.givingAmount}}
+                                                    <span v-show="index == 4">...</span>
+                                                </div>
+                                            </div>
+                                        </el-popover>
+                                    </li>
+                                </ul>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" prop="time" label="有效时间" width="200">
+                            <template slot-scope="scope">
+                                <div v-if="+scope.row.type === 1">
+                                    永久有效
+                                </div>
+                                <div v-else>
+                                    <div>起: {{scope.row.startTime}}</div>
+                                    <div>
+                                        止: {{scope.row.endTime}}
+                                    </div>
+
+                                </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" prop="updateUserName" label="更新人" width="200"></el-table-column>
+                        <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat"
+                            width="200"></el-table-column>
+                        <el-table-column align="center" prop="status" label="状态">
+                            <template slot-scope="scope">
+                                {{searchAllStatus[scope.row.status]}}
+                            </template>
 
 
-                    </el-table-column>
+                        </el-table-column>
                     </el-table>
 
                 </div>
@@ -406,7 +417,7 @@
                                 <div class="dialog-discount">
                                     <el-input v-model="input" placeholder="请输入优惠名称" maxlength="20" :disabled="disabled">
                                     </el-input>
-    
+
                                 </div>
                             </div>
                             <div class="dialog-box-operate activity">
@@ -416,32 +427,34 @@
                                 </div>
                                 <div class="dialog-el-form">
                                     <el-form :inline="true" :model="formInline" class="demo-form-inline">
-                                        <div v-for="(item, index) in formInline.domains" :key="index" class="dialog-form">
-                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'" >
+                                        <div v-for="(item, index) in formInline.domains" :key="index"
+                                            class="dialog-form">
+                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'">
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
-                                                    v-model="item.recharge" placeholder="请输入充值金额" @input="getCount(item.recharge)"
-                                                    :disabled="item.isDisabled"></el-input>
+                                                    v-model="item.recharge" placeholder="请输入充值金额"
+                                                    @input="getCount(item.recharge)" :disabled="item.isDisabled">
+                                                </el-input>
                                             </el-form-item>
-                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'" >
+                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'">
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
-                                                    v-model="item.gift" placeholder="请输入赠送金额" @input="getCount(item.gift)"
-                                                    :disabled="item.isDisabled"></el-input>
+                                                    v-model="item.gift" placeholder="请输入赠送金额"
+                                                    @input="getCount(item.gift)" :disabled="item.isDisabled"></el-input>
                                             </el-form-item>
                                             <el-form-item label='总得' :prop="'domains.' + index + '.givenAmount'">
                                                 <el-input v-model='item.givenAmount' disabled></el-input>
                                             </el-form-item>
-                                            <div class="icon icon-circle" @click="addInput">
+                                            <div class="icon icon-circle" @click="addInput(index)">
                                                 <i class="el-icon-circle-plus-outline"></i>
                                             </div>
                                             <div class="icon" @click="deleteInput(index)" v-if="index > 0">
                                                 <i class="el-icon-remove-outline"></i>
                                             </div>
-    
+
                                         </div>
-    
+
                                     </el-form>
                                 </div>
-    
+
                             </div>
                             <div class="dialog-box-operate switch-box">
                                 <div class="dialog-box-name">
@@ -450,7 +463,8 @@
                                 </div>
                                 <div class="dialog-box-switch">
                                     <span class="dialog-box-switch-title">永久有效</span>
-                                    <el-switch v-model="isShowPicker" class="switch" inactive-color="#cdcdcd"></el-switch>
+                                    <el-switch v-model="isShowPicker" class="switch" inactive-color="#cdcdcd">
+                                    </el-switch>
                                     <el-date-picker v-show="!isShowPicker" v-model="time" type="daterange"
                                         range-separator="至" :start-placeholder="startPlaceholder"
                                         :end-placeholder="endPlaceholder" value-format="yyyy-MM-dd" unlink-panels>
@@ -463,24 +477,25 @@
                                     <span class="name">商家名称:</span>
                                 </div>
                                 <div>
-                                    <el-select v-model="selectList" multiple placeholder="请选择" filterable reserve-keyword>
+                                    <el-select v-model="selectList" multiple placeholder="请选择" filterable
+                                        reserve-keyword>
                                         <el-option v-for="item in options" :key="item.id" :label="item.name"
                                             :value="item.id">
                                         </el-option>
-    
+
                                     </el-select>
                                 </div>
                             </div>
-    
+
                         </div>
-    
+
                         <span slot="footer" class="dialog-footer">
                             <el-button @click="onClose" class="button-close">取 消</el-button>
-                            <el-button type="primary" @click="onSubmit":loading="loading" >提 交</el-button>
+                            <el-button type="primary" @click="onSubmit" :loading="loading">提 交</el-button>
                         </span>
-    
+
                     </el-dialog>
-    
+
                     <el-dialog title="删除优惠" :visible.sync="deleteVisible" width="500px">
                         <div class="delete-box">
                             <div class="icon-warning">
@@ -491,13 +506,13 @@
                                 <span class="dialog-delete-name">“{{discountName}}”</span>
                                 优惠设置吗
                             </div>
-    
+
                         </div>
                         <span slot="footer" class="dialog-footer">
                             <el-button @click="dialogClosed" class="button-close">取 消</el-button>
                             <el-button type="primary" @click="onDeleteSubmit">提 交</el-button>
                         </span>
-    
+
                     </el-dialog>
                 </div>
             </div>
@@ -506,13 +521,7 @@
 
 
         </div>
-        <!-- <div class="content-message" v-if="innerVisible">
-            <span class="message-icon">
-                <i class="el-icon-success"></i>
-            </span>
-            <span class="message-title">提交成功 {{colseTime}}s</span>
 
-        </div> -->
     </div>
 </body>
 <!-- import Vue before Element -->
@@ -521,7 +530,7 @@
 
 <!-- import common js-->
 <script th:inline="javascript">
-    var merchantUserList=[[${merchantUserList}]];//商户集合
+    var merchantUserList = [[${ merchantUserList }]];//商户集合
 
     var addClueVM = new Vue({
         el: '#resourceApply',
@@ -530,10 +539,10 @@
                 id: '',
                 loading: false,
                 multipleSelection: [],//选择行
-                pager:{
-                  total: 0,
-                  currentPage: 1,
-                  pageSize: 20,
+                pager: {
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
                 },
                 dataTable: [],
                 searchOptions: [
@@ -546,24 +555,23 @@
                         label: '已删除'
                     }, {
                         id: 1,
-                        label: '有效中'
+                        label: '生效中'
                     }, {
                         id: 2,
                         label: '未生效'
                     }, {
                         id: 3,
-                        label: '已失效'
+                        label: '已结束'
                     }
                 ],
                 searchAllStatus: {
                     'all': '全部',
                     '0': '已删除',
-                    '1':'有效中',
+                    '1': '生效中',
                     '2': '未生效',
-                    '3': '已失效'
+                    '3': '已结束'
 
                 },
-                searchTime: [],
                 userId: '',
                 searchStatus: 1,
                 searchName: '',
@@ -593,20 +601,9 @@
                     }]
                 },
                 options: merchantUserList,
-                
+                startTime: '',
+                endTime: ''
 
-                // dynamicValidateForm: {
-                //     domains: [
-                //         // {
-                //         //     id:'',
-                //         //     rechargeAmount: '',
-                //         //     givenAmount: '',
-                //         //     totalAmount: '',
-                //         //     isDisabled:null,
-                //         //     isShowDel:null
-                //         // }
-                //     ]
-                // }
             }
         },
 
@@ -618,7 +615,7 @@
 
             },
             handleSelectionChange(val) {
-               this.multipleSelection = val;
+                this.multipleSelection = val;
             },
             // 校验
             checkActivity(domains = []) {
@@ -664,10 +661,10 @@
                 console.log(domains)
 
                 domains.forEach(item => {
-                    if(typeof item.gift === 'number') {
+                    if (typeof item.gift === 'number') {
                         item.gift = item.gift.toString()
                     }
-                    if(typeof item.recharge === 'number') {
+                    if (typeof item.recharge === 'number') {
                         item.recharge = item.recharge.toString()
 
                     }
@@ -683,13 +680,13 @@
                     const recharge = item.recharge;
                     console.log(item.gift[0])
 
-                    if((gift.indexOf('0') > -1 && gift[0] == 0) || (recharge.indexOf('0') > -1 && recharge[0] == 0)) {
+                    if ((gift.indexOf('0') > -1 && gift[0] == 0) || (recharge.indexOf('0') > -1 && recharge[0] == 0)) {
                         isAmountReq = true;
 
                     }
 
                 })
-                if(isAmountReq) {
+                if (isAmountReq) {
                     this.$message('不支持输入非正整数');
                     return;
 
@@ -717,7 +714,6 @@
                     item.givingAmount = +item.givingAmount;
                     item.rechargeAmount = +item.rechargeAmount;
                 })
-                console.log(amountReqList)
 
 
                 const params = {
@@ -731,22 +727,27 @@
                     params.id = this.id;
 
                 }
-                if (!this.isShowPicker) {
-                    if (!this.time.length) {
-                        this.$message('请选择开始时间和结束时间');
-                        return
 
-                    }
-                    const startTime = this.time[0];
-                    const endTime = this.time[1];
-                    /[^\d]/g
-                    const start = startTime.replace(/-/g, '');
-                    const end = endTime.replace(/-/g, '');
+                console.log(this.startTime)
+                console.log(this.endTime)
 
-                    params.type = 0;
-                    params.startTime = startTime;
-                    params.endTime = endTime;
-                }
+
+                // if (!this.isShowPicker) {
+                //     if (!this.time.length) {
+                //         this.$message('请选择开始时间和结束时间');
+                //         return
+
+                //     }
+                //     const startTime = this.time[0];
+                //     const endTime = this.time[1];
+                //     /[^\d]/g
+                //     const start = startTime.replace(/-/g, '');
+                //     const end = endTime.replace(/-/g, '');
+
+                //     params.type = 0;
+                //     params.startTime = startTime;
+                //     params.endTime = endTime;
+                // }
                 this.loading = true;
 
 
@@ -761,15 +762,7 @@
                         type: 'success'
                     })
 
-                    // addClueVM.timer = setInterval(() => {
-                    //     addClueVM.colseTime--
-                    //     if (addClueVM.colseTime === 0) {
-                    //         addClueVM.dialogVisible = false;
-                    //         addClueVM.innerVisible = false;
-                    //         clearInterval(addClueVM.timer)
-                    //     }
 
-                    // }, 1000)
 
                 }).catch(err => {
                     console.log(err)
@@ -783,17 +776,18 @@
                 this.time = [];
             },
             deleteInput(index) {
-                console.log(index)
-                console.log(this.formInline.domains)
+           
                 this.formInline.domains = this.formInline.domains.filter((item, domainsIndex) => +domainsIndex !== +index)
             },
-            addInput() {
+            addInput(index) {
                 if (+this.formInline.domains.length > 9) {
                     this.$message('最多可创建10条优惠规则');
                     return
 
+
                 }
-                this.formInline.domains.push({
+
+                this.formInline.domains.splice(index + 1, 0, {
                     recharge: '',
                     gift: '',
                     isDisabled: false,
@@ -826,24 +820,24 @@
             // 编辑
             editBuild() {
                 this.colseTime = 3;
-                if(this.multipleSelection.length > 1) {
+                if (this.multipleSelection.length > 1) {
                     this.$message('只允许选择一条数据进行编辑');
                     return
                 }
-                if(!this.multipleSelection.length) {
+                if (!this.multipleSelection.length) {
                     this.$message('请先选择需要修改的数据');
                     return
 
                 }
-            const {
-                activityName, //优惠名称
-                amountList, // 充值优惠
-                startTime = '开始日期', // 开始时间
-                endTime = '结束日期', // 结束时间
-                id,  // 商家id
-                type, // 时间是否开始
-                userIdList = []
-            } = this.multipleSelection[0];
+                const {
+                    activityName, //优惠名称
+                    amountList, // 充值优惠
+                    startTime = '开始日期', // 开始时间
+                    endTime = '结束日期', // 结束时间
+                    id,  // 商家id
+                    type, // 时间是否开始
+                    userIdList = []
+                } = this.multipleSelection[0];
                 this.title = '编辑优惠';
                 this.input = activityName;
                 this.isShowPicker = +type === 1;
@@ -855,7 +849,7 @@
                     }
                 })
                 console.log(type)
-                if(+type === 1) {
+                if (+type === 1) {
                     this.startPlaceholder = '开始日期';
                     this.endPlaceholder = '结束日期';
                     this.time = [];
@@ -864,7 +858,7 @@
                 this.startPlaceholder = startTime;
                 this.endPlaceholder = endTime;
                 this.id = id;
-                if(startTime !== '开始日期') {
+                if (startTime !== '开始日期') {
                     this.time = [startTime, endTime];
 
                 }
@@ -875,7 +869,7 @@
             // 删除确定
             onDeleteSubmit() {
                 const ids = this.multipleSelection.reduce((mome, item, index) => {
-                    if(index === 0) {
+                    if (index === 0) {
                         mome = item.id
                     } else {
                         mome = item.id + ',' + mome
@@ -894,14 +888,14 @@
             },
             // 删除弹框
             deleteBuild() {
-                if(!this.multipleSelection.length) {
+                if (!this.multipleSelection.length) {
                     this.$message('请先选择需要删除的数据');
                     return
 
                 }
                 const activityName = this.multipleSelection || [];
                 this.discountName = activityName.reduce((mome, item, index) => {
-                    if(index === 0) {
+                    if (index === 0) {
                         mome = item.activityName;
                     } else {
                         mome = item.activityName + '、' + mome;
@@ -915,45 +909,43 @@
                 this.deleteVisible = false;
             },
             getPageList() {
-                const {currentPage, pageSize} = this.pager;
+                const { currentPage, pageSize } = this.pager;
 
                 const userId = this.userId;
 
-                const startTime = (this.searchTime && this.searchTime.length && this.searchTime[0]) || "";
-                const endTime = (this.searchTime && this.searchTime.length && this.searchTime[1]) || '';
 
                 const params = {
                     activityName: this.searchName,
                     userId,
-                    startTime,
-                    endTime,
+                    startTime: this.startTime,
+                    endTime: this.endTime,
                     pageSize: pageSize,
                     pageNum: currentPage,
                     status: this.searchStatus
 
                 }
-                if(this.searchStatus === 'all') {
+                if (this.searchStatus === 'all') {
                     params.status = '';
                 }
                 axios.post('/merchant/chargePreFerential/findPageList', params).then(res => {
 
-                    
+
                     let data = (res.data && res.data.data && res.data.data.data) || [];
-                    addClueVM.pager.total =  res.data.data.total;
+                    addClueVM.pager.total = res.data.data.total;
                     addClueVM.pager.currentPage = res.data.data.currentPage;
 
 
                     data = data.map((item, index) => {
                         item.index = index;
                         if (item['startTime']) {
-                        item.startTime = addClueVM.changTimeStatus(item['startTime'])
+                            item.startTime = addClueVM.changTimeStatus(item['startTime'])
                         }
                         if (item['endTime']) {
                             item.endTime = addClueVM.changTimeStatus(item['endTime'])
                         }
 
 
-         
+
                         return item;
                     })
 
@@ -963,13 +955,13 @@
             },
             getCount(type) {
                 // console.log(type)
-                if(type.indexOf('0') > -1 && +type[0] === 0) {
+                if (type.indexOf('0') > -1 && +type[0] === 0) {
                     this.$message('不支持输入非正整数');
                     return
 
                 }
-              
-                
+
+
                 if (type && !type.match(/^\d+$/)) {
                     this.$message('不支持输入非正整数');
                     return
@@ -986,41 +978,49 @@
                     const gift = +item.gift;
 
                     let givenAmount = recharge + gift;
-                    if(!recharge && !gift) {
+                    if (!recharge && !gift) {
                         item.givenAmount = ''
 
                     } else {
                         item.givenAmount = givenAmount
                     }
-                    
+
 
                 });
 
             },
             onSearch() {
+
+                if(this.endTime && this.startTime>this.endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
                 this.getPageList()
 
             },
             getIds(list) {
-            const ids = list.reduce((mome, item, index) => {
-                if(index === 0) {
-                    mome = item
+                const ids = list.reduce((mome, item, index) => {
+                    if (index === 0) {
+                        mome = item
 
-                } else {
-                    mome = item + ',' + mome
+                    } else {
+                        mome = item + ',' + mome
 
-                }
+                    }
                     return mome;
                 }, '')
                 return ids;
 
-        },
-         //日期数据格式化方法
-        changTimeStatus(cellValue) {
-            return moment(cellValue).format("YYYY-MM-DD");
-        },
-          //日期数据格式化方法
-          dateFormat(row, column, cellValue, index) {
+            },
+            //日期数据格式化方法
+            changTimeStatus(cellValue) {
+                return moment(cellValue).format("YYYY-MM-DD");
+            },
+            //日期数据格式化方法
+            dateFormat(row, column, cellValue, index) {
                 if (cellValue == undefined) {
                     return "";
                 }
