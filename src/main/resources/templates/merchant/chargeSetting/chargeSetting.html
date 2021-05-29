@@ -435,15 +435,15 @@
                                         <div v-for="(item, index) in formInline.domains" :key="index"
                                             class="dialog-form">
                                             <el-form-item label='充值'>
-                                                <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                <el-input maxlength="7"
                                                     v-model="item.recharge" placeholder="请输入充值金额"
-                                                    @input="getCount(item.recharge)" :disabled="item.isDisabled">
+                                                    @input="getCount(item.recharge)" :disabled="item.isDisabled" @keyup.native="number">
                                                 </el-input>
                                             </el-form-item>
                                             <el-form-item label='赠'>
-                                                <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                <el-input maxlength="7" 
                                                     v-model="item.gift" placeholder="请输入赠送金额"
-                                                    @input="getCount(item.gift)" :disabled="item.isDisabled"></el-input>
+                                                    @input="getCount(item.gift)" :disabled="item.isDisabled" @keyup.native="number"></el-input>
                                             </el-form-item>
                                             <el-form-item label='总得'>
                                                 <el-input v-model='item.givenAmount' disabled></el-input>
@@ -643,7 +643,30 @@
 
 
         methods: {
-            getDomains() {
+            number(){
+                console.log(this.formInline.domains)
+                this.formInline.domains = this.formInline.domains.map(item => {
+
+                    if( typeof item.gift === "string") {
+
+                        item.gift = item.gift.replace(/[^\.\d]/g,'')
+                        console.log(item.gift)
+
+                        if(+item.gift[0] === 0) {
+                            item.gift = '';
+
+                        }
+                    }
+                    if( typeof item.recharge === "string") {
+                        item.recharge = item.recharge.replace(/[^\.\d]/g,'')
+                        if(+item.recharge[0] === 0) {
+                            item.recharge = '';
+
+                        }
+                    }
+
+                    return item
+                })
 
             },
             searchTable() {
