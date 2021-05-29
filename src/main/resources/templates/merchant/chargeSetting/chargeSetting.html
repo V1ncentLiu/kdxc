@@ -253,9 +253,14 @@
             height: 1px;
             border-top: solid #ACC0D8 1px;
             margin: 0 5px;
+            display: inline-block;
         }
+
         .el-date-picker__time-header {
             display: none;
+        }
+        .el-input__icon {
+            line-height: 25px;
         }
     </style>
 </head>
@@ -296,8 +301,8 @@
                         <span class="content-search-name">
                             有效时间:
                         </span>
-                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="startTime" type="datetime"
-                            placeholder="选择日期时间">
+                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="startTime"
+                            type="datetime" placeholder="选择日期时间">
                         </el-date-picker>
                         <span class="line"></span>
                         <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="endTime" type="datetime"
@@ -429,18 +434,18 @@
                                     <el-form :inline="true" :model="formInline" class="demo-form-inline">
                                         <div v-for="(item, index) in formInline.domains" :key="index"
                                             class="dialog-form">
-                                            <el-form-item label='充值' :prop="'domains.' + index + '.recharge'">
+                                            <el-form-item label='充值'>
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
                                                     v-model="item.recharge" placeholder="请输入充值金额"
                                                     @input="getCount(item.recharge)" :disabled="item.isDisabled">
                                                 </el-input>
                                             </el-form-item>
-                                            <el-form-item label='赠' :prop="'domains.' + index + '.gift'">
+                                            <el-form-item label='赠'>
                                                 <el-input maxlength="7" onkeyup="value=value.replace(/[^\d]/g,'')"
                                                     v-model="item.gift" placeholder="请输入赠送金额"
                                                     @input="getCount(item.gift)" :disabled="item.isDisabled"></el-input>
                                             </el-form-item>
-                                            <el-form-item label='总得' :prop="'domains.' + index + '.givenAmount'">
+                                            <el-form-item label='总得'>
                                                 <el-input v-model='item.givenAmount' disabled></el-input>
                                             </el-form-item>
                                             <div class="icon icon-circle" @click="addInput(index)">
@@ -465,10 +470,20 @@
                                     <span class="dialog-box-switch-title">永久有效</span>
                                     <el-switch v-model="isShowPicker" class="switch" inactive-color="#cdcdcd">
                                     </el-switch>
-                                    <el-date-picker v-show="!isShowPicker" v-model="time" type="daterange"
+
+                                    <div v-show="!isShowPicker">
+                                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd"
+                                            v-model="time.startTime" type="datetime" placeholder="选择日期时间">
+                                        </el-date-picker>
+                                        <span class="line"></span>
+                                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="time.endTime"
+                                            type="datetime" placeholder="选择日期时间">
+                                        </el-date-picker>
+                                    </div>
+                                    <!-- <el-date-picker v-show="!isShowPicker" v-model="time" type="daterange"
                                         range-separator="至" :start-placeholder="startPlaceholder"
                                         :end-placeholder="endPlaceholder" value-format="yyyy-MM-dd" unlink-panels>
-                                    </el-date-picker>
+                                    </el-date-picker> -->
                                 </div>
                             </div>
                             <div class="dialog-box-operate">
@@ -585,7 +600,10 @@
                 selectList: [],
                 startPlaceholder: "开始日期",
                 endPlaceholder: '结束日期',
-                time: [],
+                time: {
+                    startTime: '',
+                    endTime: ''
+                },
                 addIsDisabled: false,
                 // editIsDisabled:true,//默认不可点击
                 isShowPicker: false,
@@ -602,13 +620,32 @@
                 },
                 options: merchantUserList,
                 startTime: '',
-                endTime: ''
+                endTime: '',
+                domainsMap: []
 
             }
         },
 
+        watch: {
+            formInline: {
+                handler(val, oldVal) {
+                    // var t = this;
+                    let domains = val.domains;
+                    domains = domains.map(item => {
+                        return item
+                    })
+                //   this.getDomains();
+                },
+                deep: true
+            }
+
+        },
+
 
         methods: {
+            getDomains() {
+
+            },
             searchTable() {
 
                 this.getPageList()
@@ -658,7 +695,6 @@
                 }
                 const domains = this.formInline.domains;
 
-                console.log(domains)
 
                 domains.forEach(item => {
                     if (typeof item.gift === 'number') {
@@ -670,7 +706,6 @@
                     }
                 })
 
-                // console.log(domains)
 
 
                 let isAmountReq = false;
@@ -678,7 +713,6 @@
                 domains.forEach(item => {
                     const gift = item.gift;
                     const recharge = item.recharge;
-                    console.log(item.gift[0])
 
                     if ((gift.indexOf('0') > -1 && gift[0] == 0) || (recharge.indexOf('0') > -1 && recharge[0] == 0)) {
                         isAmountReq = true;
@@ -728,26 +762,30 @@
 
                 }
 
-                console.log(this.startTime)
-                console.log(this.endTime)
 
 
-                // if (!this.isShowPicker) {
-                //     if (!this.time.length) {
-                //         this.$message('请选择开始时间和结束时间');
-                //         return
+                const {startTime, endTime} = this.time;
 
-                //     }
-                //     const startTime = this.time[0];
-                //     const endTime = this.time[1];
-                //     /[^\d]/g
-                //     const start = startTime.replace(/-/g, '');
-                //     const end = endTime.replace(/-/g, '');
+                if (endTime && startTime > endTime) {
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                if(!startTime || !endTime) {
+                    this.$message('请选择开始时间和结束时间');
+                    return
+                }
 
-                //     params.type = 0;
-                //     params.startTime = startTime;
-                //     params.endTime = endTime;
-                // }
+                if(!this.isShowPicker) {
+                    params.type = 0;
+                    params.startTime = startTime;
+                    params.endTime = endTime;
+
+                }
+
+
                 this.loading = true;
 
 
@@ -773,10 +811,13 @@
                 this.dialogVisible = false;
                 this.startPlaceholder = '开始日期';
                 this.endPlaceholder = '结束日期';
-                this.time = [];
+                this.time = {
+                    startTime: '',
+                    endTime: ''
+                };
             },
             deleteInput(index) {
-           
+
                 this.formInline.domains = this.formInline.domains.filter((item, domainsIndex) => +domainsIndex !== +index)
             },
             addInput(index) {
@@ -807,7 +848,10 @@
                 };
                 this.id = '';
                 this.isShowPicker = false;
-                this.time = [];
+                this.time = {
+                    startTime: '',
+                    endTime: ''
+                }
                 this.startPlaceholder = '开始日期';
                 this.endPlaceholder = '结束日期';
                 this.selectList = [];
@@ -832,8 +876,8 @@
                 const {
                     activityName, //优惠名称
                     amountList, // 充值优惠
-                    startTime = '开始日期', // 开始时间
-                    endTime = '结束日期', // 结束时间
+                    startTime = '', // 开始时间
+                    endTime = '', // 结束时间
                     id,  // 商家id
                     type, // 时间是否开始
                     userIdList = []
@@ -848,20 +892,23 @@
                         givenAmount: +item.givingAmount + +item.rechargeAmount
                     }
                 })
-                console.log(type)
                 if (+type === 1) {
                     this.startPlaceholder = '开始日期';
                     this.endPlaceholder = '结束日期';
-                    this.time = [];
+                    this.time = {
+                        startTime: '',
+                        endTime: ''
+                    };
 
+                } else {
+                    this.time = {
+                        startTime,
+                        endTime
+                    }
                 }
-                this.startPlaceholder = startTime;
-                this.endPlaceholder = endTime;
+     
                 this.id = id;
-                if (startTime !== '开始日期') {
-                    this.time = [startTime, endTime];
-
-                }
+         
 
                 this.selectList = userIdList;
                 this.dialogVisible = true;
@@ -954,22 +1001,21 @@
                 })
             },
             getCount(type) {
-                // console.log(type)
                 if (type.indexOf('0') > -1 && +type[0] === 0) {
                     this.$message('不支持输入非正整数');
                     return
 
                 }
 
-
                 if (type && !type.match(/^\d+$/)) {
+                    
+                
                     this.$message('不支持输入非正整数');
                     return
 
                 }
 
-                console.log(this.formInline.domains)
-
+                // console.log(this.formInline.domains)
 
 
 
@@ -991,7 +1037,7 @@
             },
             onSearch() {
 
-                if(this.endTime && this.startTime>this.endTime){
+                if (this.endTime && this.startTime > this.endTime) {
                     this.$message({
                         message: '结束时间不允许选择早于开始时间',
                         type: 'warning'
