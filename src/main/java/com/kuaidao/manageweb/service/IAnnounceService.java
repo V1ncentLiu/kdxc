@@ -10,4 +10,6 @@ import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 public interface IAnnounceService {
 
     public void sendMessage( AnnouncementAddAndUpdateDTO dto);
+
+    public void sendNewMessage(AnnouncementAddAndUpdateDTO dto);
 }
