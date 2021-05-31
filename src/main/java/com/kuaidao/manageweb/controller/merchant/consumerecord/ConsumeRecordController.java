@@ -291,7 +291,7 @@ public class ConsumeRecordController {
     @RequestMapping("/initInfoList")
     @RequiresPermissions("merchant:consumeRecord:view")
     public String initInfoList(HttpServletRequest request, @RequestParam Long mainAccountId) {
-        List<UserInfoDTO> userList = getUserListByainAccountId(mainAccountId);
+        List<UserInfoDTO> userList = getMerchantUserListByainAccountId(mainAccountId);
         request.setAttribute("userList", userList);
         return "merchant/consumeRecord/consumeRecordInfo";
     }
@@ -385,6 +385,60 @@ public class ConsumeRecordController {
         return user;
     }
 
+    /**
+     * 根据商家主账户查询所有子账号和本身
+     *
+     * @param
+     * @return
+     */
+    private List<UserInfoDTO> getMerchantUserListByainAccountId(Long mainAccountId) {
+        List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
+        // 主账号空的时候查询所有(是点消费明细按钮进来的)
+        // 展示所有的主账号以及子账号和所有的电销组
+        if (null == mainAccountId) {
+            List<Integer> statusList = new ArrayList<>();
+            // 启用
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            // 锁定
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            userList = getMerchantUser(SysConstant.USER_TYPE_TWO, statusList);
+            return userList;
+        }
+        // 根据主账号查询
+        // 内部商家展示主账号和绑定的电销组
+        // 外部商家展示主账号和子账号
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(new IdEntityLong(mainAccountId));
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && null != jsonResult.getCode()) {
+            UserInfoDTO user = jsonResult.getData();
+            userList.add(user);
+            // 内部商家
+            if (SysConstant.MerchantType.TYPE1 == user.getMerchantType()) {
+                TelemarketingLayoutDTO reqDto = new TelemarketingLayoutDTO();
+                reqDto.setCompanyGroupId(mainAccountId);
+                JSONResult<List<OrganizationDTO>> result = telemarketingLayoutFeignClient.getdxListByCompanyGroupId(reqDto);
+                List<OrganizationDTO> orgList = result.getData();
+                if (result.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(result.getData())) {
+                    for (OrganizationDTO organizationDTO : orgList) {
+                        UserInfoDTO userInfoDTO = new UserInfoDTO();
+                        BeanUtils.copyProperties(organizationDTO, userInfoDTO);
+                        //添加内部电销组
+                        userList.add(userInfoDTO);
+                    }
+                }
+            }
+            // 外部商家
+            if (SysConstant.MerchantType.TYPE2 == user.getMerchantType()) {
+                // 查询子账号
+                UserInfoDTO userInfoDTO = new UserInfoDTO();
+                userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
+                userInfoDTO.setParentId(mainAccountId);
+                JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+                //添加所有子账号
+                userList.addAll(merchantUserList.getData());
+            }
+        }
+        return userList;
+    }
 
     /**
      * 根据商家主账户查询所有子账号和本身
