@@ -18,6 +18,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -73,9 +74,9 @@ public class AnnounceServiceImpl implements IAnnounceService {
 
         if (list1.getCode().equals("0")) {
             list = list1.getData();
-            InsertBatch(list1, dto.getType(), idsList, dto.getId());
+            InsertBatch(list1, Integer.parseInt(dto.getType()), idsList, dto.getId());
         }
-        Integer type = dto.getType();
+        Integer type = Integer.parseInt(dto.getType());
         long endTime = System.currentTimeMillis();
         System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
     }
@@ -94,7 +95,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
 
 
     public void InsertBatch(JSONResult<List<UserInfoDTO>> list1, Integer type, List<Long> idsList,
-            Long annId) {
+                            Long annId) {
         List<UserInfoDTO> list = list1.getData();
         List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<AnnReceiveAddAndUpdateDTO>();
         for (UserInfoDTO userinfo : list) {
@@ -142,9 +143,11 @@ public class AnnounceServiceImpl implements IAnnounceService {
         for (UserInfoDTO userInfoDTO : list) {
             if(dto.getBusinessType().equals(AnnBuinessTypeEnum.招商宝充值协议)){
                 //这个就要进行判断
-                if(CollectionUtils.isNotEmpty(dto.getTypeList())){
-                    for (Integer type : dto.getTypeList()) {
-                        switch (type){
+                if(StringUtils.isNotBlank(dto.getType())){
+                    String[] types = dto.getType().split(",");
+                    for (String type : types) {
+                        int typeInt = Integer.parseInt(type);
+                        switch (typeInt){
                             case 0:
                                 //全部
                                 sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
