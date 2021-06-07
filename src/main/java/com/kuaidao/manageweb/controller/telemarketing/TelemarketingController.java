@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.telemarketing;
 
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
 import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -109,6 +110,8 @@ public class TelemarketingController {
         userInfoAddDTO.setStatusList(statusList);
         List<UserInfoDTO> userInfoAddList = getMerchantUser(userInfoAddDTO);
         request.setAttribute("userInfoAddList",userInfoAddList);
+        JSONResult<List<ProjectInfoDTO>> projectAddList =projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        request.setAttribute("projectAddList",projectAddList.data());
 
         return "telemarketing/telemarketingLayoutList";
     }
