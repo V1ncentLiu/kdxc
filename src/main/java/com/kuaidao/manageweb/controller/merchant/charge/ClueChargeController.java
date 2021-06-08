@@ -19,13 +19,11 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.charge.ClueChargeFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeMsg;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
+import com.kuaidao.merchant.dto.charge.*;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveInsertAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.user.MerchantUserReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
@@ -183,6 +181,18 @@ public class ClueChargeController {
         return  jsonResult1;
     }
 
+    /**
+     * 查询资源资费操作日志列表
+     *
+     * @param
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/queryLogPage")
+    public JSONResult<PageBean<MerchantCleuChargeOperationLogDto>> queryPage(@RequestBody MerchantCleuChargeOperationLogReq pageParam) {
+        return clueChargeFeignClient.queryLogPage(pageParam);
+    }
+
     private void sendEmail(MerchantClueChargeReq merchantClueChargeReq, BigDecimal odlCharge) {
         //发送邮件
         try {
@@ -222,9 +232,25 @@ public class ClueChargeController {
         rev.setContent(content);
         rev.setRemark(remark);
         rev.setSourceType(BussReceiveSourceTypeEnum.充值优惠.getStatus());
-        JSONResult insertAndSent = busReceiveFeignClient.insertAndSent(rev);
+        JSONResult insertAndSent = busReceiveFeignClient.merchantInsertAndSent(rev);
         logger.info("发送推送消息结果:" + insertAndSent);
+        Long busId = (Long) insertAndSent.getData();
+        updateMerchantUser( userId,busId);
+
     }
+
+    /**
+     * 资费标准修改状态调整
+     * @param userId
+     * @param busId
+     */
+    private void updateMerchantUser(Long userId, Long busId) {
+        MerchantUserReq merchantUserReq = new MerchantUserReq();
+        merchantUserReq.setUserId(userId);
+        merchantUserReq.setDeductBusId(busId);
+        merchantUserInfoFeignClient.addOrUpdateMerchant(merchantUserReq);
+    }
+
     /**
      * 获取当前登录账号ID
      * 

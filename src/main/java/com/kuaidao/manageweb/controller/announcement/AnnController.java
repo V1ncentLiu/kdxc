@@ -39,7 +39,6 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Auther: admin
@@ -193,8 +192,7 @@ public class AnnController {
         dto.setId(annId); // 公告ID
         if(AnnBuinessTypeEnum.招商宝充值协议.getType().equals(dto.getBusinessType())){
             List<UserInfoDTO> merchantUser = getMerchantUser();
-            List<Long> merchantUserIdList = merchantUser.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
-            dto.setOrgids(merchantUserIdList);
+            dto.setUserIds(merchantUser);
         }
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
         if (jsonResult.getCode().equals(JSONResult.SUCCESS)) {
@@ -244,6 +242,7 @@ public class AnnController {
         statusList.add(SysConstant.USER_STATUS_LOCK);
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+
         userInfoDTO.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);

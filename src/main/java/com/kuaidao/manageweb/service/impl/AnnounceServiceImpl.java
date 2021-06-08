@@ -6,6 +6,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.EmailSend;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
+import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.service.IAnnounceService;
@@ -13,6 +14,7 @@ import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.msgpush.dto.SmsTemplateCodeReq;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
+import com.kuaidao.sys.dto.user.MerchantUserReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import freemarker.template.Configuration;
@@ -51,6 +53,9 @@ public class AnnounceServiceImpl implements IAnnounceService {
 
     @Autowired
     private MsgPushFeignClient msgPushFeignClient;
+
+    @Autowired
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
 
 
 
@@ -117,7 +122,8 @@ public class AnnounceServiceImpl implements IAnnounceService {
     @Override
     public void sendNewMessage(AnnouncementAddAndUpdateDTO dto) {
         long startTime = System.currentTimeMillis();
-        List<UserInfoDTO> userList = getUserList(dto);
+        List<UserInfoDTO> userList = dto.getUserIds();
+        List<MerchantUserReq> merchantUserReqList = new ArrayList<>();
         if(CollectionUtils.isNotEmpty(userList)){
             List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<>();
             Map<Long,Long> userAnnMap = new HashMap<>();
@@ -129,10 +135,15 @@ public class AnnounceServiceImpl implements IAnnounceService {
                 annDto.setAnnouncementId(dto.getId());
                 annrList.add(annDto);
                 userAnnMap.put(userinfo.getId(),annRecId);
+                MerchantUserReq merchantUserReq = new MerchantUserReq();
+                merchantUserReq.setUserId(userinfo.getId());
+                merchantUserReq.setChargeAgreeAnnId(dto.getId());
+                merchantUserReqList.add(merchantUserReq);
             }
             //消息批量入库
             annReceiveFeignClient.batchInsert(annrList);
             sendOtherMessaage(userList,dto,userAnnMap);
+            merchantUserInfoFeignClient.batchUpdateMerchantUser(merchantUserReqList);
         }
         long endTime = System.currentTimeMillis();
         System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
@@ -222,7 +233,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
      */
     private void sendSiteMessage(UserInfoDTO userInfoDTO,AnnouncementAddAndUpdateDTO dto, Long id) {
         amqpTemplate.convertAndSend("amq.topic",
-                userInfoDTO.getId() + "." + userInfoDTO.getId(),
+                userInfoDTO.getOrgId() + "." + userInfoDTO.getId(),
                 "announce," + dto.getId() + "," + id);
     }
 
