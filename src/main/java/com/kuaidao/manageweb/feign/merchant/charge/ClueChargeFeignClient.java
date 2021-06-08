@@ -21,7 +21,7 @@ import java.util.List;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchantClueCharge", fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service-3", path = "/merchant/merchantClueCharge", fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
 public interface ClueChargeFeignClient {
     /***
      * 资源资费列表页
