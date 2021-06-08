@@ -79,9 +79,9 @@ public class AnnounceServiceImpl implements IAnnounceService {
 
         if (list1.getCode().equals("0")) {
             list = list1.getData();
-            InsertBatch(list1, Integer.parseInt(dto.getType()), idsList, dto.getId());
+            InsertBatch(list1, dto.getType(), idsList, dto.getId());
         }
-        Integer type = Integer.parseInt(dto.getType());
+        Integer type = dto.getType();
         long endTime = System.currentTimeMillis();
         System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
     }
@@ -154,8 +154,8 @@ public class AnnounceServiceImpl implements IAnnounceService {
         for (UserInfoDTO userInfoDTO : list) {
             if(dto.getBusinessType().equals(AnnBuinessTypeEnum.招商宝充值协议)){
                 //这个就要进行判断
-                if(StringUtils.isNotBlank(dto.getType())){
-                    String[] types = dto.getType().split(",");
+                if(StringUtils.isNotBlank(dto.getTypes())){
+                    String[] types = dto.getTypes().split(",");
                     for (String type : types) {
                         int typeInt = Integer.parseInt(type);
                         switch (typeInt){
@@ -255,6 +255,4 @@ public class AnnounceServiceImpl implements IAnnounceService {
         }
         return null;
     }
-
-
 }

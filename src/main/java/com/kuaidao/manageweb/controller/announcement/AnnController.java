@@ -37,8 +37,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Auther: admin
@@ -190,6 +192,22 @@ public class AnnController {
         logger.info("发布人：{}" + user);
         long annId = IdUtil.getUUID();
         dto.setId(annId); // 公告ID
+        List<Integer> types = Arrays.asList(dto.getTypes().split(",")).stream().map(Integer::parseInt).sorted().collect(Collectors.toList());
+        Integer flagType=0;
+        for (Integer type : types) {
+            switch (type){
+                case 1:
+                    flagType=flagType+1;
+                    break;
+                case 2:
+                    flagType=flagType+10;
+                case 3:
+                    flagType=flagType+100;
+                default:
+                    break;
+            }
+        }
+        dto.setType(Integer.parseInt("000000"+flagType,2));
         if(AnnBuinessTypeEnum.招商宝充值协议.getType().equals(dto.getBusinessType())){
             List<UserInfoDTO> merchantUser = getMerchantUser();
             dto.setUserIds(merchantUser);
