@@ -3,18 +3,12 @@
  */
 package com.kuaidao.manageweb.controller.merchant.user;
 
-import com.kuaidao.aggregation.dto.changeorg.ChangeOrgRecordReqDto;
-import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.common.constant.*;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.MD5Util;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
 import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
@@ -25,11 +19,7 @@ import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
@@ -46,14 +36,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author gpc

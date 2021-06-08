@@ -161,13 +161,13 @@ public class AnnounceServiceImpl implements IAnnounceService {
                         switch (typeInt){
                             case 0:
                                 //全部
-                                sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
+                                //sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
                                 sendSmsMessage(userInfoDTO,dto);
                                 sendEmailMessage(userInfoDTO,dto);
                                 break;
                             case 1:
                                 //站内
-                                sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
+                               // sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
                                 break;
                             case 2:
                                 //短信
@@ -181,7 +181,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
                     }
                 }
             }else{
-                sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
+               // sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
             }
         }
     }
@@ -231,11 +231,11 @@ public class AnnounceServiceImpl implements IAnnounceService {
      * @param dto
      * @param id
      */
-    private void sendSiteMessage(UserInfoDTO userInfoDTO,AnnouncementAddAndUpdateDTO dto, Long id) {
-        amqpTemplate.convertAndSend("amq.topic",
-                userInfoDTO.getOrgId() + "." + userInfoDTO.getId(),
-                "announce," + dto.getId() + "," + id);
-    }
+//    private void sendSiteMessage(UserInfoDTO userInfoDTO,AnnouncementAddAndUpdateDTO dto, Long id) {
+//        amqpTemplate.convertAndSend("amq.topic",
+//                userInfoDTO.getOrgId() + "." + userInfoDTO.getId(),
+//                "announce," + dto.getId() + "," + id);
+//    }
 
     /**
      * 获取发送的用户集合

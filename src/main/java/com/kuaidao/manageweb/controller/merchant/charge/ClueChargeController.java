@@ -232,7 +232,7 @@ public class ClueChargeController {
         rev.setContent(content);
         rev.setRemark(remark);
         rev.setSourceType(BussReceiveSourceTypeEnum.充值优惠.getStatus());
-        JSONResult insertAndSent = busReceiveFeignClient.merchantInsertAndSent(rev);
+        JSONResult insertAndSent = busReceiveFeignClient.merchantInsert(rev);
         logger.info("发送推送消息结果:" + insertAndSent);
         Long busId = (Long) insertAndSent.getData();
         updateMerchantUser( userId,busId);

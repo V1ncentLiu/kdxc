@@ -52,6 +52,9 @@ public interface BusReceiveFeignClient {
 
     @PostMapping("/merchantInsertAndSent")
     public JSONResult merchantInsertAndSent(@RequestBody BussReceiveInsertAndUpdateDTO dto);
+
+    @PostMapping("/merchantInsert")
+    public JSONResult merchantInsert(@RequestBody BussReceiveInsertAndUpdateDTO dto);
     
     @Component
     static class HystrixClientFallback implements BusReceiveFeignClient {
@@ -105,6 +108,11 @@ public interface BusReceiveFeignClient {
         @Override
         public JSONResult merchantInsertAndSent(BussReceiveInsertAndUpdateDTO dto) {
             return fallBackError("新增消息");
+        }
+
+        @Override
+        public JSONResult merchantInsert(BussReceiveInsertAndUpdateDTO dto) {
+            return fallBackError("新增消息，不发websocket");
         }
 
     }
