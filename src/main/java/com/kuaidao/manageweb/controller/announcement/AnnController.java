@@ -201,8 +201,10 @@ public class AnnController {
                     break;
                 case 2:
                     flagType=flagType+10;
+                    break;
                 case 3:
                     flagType=flagType+100;
+                    break;
                 default:
                     break;
             }
@@ -266,4 +268,5 @@ public class AnnController {
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
     }
+
 }
