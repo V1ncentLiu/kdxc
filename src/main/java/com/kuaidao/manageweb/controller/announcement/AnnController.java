@@ -82,7 +82,7 @@ public class AnnController {
     @RequestMapping("/publishAnn")
     @ResponseBody
     public JSONResult saveAnn(@Valid @RequestBody AnnouncementAddAndUpdateDTO dto,
-            BindingResult result) {
+                              BindingResult result) {
         if (result.hasErrors()) {
             return validateParam(result);
         }
@@ -175,7 +175,7 @@ public class AnnController {
     @RequestMapping("/newpublishAnn")
     @ResponseBody
     public JSONResult newpublishAnn(@Valid @RequestBody AnnouncementAddAndUpdateDTO dto,
-                              BindingResult result) {
+                                    BindingResult result) {
         if (result.hasErrors()) {
             return validateParam(result);
         }
@@ -193,26 +193,27 @@ public class AnnController {
         long annId = IdUtil.getUUID();
         dto.setId(annId); // 公告ID
         List<Integer> types = Arrays.asList(dto.getTypes().split(",")).stream().map(Integer::parseInt).sorted().collect(Collectors.toList());
-        Integer flagType=0;
+        String flagType="";
         for (Integer type : types) {
             switch (type){
                 case 1:
                     flagType=flagType+1;
                     break;
                 case 2:
-                    flagType=flagType+10;
+                    flagType=flagType+2;
                     break;
                 case 3:
-                    flagType=flagType+100;
+                    flagType=flagType+4;
                     break;
                 default:
                     break;
             }
         }
-        dto.setType(Integer.parseInt("000000"+flagType,2));
+        dto.setType(Integer.parseInt(flagType));
         if(AnnBuinessTypeEnum.招商宝充值协议.getType().equals(dto.getBusinessType())){
             List<UserInfoDTO> merchantUser = getMerchantUser();
             dto.setUserIds(merchantUser);
+            dto.setOrgId(-1L);
         }
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
         if (jsonResult.getCode().equals(JSONResult.SUCCESS)) {
@@ -224,7 +225,7 @@ public class AnnController {
 
     /**
      * 获取当前登录账号
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -236,7 +237,7 @@ public class AnnController {
 
     /**
      * 错误参数检验
-     * 
+     *
      * @param result
      * @return
      */
