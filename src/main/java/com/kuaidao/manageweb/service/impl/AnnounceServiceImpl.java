@@ -171,9 +171,11 @@ public class AnnounceServiceImpl implements IAnnounceService {
                                 break;
                             case 2:
                                 //短信
+                                sendSmsMessage(userInfoDTO,dto);
                                 break;
                             case 3:
                                 //邮件
+                                sendEmailMessage(userInfoDTO,dto);
                                 break;
                             default:
                                 break;
