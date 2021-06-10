@@ -1,9 +1,10 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller.merchant.user;
 
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.emun.sys.UserTypeEnum;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -171,6 +172,9 @@ public class MechantUserController {
     public JSONResult saveUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
+        }
+        if(userInfoReq.getUserType().equals(UserTypeEnum.商家子账号.getType())){
+            userInfoReq.setMerchantType(SysConstant.MerchantType.TYPE2);
         }
         return mechantUserInfoFeignClient.create(userInfoReq);
     }
