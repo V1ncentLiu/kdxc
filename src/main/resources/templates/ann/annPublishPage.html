@@ -20,13 +20,32 @@
             <el-form-item label="公告标题：" prop="title" style="width:700px">
                 <el-input v-model="annForm.title" type="text" maxlength="100" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="公告接收：" prop="type" >
+            <el-form-item label="公告接收：" >
+<!--                <el-radio-group v-model="annForm.type" @change="redioChangeType">-->
+<!--                    <el-radio :label="1" >站内公告通知</el-radio>-->
+<!--                    <el-radio :label="2" >短信</el-radio>-->
+<!--                    <el-radio :label="3" >邮件</el-radio>-->
+<!--                </el-radio-group>-->
                 <el-checkbox-group v-model="annForm.type">
-                    <el-checkbox label="1" name="type">站内公告通知</el-checkbox>
-                    <!--<el-checkbox label="2" name="type">短信</el-checkbox>-->
+                    <el-checkbox :label="1">站内公告通知</el-checkbox>
+                    <el-checkbox :label="2">短信</el-checkbox>
+                    <el-checkbox :label="3">邮件</el-checkbox>
                 </el-checkbox-group>
+
+
+
             </el-form-item>
-            <el-form-item  label="接收范围：">
+            <el-form-item label="业务场景：" >
+                <el-select v-model="annForm.scene" placeholder="请选择" @change="sceneSelectChange">
+                    <el-option
+                            v-for="item in sceneOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item  label="接收范围：" v-if="isShowRange">
                     <el-form-item v-show="isShowAll"  prop="redio" style="float: left;margin-right: 20px;">
                         <el-radio-group v-model="annForm.radio" @change="redioChange">
                             <el-radio   label="0">系统全用户</el-radio>
@@ -91,27 +110,39 @@ var orgId = [[${orgId}]];//当前用户机构
         data:{
             showOrg:false,
         	isShowAll:true,
+            isShowRange:true,
             isDisabled:false,
             expandedKeys:[],
             dataTree:[],
             OraTreeMuliCheckDialog: false,
             multipleSelection:[],
             multipleSelectionName:[],
+            sceneOptions:[
+                {
+                    value: '0',
+                    label: '通用'
+                },
+                {
+                    value: '1',
+                    label: '招商宝充值协议变更'
+                }
+            ],
             annForm: {
                 title: "",
-                type: ["1"],
+                type: [1],
                 content:"",
                 radio:"0",
-                org:""
+                org:"",
+                scene:'0'
             },
             rules: {
                 title: [
                     { required: true, message: '标题不能为空', trigger: 'blur' },
                     { min: 1, max: 100, message: '长度在 1 到  100 个字符', trigger: 'blur' }
                 ],
-                type: [
-                    { type: 'array', required: true, message: '请至少选择一个接收方式', trigger: 'change' }
-                ],
+                // type: [
+                //     { type: 'array', required: true, message: '请至少选择一个接收方式', trigger: 'change' }
+                // ],
                 redio: [ // 默认选中则一定不会为空
                 ],
                 content: [
@@ -153,6 +184,8 @@ var orgId = [[${orgId}]];//当前用户机构
                                 vm.expandedKeys.push(curChildNode.id);
                             }
                         }
+
+                        console.log(vm.multipleSelection,vm.expandedKeys,vm.dataTree,22222)
                     }
                 }).catch(function (error) { console.log(error);});
             },
@@ -230,6 +263,20 @@ var orgId = [[${orgId}]];//当前用户机构
                 vm.annForm.org = names
                 this.OraTreeMuliCheckDialog = false
             },
+            redioChangeType(val){
+                console.log(val)
+            },
+            sceneSelectChange(val){
+                if(val==1){
+                    vm.isShowRange=false
+                }else {
+                    vm.isShowRange=true
+                }
+                this.annForm.radio='0'
+                vm.showOrg=false;
+                vm.multipleSelection =[];
+                vm.multipleSelectionName = [];
+            },
             redioChange:function(val){
 
                 if(val==0){//全体用户
@@ -257,25 +304,27 @@ var orgId = [[${orgId}]];//当前用户机构
                         var param={};
                         param.title = formData.title;
                         param.content = formData.content;
+                        param.businessType=this.annForm.scene
                         if(formData.radio==0){
                             param.orgId = 0;
                         }else{
                             param.orgId = 1;
                             param.orgids = this.multipleSelection;
                         }
+                        param.types=this.annForm.type.toString()
                         // console.log(formData.type.length)
                         // console.log(formData.type)
-                        if(formData.type.length == 2){
-                            param.type = 0;
-                        }else{
-                            param.type = formData.type[0];
-                        }
+                        // if(formData.type.length == 2){
+                        //     param.type = 0;
+                        // }else{
+                        //     param.type = formData.type[0];
+                        // }
 
                         // console.log("=---P----_---P----=")
                         // console.log(param)
 
 
-                        axios.post("/ann/publishAnn", param)
+                        axios.post("/ann/newpublishAnn", param)
                             .then(function (response) {
                                 if(response.data.code==0){
                                     vm.$message({type: 'success',message:'提交成功',duration:2000,onClose:function(){

@@ -4,9 +4,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
+import com.kuaidao.merchant.dto.charge.*;
 import feign.hystrix.FallbackFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +21,7 @@ import java.util.List;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "merchant-service", path = "/merchant/merchantClueCharge", fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "merchant-service-3", path = "/merchant/merchantClueCharge", fallbackFactory = ClueChargeFeignClient.HystrixClientFallback.class)
 public interface ClueChargeFeignClient {
     /***
      * 资源资费列表页
@@ -64,6 +62,12 @@ public interface ClueChargeFeignClient {
     @PostMapping("/get")
     JSONResult<MerchantClueChargeDTO> get(@RequestBody IdEntityLong idEntityLong);
 
+
+    @PostMapping("/queryLogPage")
+    public JSONResult<PageBean<MerchantCleuChargeOperationLogDto>> queryLogPage(
+            @RequestBody MerchantCleuChargeOperationLogReq pageParam);
+
+
     @Component
     static class HystrixClientFallback implements FallbackFactory<ClueChargeFeignClient> {
 
@@ -103,6 +107,12 @@ public interface ClueChargeFeignClient {
                 @Override
                 public JSONResult<MerchantClueChargeDTO> get(IdEntityLong idEntityLong) {
                     return fallBackError("根据ID查询资费信息");
+                }
+
+
+                @Override
+                public JSONResult<PageBean<MerchantCleuChargeOperationLogDto>> queryLogPage(MerchantCleuChargeOperationLogReq pageParam) {
+                    return fallBackError("查询操作明细");
                 }
             };
         }
