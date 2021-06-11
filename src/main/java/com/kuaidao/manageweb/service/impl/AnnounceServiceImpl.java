@@ -122,28 +122,42 @@ public class AnnounceServiceImpl implements IAnnounceService {
     @Override
     public void sendNewMessage(AnnouncementAddAndUpdateDTO dto) {
         long startTime = System.currentTimeMillis();
-        List<UserInfoDTO> userList = dto.getUserIds();
-        List<MerchantUserReq> merchantUserReqList = new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(userList)){
-            List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<>();
-            Map<Long,Long> userAnnMap = new HashMap<>();
-            for (UserInfoDTO userinfo : userList) {
-                AnnReceiveAddAndUpdateDTO annDto = new AnnReceiveAddAndUpdateDTO();
-                long annRecId = IdUtil.getUUID();
-                annDto.setId(annRecId);
-                annDto.setReceiveUser(userinfo.getId());
-                annDto.setAnnouncementId(dto.getId());
-                annrList.add(annDto);
-                userAnnMap.put(userinfo.getId(),annRecId);
-                MerchantUserReq merchantUserReq = new MerchantUserReq();
-                merchantUserReq.setUserId(userinfo.getId());
-                merchantUserReq.setChargeAgreeAnnId(dto.getId());
-                merchantUserReqList.add(merchantUserReq);
+        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+        if(dto.getBusinessType().equals(AnnBuinessTypeEnum.招商宝充值协议.getType())) {
+            List<UserInfoDTO> userList = dto.getUserIds();
+            List<MerchantUserReq> merchantUserReqList = new ArrayList<>();
+            JSONResult<List<UserInfoDTO>> list1 = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+            if(CollectionUtils.isNotEmpty(userList)){
+                List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<>();
+                Map<Long,Long> userAnnMap = new HashMap<>();
+                for (UserInfoDTO userinfo : userList) {
+                    AnnReceiveAddAndUpdateDTO annDto = new AnnReceiveAddAndUpdateDTO();
+                    long annRecId = IdUtil.getUUID();
+                    annDto.setId(annRecId);
+                    annDto.setReceiveUser(userinfo.getId());
+                    annDto.setAnnouncementId(dto.getId());
+                    annrList.add(annDto);
+                    userAnnMap.put(userinfo.getId(),annRecId);
+                    MerchantUserReq merchantUserReq = new MerchantUserReq();
+                    merchantUserReq.setUserId(userinfo.getId());
+                    merchantUserReq.setChargeAgreeAnnId(dto.getId());
+                    merchantUserReqList.add(merchantUserReq);
+                }
+                //消息批量入库
+                annReceiveFeignClient.batchInsert(annrList);
+                sendOtherMessaage(userList,dto,userAnnMap);
+                merchantUserInfoFeignClient.batchUpdateMerchantUser(merchantUserReqList);
             }
-            //消息批量入库
-            annReceiveFeignClient.batchInsert(annrList);
-            sendOtherMessaage(userList,dto,userAnnMap);
-            merchantUserInfoFeignClient.batchUpdateMerchantUser(merchantUserReqList);
+        }else{
+            if (dto.getType() != 0) { // 全部用户
+                // 获取多个组织下的用户，通过组织ID进行获取。
+                List<Long> orgids = dto.getOrgids();
+                userOrgRoleReq.setOrgIdList(orgids);
+            }
+            JSONResult<List<UserInfoDTO>> list1 = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+            if (list1.getCode().equals("0")) {
+                InsertBatch(list1, dto.getType(), new ArrayList<>(), dto.getId());
+            }
         }
         long endTime = System.currentTimeMillis();
         System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
@@ -152,38 +166,34 @@ public class AnnounceServiceImpl implements IAnnounceService {
 
     private void sendOtherMessaage(List<UserInfoDTO> list,AnnouncementAddAndUpdateDTO dto,  Map<Long,Long> userAnnMap) {
         for (UserInfoDTO userInfoDTO : list) {
-            if(dto.getBusinessType().equals(AnnBuinessTypeEnum.招商宝充值协议.getType())){
-                //这个就要进行判断
-                if(StringUtils.isNotBlank(dto.getTypes())){
-                    String[] types = dto.getTypes().split(",");
-                    for (String type : types) {
-                        int typeInt = Integer.parseInt(type);
-                        switch (typeInt){
-                            case 0:
-                                //全部
-                                //sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
+            //这个就要进行判断
+            if(StringUtils.isNotBlank(dto.getTypes())){
+                String[] types = dto.getTypes().split(",");
+                for (String type : types) {
+                    int typeInt = Integer.parseInt(type);
+                    switch (typeInt){
+                        case 0:
+                            //全部
+                            //sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
+                            sendSmsMessage(userInfoDTO,dto);
+                            sendEmailMessage(userInfoDTO,dto);
+                            break;
+                        case 1:
+                            //站内
+                           // sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
+                            break;
+                        case 2:
                                 sendSmsMessage(userInfoDTO,dto);
+                            //短信
+                            break;
+                        case 3:
+                            //邮件
                                 sendEmailMessage(userInfoDTO,dto);
-                                break;
-                            case 1:
-                                //站内
-                               // sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
-                                break;
-                            case 2:
-                                    sendSmsMessage(userInfoDTO,dto);
-                                //短信
-                                break;
-                            case 3:
-                                //邮件
-                                    sendEmailMessage(userInfoDTO,dto);
-                                break;
-                            default:
-                                break;
-                        }
+                            break;
+                        default:
+                            break;
                     }
                 }
-            }else{
-                sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
             }
         }
     }
