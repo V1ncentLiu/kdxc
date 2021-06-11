@@ -152,7 +152,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
 
     private void sendOtherMessaage(List<UserInfoDTO> list,AnnouncementAddAndUpdateDTO dto,  Map<Long,Long> userAnnMap) {
         for (UserInfoDTO userInfoDTO : list) {
-            if(dto.getBusinessType().equals(AnnBuinessTypeEnum.招商宝充值协议)){
+            if(dto.getBusinessType().equals(AnnBuinessTypeEnum.招商宝充值协议.getType())){
                 //这个就要进行判断
                 if(StringUtils.isNotBlank(dto.getTypes())){
                     String[] types = dto.getTypes().split(",");
@@ -170,12 +170,12 @@ public class AnnounceServiceImpl implements IAnnounceService {
                                // sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
                                 break;
                             case 2:
+                                    sendSmsMessage(userInfoDTO,dto);
                                 //短信
-                                sendSmsMessage(userInfoDTO,dto);
                                 break;
                             case 3:
                                 //邮件
-                                sendEmailMessage(userInfoDTO,dto);
+                                    sendEmailMessage(userInfoDTO,dto);
                                 break;
                             default:
                                 break;
@@ -216,9 +216,8 @@ public class AnnounceServiceImpl implements IAnnounceService {
 
         try {
             Map<String,Object> dataMap = new HashMap<>();
-
-            dataMap.put("time",DateUtil.convert2String(dto.getCreateTime(),DateUtil.ymd));
-            String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(this.configuration.getTemplate("email/huijuMerchantCharge.html"),dataMap);
+            dataMap.put("content",dto.getContent());
+            String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(this.configuration.getTemplate("email/huijuBussinessCharge.html"),dataMap);
             emailSend.sendEmail("【餐盟严选】"+dto.getTitle(), emailContent, userInfoDTO.getEmail());
         } catch (Exception e) {
             log.error("AnnounceServiceImpl sendEmailMessage userInfoDTO[{}],e[{}] ",userInfoDTO,e);
