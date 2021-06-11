@@ -1,18 +1,20 @@
 package com.kuaidao.manageweb.feign.merchant.user;
 
-import java.util.List;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.sys.dto.user.MerchantUserReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
-import com.kuaidao.sys.dto.user.UserInfoReq;
+
+import java.util.List;
 
 /**
  * 用户
@@ -21,7 +23,7 @@ import com.kuaidao.sys.dto.user.UserInfoReq;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service", path = "/sys/merchant/userInfo",
+@FeignClient(name = "sys-service-3", path = "/sys/merchant/userInfo",
         fallback = MerchantUserInfoFeignClient.HystrixClientFallback.class)
 public interface MerchantUserInfoFeignClient {
 
@@ -70,6 +72,12 @@ public interface MerchantUserInfoFeignClient {
     @PostMapping("/merchantUserList")
     public JSONResult<List<UserInfoDTO>> merchantUserList(@RequestBody UserInfoDTO userInfoDTO);
 
+    @PostMapping("/addOrUpdateMerchant")
+    public JSONResult<String> addOrUpdateMerchant(@RequestBody MerchantUserReq merchantUserReq);
+
+    @PostMapping("/batchUpdateMerchantUser")
+    public JSONResult batchUpdateMerchantUser(@RequestBody  List<MerchantUserReq> merchantUserReqList);
+
 
     @Component
     static class HystrixClientFallback implements MerchantUserInfoFeignClient {
@@ -107,6 +115,16 @@ public interface MerchantUserInfoFeignClient {
         @Override
         public JSONResult<List<UserInfoDTO>> merchantUserList(UserInfoDTO userInfoDTO) {
             return fallBackError("查询账号失败");
+        }
+
+        @Override
+        public JSONResult<String> addOrUpdateMerchant(MerchantUserReq merchantUserReq) {
+            return fallBackError("修改商户信息");
+        }
+
+        @Override
+        public JSONResult batchUpdateMerchantUser(List<MerchantUserReq> merchantUserReqList) {
+            return fallBackError("批量修改商户信息");
         }
 
     }

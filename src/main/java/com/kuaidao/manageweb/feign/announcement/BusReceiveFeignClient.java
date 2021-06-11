@@ -4,8 +4,6 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
-import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveRespDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveInsertAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveRespDTO;
@@ -26,7 +24,7 @@ import java.util.Map;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service",path="/sys/busReceive",fallback = BusReceiveFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service-3",path="/sys/busReceive",fallback = BusReceiveFeignClient.HystrixClientFallback.class)
 public interface BusReceiveFeignClient {
 
     @PostMapping("/queryBussReceive")
@@ -51,6 +49,12 @@ public interface BusReceiveFeignClient {
     @PostMapping("/queryBussReceiveNoPage")
     public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(
             BussReceiveQueryDTO queryDTO);
+
+    @PostMapping("/merchantInsertAndSent")
+    public JSONResult merchantInsertAndSent(@RequestBody BussReceiveInsertAndUpdateDTO dto);
+
+    @PostMapping("/merchantInsert")
+    public JSONResult merchantInsert(@RequestBody BussReceiveInsertAndUpdateDTO dto);
     
     @Component
     static class HystrixClientFallback implements BusReceiveFeignClient {
@@ -99,6 +103,16 @@ public interface BusReceiveFeignClient {
         public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(
                 BussReceiveQueryDTO queryDTO) {
             return fallBackError("查询消息");
+        }
+
+        @Override
+        public JSONResult merchantInsertAndSent(BussReceiveInsertAndUpdateDTO dto) {
+            return fallBackError("新增消息");
+        }
+
+        @Override
+        public JSONResult merchantInsert(BussReceiveInsertAndUpdateDTO dto) {
+            return fallBackError("新增消息，不发websocket");
         }
 
     }
