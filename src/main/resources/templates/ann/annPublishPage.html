@@ -20,7 +20,7 @@
             <el-form-item label="公告标题：" prop="title" style="width:700px">
                 <el-input v-model="annForm.title" type="text" maxlength="100" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="公告接收：" >
+            <el-form-item label="公告接收：" prop="type">
 <!--                <el-radio-group v-model="annForm.type" @change="redioChangeType">-->
 <!--                    <el-radio :label="1" >站内公告通知</el-radio>-->
 <!--                    <el-radio :label="2" >短信</el-radio>-->
@@ -58,8 +58,11 @@
                         </el-input>
                     </el-form-item>
             </el-form-item>
+<!--            :autosize="{ minRows: 10, maxRows: 50}"-->
             <el-form-item label="公告内容：" prop="content" style="width:700px">
-                <el-input type="textarea" v-model="annForm.content" :autosize="{ minRows: 10, maxRows: 500}" maxlength="990"></el-input>
+                <el-input type="textarea" v-model="annForm.content"
+                          :autosize="{ minRows: 10, maxRows: 10}"
+                ></el-input>
             </el-form-item>
             <el-row>
                 <el-form-item class="f-tac">
@@ -140,14 +143,14 @@ var orgId = [[${orgId}]];//当前用户机构
                     { required: true, message: '标题不能为空', trigger: 'blur' },
                     { min: 1, max: 100, message: '长度在 1 到  100 个字符', trigger: 'blur' }
                 ],
-                // type: [
-                //     { type: 'array', required: true, message: '请至少选择一个接收方式', trigger: 'change' }
-                // ],
+                type: [
+                    { type: 'array', required: true, message: '请至少选择一个接收方式', trigger: 'change' }
+                ],
                 redio: [ // 默认选中则一定不会为空
                 ],
                 content: [
                     { required: true, message: '公告内容不能为空', trigger: 'blur' },
-                    { min: 1, max: 990, message: '长度在 1 到 990 个字符', trigger: 'blur' }
+                    { min: 1, message: '长度需要大于1个字符', trigger: 'blur' }
                 ]
             },
 
