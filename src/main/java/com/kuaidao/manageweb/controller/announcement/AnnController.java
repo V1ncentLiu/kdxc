@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -255,8 +256,15 @@ public class AnnController {
      * @return
      */
     private List<UserInfoDTO> getMerchantUser() {
+        List<Integer> statusList = new ArrayList<>();
+        // 启用
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        // 锁定
+        statusList.add(SysConstant.USER_STATUS_LOCK);
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+
+        userInfoDTO.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> merchantUserList =
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
