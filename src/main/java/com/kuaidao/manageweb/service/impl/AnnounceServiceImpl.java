@@ -180,15 +180,15 @@ public class AnnounceServiceImpl implements IAnnounceService {
                             break;
                         case 1:
                             //站内
-                           // sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
+                            // sendSiteMessage(userInfoDTO,dto,userAnnMap.get(userInfoDTO.getId()));
                             break;
                         case 2:
-                                sendSmsMessage(userInfoDTO,dto);
+                            sendSmsMessage(userInfoDTO,dto);
                             //短信
                             break;
                         case 3:
                             //邮件
-                                sendEmailMessage(userInfoDTO,dto);
+                            sendEmailMessage(userInfoDTO,dto);
                             break;
                         default:
                             break;
@@ -225,6 +225,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
     private void sendEmailMessage(UserInfoDTO userInfoDTO, AnnouncementAddAndUpdateDTO dto) {
 
         try {
+            log.info("sendEmailMessage ,userInfoDTO:{}",userInfoDTO);
             if(StringUtils.isNotBlank(userInfoDTO.getEmail())){
                 Map<String,Object> dataMap = new HashMap<>();
                 dataMap.put("content",dto.getContent());
