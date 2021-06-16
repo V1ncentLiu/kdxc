@@ -190,6 +190,9 @@ public class ClueChargeController {
     @ResponseBody
     @PostMapping("/queryLogPage")
     public JSONResult<PageBean<MerchantCleuChargeOperationLogDto>> queryPage(@RequestBody MerchantCleuChargeOperationLogReq pageParam) {
+        if(StringUtils.isBlank(pageParam.getUpdateField().trim())){
+            pageParam.setUpdateField(null);
+        }
         return clueChargeFeignClient.queryLogPage(pageParam);
     }
 
