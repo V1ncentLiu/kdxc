@@ -225,10 +225,12 @@ public class AnnounceServiceImpl implements IAnnounceService {
     private void sendEmailMessage(UserInfoDTO userInfoDTO, AnnouncementAddAndUpdateDTO dto) {
 
         try {
-            Map<String,Object> dataMap = new HashMap<>();
-            dataMap.put("content",dto.getContent());
-            String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(this.configuration.getTemplate("email/huijuBussinessCharge.html"),dataMap);
-            emailSend.sendEmail("【餐盟严选】"+dto.getTitle(), emailContent, userInfoDTO.getEmail());
+            if(StringUtils.isNotBlank(userInfoDTO.getEmail())){
+                Map<String,Object> dataMap = new HashMap<>();
+                dataMap.put("content",dto.getContent());
+                String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(this.configuration.getTemplate("email/huijuBussinessCharge.html"),dataMap);
+                emailSend.sendEmail("【餐盟严选】"+dto.getTitle(), emailContent, userInfoDTO.getEmail());
+            }
         } catch (Exception e) {
             log.error("AnnounceServiceImpl sendEmailMessage userInfoDTO[{}],e[{}] ",userInfoDTO,e);
         }
