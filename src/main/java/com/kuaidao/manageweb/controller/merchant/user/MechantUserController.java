@@ -14,6 +14,7 @@ import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.clue.MerchantClueInfoFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
@@ -25,6 +26,8 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.*;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -48,6 +51,8 @@ import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author gpc
@@ -81,6 +86,9 @@ public class MechantUserController {
     private ChangeOrgFeignClient changeOrgFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient mechantUserInfoFeignClient;
+
+    @Autowired
+    private MerchantClueInfoFeignClient merchantClueInfoFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -139,6 +147,22 @@ public class MechantUserController {
     public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
                                                           HttpServletResponse response) {
         JSONResult<PageBean<UserInfoDTO>> list = mechantUserInfoFeignClient.merchantlist(userInfoPageParam);
+        if(userInfoPageParam.getParentId()==null && list.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(list.getData().getData())){
+            List<UserInfoDTO> data = list.getData().getData();
+            List<Long> userIds = ListUtils.emptyIfNull(data).stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+            IdListLongReq idListLongReq = new IdListLongReq();
+            idListLongReq.setIdList(userIds);
+            JSONResult<Map<Long, Integer>> userBalanceStatus = merchantClueInfoFeignClient.getUserBalanceStatus(idListLongReq);
+            if(userBalanceStatus.getCode().equals(JSONResult.SUCCESS)){
+                Map<Long, Integer> map = userBalanceStatus.getData();
+                for (UserInfoDTO userInfoDTO : data) {
+                    userInfoDTO.setBalanceStatus(null);
+                    if(map.containsKey(userInfoDTO.getId())){
+                        userInfoDTO.setBalanceStatus(map.get(userInfoDTO.getId()));
+                    }
+                }
+            }
+        }
         return list;
     }
     /**
