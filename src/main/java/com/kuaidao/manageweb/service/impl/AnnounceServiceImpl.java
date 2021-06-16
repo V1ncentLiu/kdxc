@@ -211,7 +211,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
         param.put("time", DateUtil.convert2String(dto.getCreateTime(),DateUtil.ymd));
         param.put("title",dto.getTitle());
         smsTemplateCodeReq.setTempPara(param);
-        JSONResult<String> smsFlag = msgPushFeignClient.sendTempSms(smsTemplateCodeReq);
+        JSONResult<String> smsFlag = msgPushFeignClient.sendTempSmsNew(smsTemplateCodeReq);
         if (smsFlag == null || !JSONResult.SUCCESS.equals(smsFlag.getCode())) {
             log.error("audit pass sms sub error ,res{{}}", smsFlag);
         }

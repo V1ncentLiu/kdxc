@@ -31,6 +31,9 @@
         .detailDialog .detailDialogEndTime .el-form-item__label{
             width: 10px !important;
         }
+        .detailDialog .el-form-item__label{
+            width: auto !important;
+        }
     </style>
 </head>
 
@@ -164,7 +167,7 @@
                             </el-table-column>
                         </el-table>
                     </el-form>
-                    <table-pagination :pager="pager" @change="searchTable" style="text-align:center; ">
+                    <table-pagination :pager="pager"  @change="searchTable" style="text-align:center; ">
                     </table-pagination>
                 </div>
             </el-row>
@@ -231,7 +234,7 @@
                     <el-button class="cancel" type="primary" @click="cancelClick('subAccountForm')">取消</el-button>
                 </div>
             </el-dialog>
-            <el-dialog class="detailDialog" title="查看明细" :visible.sync="detailDialogVisible" width="1020px">
+            <el-dialog class="detailDialog" title="查看明细" :visible.sync="detailDialogVisible" width="986px">
                 <el-form :inline="true" :model="formInline" class="demo-form-inline">
                     <el-form-item label="修改项：">
                         <el-select v-model="formInline.region" placeholder="全部">
@@ -279,7 +282,7 @@
                     <el-table-column align="center" prop="createTime" label="更新时间" :formatter="dateFormat" min-width="120">
                     </el-table-column>
                 </el-table>
-                <table-pagination :pager="detailPager" @change="lookDetailClick" style="text-align:center; ">
+                <table-pagination :pager="detailPager"  @change="lookDetailClick" style="text-align:center; ">
                 </table-pagination>
             </el-dialog>
         </div>
@@ -414,12 +417,30 @@
         },
         methods: {
             lookDetailClick(scope){
-                console.log(scope)
-               
+                let that=this
+
+                if(!that.detailDialogVisible){
+                    that.detailDialogVisible=true
+                    that.formInline.start=''
+                    that.formInline.end=''
+                    that.formInline.region=''
+                }
+                const {start,end}=this.formInline
+                var startTimestamp = new Date(start);
+                var endTimestamp = new Date(end);
+                if(end){
+                    if (startTimestamp > endTimestamp) {
+                        this.$message({
+                            message: '开始时间必须小于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+
                 if(scope){
                     this.detailId=scope.row.id
                 }
-                let that=this
                 let param={
                     pageNum:this.detailPager.currentPage,
                     pageSize:this.detailPager.pageSize,
@@ -436,14 +457,8 @@
                     if(response.data.code==0){
                         var table = response.data.data;
                         that.detailDataTable=table.data
-                        if(!that.detailDialogVisible){
-                            that.detailDialogVisible=true
-                            that.formInline.start=''
-                            that.formInline.end=''
-                            that.formInline.region=''
-x                        }
-                        that.detailPager.total = table.total;
-                        that.detailPager.currentPage = table.currentPage;
+                       that.detailPager.total = table.total;
+                       that.detailPager.currentPage = table.currentPage;
                     }else{
                         clueChargeVM.$message.error(response.data.msg);
                     }
