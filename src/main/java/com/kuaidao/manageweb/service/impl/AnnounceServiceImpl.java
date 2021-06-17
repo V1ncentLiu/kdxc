@@ -204,17 +204,24 @@ public class AnnounceServiceImpl implements IAnnounceService {
      * @param dto
      */
     private void sendSmsMessage(UserInfoDTO userInfoDTO, AnnouncementAddAndUpdateDTO dto) {
-        SmsTemplateCodeReq smsTemplateCodeReq = new SmsTemplateCodeReq();
-        smsTemplateCodeReq.setMobile(userInfoDTO.getPhone());
-        smsTemplateCodeReq.setTempId(SmsTempIdConstant.SEND_MSG_TEMPID_MERCHANT_RECHARGE_ANN);
-        Map<String,Object> param = new HashMap<>();
-        param.put("time", DateUtil.convert2String(dto.getCreateTime(),DateUtil.ymd));
-        param.put("title",dto.getTitle());
-        smsTemplateCodeReq.setTempPara(param);
-        JSONResult<String> smsFlag = msgPushFeignClient.sendTempSmsNew(smsTemplateCodeReq);
-        if (smsFlag == null || !JSONResult.SUCCESS.equals(smsFlag.getCode())) {
-            log.error("audit pass sms sub error ,res{{}}", smsFlag);
+        try {
+            if(StringUtils.isNotBlank(userInfoDTO.getPhone())){
+                SmsTemplateCodeReq smsTemplateCodeReq = new SmsTemplateCodeReq();
+                smsTemplateCodeReq.setMobile(userInfoDTO.getPhone());
+                smsTemplateCodeReq.setTempId(SmsTempIdConstant.SEND_MSG_TEMPID_MERCHANT_RECHARGE_ANN);
+                Map<String,Object> param = new HashMap<>();
+                param.put("time", DateUtil.convert2String(dto.getCreateTime(),DateUtil.ymd));
+                param.put("title",dto.getTitle());
+                smsTemplateCodeReq.setTempPara(param);
+                JSONResult<String> smsFlag = msgPushFeignClient.sendTempSmsNew(smsTemplateCodeReq);
+                if (smsFlag == null || !JSONResult.SUCCESS.equals(smsFlag.getCode())) {
+                    log.error("audit pass sms sub error ,res{{}}", smsFlag);
+                }
+            }
+        } catch (Exception e) {
+            log.error("AnnounceServiceImpl sendSmsMessage userInfoDTO[{}],e[{}] ",userInfoDTO,e);
         }
+
     }
 
     /**
