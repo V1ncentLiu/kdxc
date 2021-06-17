@@ -58,6 +58,10 @@ public interface MsgPushFeignClient {
     @PostMapping("/sendTempSms")
     public JSONResult<String> sendTempSms(@RequestBody SmsTemplateCodeReq smsTemplateCodeReq);
 
+    @PostMapping("/sendTempSmsNew")
+    public JSONResult<String> sendTempSmsNew(@RequestBody SmsTemplateCodeReq smsTemplateCodeReq);
+
+
     @Component
     static class HystrixClientFallback implements MsgPushFeignClient {
 
@@ -91,6 +95,11 @@ public interface MsgPushFeignClient {
 
         @Override
         public JSONResult<String> sendTempSms(SmsTemplateCodeReq smsTemplateCodeReq) {
+            return fallBackError("发送模板短信");
+        }
+
+        @Override
+        public JSONResult<String> sendTempSmsNew(SmsTemplateCodeReq smsTemplateCodeReq) {
             return fallBackError("发送模板短信");
         }
 

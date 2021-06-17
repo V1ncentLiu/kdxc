@@ -3,6 +3,8 @@
  */
 package com.kuaidao.manageweb.controller.merchant.charge;
 
+import com.alibaba.fastjson.JSON;
+import com.kuaidao.common.constant.BussReceiveSourceTypeEnum;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -17,12 +19,11 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.charge.ClueChargeFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeDTO;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargePageParam;
-import com.kuaidao.merchant.dto.charge.MerchantClueChargeReq;
+import com.kuaidao.merchant.dto.charge.*;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveInsertAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.user.MerchantUserReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -172,14 +174,29 @@ public class ClueChargeController {
         if(JSONResult.SUCCESS.equals(jsonResult1.getCode())){
             MerchantClueChargeDTO data = jsonResult.getData();
             if(data!=null && merchantClueChargeReq.getId()!=null && merchantClueChargeReq.getCharge().compareTo(data.getCharge())!=0){
-                sendEmail(merchantClueChargeReq);
+                sendEmail(merchantClueChargeReq,data.getCharge());
             }
         }
 
         return  jsonResult1;
     }
 
-    private void sendEmail(MerchantClueChargeReq merchantClueChargeReq) {
+    /**
+     * 查询资源资费操作日志列表
+     *
+     * @param
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/queryLogPage")
+    public JSONResult<PageBean<MerchantCleuChargeOperationLogDto>> queryPage(@RequestBody MerchantCleuChargeOperationLogReq pageParam) {
+        if(StringUtils.isBlank(pageParam.getUpdateField().trim())){
+            pageParam.setUpdateField(null);
+        }
+        return clueChargeFeignClient.queryLogPage(pageParam);
+    }
+
+    private void sendEmail(MerchantClueChargeReq merchantClueChargeReq, BigDecimal odlCharge) {
         //发送邮件
         try {
             if(merchantClueChargeReq.getId()!=null && merchantClueChargeReq.getMainAccountId()!=null){
@@ -187,9 +204,12 @@ public class ClueChargeController {
                 JSONResult<UserInfoDTO> userInfoDTOJSONResult = userInfoFeignClient.get(new IdEntityLong(merchantClueChargeReq.getMainAccountId()));
                 if(JSONResult.SUCCESS.equals(userInfoDTOJSONResult.getCode()) && userInfoDTOJSONResult.getData()!=null && StringUtils.isNotBlank(userInfoDTOJSONResult.getData().getEmail())){
                     String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
-                    pushMessage(merchantClueChargeReq.getMainAccountId(), "资费调整通知", "于"+time+" 已调整了您的资源计费规则，详情如下，请知晓\n" +
-                            "    账户信息\n" +
-                            "             账户名称：" +   userInfoDTOJSONResult.getData().getName()+  "        计费标准：" +"每条资源 "+merchantClueChargeReq.getCharge()+"个餐盟币", merchantClueChargeReq.getId()+"");
+                    MerchantClueChargeMsg merchantClueChargeMsg = new MerchantClueChargeMsg();
+                    merchantClueChargeMsg.setCharge(merchantClueChargeReq.getCharge());
+                    merchantClueChargeMsg.setOldCharge(odlCharge);
+                    merchantClueChargeMsg.setUserName( userInfoDTOJSONResult.getData().getName());
+                    merchantClueChargeMsg.setTime(time);
+                    pushMessage(merchantClueChargeReq.getMainAccountId(), "资费调整通知", JSON.toJSONString(merchantClueChargeMsg), merchantClueChargeReq.getId()+"");
                     Map<String,Object> dataMap = new HashMap<>();
                     dataMap.put("name",userInfoDTOJSONResult.getData().getName());
                     dataMap.put("charge",merchantClueChargeReq.getCharge());
@@ -214,9 +234,26 @@ public class ClueChargeController {
         rev.setReceiveUser(userId);
         rev.setContent(content);
         rev.setRemark(remark);
-        JSONResult insertAndSent = busReceiveFeignClient.insertAndSent(rev);
+        rev.setSourceType(BussReceiveSourceTypeEnum.充值优惠.getStatus());
+        JSONResult insertAndSent = busReceiveFeignClient.merchantInsert(rev);
         logger.info("发送推送消息结果:" + insertAndSent);
+        Long busId = (Long) insertAndSent.getData();
+        updateMerchantUser( userId,busId);
+
     }
+
+    /**
+     * 资费标准修改状态调整
+     * @param userId
+     * @param busId
+     */
+    private void updateMerchantUser(Long userId, Long busId) {
+        MerchantUserReq merchantUserReq = new MerchantUserReq();
+        merchantUserReq.setUserId(userId);
+        merchantUserReq.setDeductBusId(busId);
+        merchantUserInfoFeignClient.addOrUpdateMerchant(merchantUserReq);
+    }
+
     /**
      * 获取当前登录账号ID
      * 

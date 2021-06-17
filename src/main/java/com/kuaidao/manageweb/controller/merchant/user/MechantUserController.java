@@ -1,39 +1,33 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller.merchant.user;
 
-import com.kuaidao.aggregation.dto.changeorg.ChangeOrgRecordReqDto;
-import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.common.constant.*;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.emun.sys.UserTypeEnum;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.MD5Util;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
 import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.clue.MerchantClueInfoFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.*;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -46,13 +40,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -87,6 +86,9 @@ public class MechantUserController {
     private ChangeOrgFeignClient changeOrgFeignClient;
     @Autowired
     private MerchantUserInfoFeignClient mechantUserInfoFeignClient;
+
+    @Autowired
+    private MerchantClueInfoFeignClient merchantClueInfoFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -145,6 +147,22 @@ public class MechantUserController {
     public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
                                                           HttpServletResponse response) {
         JSONResult<PageBean<UserInfoDTO>> list = mechantUserInfoFeignClient.merchantlist(userInfoPageParam);
+        if(userInfoPageParam.getParentId()==null && list.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(list.getData().getData())){
+            List<UserInfoDTO> data = list.getData().getData();
+            List<Long> userIds = ListUtils.emptyIfNull(data).stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+            IdListLongReq idListLongReq = new IdListLongReq();
+            idListLongReq.setIdList(userIds);
+            JSONResult<Map<Long, Integer>> userBalanceStatus = merchantClueInfoFeignClient.getUserBalanceStatus(idListLongReq);
+            if(userBalanceStatus.getCode().equals(JSONResult.SUCCESS)){
+                Map<Long, Integer> map = userBalanceStatus.getData();
+                for (UserInfoDTO userInfoDTO : data) {
+                    userInfoDTO.setBalanceStatus(null);
+                    if(map.containsKey(userInfoDTO.getId())){
+                        userInfoDTO.setBalanceStatus(map.get(userInfoDTO.getId()));
+                    }
+                }
+            }
+        }
         return list;
     }
     /**
@@ -178,6 +196,9 @@ public class MechantUserController {
     public JSONResult saveUser(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
+        }
+        if(userInfoReq.getUserType().equals(UserTypeEnum.商家子账号.getType())){
+            userInfoReq.setMerchantType(SysConstant.MerchantType.TYPE2);
         }
         return mechantUserInfoFeignClient.create(userInfoReq);
     }
