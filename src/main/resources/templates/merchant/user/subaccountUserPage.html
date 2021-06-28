@@ -11,6 +11,7 @@
         .orgSelectInput input{border: none;background: none;}
         .orgSelectInput input:hover{cursor: pointer;}
         .el-tree-node__expand-icon.is-leaf~.el-tree-node__label{color: #1979fd}
+
     </style>
 </head>
 <body>
@@ -40,12 +41,26 @@
                 <el-form-item label="账号状态:" prop="status" label-width="75px">
                     <el-select clearable v-model="userSearchForm.status" placeholder="全部状态" @visible-change="seleckClick">
                         <el-option
-                                v-for="item in statusOptions"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
                         </el-option>
                     </el-select>
+                </el-form-item>
+
+                <el-form-item label="新客户短信提醒:" label-width="95px" style="margin-left: 10px;">
+                    <el-select v-model="newsQueryCode" clearable>
+                        <el-option
+                                v-for="item in customerCode"
+                                :key="item.key"
+                                :label="item.label"
+                                :value="item.key"
+                            >
+                            </el-option>
+
+                    </el-select>
+
                 </el-form-item>
 
                 <!-- <div class="mainSearchBtnBox">  -->
@@ -148,6 +163,21 @@
                 <!--<el-input v-model="clueTemplateForm.orgName" autocomplete="off" prop="orgName" style="width:185px;margin-right: 6px;"></el-input>
                 <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>-->
             </el-form-item>
+
+            <el-form-item label="新客户短信提醒:" prop="codeRules" :label-width="formLabelWidth">
+                <el-select v-model="newChildCode" style="width: 290px;">
+                    <el-option
+                        v-for="item in customerCode"
+                        :key="item.key"
+                        :label="item.label"
+                        :value="item.key"
+                    >
+                    </el-option>
+                </el-select>
+            </el-form-item>
+
+
+
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
             <el-button type="primary" :disabled="submitDisabled" @click="saveAccountUser('subAccountForm')">提交</el-button>
@@ -188,6 +218,7 @@
     var userVM = new Vue({
         el: '#userManage',
         data: {
+            newsQueryCode: '',
             merchatName:merchantName,
             subAccountFormTitle:"添加商家子账号",
             dialogsubAccountForm:false,
@@ -250,6 +281,9 @@
                 ],
                 orgName: [
                     { required: true, message: '组织不能为空', trigger: 'change' }
+                ],
+                newChildCode: [
+                { required: true }
                 ]
 
             },
@@ -310,6 +344,15 @@
             },
             storeId: '',
             scrollTop: 0,
+            customerCode: [{
+                    label: '关闭',
+                    key: 0
+                }, {
+                    label: '开启',
+                    key: 1
+                }],
+            newsQueryCode: '',
+            newChildCode: 0
         },
         methods: {
             passwordVal(){

@@ -42,6 +42,14 @@
                         </el-option>
                     </el-select>
                 </el-form-item> 
+
+                <el-form-item label="项目信息:">
+                    <el-select clearable v-model="form.projectName" placeholder="请选择" filterable>
+                        <el-option v-for="item in projectList" :key="item.id" :label="item.name" :value="item.name">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+
                 <el-form-item label="消费日期:">
                     <el-date-picker
                         format="yyyy-MM-dd"  
@@ -85,6 +93,9 @@
                         <el-button size="mini" type="text" @click="gotoSingle(scope.row.mainAccountId)">{{scope.row.userName}}</el-button>
                     </template>
                 </el-table-column>
+
+                <el-table-column align="center" prop="projectName" label="项目信息" width="150"></el-table-column>
+
                 <el-table-column align="center" prop="dateNum" label="消费数（天）" width="200"></el-table-column>
                 <el-table-column align="center" prop="amount" label="消费金额(元)" width="200"></el-table-column>                
                 <el-table-column align="center" prop="createDate" label="最新消费日期"  :formatter="dateFormat" width="200"></el-table-column>
@@ -102,19 +113,20 @@
         <el-form :model="formRemind" ref="formRemind" :rules="rules">
             <el-form-item label="账户余额低于：" prop="amount" :label-width="formLabelWidth">
                 <el-input v-model="formRemind.amount" placeholder="" style="width: 290px;" maxLength="9" @keyup.native="number"></el-input>元
+                <span>触发提醒</span>
             </el-form-item>
-            <el-form-item label="提醒标题：" prop="title" :label-width="formLabelWidth">
+            <!-- <el-form-item label="提醒标题：" prop="title" :label-width="formLabelWidth">
                 <el-input v-model="formRemind.title" placeholder="" style="width: 290px;" maxLength="20"></el-input>
-            </el-form-item>
-            <el-form-item label="提醒人手机号：" prop="phone" :label-width="formLabelWidth">
+            </el-form-item> -->
+            <!-- <el-form-item label="提醒人手机号：" prop="phone" :label-width="formLabelWidth">
                 <el-input oninput = "value=value.replace(/[^0-9]/g,'')" v-model="formRemind.phone" placeholder="" style="width: 290px;" maxLength="11" ></el-input>
             </el-form-item>
             <el-form-item label="提醒人手机号2：" :label-width="formLabelWidth">
                 <el-input oninput = "value=value.replace(/[^0-9]/g,'')" v-model="formRemind.phone2" placeholder="" style="width: 290px;" maxLength="11" ></el-input>
-            </el-form-item>
-            <el-form-item label="提醒内容：" prop="content" :label-width="formLabelWidth">
+            </el-form-item> -->
+            <!-- <el-form-item label="提醒内容：" prop="content" :label-width="formLabelWidth">
                 <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="formRemind.content" style="width: 290px;" maxLength="50"></el-input>
-            </el-form-item>
+            </el-form-item> -->
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
             <el-button type="primary" :disabled="btnDisabled" @click="submitApplyForm('formRemind')">保存</el-button>
@@ -129,6 +141,7 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList=[[${userList}]];//商户集合
+    var projectList = [[${ projectList }]];//项目信息
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -146,7 +159,8 @@
                 form: {
                   mainAccountId:'',
                   createDateStart:'',
-                  createDateEnd:''
+                  createDateEnd:'',
+                  projectName: ''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -155,8 +169,8 @@
                     amount:'',
                     title:'',
                     content:'',
-                    phone:'',
-                    phone2:''
+                    // phone:'',
+                    // phone2:''
                 },
                 todayNum:'',
                 todayAmount:'',
@@ -199,7 +213,9 @@
                         }
                     ],
                 },
-            }        	  
+                projectList: projectList
+
+            }
         },
         methods: {
             numFormat(num) {
@@ -276,8 +292,8 @@
                         ocmVM.formRemind.amount=data.data.amount;
                         ocmVM.formRemind.title=data.data.title;
                         ocmVM.formRemind.content=data.data.content;
-                        ocmVM.formRemind.phone=data.data.phone;
-                        ocmVM.formRemind.phone2=data.data.phone2;
+                        // ocmVM.formRemind.phone=data.data.phone;
+                        // ocmVM.formRemind.phone2=data.data.phone2;
                         ocmVM.btnShow=false;
                     }else{
                         ocmVM.$message({
@@ -296,18 +312,18 @@
             submitApplyForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        if(this.formRemind.phone2&&this.formRemind.phone2.length!=11){
-                            this.$message.warning(`手机号不能小于11位`);
-                            return 
-                        }
+                        // if(this.formRemind.phone2&&this.formRemind.phone2.length!=11){
+                        //     this.$message.warning(`手机号不能小于11位`);
+                        //     return 
+                        // }
                         this.btnDisabled = true;
                         //分配
                         var param = {};
                         param.amount = this.formRemind.amount;
                         param.title = this.formRemind.title;
                         param.content = this.formRemind.content;
-                        param.phone = this.formRemind.phone;
-                        param.phone2 = this.formRemind.phone2;
+                        // param.phone = this.formRemind.phone;
+                        // param.phone2 = this.formRemind.phone2;
 
                         axios.post('/merchant/balanceWarnSetting/setting',param)
                         .then(function (response) {

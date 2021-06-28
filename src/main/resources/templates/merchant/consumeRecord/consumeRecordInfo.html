@@ -15,6 +15,13 @@
         .optimize-download {
             margin: 15px 0;
         }
+        .el-form-item__label {
+            width: auto !important;
+        }
+        .mainSearchForm {
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 
@@ -31,17 +38,19 @@
         <div class="mainSearchBg">
             <div class="mainSearchFormBox">
                 <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                    <div>
+                        <el-form-item label="消费日期:">
+                            <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.createDateStart"
+                                type="datetime" placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="—" class="widthauto">
+                            <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.createDateEnd"
+                                type="datetime" placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </div>
 
-                    <el-form-item label="消费日期:">
-                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.createDateStart"
-                            type="datetime" placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker format="yyyy-MM-dd" value-format="yyyy-MM-dd" v-model="form.createDateEnd"
-                            type="datetime" placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
                     <el-form-item label="消费商家:" label-width="auto">
                         <el-select v-model="form.mainAccountId" filterable clearable placeholder="商家账户名">
                             <el-option v-for="item in merchantUserListOptions" :key="item.id" :label="item.name"
@@ -51,6 +60,12 @@
                     </el-form-item>
                     <el-form-item label="资源ID:" label-width="55px">
                         <el-input v-model="form.clueId" placeholder="资源ID"></el-input>
+                    </el-form-item>
+                    <el-form-item label="咨询项目:">
+                        <el-select clearable v-model="form.projectName" placeholder="请选择" filterable>
+                            <el-option v-for="item in projectList" :key="item.id" :label="item.name" :value="item.name">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="">
                         <el-button icon="el-icon-search" type="primary" @click="searchTable('form')" class="searchBtn"
@@ -65,6 +80,9 @@
                     <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                     <el-table-column align="center" prop="orderId" label="订单号"></el-table-column>
                     <el-table-column align="center" prop="userName" label="商家名称"></el-table-column>
+
+                    <el-table-column align="center" prop="projectName" label="咨询项目" width="150"></el-table-column>
+
                     <el-table-column align="center" prop="createTime" label="消费时间" :formatter="dateFormat" width="200">
                     </el-table-column>
                     <el-table-column align="center" prop="clueId" label="资源ID" width="200"></el-table-column>
@@ -105,6 +123,7 @@
 <!-- import common js-->
 <script th:inline="javascript">
     var merchantUserList = [[${ userList }]];//商户集合
+    var projectList = [[${ projectList }]];//项目信息
     var userList=[]
     for(var i=0;i<merchantUserList.length;i++){
         userList.push(merchantUserList[i].id)
@@ -126,10 +145,12 @@
                     mainAccountId: '',
                     createDateStart: '',
                     createDateEnd: '',
-                    clueId: ''
+                    clueId: '',
+                    projectName: ''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
+                projectList: projectList
             }
         },
         methods: {
