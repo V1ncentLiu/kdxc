@@ -1,9 +1,10 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller.merchant.charge;
 
 import com.alibaba.fastjson.JSON;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.BussReceiveSourceTypeEnum;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -18,21 +19,26 @@ import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.charge.ClueChargeFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.merchant.dto.charge.*;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveInsertAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.project.ProjectDTO;
 import com.kuaidao.sys.dto.user.MerchantUserReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import freemarker.template.Configuration;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,12 +52,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * @author zxy
@@ -79,9 +83,12 @@ public class ClueChargeController {
     private Configuration configuration;
     @Autowired
     private BusReceiveFeignClient busReceiveFeignClient;
+
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
     /***
      * 资源资费列表页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initClueChargeList")
@@ -96,7 +103,34 @@ public class ClueChargeController {
         // 商家账号
         List<UserInfoDTO> userList = getMerchantUser(null);
         request.setAttribute("merchantUserList",userList);
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(ListUtils.emptyIfNull(userList).stream().map(UserInfoDTO::getId).collect(Collectors.toList()));
+        JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            request.setAttribute("projectList", listJSONResult.getData());
 
+        }
+
+        if(CollectionUtils.isNotEmpty(userList)){
+            Map<String, List<ProjectInfoDTO>> userProjectList = getUserProjectList(ListUtils.emptyIfNull(userList).stream().map(UserInfoDTO::getId).collect(Collectors.toList()));
+            BeanCopier beanCopier = BeanCopier.create(ProjectInfoDTO.class, ProjectDTO.class, false);
+            for (UserInfoDTO userInfoDTO : userList) {
+                if(userProjectList.containsKey(userInfoDTO.getId()+"")){
+                    List<ProjectInfoDTO> projectInfoDTOList = userProjectList.get(userInfoDTO.getId() + "");
+                    if(CollectionUtils.isNotEmpty(projectInfoDTOList)){
+                        List<ProjectDTO> list = new ArrayList<>();
+                        for (ProjectInfoDTO projectInfoDTO : projectInfoDTOList) {
+                            ProjectDTO projectDTO = new ProjectDTO();
+                            beanCopier.copy(projectInfoDTO,projectDTO,null);
+                            list.add(projectDTO);
+                        }
+                        userInfoDTO.setChildren(list);
+                    }
+                }
+            }
+        }
+
+        request.setAttribute("merchantUserProjectList",userList);
         return "merchant/charge/clueChargeManagerPage";
     }
 
@@ -109,8 +143,29 @@ public class ClueChargeController {
     @ResponseBody
     @PostMapping("/queryPage")
     public JSONResult<PageBean<MerchantClueChargeDTO>> queryPage(@RequestBody MerchantClueChargeReq pageParam) {
+        if(pageParam.getProjectId()!=null){
+            JSONResult<ProjectInfoDTO> projectInfoDTOJSONResult = projectInfoFeignClient.get(new IdEntityLong(pageParam.getProjectId()));
+            if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
+                String groupId = projectInfoDTOJSONResult.getData().getGroupId();
+                if(pageParam.getMainAccountId()!=null &&  pageParam.getMainAccountId().longValue()!=Long.parseLong(groupId)){
+                    return new JSONResult<PageBean<MerchantClueChargeDTO>>().success(null);
+                }
+                if(pageParam.getMainAccountId()==null){
+                    pageParam.setMainAccountId(Long.parseLong(groupId));
+                }
+            }
+        }
+        JSONResult<PageBean<MerchantClueChargeDTO>> list = clueChargeFeignClient.queryPage(pageParam);
+        if(JSONResult.SUCCESS.equals(list.getCode())){
+            Map<String, String> userProject = getUserProject(ListUtils.emptyIfNull(list.getData().getData()).stream().map(MerchantClueChargeDTO::getMainAccountId).collect(Collectors.toList()));
+            for (MerchantClueChargeDTO merchantClueChargeDTO : list.getData().getData()) {
+                if(userProject.containsKey(merchantClueChargeDTO.getMainAccountId()+"")){
+                    merchantClueChargeDTO.setProjectName(userProject.get(merchantClueChargeDTO.getMainAccountId()+""));
+                }
+            }
 
-        return clueChargeFeignClient.queryPage(pageParam);
+        }
+        return list;
 
     }
     /**
@@ -126,7 +181,7 @@ public class ClueChargeController {
         merchantClueChargeReq.setUpdateUser(getUserId());
         merchantClueChargeReq.setUpdateTime(new Date());
         merchantClueChargeReq.setIdList(idListLongReq.getIdList());
-    return clueChargeFeignClient.delete(merchantClueChargeReq);
+        return clueChargeFeignClient.delete(merchantClueChargeReq);
     }
 
     /***
@@ -137,7 +192,7 @@ public class ClueChargeController {
     @PostMapping("/listNoPage")
     @ResponseBody
     public JSONResult<List<MerchantClueChargeDTO>> listNoPage(@RequestBody MerchantClueChargePageParam merchantClueChargePageParam,
-            HttpServletRequest request) {
+                                                              HttpServletRequest request) {
 
         JSONResult<List<MerchantClueChargeDTO>> list = clueChargeFeignClient.listNoPage(merchantClueChargePageParam);
 
@@ -148,7 +203,7 @@ public class ClueChargeController {
 
     /**
      * 保存资源资费
-     * 
+     *
      * @param orgDTO
      * @return
      * @throws InvocationTargetException
@@ -256,7 +311,7 @@ public class ClueChargeController {
 
     /**
      * 获取当前登录账号ID
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -291,5 +346,42 @@ public class ClueChargeController {
         userInfoDTO.setStatusList(arrayList);
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
+    }
+
+    /**
+     * 根据用户id  返回项目名
+     * @param userIds
+     * @return
+     */
+    private Map<String,String> getUserProject(List<Long> userIds){
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(userIds);
+        JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+        List<ProjectInfoDTO> projectInfoDTOList = new ArrayList<>();
+        if(listJSONResult.getCode().equals(JSONResult.SUCCESS)) {
+            projectInfoDTOList =listJSONResult.data();
+        }
+        return  ListUtils.emptyIfNull(projectInfoDTOList).stream().
+                collect(Collectors.
+                        groupingBy(ProjectInfoDTO::getGroupId,
+                                Collectors.mapping(ProjectInfoDTO::getProjectName,
+                                        Collectors.joining("、"))));
+
+    }
+
+    /**
+     * 根据用户id  返回项目名
+     * @param userIds
+     * @return
+     */
+    private Map<String,List<ProjectInfoDTO>> getUserProjectList(List<Long> userIds){
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(userIds);
+        JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+        List<ProjectInfoDTO> projectInfoDTOList = new ArrayList<>();
+        if(listJSONResult.getCode().equals(JSONResult.SUCCESS)) {
+            projectInfoDTOList =listJSONResult.data();
+        }
+        return ListUtils.emptyIfNull(projectInfoDTOList).stream().collect(Collectors.groupingBy(ProjectInfoDTO::getGroupId));
     }
 }

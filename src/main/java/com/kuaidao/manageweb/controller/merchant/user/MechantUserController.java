@@ -3,7 +3,10 @@
  */
 package com.kuaidao.manageweb.controller.merchant.user;
 
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SettingConstant;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.emun.sys.UserTypeEnum;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
@@ -17,6 +20,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.MerchantClueInfoFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
@@ -49,6 +53,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -85,10 +90,13 @@ public class MechantUserController {
     @Autowired
     private ChangeOrgFeignClient changeOrgFeignClient;
     @Autowired
-    private MerchantUserInfoFeignClient mechantUserInfoFeignClient;
+    private MerchantUserInfoFeignClient merchantUserInfoFeignClient;
 
     @Autowired
     private MerchantClueInfoFeignClient merchantClueInfoFeignClient;
+
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -134,6 +142,14 @@ public class MechantUserController {
         if (subaccountRoleDTOs != null && JSONResult.SUCCESS.equals(subaccountRoleDTOs.getCode())) {
             request.setAttribute("subaccountRoleDTOs", subaccountRoleDTOs.getData());
         }
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(ListUtils.emptyIfNull(getMerchantUser()).stream().map(UserInfoDTO::getId).collect(Collectors.toList()));
+        JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            request.setAttribute("projectList", listJSONResult.getData());
+
+        }
+        //查询项目信息
         request.setAttribute("ossUrl",ossUrl);
         return "merchant/user/userManagePage";
     }
@@ -146,19 +162,39 @@ public class MechantUserController {
     @ResponseBody
     public JSONResult<PageBean<UserInfoDTO>> merchantlist(@RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
                                                           HttpServletResponse response) {
-        JSONResult<PageBean<UserInfoDTO>> list = mechantUserInfoFeignClient.merchantlist(userInfoPageParam);
+        if(userInfoPageParam.getProjectId()!=null){
+            JSONResult<ProjectInfoDTO> projectInfoDTOJSONResult = projectInfoFeignClient.get(new IdEntityLong(userInfoPageParam.getProjectId()));
+            if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
+                String groupId = projectInfoDTOJSONResult.getData().getGroupId();
+                userInfoPageParam.setId(Long.parseLong(groupId));
+            }
+        }
+        JSONResult<PageBean<UserInfoDTO>> list = merchantUserInfoFeignClient.merchantlist(userInfoPageParam);
         if(userInfoPageParam.getParentId()==null && list.getCode().equals(JSONResult.SUCCESS) && CollectionUtils.isNotEmpty(list.getData().getData())){
             List<UserInfoDTO> data = list.getData().getData();
             List<Long> userIds = ListUtils.emptyIfNull(data).stream().map(UserInfoDTO::getId).collect(Collectors.toList());
             IdListLongReq idListLongReq = new IdListLongReq();
             idListLongReq.setIdList(userIds);
             JSONResult<Map<Long, Integer>> userBalanceStatus = merchantClueInfoFeignClient.getUserBalanceStatus(idListLongReq);
+            JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+            List<ProjectInfoDTO> projectInfoDTOList = new ArrayList<>();
+            if(listJSONResult.getCode().equals(JSONResult.SUCCESS)) {
+                projectInfoDTOList =listJSONResult.data();
+            }
+            Map<String, String> projectMap = ListUtils.emptyIfNull(projectInfoDTOList).stream().
+                    collect(Collectors.
+                            groupingBy(ProjectInfoDTO::getGroupId,
+                                    Collectors.mapping(ProjectInfoDTO::getProjectName,
+                                            Collectors.joining("、"))));
             if(userBalanceStatus.getCode().equals(JSONResult.SUCCESS)){
                 Map<Long, Integer> map = userBalanceStatus.getData();
                 for (UserInfoDTO userInfoDTO : data) {
                     userInfoDTO.setBalanceStatus(null);
                     if(map.containsKey(userInfoDTO.getId())){
                         userInfoDTO.setBalanceStatus(map.get(userInfoDTO.getId()));
+                    }
+                    if(projectMap.containsKey(userInfoDTO.getId()+"")){
+                        userInfoDTO.setProjectName(projectMap.get(userInfoDTO.getId()+""));
                     }
                 }
             }
@@ -199,9 +235,26 @@ public class MechantUserController {
         }
         if(userInfoReq.getUserType().equals(UserTypeEnum.商家子账号.getType())){
             userInfoReq.setMerchantType(SysConstant.MerchantType.TYPE2);
+            String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
+            Long count = Long.parseLong(merchantUserMsgCount);
+            //查询现在有的
+            if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"该商户短信开启数量超过"+count+"!");
+            }
         }
-        return mechantUserInfoFeignClient.create(userInfoReq);
+
+        return merchantUserInfoFeignClient.create(userInfoReq);
     }
+
+    private Long getMerchantSmsCount(Long parentId) {
+
+        //查询现在有的
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(parentId);
+        JSONResult<Long> jsonResult =  merchantUserInfoFeignClient.getMerchantSmsCount(idEntityLong);
+        return jsonResult.getData();
+    }
+
     /**
      * 查询用户根据id
      *
@@ -213,7 +266,7 @@ public class MechantUserController {
     @PostMapping("/getMechantUserById")
     @ResponseBody
     public JSONResult<UserInfoReq> getMechantUserById(@RequestBody UserInfoReq userInfoReq) {
-        return mechantUserInfoFeignClient.getMechantUserById(userInfoReq);
+        return merchantUserInfoFeignClient.getMechantUserById(userInfoReq);
     }
 
     /**
@@ -232,7 +285,18 @@ public class MechantUserController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        return mechantUserInfoFeignClient.updateUser(userInfoReq);
+        UserInfoReq param= new UserInfoReq();
+        param.setId(userInfoReq.getId());
+        JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(param);
+        if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData().getSmsStatus().intValue()==0 && userInfoReq.getSmsStatus().intValue()==1){
+            String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
+            Long count = Long.parseLong(merchantUserMsgCount);
+            //查询现在有的
+            if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"该商户短信开启数量超过"+count+"!");
+            }
+        }
+        return merchantUserInfoFeignClient.updateUser(userInfoReq);
     }
 
     /***
@@ -322,5 +386,18 @@ public class MechantUserController {
         }
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
         return jsonResult;
+    }
+
+    /**
+     * 查询商家账号
+     *
+     * @return
+     */
+    private List<UserInfoDTO> getMerchantUser() {
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+        JSONResult<List<UserInfoDTO>> merchantUserList =
+                merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+        return merchantUserList.getData();
     }
 }

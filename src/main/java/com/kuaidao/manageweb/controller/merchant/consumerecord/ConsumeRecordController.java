@@ -11,6 +11,7 @@ import com.kuaidao.account.dto.consume.ConsumeRecordNumDTO;
 import com.kuaidao.account.dto.consume.CountConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordDTO;
 import com.kuaidao.account.dto.consume.MerchantConsumeRecordPageParam;
+import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.businessconfig.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.entity.*;
@@ -22,6 +23,7 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.merchant.consumerecord.MerchantConsumeRecordFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
@@ -30,6 +32,7 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -46,9 +49,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zxy
@@ -70,6 +72,9 @@ public class ConsumeRecordController {
     @Autowired
     private TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
 
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
+
     /***
      * 消费记录列表页(管理端)
      *
@@ -85,6 +90,14 @@ public class ConsumeRecordController {
         // 锁定
         statusList.add(SysConstant.USER_STATUS_LOCK);
         List<UserInfoDTO> userList = getMerchantUser(SysConstant.USER_TYPE_TWO, statusList);
+
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(ListUtils.emptyIfNull(userList).stream().map(UserInfoDTO::getId).collect(Collectors.toList()));
+        JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            request.setAttribute("projectList", listJSONResult.getData());
+
+        }
         request.setAttribute("userList", userList);
         return "merchant/consumeRecord/consumeRecord";
     }
@@ -98,9 +111,29 @@ public class ConsumeRecordController {
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
     public JSONResult<PageBean<CountConsumeRecordDTO>> countList(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletRequest request) {
+        if(pageParam.getProjectId()!=null){
+            JSONResult<ProjectInfoDTO> projectInfoDTOJSONResult = projectInfoFeignClient.get(new IdEntityLong(pageParam.getProjectId()));
+            if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
+                String groupId = projectInfoDTOJSONResult.getData().getGroupId();
+                if(pageParam.getUserId()!=null && pageParam.getUserId().longValue()!=Long.parseLong(groupId)){
+                    return new JSONResult<PageBean<CountConsumeRecordDTO>>().success(null);
+                }
+                if(pageParam.getUserId()==null){
+                    pageParam.setUserId(Long.parseLong(groupId));
+                }
+            }
+        }
         // 消费记录
         JSONResult<PageBean<CountConsumeRecordDTO>> countList = merchantConsumeRecordFeignClient.countList(pageParam);
+        if(JSONResult.SUCCESS.equals(countList.getCode())){
+            Map<String, String> userProject = getUserProject(ListUtils.emptyIfNull(countList.getData().getData()).stream().map(CountConsumeRecordDTO::getUserId).collect(Collectors.toList()));
+            for (CountConsumeRecordDTO countConsumeRecordDTO : countList.getData().getData()) {
+                if(userProject.containsKey(countConsumeRecordDTO.getUserId()+"")){
+                    countConsumeRecordDTO.setProjectName(userProject.get(countConsumeRecordDTO.getUserId()+""));
+                }
+            }
 
+        }
         return countList;
     }
 
@@ -128,6 +161,7 @@ public class ConsumeRecordController {
                 curList.add(i + 1);
                 //
                 curList.add(dto.getUserName());
+                curList.add(dto.getProjectName());
                 curList.add(dto.getDateNum());
                 curList.add(dto.getAmount());
                 curList.add(dto.getCreateDate());
@@ -145,9 +179,10 @@ public class ConsumeRecordController {
         // 设置宽度
         sheet.setColumnWidth(1, 4000);
         sheet.setColumnWidth(2, 4000);
-        sheet.setColumnWidth(3, 4000);
+        sheet.setColumnWidth(3, 5500);
         sheet.setColumnWidth(4, 4000);
-        sheet.setColumnWidth(5, 5500);
+        sheet.setColumnWidth(5, 4000);
+        sheet.setColumnWidth(6, 5500);
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007ExcelWorkbook(workBook, dataList);
 
         String name = "商家消费记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
@@ -165,6 +200,7 @@ public class ConsumeRecordController {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
         headTitleList.add("消费商家名称");
+        headTitleList.add("项目信息");
         headTitleList.add("消费数（天）");
         headTitleList.add("消费金额（元）");
         headTitleList.add("消费时间");
@@ -292,8 +328,24 @@ public class ConsumeRecordController {
     @RequiresPermissions("merchant:consumeRecord:view")
     public String initInfoList(HttpServletRequest request, @RequestParam Long mainAccountId) {
         List<UserInfoDTO> userList = getMerchantUserListByainAccountId(mainAccountId);
+        IdListLongReq idListLongReq = new IdListLongReq();
+
+        if(mainAccountId!=null){
+            idListLongReq.setIdList(Arrays.asList(mainAccountId));
+        }else{
+            idListLongReq.setIdList(getMerchantUserIdList());
+        }
+        JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            request.setAttribute("projectList", listJSONResult);
+        }
         request.setAttribute("userList", userList);
         return "merchant/consumeRecord/consumeRecordInfo";
+    }
+
+    private List<Long> getMerchantUserIdList() {
+        List<UserInfoDTO> merchantUser = getMerchantUser(SysConstant.USER_TYPE_TWO, null);
+        return ListUtils.emptyIfNull(merchantUser).stream().map(UserInfoDTO::getId).collect(Collectors.toList());
     }
 
 
@@ -309,9 +361,29 @@ public class ConsumeRecordController {
         if (null == pageParam.getUserId()) {
             pageParam.setMerchantUserList(pageParam.getUserList());
         }
+        if(pageParam.getProjectId()!=null){
+            JSONResult<ProjectInfoDTO> projectInfoDTOJSONResult = projectInfoFeignClient.get(new IdEntityLong(pageParam.getProjectId()));
+            if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
+                String groupId = projectInfoDTOJSONResult.getData().getGroupId();
+                if(pageParam.getUserId()!=null && pageParam.getUserId().longValue()!=Long.parseLong(groupId)){
+                    return new JSONResult<PageBean<MerchantConsumeRecordDTO>>().success(null);
+                }
+                if(pageParam.getUserId()==null){
+                    pageParam.setUserId(Long.parseLong(groupId));
+                }
+            }
+        }
         // 消费记录
         JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
+        if(JSONResult.SUCCESS.equals(list.getCode())){
+            Map<String, String> userProject = getUserProject(ListUtils.emptyIfNull(list.getData().getData()).stream().map(MerchantConsumeRecordDTO::getUserId).collect(Collectors.toList()));
+            for (MerchantConsumeRecordDTO countConsumeRecordDTO : list.getData().getData()) {
+                if(userProject.containsKey(countConsumeRecordDTO.getUserId()+"")){
+                    countConsumeRecordDTO.setProjectName(userProject.get(countConsumeRecordDTO.getUserId()+""));
+                }
+            }
 
+        }
         return list;
     }
 
@@ -332,12 +404,16 @@ public class ConsumeRecordController {
         List<MerchantConsumeDetailExportModel> merchantConsumeDetailExportModelList = new ArrayList();
         if (jsonResult.getCode().equals(JSONResult.SUCCESS)) {
             List<MerchantConsumeRecordDTO> data = jsonResult.getData();
+            Map<String, String> userProject = getUserProject(ListUtils.emptyIfNull(data).stream().map(MerchantConsumeRecordDTO::getUserId).collect(Collectors.toList()));
             if (CollectionUtils.isNotEmpty(data)) {
                 for (int i = 0; i < data.size(); i++) {
                     MerchantConsumeRecordDTO merchantConsumeRecordDTO = data.get(i);
                     MerchantConsumeDetailExportModel merchantConsumeDetailExportModel = new MerchantConsumeDetailExportModel();
                     BeanUtils.copyProperties(merchantConsumeRecordDTO, merchantConsumeDetailExportModel);
                     int flag =i+1;
+                    if(userProject.containsKey(merchantConsumeRecordDTO.getUserId()+"")){
+                        merchantConsumeDetailExportModel.setProjectName(userProject.get(merchantConsumeRecordDTO.getUserId()+""));
+                    }
                     merchantConsumeDetailExportModel.setId(flag);
                     merchantConsumeDetailExportModel.setCustomerTime(DateUtil.convert2String(merchantConsumeRecordDTO.getCreateTime(),DateUtil.ymdhms));
                     merchantConsumeDetailExportModel.setClueId(merchantConsumeRecordDTO.getClueId()+"");
@@ -553,5 +629,26 @@ public class ConsumeRecordController {
         userInfoDTO.setStatusList(arrayList);
         JSONResult<List<UserInfoDTO>> merchantUserList = merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
+    }
+
+    /**
+     * 根据用户id  返回项目名
+     * @param userIds
+     * @return
+     */
+    private Map<String,String> getUserProject(List<Long> userIds){
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(userIds);
+        JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
+        List<ProjectInfoDTO> projectInfoDTOList = new ArrayList<>();
+        if(listJSONResult.getCode().equals(JSONResult.SUCCESS)) {
+            projectInfoDTOList =listJSONResult.data();
+        }
+        return  ListUtils.emptyIfNull(projectInfoDTOList).stream().
+                collect(Collectors.
+                        groupingBy(ProjectInfoDTO::getGroupId,
+                                Collectors.mapping(ProjectInfoDTO::getProjectName,
+                                        Collectors.joining("、"))));
+
     }
 }
