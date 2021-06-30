@@ -337,7 +337,7 @@ public class ConsumeRecordController {
         }
         JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.queryListByGroupId(idListLongReq);
         if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
-            request.setAttribute("projectList", listJSONResult);
+            request.setAttribute("projectList", listJSONResult.getData());
         }
         request.setAttribute("userList", userList);
         return "merchant/consumeRecord/consumeRecordInfo";
