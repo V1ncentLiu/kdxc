@@ -553,7 +553,10 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     curList.add("顾问匹配");
                 }
+                //首次响应间隔
+                curList.add(taskDTO.getFirstResponseInterval());
                 dataList.add(curList);
+
             }
         }
 
