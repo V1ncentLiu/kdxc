@@ -125,18 +125,18 @@
                         </el-select>
                     </el-form-item>
                 </div>
-                
+
                 <!-- <div class="mainSearchBtnBox">  -->
                     <div class="mainSearchBtnBox-right">
                         <div>
                             <el-form-item label="项目信息:" prop="status" label-width="75px">
-                                <el-select clearable v-model="userSearchForm.projectName" placeholder="请选择" filterable>
-                                    <el-option v-for="item in projectList" :key="item.id" :label="item.name" :value="item.name">
+                                <el-select clearable v-model="userSearchForm.projectId" placeholder="请选择" filterable>
+                                    <el-option v-for="item in projectList" :key="item.id" :label="item.projectName" :value="item.id">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="新客户短信提醒:" label-width="75px" style="margin-left: 65px;">
-                                <el-select v-model="newsQueryCode" clearable>
+                                <el-select v-model="smsStatus" clearable>
                                     <el-option
                                             v-for="item in customerCode"
                                             :key="item.key"
@@ -144,20 +144,18 @@
                                             :value="item.key"
                                         >
                                         </el-option>
-            
+
                                 </el-select>
 
                             </el-form-item>
                         </div>
-                        
+
                         <el-form-item label="">
                             <el-button icon="el-icon-search" type="primary" @click="searchTable()" style="margin-left: 10px;">搜索
                             </el-button>
                         </el-form-item>
                     </div>
 
-
-                
                 <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                 <!-- </div>  -->
             </el-form>
@@ -172,19 +170,20 @@
                 <el-table-column align="center" prop="name" label="商家名称"></el-table-column>
                 <el-table-column align="center" prop="projectName" label="项目信息" width="180">
                     <template slot-scope="scope">
-                       
-                        <el-popover
-                        placement="top-start"
-                        width="200"
-                        trigger="hover"
-                        content="阿金大方阿斯顿发送到发阿迪舒服阿斯顿发阿斯顿发阿斯顿发阿斯顿发阿斯顿发送到发阿斯顿发送到发阿斯顿发阿斯顿发阿斯顿发阿斯顿fa s d"
-                        >
-                        <span class="scope-text" slot="reference">
-                            阿金大方阿斯顿发送到发阿迪舒服阿斯顿发阿斯顿发阿斯顿发阿斯顿发阿斯顿发送到发阿斯顿发送到发阿斯顿发阿斯顿发阿斯顿发阿斯顿fa s d
-                        </span>
-                        </el-popover>
+                        <div v-if="scope.row.projectName">
+                            <el-popover
+                                placement="top-start"
+                                trigger="hover"
+                                width="200"
+                            >
+                                {{scope.row.projectName}}
+                                <div slot="reference" class="name-wrapper">
+                                    {{scope.row.projectName}}
+                                </div>
+                            </el-popover>
+                        </div>
+                        <div v-else>__</div>
                     </template>
-
                 </el-table-column>
                 <el-table-column align="center" prop="balance" label="账号余额" width="100"></el-table-column>
                 <el-table-column align="center" prop="balance" label="剩余餐盟币" width="100"></el-table-column>
@@ -215,6 +214,18 @@
                                  width="80"></el-table-column>
                 <el-table-column align="center" prop="isCharge" label="资源收费" :formatter="transformIsCharge" width="80">
                 </el-table-column>
+
+                <el-table-column align="center" prop="smsStatus" label="新客户短信提醒" :formatter="transformIsCharge" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.smsStatus || +scope.row.smsStatus ===0">
+                            {{smsStatusConfig[scope.row.smsStatus]}}
+                        </div>
+                        <div v-else>
+                            __
+                        </div>
+                    </template>
+                </el-table-column>
+
                 <el-table-column align="center" label="操作" width="150">
                     <template slot-scope="scope">
                         <shiro:hasPermission name="sys:userManager:edit">
@@ -500,6 +511,9 @@
     var ossSignatureUrl =[[${ ossUrl }]]; //上传文件地址
     var projectList = [[${ projectList }]];//项目信息
 
+
+    console.log('projectList',projectList)
+
     if (orgData != null) {
         for (var i = 0; i < orgData.length; i++) {
             var curNode = orgData[i];
@@ -542,7 +556,7 @@
                 name: '',
                 merchantType: '',
                 isCharge:'',
-                projectName: ''
+                projectId: ''
             },
             subAccountForm: {
                 username: "",
@@ -800,7 +814,11 @@
                 }],
             newCode: 1,
             newChildCode: 0,
-            newsQueryCode: '',
+            smsStatus: '',
+            smsStatusConfig: {
+                0: '关闭',
+                1: '开启'
+            }
 
         },
         methods: {
@@ -1092,9 +1110,10 @@
                 param.name = this.userSearchForm.name;
                 param.merchantType = this.userSearchForm.merchantType;
                 param.isCharge = this.userSearchForm.isCharge;
-                param.projectName = this.userSearchForm.projectName;
+                param.projectId = this.userSearchForm.projectId;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
+                param.smsStatus = this.smsStatus
 
                 param.userType = 2;
                 console.info(param);

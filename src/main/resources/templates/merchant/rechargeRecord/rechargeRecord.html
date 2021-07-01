@@ -35,8 +35,8 @@
                 </el-form-item>
 
                 <el-form-item label="项目信息:">
-                    <el-select clearable v-model="form.projectName" placeholder="请选择" filterable>
-                        <el-option v-for="item in projectList" :key="item.id" :label="item.name" :value="item.name">
+                    <el-select clearable v-model="form.projectId" placeholder="请选择" filterable>
+                        <el-option v-for="item in projectList" :key="item.id" :label="item.projectName" :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -92,7 +92,30 @@
                     </template>
                 </el-table-column> 
 
-                <el-table-column align="center" prop="projectName" label="项目信息" width="150"></el-table-column>
+                <el-table-column align="center" prop="projectName" label="项目信息" width="180">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.projectName">
+                            <el-popover
+                                placement="top-start"
+                                trigger="hover"
+                                width="200"
+                            >
+                                {{scope.row.projectName}}
+                                <div slot="reference" class="name-wrapper">
+                                    {{scope.row.projectName}}
+                                </div>
+                            </el-popover>
+                        </div>
+                        <div v-else>__</div>
+                    </template>
+                </el-table-column>
+
+                <el-table-column align="center" prop="projectName" label="项目信息" width="180">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.projectName">{{scope.row.projectName}}</div> 
+                        <div v-else>__</div>
+                    </template>
+                </el-table-column>
 
                 <el-table-column align="center" prop="rechargeWay" label="充值方式">
                     <template slot-scope="scope">                        
@@ -129,6 +152,7 @@
     var merchantUserList=[[${merchantUserList}]];//商户集合
     var rechargeAccountDTO=[[${rechargeAccountDTO}]];
     var projectList = [[${ projectList }]];//项目信息
+
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -151,7 +175,7 @@
                     rechargeBeginTime:'',
                     rechargeEndTime:'',
                     serialNumber:'',
-                    projectName: ''
+                    projectId: ''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -202,6 +226,9 @@
                 param.rechargeBeginTime = this.form.rechargeBeginTime; 
                 param.rechargeEndTime = this.form.rechargeEndTime;
                 param.serialNumber = this.form.serialNumber; 
+                param.projectId = this.form.projectId;
+
+
                 axios.post('/merchant/merchantRechargeRecordManage/queryManagePageList', param)
                 .then(function (response) {
                     console.log(response)

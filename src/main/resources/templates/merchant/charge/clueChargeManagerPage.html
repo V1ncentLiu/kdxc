@@ -116,8 +116,8 @@
                     <div class="mainSearchBtnBox">
 
                         <el-form-item label="项目信息:">
-                            <el-select clearable v-model="clueChargeSearchForm.projectName" placeholder="请选择" filterable>
-                                <el-option v-for="item in projectList" :key="item.id" :label="item.name" :value="item.name">
+                            <el-select clearable v-model="clueChargeSearchForm.projectId" placeholder="请选择" filterable>
+                                <el-option v-for="item in projectList" :key="item.id" :label="item.projectName" :value="item.id">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -175,7 +175,23 @@
                             <el-table-column align="center" prop="mainAccountName" label="选择商家" min-width="80">
                             </el-table-column>
 
-                            <el-table-column align="center" prop="projectName" label="项目信息" width="150"></el-table-column>
+                            <el-table-column align="center" prop="projectName" label="项目信息" width="150">
+                                <template slot-scope="scope">
+                                    <div v-if="scope.row.projectName">
+                                        <el-popover
+                                            placement="top-start"
+                                            trigger="hover"
+                                            width="200"
+                                        >
+                                            {{scope.row.projectName}}
+                                            <div slot="reference" class="name-wrapper">
+                                                {{scope.row.projectName}}
+                                            </div>
+                                        </el-popover>
+                                    </div>
+                                    <div v-else>__</div>
+                                </template>
+                            </el-table-column>
 
                             <el-table-column align="center" prop="updateTime" label="更新时间" :formatter="dateFormat"
                                 min-width="120">
@@ -263,9 +279,9 @@
 
                         </el-cascader> -->
                         <el-cascader :options="merchantUserProjectList" @change="handleChange" filterable clearable v-model="subAccountForm.mainAccountId" style="width: 290px;">
-                            <template slot-scope="{ node, data }">
+                            <!-- <template slot-scope="{ node, data }">
                                 <span>{{ data.label }}</span>
-                            </template>
+                            </template> -->
                         </el-cascader>
                     </el-form-item>
 
@@ -343,35 +359,32 @@
 
     var merchantUserProjectList = [[${ merchantUserProjectList }]];//选择商家信息
 
-    // 联调完删除
+    console.log(merchantUserProjectList)
+    const options = merchantUserProjectList.map(item => {
+        const subChildren = item.children || [];
+        const children = subChildren.map(subItem => {
+            return {
+                label: subItem.projectName, value: subItem.id
+            }
 
-    // var options = [{
-    //     value: 'zhinan',
-    //     label: '指南',
-    //     children: [{
-    //         value: 'shejiyuanze',
-    //         label: '设计原则'
-    //     }]
-    // }, {
-    //     value: 'zujian',
-    //     label: '组件',
-    //     children: [{
-    //         value: 'basic',
-    //         label: 'Basic'
-    //     }]
-    // }, {
-    //     value: 'ziyuan',
-    //     label: '资源',
-    //     children: [{
-    //         value: 'axure',
-    //         label: 'Axure Components'
-    //     }]
-    // }]
+        })
+        const params = {
+            label: item.name,
+            value: item.id
+        }
+        if(subChildren.length) {
+            params.children = children;
+        }
+        return params;
+    })
+
+    console.log('options', options)
+
 
     var clueChargeVM = new Vue({
         el: '#clueChargeManage',
         data: {
-            merchantUserProjectList: merchantUserProjectList,
+            merchantUserProjectList: options,
             projectList: projectList,
             formInline: {
                 region: '',
@@ -384,7 +397,7 @@
                 source: '',
                 merchantType: '',
                 mainAccountId: '',
-                projectName: ''
+                projectId: ''
             },
             categoryOptions: categoryList,
             industryOptions: industryCategoryList,
@@ -555,7 +568,7 @@
             // 添加编辑删除
             seatOperation(type) {
                 if (this.$refs['subAccountForm'] !== undefined) {
-                    this.subAccountForm.mainAccountId=''
+                    this.subAccountForm.mainAccountId= []
                     this.$refs['subAccountForm'].resetFields();
                 }
                 switch (type) {
@@ -566,7 +579,7 @@
                         this.subAccountForm.iframeaccountNo = '不限'
                         this.subAccountForm.iframesecretKey = ''
                         this.subAccountForm.iframemerchantType = '全部商家'
-                        this.subAccountForm.mainAccountId = ''
+                        this.subAccountForm.mainAccountId = []
                         this.title = '添加资费设置'
                         this.centerDialogVisible = true
                         break;
@@ -579,8 +592,7 @@
                             this.subAccountForm.iframeaddress = category
                             this.subAccountForm.iframeaccountNo = source
                             this.subAccountForm.iframesecretKey = charge
-                            // this.subAccountForm.mainAccountId = mainAccountId
-                            this.subAccountForm.mainAccountId= ['zhinan', 'shejiyuanze']
+                            this.subAccountForm.mainAccountId= [mainAccountId]
                             this.subAccountForm.iframemerchantType = merchantType == 0 ? '全部商家' : merchantType == 1 ? '内部' : '外部'
                             this.centerDialogVisible = true
                         } else if (this.multipleSelection.length === 0) {
@@ -649,7 +661,7 @@
                         param.charge = this.subAccountForm.iframesecretKey
                         param.merchantType = this.selectionValue(this.subAccountForm.iframemerchantType, this.merchantOwnedOptions)
                         if(param.merchantType==2){
-                            param.mainAccountId = this.subAccountForm.mainAccountId
+                            param.mainAccountId = this.subAccountForm.mainAccountId[0]
                         }
                         if (this.title === '编辑资费设置') {
                             param.id = this.multipleSelection[0].id
@@ -708,6 +720,7 @@
                 param.source = this.clueChargeSearchForm.source;
                 param.merchantType = this.clueChargeSearchForm.merchantType;
                 param.mainAccountId = this.clueChargeSearchForm.mainAccountId;
+                param.projectId = this.clueChargeSearchForm.projectId;
 
                 // console.info(param);
                 axios.post('/merchant/clueChargeManager/queryPage', param)
@@ -715,7 +728,6 @@
                         var result = response.data;
                         if (result.code == 0) {
                             var table = result.data;
-                            console.log(table.data);
                             that.dynamicValidateForm.dataTable = table.data
                             that.pager.total = table.total;
                             that.pager.currentPage = table.currentPage;
@@ -732,7 +744,6 @@
             //选择一条数据
             handleSelectionChange(val) {
                 this.multipleSelection = val;
-                console.log(this.multipleSelection);
 
             },
 
@@ -756,8 +767,7 @@
                 return value
             },
             handleChange(value) {
-                console.log(value)
-                
+                this.subAccountForm.mainAccountId = [value[0]];
             }
         },
         created() {

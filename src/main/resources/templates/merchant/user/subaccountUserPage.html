@@ -50,7 +50,7 @@
                 </el-form-item>
 
                 <el-form-item label="新客户短信提醒:" label-width="95px" style="margin-left: 10px;">
-                    <el-select v-model="newsQueryCode" clearable>
+                    <el-select v-model="smsStatus" clearable>
                         <el-option
                                 v-for="item in customerCode"
                                 :key="item.key"
@@ -81,6 +81,16 @@
                 <el-table-column align="center" prop="roleName" label="角色"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="160"></el-table-column>
                 <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus" width="80"></el-table-column>
+                <el-table-column align="center" prop="smsStatus" label="新客户短信提醒" :formatter="transformIsCharge" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.smsStatus || +scope.row.smsStatus ===0">
+                            {{smsStatusConfig[scope.row.smsStatus]}}
+                        </div>
+                        <div v-else>
+                            __
+                        </div>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" label="操作" width="150">
                     <template slot-scope="scope">
                         <shiro:hasPermission name="sys:userManager:edit">
@@ -218,7 +228,12 @@
     var userVM = new Vue({
         el: '#userManage',
         data: {
-            newsQueryCode: '',
+            smsStatus: '',
+            smsStatusConfig: {
+                0: '关闭',
+                1: '开启'
+            },
+            
             merchatName:merchantName,
             subAccountFormTitle:"添加商家子账号",
             dialogsubAccountForm:false,

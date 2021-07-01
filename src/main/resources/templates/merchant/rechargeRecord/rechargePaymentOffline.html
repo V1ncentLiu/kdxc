@@ -90,28 +90,24 @@
     var merchantUserList=[[${merchantUserList}]];//商户集合
     var token = [[${token}]];
 
-    var options = [{
-        value: 'zhinan',
-        label: '指南',
-        children: [{
-            value: 'shejiyuanze',
-            label: '设计原则'
-        }]
-    }, {
-        value: 'zujian',
-        label: '组件',
-        children: [{
-            value: 'basic',
-            label: 'Basic'
-        }]
-    }, {
-        value: 'ziyuan',
-        label: '资源',
-        children: [{
-            value: 'axure',
-            label: 'Axure Components'
-        }]
-    }]
+    const options = merchantUserList.map(item => {
+        const subChildren = item.children || [];
+        const children = subChildren.map(subItem => {
+            return {
+                label: subItem.projectName, value: subItem.id
+            }
+
+        })
+        const params = {
+            label: item.name,
+            value: item.id
+        }
+        if(subChildren.length) {
+            params.children = children;
+        }
+        return params;
+    })
+    
 
 
 
@@ -175,7 +171,7 @@
                     if (valid) {
                         this.isDisabled=true;
                         var param ={};   
-                        param.rechargeBusiness = this.form.rechargeBusiness;
+                        param.rechargeBusiness = this.form.rechargeBusiness[0];
                         param.rechargeMoney = this.form.rechargeMoney; 
                         param.imgUrl = this.form.imgUrl;
                         //param.token = token;
@@ -297,9 +293,8 @@
             　　this.form.rechargeMoney=this.form.rechargeMoney.replace(/[^\.\d]/g,'');
                 this.form.rechargeMoney=this.form.rechargeMoney.replace('.','');
             },
-            handleChange(value, id) {
-                console.log(value)
-                console.log(id)
+            handleChange(value) {
+                this.form.rechargeBusiness = [value[0]];
 
             }
         },

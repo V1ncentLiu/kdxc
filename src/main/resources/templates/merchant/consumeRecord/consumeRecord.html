@@ -44,8 +44,8 @@
                 </el-form-item> 
 
                 <el-form-item label="项目信息:">
-                    <el-select clearable v-model="form.projectName" placeholder="请选择" filterable>
-                        <el-option v-for="item in projectList" :key="item.id" :label="item.name" :value="item.name">
+                    <el-select clearable v-model="form.projectId" placeholder="请选择" filterable>
+                        <el-option v-for="item in projectList" :key="item.id" :label="item.projectName" :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -94,7 +94,23 @@
                     </template>
                 </el-table-column>
 
-                <el-table-column align="center" prop="projectName" label="项目信息" width="150"></el-table-column>
+                <el-table-column align="center" prop="projectName" label="项目信息" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.projectName">
+                            <el-popover
+                                placement="top-start"
+                                trigger="hover"
+                                width="200"
+                            >
+                                {{scope.row.projectName}}
+                                <div slot="reference" class="name-wrapper">
+                                    {{scope.row.projectName}}
+                                </div>
+                            </el-popover>
+                        </div> 
+                        <div v-else>__</div>
+                    </template>
+                </el-table-column>
 
                 <el-table-column align="center" prop="dateNum" label="消费数（天）" width="200"></el-table-column>
                 <el-table-column align="center" prop="amount" label="消费金额(元)" width="200"></el-table-column>                
@@ -160,7 +176,7 @@
                   mainAccountId:'',
                   createDateStart:'',
                   createDateEnd:'',
-                  projectName: ''
+                  projectId: ''
                 },
                 formLabelWidth: '120px',
                 dataTable: [],
@@ -255,6 +271,7 @@
                 param.mainAccountId = this.form.mainAccountId;   
                 param.createDateStart = this.form.createDateStart;   
                 param.createDateEnd = this.form.createDateEnd; 
+                param.projectId = this.form.projectId;
                 axios.post('/merchant/consumeRecord/countList', param)
                 .then(function (response) {
                     console.log(response)
