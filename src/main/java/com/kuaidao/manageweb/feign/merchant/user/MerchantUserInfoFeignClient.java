@@ -101,6 +101,16 @@ public interface MerchantUserInfoFeignClient {
     public JSONResult<Long> getMerchantSmsCount(@RequestBody IdEntityLong idEntityLong);
 
 
+    /**
+     * 根据参数查询用户列表
+     *
+     * @param userInfoReq
+     * @return
+     */
+    @PostMapping("/getUserInfo")
+    public JSONResult<UserInfoReq> getUserInfo(@RequestBody UserInfoReq userInfoReq);
+
+
     @Component
     static class HystrixClientFallback implements MerchantUserInfoFeignClient {
 
@@ -152,6 +162,11 @@ public interface MerchantUserInfoFeignClient {
         @Override
         public JSONResult<Long> getMerchantSmsCount(IdEntityLong idEntityLong) {
             return fallBackError("查询商家账户开启发送短信数量");
+        }
+
+        @Override
+        public JSONResult<UserInfoReq> getUserInfo(UserInfoReq userInfoReq) {
+            return fallBackError("查询商家账户信息");
         }
 
     }

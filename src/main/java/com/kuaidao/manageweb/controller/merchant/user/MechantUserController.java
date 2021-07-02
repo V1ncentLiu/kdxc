@@ -287,7 +287,7 @@ public class MechantUserController {
         }
         UserInfoReq param= new UserInfoReq();
         param.setId(userInfoReq.getId());
-        JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getMechantUserById(param);
+        JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getUserInfo(param);
         if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData().getSmsStatus().intValue()==0 && userInfoReq.getSmsStatus().intValue()==1){
             String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
             Long count = Long.parseLong(merchantUserMsgCount);
