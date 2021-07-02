@@ -6,7 +6,6 @@ package com.kuaidao.manageweb.controller.merchant.user;
 import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SettingConstant;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.emun.sys.UserTypeEnum;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
@@ -233,13 +232,14 @@ public class MechantUserController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        if(userInfoReq.getUserType().equals(UserTypeEnum.商家子账号.getType())){
+        if(userInfoReq.getUserType().equals(UserTypeEnum.商家子账号.getType())&& userInfoReq.getSmsStatus()==1){
             userInfoReq.setMerchantType(SysConstant.MerchantType.TYPE2);
             String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
             Long count = Long.parseLong(merchantUserMsgCount);
             //查询现在有的
-            if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
-                return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"该商户短信开启数量超过"+count+"!");
+
+            if(  count<=getMerchantSmsCount(userInfoReq.getParentId())  ){
+                return new JSONResult().fail("-1","该商户短信开启数量超过"+count+"!");
             }
         }
 
@@ -293,7 +293,7 @@ public class MechantUserController {
             Long count = Long.parseLong(merchantUserMsgCount);
             //查询现在有的
             if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
-                return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"该商户短信开启数量超过"+count+"!");
+                return new JSONResult().fail("-1","该商户短信开启数量超过"+count+"!");
             }
         }
         return merchantUserInfoFeignClient.updateUser(userInfoReq);

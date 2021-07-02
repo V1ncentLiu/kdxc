@@ -148,7 +148,7 @@ public class ClueChargeController {
             if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
                 String groupId = projectInfoDTOJSONResult.getData().getGroupId();
                 if(pageParam.getMainAccountId()!=null &&  pageParam.getMainAccountId().longValue()!=Long.parseLong(groupId)){
-                    return new JSONResult<PageBean<MerchantClueChargeDTO>>().success(null);
+                    return new JSONResult<PageBean<MerchantClueChargeDTO>>().success(new PageBean<MerchantClueChargeDTO>());
                 }
                 if(pageParam.getMainAccountId()==null){
                     pageParam.setMainAccountId(Long.parseLong(groupId));

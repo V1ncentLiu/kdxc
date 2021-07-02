@@ -115,11 +115,11 @@ public class ConsumeRecordController {
             JSONResult<ProjectInfoDTO> projectInfoDTOJSONResult = projectInfoFeignClient.get(new IdEntityLong(pageParam.getProjectId()));
             if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
                 String groupId = projectInfoDTOJSONResult.getData().getGroupId();
-                if(pageParam.getUserId()!=null && pageParam.getUserId().longValue()!=Long.parseLong(groupId)){
-                    return new JSONResult<PageBean<CountConsumeRecordDTO>>().success(null);
+                if(pageParam.getMainAccountId()!=null && pageParam.getMainAccountId().longValue()!=Long.parseLong(groupId)){
+                    return new JSONResult<PageBean<CountConsumeRecordDTO>>().success(new PageBean<>());
                 }
-                if(pageParam.getUserId()==null){
-                    pageParam.setUserId(Long.parseLong(groupId));
+                if(pageParam.getMainAccountId()==null){
+                    pageParam.setMainAccountId(Long.parseLong(groupId));
                 }
             }
         }
@@ -358,20 +358,20 @@ public class ConsumeRecordController {
     @ResponseBody
     @RequiresPermissions("merchant:consumeRecord:view")
     public JSONResult<PageBean<MerchantConsumeRecordDTO>> list(@RequestBody MerchantConsumeRecordPageParam pageParam) {
-        if (null == pageParam.getUserId()) {
-            pageParam.setMerchantUserList(pageParam.getUserList());
-        }
         if(pageParam.getProjectId()!=null){
             JSONResult<ProjectInfoDTO> projectInfoDTOJSONResult = projectInfoFeignClient.get(new IdEntityLong(pageParam.getProjectId()));
             if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
                 String groupId = projectInfoDTOJSONResult.getData().getGroupId();
                 if(pageParam.getUserId()!=null && pageParam.getUserId().longValue()!=Long.parseLong(groupId)){
-                    return new JSONResult<PageBean<MerchantConsumeRecordDTO>>().success(null);
+                    return new JSONResult<PageBean<MerchantConsumeRecordDTO>>().success(new PageBean<MerchantConsumeRecordDTO>());
                 }
                 if(pageParam.getUserId()==null){
                     pageParam.setUserId(Long.parseLong(groupId));
                 }
             }
+        }
+        if (null == pageParam.getUserId()) {
+            pageParam.setMerchantUserList(pageParam.getUserList());
         }
         // 消费记录
         JSONResult<PageBean<MerchantConsumeRecordDTO>> list = merchantConsumeRecordFeignClient.list(pageParam);
@@ -396,24 +396,43 @@ public class ConsumeRecordController {
     @RequiresPermissions("merchant:consumeRecord:view")
     @LogRecord(description = "导出", operationType = OperationType.EXPORT, menuName = MenuEnum.CONSUME_RECORD)
     public void exportList(@RequestBody MerchantConsumeRecordPageParam pageParam, HttpServletResponse response) {
+        Boolean flagTrue=true;
+        if(pageParam.getProjectId()!=null){
+            JSONResult<ProjectInfoDTO> projectInfoDTOJSONResult = projectInfoFeignClient.get(new IdEntityLong(pageParam.getProjectId()));
+            if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
+                String groupId = projectInfoDTOJSONResult.getData().getGroupId();
+                if(pageParam.getUserId()!=null && pageParam.getUserId().longValue()!=Long.parseLong(groupId)){
+                    flagTrue=false;
+                }
+                if(pageParam.getUserId()==null){
+                    pageParam.setUserId(Long.parseLong(groupId));
+                }
+            }
+        }
         if (null == pageParam.getUserId()) {
             pageParam.setMerchantUserList(pageParam.getUserList());
         }
         // 消费记录
-        JSONResult<List<MerchantConsumeRecordDTO>> jsonResult =merchantConsumeRecordFeignClient.listDeatilExport(pageParam);
+        JSONResult<List<MerchantConsumeRecordDTO>> jsonResult;
+        if(flagTrue){
+            jsonResult =merchantConsumeRecordFeignClient.listDeatilExport(pageParam);
+        }else{
+            jsonResult =new JSONResult<List<MerchantConsumeRecordDTO>>().success(new ArrayList<>());
+        }
         List<MerchantConsumeDetailExportModel> merchantConsumeDetailExportModelList = new ArrayList();
         if (jsonResult.getCode().equals(JSONResult.SUCCESS)) {
             List<MerchantConsumeRecordDTO> data = jsonResult.getData();
-            Map<String, String> userProject = getUserProject(ListUtils.emptyIfNull(data).stream().map(MerchantConsumeRecordDTO::getUserId).collect(Collectors.toList()));
+
+            //Map<String, String> userProject = getUserProject(ListUtils.emptyIfNull(data).stream().map(MerchantConsumeRecordDTO::getUserId).collect(Collectors.toList()));
             if (CollectionUtils.isNotEmpty(data)) {
                 for (int i = 0; i < data.size(); i++) {
                     MerchantConsumeRecordDTO merchantConsumeRecordDTO = data.get(i);
                     MerchantConsumeDetailExportModel merchantConsumeDetailExportModel = new MerchantConsumeDetailExportModel();
                     BeanUtils.copyProperties(merchantConsumeRecordDTO, merchantConsumeDetailExportModel);
                     int flag =i+1;
-                    if(userProject.containsKey(merchantConsumeRecordDTO.getUserId()+"")){
-                        merchantConsumeDetailExportModel.setProjectName(userProject.get(merchantConsumeRecordDTO.getUserId()+""));
-                    }
+//                    if(userProject.containsKey(merchantConsumeRecordDTO.getUserId()+"")){
+//                        merchantConsumeDetailExportModel.setProjectName(userProject.get(merchantConsumeRecordDTO.getUserId()+""));
+//                    }
                     merchantConsumeDetailExportModel.setId(flag);
                     merchantConsumeDetailExportModel.setCustomerTime(DateUtil.convert2String(merchantConsumeRecordDTO.getCreateTime(),DateUtil.ymdhms));
                     merchantConsumeDetailExportModel.setClueId(merchantConsumeRecordDTO.getClueId()+"");

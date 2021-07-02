@@ -123,7 +123,7 @@ public class MerchantRechargeRecordManageController {
         if(JSONResult.SUCCESS.equals(projectInfoDTOJSONResult.getCode()) && projectInfoDTOJSONResult.getData()!=null){
           String groupId = projectInfoDTOJSONResult.getData().getGroupId();
           if(queryDTO.getRechargeBusiness()!=null && queryDTO.getRechargeBusiness().longValue()!=Long.parseLong(groupId)){
-            return new JSONResult<PageBean<MerchantRechargeRecordDTO>>().success(null);
+            return new JSONResult<PageBean<MerchantRechargeRecordDTO>>().success(new PageBean<MerchantRechargeRecordDTO>());
           }
           if(queryDTO.getRechargeBusiness()==null){
             queryDTO.setRechargeBusiness(Long.parseLong(groupId));
