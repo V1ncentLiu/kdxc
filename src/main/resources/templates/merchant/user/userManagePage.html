@@ -407,8 +407,8 @@
                         <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>-->
             </el-form-item>
 
-            <el-form-item label="新客户短信提醒:" prop="codeRules" :label-width="formLabelWidth" v-if="clueTemplateForm.merchantType === 2">
-                <el-select v-model="newCode">
+            <el-form-item label="新客户短信提醒:" prop="newCode" :label-width="formLabelWidth" v-if="clueTemplateForm.merchantType === 2">
+                <el-select v-model="clueTemplateForm.newCode">
                     <el-option
                         v-for="item in customerCode"
                         :key="item.key"
@@ -476,8 +476,8 @@
                         <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>-->
             </el-form-item>
 
-            <el-form-item label="新客户短信提醒:" prop="codeRules" :label-width="formLabelWidth">
-                <el-select v-model="newChildCode">
+            <el-form-item label="新客户短信提醒:" prop="newChildCode" :label-width="formLabelWidth">
+                <el-select v-model="subAccountForm.newChildCode">
                     <el-option
                         v-for="item in customerCode"
                         :key="item.key"
@@ -566,7 +566,8 @@
                 orgName: "",
                 orgId: "",
                 id: "",
-                roleId: ""
+                roleId: "",
+                newChildCode: 0
             },
             clueTemplateForm: {
                 username: "",
@@ -586,7 +587,10 @@
                 merchantType: "",
                 id: "",
                 roleId: "",
-                email:''
+                email:'',
+                newCode: 1,
+                
+
             },
             addOrModifyDialogTitle: '添加商家账号',
             subAccountRules: {
@@ -630,7 +634,7 @@
                 roleId: [
                     { required: true, message: '角色不能为空', trigger: 'change' }
                 ],
-                codeRules: [
+                newChildCode: [
                     {required: true, trigger: 'blur' }
                 ]
             },
@@ -696,6 +700,9 @@
                 ],
                 roleId: [
                     { required: true, message: '角色不能为空', trigger: 'change' }
+                ],
+                newCode: [
+                    {required: true, trigger: 'blur' }
                 ]
 
 
@@ -812,8 +819,6 @@
                     label: '开启',
                     key: 1
                 }],
-            newCode: 1,
-            newChildCode: 0,
             smsStatus: '',
             smsStatusConfig: {
                 0: '关闭',
@@ -964,6 +969,7 @@
                         param.userType = 3;
                         param.status = 1;
                         param.parentId = formData.id;
+                        param.smsStatus = formData.newChildCode;
 
                         var roleList = new Array();
                         roleList.push(formData.roleId);
@@ -1043,6 +1049,7 @@
                         param.id = formData.id;
                         param.merchantType = formData.merchantType;
                         param.isCharge = formData.isCharge;
+                        param.smsStatus = formData.newCode;
                         var roleList = new Array();
                         roleList.push(formData.roleId);
                         param.roleList = roleList;
