@@ -285,17 +285,20 @@ public class MechantUserController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        UserInfoReq param= new UserInfoReq();
-        param.setId(userInfoReq.getId());
-        JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getUserInfo(param);
-        if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData().getSmsStatus().intValue()==0 && userInfoReq.getSmsStatus().intValue()==1){
-            String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
-            Long count = Long.parseLong(merchantUserMsgCount);
-            //查询现在有的
-            if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
-                return new JSONResult().fail("-1","该商户短信开启数量超过"+count+"!");
+        if( userInfoReq.getSmsStatus().intValue()==1){
+            UserInfoReq param= new UserInfoReq();
+            param.setId(userInfoReq.getId());
+            JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getUserInfo(param);
+            if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData().getSmsStatus().intValue()==0 ){
+                String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
+                Long count = Long.parseLong(merchantUserMsgCount);
+                //查询现在有的
+                if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
+                    return new JSONResult().fail("-1","该商户短信开启数量超过"+count+"!");
+                }
             }
         }
+
         return merchantUserInfoFeignClient.updateUser(userInfoReq);
     }
 
