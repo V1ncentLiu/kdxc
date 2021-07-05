@@ -10,6 +10,9 @@
         .f-tac .el-form-item__content{
             margin-left: 0 !important;
         }
+        .el-cascader {
+            width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -23,14 +26,24 @@
     <el-form :model="form" ref="form" :rules="rules" :label-width="formLabelWidth">
         <el-row class="borderbox padding20" style="border: none !important;">
             <el-form-item label="充值商家：" prop="rechargeBusiness">
-                    <el-select v-model="form.rechargeBusiness" filterable  clearable placeholder="商家账户名">
+                    <!-- <el-select v-model="form.rechargeBusiness" filterable  clearable placeholder="商家账户名">
                         <el-option
                             v-for="item in merchantUserListOptions"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
                         </el-option>
-                    </el-select>
+                    </el-select> -->
+
+                    <el-cascader
+                        v-model="form.rechargeBusiness"
+                        :options="options"
+                        @change="handleChange"
+                        filterable
+                        clearable
+                    >
+
+                    </el-cascader>
                 </el-form-item>
             <el-form-item label="充值金额：" prop="rechargeMoney">
                 <el-input v-model="form.rechargeMoney" placeholder="1-999999" style="width: 250px;" maxLength="7" @keyup.native="number"></el-input>                    
@@ -76,6 +89,28 @@
     var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     var merchantUserList=[[${merchantUserList}]];//商户集合
     var token = [[${token}]];
+
+    const options = merchantUserList.map(item => {
+        const subChildren = item.children || [];
+        const children = subChildren.map(subItem => {
+            return {
+                label: subItem.projectName, value: subItem.id
+            }
+
+        })
+        const params = {
+            label: item.name,
+            value: item.id
+        }
+        if(subChildren.length) {
+            params.children = children;
+        }
+        return params;
+    })
+    
+
+
+
     var addClueVM = new Vue({
         el: '#recordPaymentOffline',
         data: function() {
@@ -83,10 +118,10 @@
                 isDisabled:false,
                 merchantUserListOptions:merchantUserList,
                 form: {
-                    rechargeBusiness:'',
                     rechargeMoney: '',
                     fileList: [],  
-                    imgUrl:''                  
+                    imgUrl:'',
+                    rechargeBusiness: []
                 },
                 rules:{
                     rechargeBusiness: [
@@ -123,7 +158,8 @@
                 fileList:[],
                 limit:1,
                 ossUrl:ossSignatureUrl,
-            }             
+                options: options
+            }
         },
         methods: {
             cancel(){
@@ -135,7 +171,7 @@
                     if (valid) {
                         this.isDisabled=true;
                         var param ={};   
-                        param.rechargeBusiness = this.form.rechargeBusiness;
+                        param.rechargeBusiness = this.form.rechargeBusiness[0];
                         param.rechargeMoney = this.form.rechargeMoney; 
                         param.imgUrl = this.form.imgUrl;
                         //param.token = token;
@@ -257,6 +293,10 @@
             　　this.form.rechargeMoney=this.form.rechargeMoney.replace(/[^\.\d]/g,'');
                 this.form.rechargeMoney=this.form.rechargeMoney.replace('.','');
             },
+            handleChange(value) {
+                this.form.rechargeBusiness = [value[0]];
+
+            }
         },
         created(){
             this.getUploadParam();
