@@ -294,7 +294,7 @@ public class MechantUserController {
                 Long count = Long.parseLong(merchantUserMsgCount);
                 //查询现在有的
                 if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
-                    return new JSONResult().fail("-1","该商户短信开启数量超过"+count+"!");
+                    return new JSONResult().fail("-1","接收新客户短信提醒账号已达到上限"+count+"!");
                 }
             }
         }
