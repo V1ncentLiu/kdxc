@@ -278,10 +278,18 @@
                         >
 
                         </el-cascader> -->
-                        <el-cascader :options="merchantUserProjectList" @change="handleChange" filterable clearable v-model="subAccountForm.mainAccountId" style="width: 290px;">
-                            <!-- <template slot-scope="{ node, data }">
-                                <span>{{ data.label }}</span>
-                            </template> -->
+                        <el-cascader 
+                            :options="merchantUserProjectList" 
+                            @change="handleChange" 
+                            filterable 
+                            clearable 
+                            v-model="subAccountForm.mainAccountId" 
+                            style="width: 290px;"
+                            @focus="cascaderfocus"
+                            @active-item-change="cascaderChange"  
+                            popper-class="refSubCat" 
+                            >
+                        
                         </el-cascader>
                     </el-form-item>
 
@@ -389,6 +397,7 @@
     var clueChargeVM = new Vue({
         el: '#clueChargeManage',
         data: {
+            timer: null,
             merchantUserProjectList: options,
             projectList: projectList,
             formInline: {
@@ -773,6 +782,20 @@
             },
             handleChange(value) {
                 this.subAccountForm.mainAccountId = [value[0]];
+            },
+            cascaderChange(value) {
+                console.log(value)
+                this.subAccountForm.mainAccountId = [value[0]];
+                this.timer = setTimeout(() => {
+                    document.getElementsByClassName('refSubCat')[0].style.display = 'none';
+                    clearInterval(this.timer)
+                }, 500)
+            },
+            cascaderfocus() {
+                if(document.getElementsByClassName('refSubCat')[0] && document.getElementsByClassName('refSubCat')[0].style) {
+                    document.getElementsByClassName('refSubCat')[0].style.display = 'block';
+                }
+
             }
         },
         created() {

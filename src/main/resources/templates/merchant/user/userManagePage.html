@@ -476,7 +476,7 @@
                         <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>-->
             </el-form-item>
 
-            <el-form-item label="新客户短信提醒:" prop="newChildCode" :label-width="formLabelWidth">
+            <el-form-item label="新客户短信提醒:" prop="newChildCode" :label-width="formLabelWidth" v-if="+childMerchantType === 2">
                 <el-select v-model="subAccountForm.newChildCode">
                     <el-option
                         v-for="item in customerCode"
@@ -531,6 +531,7 @@
     var userVM = new Vue({
         el: '#userManage',
         data: {
+            childMerchantType: 1,
             uploadOssHost:'',
             uploadOssHostWhich:'',
             dialogVisiblePortrait:false,
@@ -1001,6 +1002,7 @@
                 this.merchatName = obj.name;
                 this.dialogsubAccountForm = true;
                 this.subAccountForm.id = obj.id;
+                this.childMerchantType = obj.merchantType;
                 var param = {};
                 param.orgId = obj.orgId;
                 axios.post("/merchant/userManager/getAccountOrg", param)

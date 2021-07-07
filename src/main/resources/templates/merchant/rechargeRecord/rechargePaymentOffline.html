@@ -38,12 +38,19 @@
                     <el-cascader
                         v-model="form.rechargeBusiness"
                         :options="options"
-                        @change="handleChange"
                         filterable
                         clearable
+                        @active-item-change="handleChange"  
+                        popper-class="refSubCat"   
+                        @focus="cascaderfocus" 
+                        @change="cascaderChange"                 
+                        
                     >
+            
+                </el-cascader>
+                  
 
-                    </el-cascader>
+
                 </el-form-item>
             <el-form-item label="充值金额：" prop="rechargeMoney">
                 <el-input v-model="form.rechargeMoney" placeholder="1-999999" style="width: 250px;" maxLength="7" @keyup.native="number"></el-input>                    
@@ -71,6 +78,9 @@
                     <div slot="tip" class="el-upload__tip">支持图片大小2M以内，jpg/jpeg/png格式的图片</div>
                 </el-upload>                   
             </el-form-item>
+
+        
+
             <div class="f-tac">
                 <el-form-item>
                     <el-button type="primary" @click="submitForm('form')" :disabled="isDisabled">保存</el-button>
@@ -158,7 +168,9 @@
                 fileList:[],
                 limit:1,
                 ossUrl:ossSignatureUrl,
-                options: options
+                options: options,
+                dialogVisible: false,
+                timer: null
             }
         },
         methods: {
@@ -293,9 +305,26 @@
             　　this.form.rechargeMoney=this.form.rechargeMoney.replace(/[^\.\d]/g,'');
                 this.form.rechargeMoney=this.form.rechargeMoney.replace('.','');
             },
-            handleChange(value) {
+            handleChange(value) { 
+        
                 this.form.rechargeBusiness = [value[0]];
+        
+                this.timer = setTimeout(() => {
+                    document.getElementsByClassName('refSubCat')[0].style.display = 'none';
+                    clearInterval(this.timer)
+                }, 500)
+                
+                
 
+            },
+            cascaderfocus(value) {
+                if(document.getElementsByClassName('refSubCat')[0] && document.getElementsByClassName('refSubCat')[0].style) {
+                    document.getElementsByClassName('refSubCat')[0].style.display = 'block';
+                }
+                
+            },
+            cascaderChange(value) {
+                this.form.rechargeBusiness = [value[0]];
             }
         },
         created(){
