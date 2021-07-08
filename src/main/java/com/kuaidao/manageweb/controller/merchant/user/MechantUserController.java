@@ -235,7 +235,14 @@ public class MechantUserController {
         if(userInfoReq.getUserType().equals(UserTypeEnum.商家子账号.getType())&& userInfoReq.getSmsStatus()==1){
             userInfoReq.setMerchantType(SysConstant.MerchantType.TYPE2);
             String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
-            Long count = Long.parseLong(merchantUserMsgCount);
+            Long count = 2L;
+            try {
+                if(StringUtils.isNotBlank(merchantUserMsgCount)){
+                    count = Long.parseLong(merchantUserMsgCount);
+                }
+            } catch (NumberFormatException e) {
+              logger.error("saveUser merchantUserMsgCount{},e:{}",merchantUserMsgCount,e);
+            }
             //查询现在有的
 
             if(  count<=getMerchantSmsCount(userInfoReq.getParentId())  ){
@@ -291,7 +298,14 @@ public class MechantUserController {
             JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getUserInfo(param);
             if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData().getSmsStatus().intValue()==0 ){
                 String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
-                Long count = Long.parseLong(merchantUserMsgCount);
+                Long count = 2L;
+                try {
+                    if(StringUtils.isNotBlank(merchantUserMsgCount)){
+                        count = Long.parseLong(merchantUserMsgCount);
+                    }
+                } catch (NumberFormatException e) {
+                    logger.error("saveUser merchantUserMsgCount{},e:{}",merchantUserMsgCount,e);
+                }
                 //查询现在有的
                 if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
                     return new JSONResult().fail("-1","接收新客户短信提醒账号已达到上限"+count+"!");
