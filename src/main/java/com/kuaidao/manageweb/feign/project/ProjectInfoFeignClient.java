@@ -1,23 +1,19 @@
 package com.kuaidao.manageweb.feign.project;
 
-import java.util.List;
+import com.kuaidao.businessconfig.dto.project.*;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.businessconfig.dto.project.BrandListDTO;
-import com.kuaidao.businessconfig.dto.project.BrandListPageParam;
-import com.kuaidao.businessconfig.dto.project.CategoryDTO;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoDTO;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoPageParam;
-import com.kuaidao.businessconfig.dto.project.ProjectInfoReq;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+
+import java.util.List;
 
 /**
  * 项目
@@ -121,6 +117,14 @@ public interface ProjectInfoFeignClient {
     @PostMapping("/queryBySign")
     public JSONResult<List<ProjectInfoDTO>> queryBySign(@RequestBody ProjectInfoPageParam dto);
 
+    /**
+     * 根据商家ID查询
+     * @param idListLongReq
+     * @return
+     */
+    @PostMapping("/queryListByGroupId")
+    public JSONResult<List<ProjectInfoDTO>> queryListByGroupId  (@RequestBody IdListLongReq idListLongReq) ;
+
     @Component
     static class HystrixClientFallback implements ProjectInfoFeignClient {
 
@@ -184,6 +188,11 @@ public interface ProjectInfoFeignClient {
         @Override
         public JSONResult<List<ProjectInfoDTO>> queryBySign(ProjectInfoPageParam dto) {
             return fallBackError("查询签约项目列表");
+        }
+
+        @Override
+        public JSONResult<List<ProjectInfoDTO>> queryListByGroupId(IdListLongReq idListLongReq) {
+            return fallBackError("根据商户id查询品牌信息");
         }
 
 

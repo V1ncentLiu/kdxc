@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.merchant.user;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.user.MerchantUserReq;
@@ -71,12 +72,43 @@ public interface MerchantUserInfoFeignClient {
      */
     @PostMapping("/merchantUserList")
     public JSONResult<List<UserInfoDTO>> merchantUserList(@RequestBody UserInfoDTO userInfoDTO);
-
+    /**
+     * @description: 新增修改商家关联表
+     * @author fengyixuan
+     * @date 2021/6/25 10:04 上午
+     * @param merchantUserReq
+     * @returns com.kuaidao.common.entity.JSONResult<java.lang.String>
+    */
     @PostMapping("/addOrUpdateMerchant")
     public JSONResult<String> addOrUpdateMerchant(@RequestBody MerchantUserReq merchantUserReq);
-
+    /**
+     * @description: 批量操作商家关联表
+     * @author fengyixuan
+     * @date 2021/6/25 10:04 上午
+     * @param merchantUserReqList
+     * @returns com.kuaidao.common.entity.JSONResult
+    */
     @PostMapping("/batchUpdateMerchantUser")
     public JSONResult batchUpdateMerchantUser(@RequestBody  List<MerchantUserReq> merchantUserReqList);
+    /**
+     * @description: 查询商家账户开启发送短信数量
+     * @author fengyixuan
+     * @date 2021/6/25 10:05 上午
+     * @param idEntityLong
+     * @returns com.kuaidao.common.entity.JSONResult<java.lang.Long>
+    */
+    @PostMapping("/getMerchantSmsCount")
+    public JSONResult<Long> getMerchantSmsCount(@RequestBody IdEntityLong idEntityLong);
+
+
+    /**
+     * 根据参数查询用户列表
+     *
+     * @param userInfoReq
+     * @return
+     */
+    @PostMapping("/getUserInfo")
+    public JSONResult<UserInfoReq> getUserInfo(@RequestBody UserInfoReq userInfoReq);
 
 
     @Component
@@ -125,6 +157,16 @@ public interface MerchantUserInfoFeignClient {
         @Override
         public JSONResult batchUpdateMerchantUser(List<MerchantUserReq> merchantUserReqList) {
             return fallBackError("批量修改商户信息");
+        }
+
+        @Override
+        public JSONResult<Long> getMerchantSmsCount(IdEntityLong idEntityLong) {
+            return fallBackError("查询商家账户开启发送短信数量");
+        }
+
+        @Override
+        public JSONResult<UserInfoReq> getUserInfo(UserInfoReq userInfoReq) {
+            return fallBackError("查询商家账户信息");
         }
 
     }

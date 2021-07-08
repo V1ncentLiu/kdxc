@@ -11,6 +11,7 @@
         .orgSelectInput input{border: none;background: none;}
         .orgSelectInput input:hover{cursor: pointer;}
         .el-tree-node__expand-icon.is-leaf~.el-tree-node__label{color: #1979fd}
+
     </style>
 </head>
 <body>
@@ -40,12 +41,26 @@
                 <el-form-item label="账号状态:" prop="status" label-width="75px">
                     <el-select clearable v-model="userSearchForm.status" placeholder="全部状态" @visible-change="seleckClick">
                         <el-option
-                                v-for="item in statusOptions"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
+                            v-for="item in statusOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
                         </el-option>
                     </el-select>
+                </el-form-item>
+
+                <el-form-item label="新客户短信提醒:" label-width="95px" style="margin-left: 10px;">
+                    <el-select v-model="userSearchForm.smsStatus" clearable>
+                        <el-option
+                                v-for="item in customerCode"
+                                :key="item.key"
+                                :label="item.label"
+                                :value="item.key"
+                            >
+                            </el-option>
+
+                    </el-select>
+
                 </el-form-item>
 
                 <!-- <div class="mainSearchBtnBox">  -->
@@ -66,6 +81,16 @@
                 <el-table-column align="center" prop="roleName" label="角色"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" width="160"></el-table-column>
                 <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus" width="80"></el-table-column>
+                <el-table-column align="center" prop="smsStatus" label="新客户短信提醒" :formatter="transformIsCharge" width="150">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.smsStatus || +scope.row.smsStatus ===0">
+                            {{smsStatusConfig[scope.row.smsStatus]}}
+                        </div>
+                        <div v-else>
+                            __
+                        </div>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" label="操作" width="150">
                     <template slot-scope="scope">
                         <shiro:hasPermission name="sys:userManager:edit">
@@ -148,6 +173,21 @@
                 <!--<el-input v-model="clueTemplateForm.orgName" autocomplete="off" prop="orgName" style="width:185px;margin-right: 6px;"></el-input>
                 <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>-->
             </el-form-item>
+
+            <el-form-item label="新客户短信提醒:" prop="newChildCode" :label-width="formLabelWidth">
+                <el-select v-model="subAccountForm.newChildCode" style="width: 290px;">
+                    <el-option
+                        v-for="item in customerCode"
+                        :key="item.key"
+                        :label="item.label"
+                        :value="item.key"
+                    >
+                    </el-option>
+                </el-select>
+            </el-form-item>
+
+
+
         </el-form>
         <div slot="footer" class="dialog-footer" style="text-align:center;">
             <el-button type="primary" :disabled="submitDisabled" @click="saveAccountUser('subAccountForm')">提交</el-button>
@@ -188,6 +228,12 @@
     var userVM = new Vue({
         el: '#userManage',
         data: {
+            
+            smsStatusConfig: {
+                0: '关闭',
+                1: '开启'
+            },
+            
             merchatName:merchantName,
             subAccountFormTitle:"添加商家子账号",
             dialogsubAccountForm:false,
@@ -202,15 +248,18 @@
                 status: '',
                 userName: '',
                 name: '',
+                smsStatus: '',
             },
-            subAccountForm:{ username:"",
+            subAccountForm:{
+                username:"",
                 name:"",
                 phone:"",
                 password:"",
                 orgName:"",
                 orgId:"",
                 id:"",
-                roleId:""
+                roleId:"",
+                newChildCode: 0
             },
 
             addOrModifyDialogTitle:'添加商家账号',
@@ -250,6 +299,9 @@
                 ],
                 orgName: [
                     { required: true, message: '组织不能为空', trigger: 'change' }
+                ],
+                newChildCode: [
+                { required: true, trigger: 'change' }
                 ]
 
             },
@@ -310,6 +362,14 @@
             },
             storeId: '',
             scrollTop: 0,
+            customerCode: [{
+                    label: '关闭',
+                    key: 0
+                }, {
+                    label: '开启',
+                    key: 1
+                }],
+            newsQueryCode: ''
         },
         methods: {
             passwordVal(){
@@ -335,6 +395,8 @@
                         param.status = 1;
                         param.parentId= parentId;
                         param.id= formData.id;
+                        param.smsStatus = formData.newChildCode;
+
                         var roleList=new Array();
                         roleList.push(formData.roleId);
                         param.roleList=roleList;
@@ -395,6 +457,7 @@
                 param.name = this.userSearchForm.name;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
+                param.smsStatus = this.userSearchForm.smsStatus;
                 param.userType = 3;
                 console.info(param);
                 axios.post('/merchant/userManager/merchantlist', param)
@@ -488,6 +551,7 @@
                             userVM.subAccountForm.id = user.id;
                             userVM.multipleTreeSelection=[];
                             userVM.multipleTreeSelection.push(orgId);
+                            userVM.subAccountForm.newChildCode = user.smsStatus;
 
                         }else{
                             userVM.$message.error(msg+"失败");
