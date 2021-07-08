@@ -210,7 +210,7 @@ public class MechantUserController {
         SysSettingReq sysSettingReq = new SysSettingReq();
         sysSettingReq.setCode(code);
         JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
-        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode()) && byCode.getData()!=null) {
             return byCode.getData().getValue();
         }
         return null;
