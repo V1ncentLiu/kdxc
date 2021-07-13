@@ -160,9 +160,9 @@ public class AppiontmentController {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
         //TODO 业务线8 删除搜索词列
-        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
-            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
-        }
+//        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+//            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+//        }
         request.setAttribute("fieldList", data);
 
         // 根据用户查询页面字段

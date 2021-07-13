@@ -209,9 +209,9 @@ public class CallRecordController {
         //TODO  业务线8 删除搜索词列
         Integer businessLine = curLoginUser.getBusinessLine();
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
-            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
-        }
+//        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+//            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+//        }
         request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();

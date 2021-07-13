@@ -161,9 +161,9 @@ public class MyCustomerClueController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
-            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
-        }
+//        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+//            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+//        }
         request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
@@ -422,9 +422,9 @@ public class MyCustomerClueController {
                 }
                 //TODO 业务线8 删除搜索词列
                 Integer businessLine = user.getBusinessLine();
-                if(null != businessLine && businessLine.equals(8)){
-                    clueBasicDTO.setSearchWord(null);
-                }
+//                if(null != businessLine && businessLine.equals(8)){
+//                    clueBasicDTO.setSearchWord(null);
+//                }
                 request.setAttribute("base", clueBasicDTO);
             } else {
                 request.setAttribute("customer", new ArrayList());

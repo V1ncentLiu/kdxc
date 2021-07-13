@@ -187,10 +187,10 @@ public class PublicCustomerResourcesController {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         //TODO 业务线8 删除搜索词列
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-        Integer businessLine = user.getBusinessLine();
-        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
-            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
-        }
+//        Integer businessLine = user.getBusinessLine();
+//        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+//            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+//        }
         request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
@@ -200,9 +200,9 @@ public class PublicCustomerResourcesController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         List<UserFieldDTO> data1 = queryFieldByUserAndMenu.getData();
         //TODO 业务线8 删除搜索词列
-        if(null != businessLine && CollectionUtils.isNotEmpty(data1) && businessLine.equals(8)){
-            data1.removeIf(s -> s.getFieldCode().equals("searchWord"));
-        }
+//        if(null != businessLine && CollectionUtils.isNotEmpty(data1) && businessLine.equals(8)){
+//            data1.removeIf(s -> s.getFieldCode().equals("searchWord"));
+//        }
         request.setAttribute("userFieldList", data1);
         long endTime = System.currentTimeMillis();
         // System.out.println("公共列： "+(endTime-startTime)+"ms");

@@ -150,9 +150,9 @@ public class CustomerManagerController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
-            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
-        }
+//        if(null != businessLine && CollectionUtils.isNotEmpty(data) && businessLine.equals(8)){
+//            data.removeIf(s -> s.getFieldCode().equals("searchWord"));
+//        }
         request.setAttribute("fieldList", data);
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
