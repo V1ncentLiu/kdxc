@@ -717,11 +717,8 @@ public class ExtendClueDistributionedTaskController {
                     //是否顾问匹配
                     String isMatch = "";
                     if (taskDTO.getPid() != null) {
-                        // 子资源不展示
-                        isMatch = "";
-                    } else if (Integer.valueOf(CustomerStatusEnum.STATUS__8TH.getCode()).equals(taskDTO.getCustomerStatus())) {
                         isMatch = "是";
-                    } else {
+                    }else {
                         isMatch = "否";
                     }
                     curList.add(isMatch);
