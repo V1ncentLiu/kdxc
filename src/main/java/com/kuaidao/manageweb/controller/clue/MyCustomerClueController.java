@@ -495,13 +495,13 @@ public class MyCustomerClueController {
             //TODO 业务线8 删除搜索词
             Integer businessLine = getUser().getBusinessLine();
             List<RepeatClueRecordDTO> data = repeatJson.getData();
-            if(null != businessLine && businessLine.equals(8)){
-                if(CollectionUtils.isNotEmpty(data)){
-                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
-                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
-                    }
-                }
-            }
+//            if(null != businessLine && businessLine.equals(8)){
+//                if(CollectionUtils.isNotEmpty(data)){
+//                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+//                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+//                    }
+//                }
+//            }
             request.setAttribute("repeatClueList", data);
             request.setAttribute("repeatClueStatus", 1);
         } else {
@@ -631,9 +631,9 @@ public class MyCustomerClueController {
                 }
                 //TODO 业务线8 删除搜索词
                 Integer businessLine = user.getBusinessLine();
-                if(null != businessLine && businessLine.equals(8)){
-                    clueBasic.setSearchWord(null);
-                }
+//                if(null != businessLine && businessLine.equals(8)){
+//                    clueBasic.setSearchWord(null);
+//                }
                 request.setAttribute("base", clueBasic);
             } else {
                 request.setAttribute("base", new ArrayList());
@@ -703,13 +703,13 @@ public class MyCustomerClueController {
             //TODO 业务线8 删除搜索词
             Integer businessLine = getUser().getBusinessLine();
             List<RepeatClueRecordDTO> data = repeatJson.getData();
-            if(null != businessLine && businessLine.equals(8)){
-                if(CollectionUtils.isNotEmpty(data)){
-                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
-                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
-                    }
-                }
-            }
+//            if(null != businessLine && businessLine.equals(8)){
+//                if(CollectionUtils.isNotEmpty(data)){
+//                    for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+//                        repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+//                    }
+//                }
+//            }
             request.setAttribute("repeatClueList", data);
             request.setAttribute("repeatClueStatus", 1);
         } else {
@@ -1902,14 +1902,14 @@ public class MyCustomerClueController {
         //TODO 业务线8 删除搜索词
         JSONResult<List<RepeatClueRecordDTO>> listJSONResult = repeatClueRecordFeignClient.queryList(recordQueryDTO);
         Integer businessLine = getUser().getBusinessLine();
-        if(null != businessLine && businessLine.equals(8)){
-            List<RepeatClueRecordDTO> data = listJSONResult.getData();
-            if(CollectionUtils.isNotEmpty(data)){
-                for(RepeatClueRecordDTO repeatClueRecordDTO : data){
-                    repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
-                }
-            }
-        }
+//        if(null != businessLine && businessLine.equals(8)){
+//            List<RepeatClueRecordDTO> data = listJSONResult.getData();
+//            if(CollectionUtils.isNotEmpty(data)){
+//                for(RepeatClueRecordDTO repeatClueRecordDTO : data){
+//                    repeatClueRecordDTO.getClueDTO().getClueBasic().setSearchWord(null);
+//                }
+//            }
+//        }
         return listJSONResult;
     }
     /**
