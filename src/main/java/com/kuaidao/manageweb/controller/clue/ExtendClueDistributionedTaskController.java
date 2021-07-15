@@ -553,7 +553,10 @@ public class ExtendClueDistributionedTaskController {
                 } else {
                     curList.add("顾问匹配");
                 }
+                //首次响应间隔
+                curList.add(taskDTO.getFirstResponseInterval());
                 dataList.add(curList);
+
             }
         }
 
@@ -650,6 +653,10 @@ public class ExtendClueDistributionedTaskController {
                 List<Object> curList = new ArrayList<>();
                 // 资源ID
                 curList.add(taskDTO.getClueId() + "");
+                //客户姓名
+                if(queryDto.getFalg() == 4){
+                    curList.add(taskDTO.getCusName());
+                }
                 // 客户级别
                 curList.add(taskDTO.getCusLevelName());
                 // 创建时间
@@ -660,6 +667,13 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getTypeName());
                 // 媒介
                 curList.add(taskDTO.getSourceName());
+
+                if(queryDto.getFalg() == 4){
+                    //广告位
+                    curList.add(taskDTO.getSourceTypeName());
+                    //资源项目归属
+                    curList.add(taskDTO.getAscriptionProjectName());
+                }
                 // 资源项目
                 curList.add(taskDTO.getProjectName());
                 // 手机号
@@ -683,7 +697,7 @@ public class ExtendClueDistributionedTaskController {
                     curList.add(taskDTO.getPhtraDirectorName());
                     // 首次分配话务员
                     curList.add(taskDTO.getOperatorName());
-                } else {
+                } else if(!queryDto.getPhtraExport() && queryDto.getFalg() !=4 ){
                     // 首次分配电销组
                     curList.add(taskDTO.getFirstAsssignTeleGroupName());
                     // 首次分配电销总监
@@ -693,7 +707,26 @@ public class ExtendClueDistributionedTaskController {
                     // 电销顾问
                     curList.add(taskDTO.getTeleSaleName());
                 }
-
+                if(queryDto.getFalg() == 4){
+                    //客户类别
+                    if (taskDTO.getPid() == null) {
+                        curList.add("直发资源");
+                    } else {
+                        curList.add("顾问匹配");
+                    }
+                    //是否顾问匹配
+                    String isMatch = "";
+                    if (taskDTO.getPid() != null) {
+                        isMatch = "是";
+                    }else {
+                        isMatch = "否";
+                    }
+                    curList.add(isMatch);
+                    //首次下发类别
+                    curList.add(taskDTO.getFirstAssignGroupTypeName());
+                    //首次分配部门
+                    curList.add(taskDTO.getFirstAssignGroupName());
+                }
                 // 首次响应间隔
                 curList.add(taskDTO.getFirstResponseInterval());
                 if(queryDto.getFalg()==4){

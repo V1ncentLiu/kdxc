@@ -194,10 +194,10 @@ public class BusinessCustomerController {
             }
             if (null != clueInfo.getData().getClueBasic()) {
                 //TODO 业务线8 删除搜索词列
-                Integer businessLine = user.getBusinessLine();
-                if(null != businessLine && businessLine.equals(8)){
-                    clueInfo.getData().getClueBasic().setSearchWord(null);
-                }
+//                Integer businessLine = user.getBusinessLine();
+//                if(null != businessLine && businessLine.equals(8)){
+//                    clueInfo.getData().getClueBasic().setSearchWord(null);
+//                }
                 request.setAttribute("base", clueInfo.getData().getClueBasic());
             } else {
                 request.setAttribute("base", new ArrayList());
