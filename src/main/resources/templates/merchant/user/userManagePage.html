@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
       xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
@@ -78,6 +77,46 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
+        .auditStatus-class {
+            display: flex;
+            justify-content: center;
+        }
+        .auditStatus-class .el-button {
+            font-size: 12px;
+            padding: 4px 6px;
+        }
+        .merchantCertDto {
+            padding-bottom: 4px;
+        }
+        .merchantCertDto-name {
+            width: 100px;
+            text-align: right;
+            display: inline-block;
+        }
+        .merchantCertDto-look {
+            margin-left: 5px;
+            color: rgb(0, 114, 255);
+            cursor:pointer;
+        }
+        .el-textarea__inner {
+            height: 100px;
+        }
+        .refuse-dialog {
+            display: flex;
+        }
+        .refuse-dialog-title {
+            width: 80px;
+            margin-top: 5px;
+        }
+        .merchantCertDto-download {
+            color: rgb(0, 114, 255);
+            margin-top: 5px;
+            cursor:pointer;
+        }
+        .look-reason {
+            color: rgb(0, 114, 255);
+            cursor:pointer;
+        }
     </style>
 </head>
 
@@ -148,6 +187,18 @@
                                 </el-select>
 
                             </el-form-item>
+                            <el-form-item label="证件审核状态:" prop="auditStatus" label-width="75px" style="margin-left: 82px;">
+                                <el-select v-model="auditStatus" clearable>
+                                    <el-option
+                                        v-for="item in auditStatusConfig"
+                                        :key="item.key"
+                                        :label="item.label"
+                                        :value="item.key"
+                                    >
+
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
                         </div>
 
                         <el-form-item label="">
@@ -214,6 +265,91 @@
                                  width="80"></el-table-column>
                 <el-table-column align="center" prop="isCharge" label="资源收费" :formatter="transformIsCharge" width="80">
                 </el-table-column>
+
+                <el-table-column align="center" prop="merchantCertDto" label="证件" width="180">
+                    <template slot-scope="scope">
+                        <div>
+                            <div class="merchantCertDto">
+                                <span class="merchantCertDto-name">营业执照: </span>
+                                <el-popover
+                                   placement="top"
+                                   
+                                >
+                                <img src="https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/GrRYYRQW2X.png"/>
+                                <span slot="reference" class="merchantCertDto-look" >查看</span>
+                                </el-popover>
+                               
+                            </div>
+                            <div class="merchantCertDto">
+                                <span class="merchantCertDto-name">食品流通许可证:</span>
+                                <span class="merchantCertDto-look">查看</span>
+                            </div>
+                            <div class="merchantCertDto">
+                                <span class="merchantCertDto-name">特许经营备案:</span>
+                                <span class="merchantCertDto-look">查看</span>
+                            </div>
+                            <div class="merchantCertDto">
+                                <span class="merchantCertDto-name">商标证:</span>
+                                <span class="merchantCertDto-look">查看</span>
+                            </div>
+                            <div class="merchantCertDto">
+                                <span class="merchantCertDto-name">商标授权文件:</span>
+                                <span class="merchantCertDto-look" @click='submitCancel'>
+                                        <!-- <a href="https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/jZdcwWJekM.pdf"/> -->
+                                    查看
+                                </span>
+                            </div>
+                            <div class="merchantCertDto-download" @click="changeHandler">一键下载</div>
+                        </div>
+                        <!-- <div>暂未上传</div> -->
+                    </template>
+
+                </el-table-column>
+                <el-table-column align="center" prop="trademarkAuthStatus" label="是否商标授权" width="120">
+
+                </el-table-column>
+                <el-table-column align="center" prop="auditStatus" label="证件审核状态" width="120">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.auditStatus">
+                            {{auditStatusStatus[scope.row.auditStatus]}}
+                            <div v-if="+scope.row.auditStatus === 2">
+                                <el-popover
+                                   placement="top"
+                                   width="160"
+                                   trigger="hover"
+
+                                >
+                                <div>错误原因</div>
+                                <div slot="reference" class="look-reason">查看原因</div>
+                                </el-popover>
+
+                            </div>
+                        </div>
+
+                        <div>
+                            <el-popover
+                               placement="top"
+                               width="260"
+                               trigger="hover"
+
+                            >
+                            <div>错误原因dfsdfgsfgsdfghsdfgsdfjgn;asjk说的那份恐惧分公司的反馈给你说;地方看见你干啥了s的年份里看见你的辣椒你发了卡就当是能否立刻就按s</div>
+                            <div slot="reference" class="look-reason">查看原因</div>
+                            </el-popover>
+
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="auditStatus" label="证件审核" width="120">
+                    <template slot-scope="scope">
+                        <div class="auditStatus-class">
+                            <el-button type="warning" @click="openRefuseDialog">拒绝</el-button>
+                            <el-button type="success">通过</el-button>
+                        </div>
+                    </template>
+
+                </el-table-column>
+
 
                 <el-table-column align="center" prop="smsStatus" label="新客户短信提醒" :formatter="transformIsCharge" width="150">
                     <template slot-scope="scope">
@@ -496,10 +632,32 @@
     <el-dialog :visible.sync="dialogVisiblePortrait">
         <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
+
+    <el-dialog title="审核拒绝" :visible.sync="isRefuseDialog" width="540px" @close="closeRefuseDialog">
+
+       <div class="refuse-dialog">
+           <div class="refuse-dialog-title">
+
+               <span>拒绝原因</span>
+            </div>
+           <el-input type="textarea" placeholder="请输入审核拒绝原因，100字之内"  v-model="textarea" maxlength="100">
+           
+
+           </el-input>
+       </div>
+       <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click='submitCancel'>提 交</el-button>
+        <el-button @click="closeRefuseDialog">取 消</el-button>
+      </span>
+
+    </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
+<script src="https://cdn.bootcdn.net/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+
 <script th:inline="javascript">
     var passwordExpires = [[${ passwordExpires }]];//密码最大使用时间
     var reminderTime = [[${ reminderTime }]];//密码到期提醒时间
@@ -531,6 +689,8 @@
     var userVM = new Vue({
         el: '#userManage',
         data: {
+            textarea: '',
+            isRefuseDialog: false, // 拒绝审核
             childMerchantType: 1,
             uploadOssHost:'',
             uploadOssHostWhich:'',
@@ -588,8 +748,7 @@
                 id: "",
                 roleId: "",
                 email:'',
-                newCode: 1,
-                
+                newCode: 1
 
             },
             addOrModifyDialogTitle: '添加商家账号',
@@ -823,10 +982,76 @@
             smsStatusConfig: {
                 0: '关闭',
                 1: '开启'
+            },
+            auditStatus: '',
+            auditStatusConfig: [{
+                label: '待审核',
+                key: 1
+            }, {
+                label: '审核拒绝',
+                key: 2
+            }, {
+                label: '审核通过',
+                key: 3
+            }],
+            auditStatusStatus: {
+                1: '待审核',
+                2: '已拒绝',
+                3: '已通过'
             }
 
         },
         methods: {
+            submitCancel() {
+                window.open('https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/jZdcwWJekM.pdf')
+            },
+            changeHandler() {
+                const data = ['https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/GrRYYRQW2X.png?response-content-type=application/octet-stream', 'https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/jZdcwWJekM.pdf?response-content-type=application/octet-stream'] // 需要下载打包的路径, 可以是本地相对路径, 也可以是跨域的全路径
+                const zip = new JSZip()
+                const cache = {}
+                const promises = []
+                data.forEach(item => {
+                     const promise = this.getFile(item).then(resData => { // 下载文件, 并存成ArrayBuffer对象
+                     const arr_name = item.split("?")
+                     const file_name_length = arr_name[0].split('/') // 获取文件名
+                     const file_name = file_name_length[file_name_length.length - 1]
+                    // const file_name = 'rrrrr'
+                     console.log('file_name_length', file_name_length)
+                     console.log('file_name', file_name)
+                     console.log('resData', resData)
+                     zip.file(file_name, resData, { binary: true }) // 逐个添加文件
+                     cache[file_name] = resData
+                    })
+                    promises.push(promise)
+               })
+
+                Promise.all(promises).then(() => {
+                     zip.generateAsync({type:"blob"}).then(content => { // 生成二进制流
+                        console.log('content', content)
+                     saveAs(content, "文件下载.zip") // 利用file-saver保存文件
+                 })
+              })
+            },
+            getFile (url){
+                  return new Promise((resolve, reject) => {
+                      axios({
+                         method:'get',
+                         url,
+                         responseType: 'blob'
+                       }).then(data => {
+                            const url = window.URL.createObjectURL(new Blob([data.data]))
+                            resolve(data.data)
+                        }).catch(error => {
+                             reject(error.toString())
+                       })
+           })
+          },
+            closeRefuseDialog() {
+                this.isRefuseDialog = false;
+            },
+            openRefuseDialog() {
+                this.isRefuseDialog = true;
+            },
             previewPortrait(type){
                 this.dialogVisiblePortrait=true
                 this.dialogImageUrl=''
@@ -1121,7 +1346,8 @@
                 param.projectId = this.userSearchForm.projectId;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.smsStatus = this.smsStatus
+                param.smsStatus = this.smsStatus;
+                param.auditStatus = this.auditStatus;
 
                 param.userType = 2;
                 console.info(param);
@@ -1471,6 +1697,7 @@
             }
         },
         created() {
+
             this.getUploadParam();
             // 进入页面判断有是否有存储值
             if (!this.paginationShow) {
@@ -1491,6 +1718,8 @@
         mounted() {
             console.info("mounted method");
             document.getElementById('userManage').style.display = 'block';
+
+            console.log('JSZip', new JSZip())
         }
     })
 
