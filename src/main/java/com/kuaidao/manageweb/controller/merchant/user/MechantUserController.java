@@ -16,6 +16,7 @@ import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.cert.MerchantCertFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.MerchantClueInfoFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -25,6 +26,7 @@ import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.mechant.cert.MerchantCertReq;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
@@ -96,6 +98,9 @@ public class MechantUserController {
 
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+
+    @Autowired
+    private MerchantCertFeignClient merchantCertFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -402,6 +407,23 @@ public class MechantUserController {
             return new JSONResult().success(null);
         }
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
+        return jsonResult;
+    }
+
+    /**
+     * @description: 修改用户上传状态
+     * @author fengyixuan
+     * @date 2021/7/13 11:28 上午
+     * @param merchantCertReq
+     * @returns com.kuaidao.common.entity.JSONResult
+    */
+    @PostMapping("/updateAuditStatus")
+    @ResponseBody
+    public JSONResult<String> updateAuditStatus(@RequestBody MerchantCertReq merchantCertReq) {
+        if (null == merchantCertReq.getUserId() || merchantCertReq.getAuditStatus()==null) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        JSONResult<String> jsonResult = merchantCertFeignClient.updateAuditStatus(merchantCertReq);
         return jsonResult;
     }
 
