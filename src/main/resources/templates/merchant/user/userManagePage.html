@@ -87,6 +87,7 @@
         }
         .merchantCertDto {
             padding-bottom: 4px;
+            display: flex;
         }
         .merchantCertDto-name {
             width: 100px;
@@ -116,6 +117,9 @@
         .look-reason {
             color: rgb(0, 114, 255);
             cursor:pointer;
+        }
+        .merchantCertDto-img-ulr {
+            max-width: 800px;
         }
     </style>
 </head>
@@ -268,83 +272,154 @@
 
                 <el-table-column align="center" prop="merchantCertDto" label="证件" width="180">
                     <template slot-scope="scope">
-                        <div>
-                            <div class="merchantCertDto">
-                                <span class="merchantCertDto-name">营业执照: </span>
-                                <el-popover
-                                   placement="top"
-                                   
-                                >
-                                <img src="https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/GrRYYRQW2X.png"/>
-                                <span slot="reference" class="merchantCertDto-look" >查看</span>
-                                </el-popover>
-                               
+                        <div v-if="scope.row.merchantCertDto">
+                            <div v-if="scope.row.merchantCertDto.busLicenseName">
+                                <div class="merchantCertDto" v-if="">
+                                    <div class="merchantCertDto">
+                                        <span class="merchantCertDto-name">营业执照:</span>
+                                        <div v-if="scope.row.merchantCertDto.busLicenseUrl.indexOf('.pdf') > -1">
+                                            <span class="merchantCertDto-look" @click='openPDFFile(scope.row.merchantCertDto.busLicenseUrl)'>
+                                                查看
+                                            </span>
+                                        </div>
+                                        <div v-else>
+                                            <el-popover
+                                                placement="top"
+                                            >
+                                                <img :src="scope.row.merchantCertDto.busLicenseUrl" class="merchantCertDto-img-ulr"/>
+                                                <span slot="reference" class="merchantCertDto-look">查看</span>
+                                            </el-popover>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="merchantCertDto">
+                                    <div class="merchantCertDto">
+                                        <span class="merchantCertDto-name">食品流通许可证:</span>
+                                        <div v-if="scope.row.merchantCertDto.foodPermitUrl.indexOf('.pdf') > -1">
+                                            <span class="merchantCertDto-look" @click='openPDFFile(scope.row.merchantCertDto.foodPermitUrl)'>
+                                                查看
+                                            </span>
+                                        </div>
+                                        <div v-else>
+                                            <el-popover
+                                                placement="top"
+                                            >
+                                                <img :src="scope.row.merchantCertDto.foodPermitUrl" class="merchantCertDto-img-ulr"/>
+                                                <span slot="reference" class="merchantCertDto-look">查看</span>
+                                            </el-popover>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="merchantCertDto">
+                                    <div class="merchantCertDto">
+                                        <span class="merchantCertDto-name">特许经营备案:</span>
+                                        <div v-if="scope.row.merchantCertDto.franchiseRecordUrl.indexOf('.pdf') > -1">
+                                            <span class="merchantCertDto-look" @click='openPDFFile(scope.row.merchantCertDto.franchiseRecordUrl)'>
+                                                查看
+                                            </span>
+                                        </div>
+                                        <div v-else>
+                                            <el-popover
+                                                placement="top"
+                                            >
+                                                <img :src="scope.row.merchantCertDto.franchiseRecordUrl" class="merchantCertDto-img-ulr"/>
+                                                <span slot="reference" class="merchantCertDto-look">查看</span>
+                                            </el-popover>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="merchantCertDto">
+                                    <div class="merchantCertDto">
+                                        <span class="merchantCertDto-name">商标注册证:</span>
+                                        <div v-if="scope.row.merchantCertDto.trademarkLicenseUrl.indexOf('.pdf') > -1">
+                                            <span class="merchantCertDto-look" @click='openPDFFile(scope.row.merchantCertDto.trademarkLicenseUrl)'>
+                                                查看
+                                            </span>
+                                        </div>
+                                        <div v-else>
+                                            <el-popover
+                                                placement="top"
+                                            >
+                                                <img :src="scope.row.merchantCertDto.trademarkLicenseUrl" class="merchantCertDto-img-ulr"/>
+                                                <span slot="reference" class="merchantCertDto-look">查看</span>
+                                            </el-popover>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                <div class="merchantCertDto">
+
+                                    <div class="merchantCertDto" v-if="(scope.row.merchantCertDto.trademarkAuthUrl && scope.row.merchantCertDto.trademarkAuthStatus === 1)">
+                                        <span class="merchantCertDto-name">商标授权文件:</span>
+                                        <div v-if="scope.row.merchantCertDto.trademarkAuthUrl.indexOf('.pdf') > -1">
+                                            <span class="merchantCertDto-look" @click='openPDFFile(scope.row.merchantCertDto.trademarkAuthUrl)'>
+                                                查看
+                                            </span>
+                                        </div>
+                                        <div v-else>
+                                            <el-popover
+                                                placement="top"
+                                            >
+                                                <img :src="scope.row.merchantCertDto.trademarkAuthUrl" class="merchantCertDto-img-ulr"/>
+                                                <span slot="reference" class="merchantCertDto-look">查看</span>
+                                            </el-popover>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="merchantCertDto-download" @click="changeHandler(scope.row)">一键下载</div>
+
                             </div>
-                            <div class="merchantCertDto">
-                                <span class="merchantCertDto-name">食品流通许可证:</span>
-                                <span class="merchantCertDto-look">查看</span>
-                            </div>
-                            <div class="merchantCertDto">
-                                <span class="merchantCertDto-name">特许经营备案:</span>
-                                <span class="merchantCertDto-look">查看</span>
-                            </div>
-                            <div class="merchantCertDto">
-                                <span class="merchantCertDto-name">商标证:</span>
-                                <span class="merchantCertDto-look">查看</span>
-                            </div>
-                            <div class="merchantCertDto">
-                                <span class="merchantCertDto-name">商标授权文件:</span>
-                                <span class="merchantCertDto-look" @click='submitCancel'>
-                                        <!-- <a href="https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/jZdcwWJekM.pdf"/> -->
-                                    查看
-                                </span>
-                            </div>
-                            <div class="merchantCertDto-download" @click="changeHandler">一键下载</div>
+                            <div v-else>线下提供</div>
                         </div>
-                        <!-- <div>暂未上传</div> -->
+                        <div v-else>暂未上传</div>
+
                     </template>
 
                 </el-table-column>
-                <el-table-column align="center" prop="trademarkAuthStatus" label="是否商标授权" width="120">
-
-                </el-table-column>
-                <el-table-column align="center" prop="auditStatus" label="证件审核状态" width="120">
+                <el-table-column align="center" prop="merchantCertDto" label="是否商标授权" width="120">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.auditStatus">
-                            {{auditStatusStatus[scope.row.auditStatus]}}
-                            <div v-if="+scope.row.auditStatus === 2">
+                        <div v-if="(scope.row.merchantCertDto&&scope.row.merchantCertDto.trademarkAuthStatus)">
+                            <div v-if="scope.row.merchantCertDto.trademarkAuthStatus === 1">是</div>
+                            <div v-else>否</div>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="merchantCertDto" label="证件审核状态" width="120">
+                    <template slot-scope="scope">
+                        <div v-if="(scope.row.merchantCertDto&&scope.row.merchantCertDto.auditStatus)">
+                            {{auditStatusStatus[scope.row.merchantCertDto.auditStatus]}}
+                            <div v-if="+scope.row.merchantCertDto.auditStatus === 2">
                                 <el-popover
                                    placement="top"
                                    width="160"
                                    trigger="hover"
 
                                 >
-                                <div>错误原因</div>
+                                <div v-if="scope.row.merchantCertDto.auditReason">{{scope.row.merchantCertDto.auditReason}}</div>
                                 <div slot="reference" class="look-reason">查看原因</div>
                                 </el-popover>
 
                             </div>
                         </div>
-
-                        <div>
-                            <el-popover
-                               placement="top"
-                               width="260"
-                               trigger="hover"
-
-                            >
-                            <div>错误原因dfsdfgsfgsdfghsdfgsdfjgn;asjk说的那份恐惧分公司的反馈给你说;地方看见你干啥了s的年份里看见你的辣椒你发了卡就当是能否立刻就按s</div>
-                            <div slot="reference" class="look-reason">查看原因</div>
-                            </el-popover>
-
-                        </div>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="auditStatus" label="证件审核" width="120">
+                <el-table-column align="center" prop="merchantCertDto" label="证件审核" width="120">
                     <template slot-scope="scope">
                         <div class="auditStatus-class">
-                            <el-button type="warning" @click="openRefuseDialog">拒绝</el-button>
-                            <el-button type="success">通过</el-button>
+                            <div v-if="(scope.row.merchantCertDto&&scope.row.merchantCertDto.auditStatus)">
+                                <span v-if="+scope.row.merchantCertDto.auditStatus === 3">
+                                    <el-button type="warning" @click="updateAuditStatus(scope.row, true)">拒绝</el-button>
+                                </span>
+                                <span v-if="+scope.row.merchantCertDto.auditStatus === 2">
+                                    <el-button type="success" @click="updateAuditStatus(scope.row)">通过</el-button>
+                                </span>
+                                <span v-if="+scope.row.merchantCertDto.auditStatus === 1">
+                                    <el-button type="warning" @click="updateAuditStatus(scope.row, true)">拒绝</el-button>
+                                    <el-button type="success" @click="updateAuditStatus(scope.row)">通过</el-button>
+                                </span>
+                            </div>
                         </div>
                     </template>
 
@@ -633,16 +708,12 @@
         <img width="100%" :src="dialogImageUrl" alt="">
     </el-dialog>
 
-    <el-dialog title="审核拒绝" :visible.sync="isRefuseDialog" width="540px" @close="closeRefuseDialog">
-
+    <el-dialog title="审核拒绝" :visible.sync="isRefuseDialog" width="540px" :close-on-click-modal="false">
        <div class="refuse-dialog">
            <div class="refuse-dialog-title">
-
                <span>拒绝原因</span>
             </div>
-           <el-input type="textarea" placeholder="请输入审核拒绝原因，100字之内"  v-model="textarea" maxlength="100">
-           
-
+           <el-input type="textarea" placeholder="请输入审核拒绝原因，100字之内" v-model="textarea" maxlength="100">
            </el-input>
        </div>
        <span slot="footer" class="dialog-footer">
@@ -689,6 +760,7 @@
     var userVM = new Vue({
         el: '#userManage',
         data: {
+            userId: '',
             textarea: '',
             isRefuseDialog: false, // 拒绝审核
             childMerchantType: 1,
@@ -1002,37 +1074,115 @@
 
         },
         methods: {
-            submitCancel() {
-                window.open('https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/jZdcwWJekM.pdf')
+             // 证件审核
+            updateAuditStatus(row, isRefuse) {
+                const {
+                    id,
+                    merchantCertDto
+                } = row;
+                if(isRefuse) {
+                    this.isRefuseDialog = true; // 拒绝弹出框
+                    this.userId = id;
+                    return
+                }
+                const params = {
+                    userId: id,
+                    auditStatus: 3
+
+                }
+                axios.post('/merchant/userManager/updateAuditStatus',params).then(res => {
+                    userVM.$message('修改成功');
+                    userVM.searchTable()
+                })
             },
-            changeHandler() {
-                const data = ['https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/GrRYYRQW2X.png?response-content-type=application/octet-stream', 'https://huiju-new-prod.oss-cn-beijing.aliyuncs.com/aggregation/jZdcwWJekM.pdf?response-content-type=application/octet-stream'] // 需要下载打包的路径, 可以是本地相对路径, 也可以是跨域的全路径
+
+            openPDFFile(url) {
+                window.open(url)
+            },
+            submitCancel() {
+
+                const auditReason= this.textarea;
+                const params = {
+                    userId: this.userId ,
+                    auditStatus: 2,
+                    auditReason
+                }
+                if(!this.textarea) {
+                    userVM.$message('请填写审核拒绝原因');
+                    return
+
+                }
+                axios.post('/merchant/userManager/updateAuditStatus',params).then(res => {
+                    userVM.$message('提交成功');
+                    userVM.isRefuseDialog = false;
+                    userVM.textarea = '';
+                    userVM.searchTable();
+
+                })
+            },
+            closeRefuseDialog() {
+                this.isRefuseDialog = false;
+                userVM.textarea = '';
+                userVM.$message('取消成功');
+            },
+            changeHandler(params) {
+                const {
+                    trademarkAuthUrl, // 商标授权文件
+                    trademarkLicenseUrl, //商标注册证
+                    franchiseRecordUrl, // 特许经营备案
+                    foodPermitUrl, // 食品流通许可证
+                    busLicenseUrl // 营业执照
+                } = params.merchantCertDto;
+                const busLicenseName = params.name;
+
+                 const data = {
+                     '营业执照': `${busLicenseUrl}?response-content-type=application/octet-stream`,
+                     '食品经营许可证': `${trademarkLicenseUrl}?response-content-type=application/octet-stream`,
+                     '特许经营备案': `${franchiseRecordUrl}?response-content-type=application/octet-stream`,
+                     '商标注册证': `${foodPermitUrl}?response-content-type=application/octet-stream`,
+                     '商标授权文件': `${busLicenseUrl}?response-content-type=application/octet-stream`
+                 }
+
+
                 const zip = new JSZip()
                 const cache = {}
                 const promises = []
-                data.forEach(item => {
-                     const promise = this.getFile(item).then(resData => { // 下载文件, 并存成ArrayBuffer对象
-                     const arr_name = item.split("?")
+                for(let key in data) {
+
+                    const promise = this.getFile({url: data[key], name: key}).then(dataRes => { // 下载文件, 并存成ArrayBuffer对象
+                    const arr_name = data[key].split("?")
                      const file_name_length = arr_name[0].split('/') // 获取文件名
                      const file_name = file_name_length[file_name_length.length - 1]
-                    // const file_name = 'rrrrr'
-                     console.log('file_name_length', file_name_length)
-                     console.log('file_name', file_name)
-                     console.log('resData', resData)
-                     zip.file(file_name, resData, { binary: true }) // 逐个添加文件
+                     const resData = dataRes.data;
+                     const name = dataRes.name;
+                     const format = ['.png', '.pdf', '.jpg', '.jpeg']
+                     let urlName = '';
+                     format.forEach(subItem => {
+                         if(data[key].indexOf(subItem) > -1) {
+                            urlName = subItem;
+                         }
+                     })
+                    // 文件名 需要自定义
+                 const fileMergeName = busLicenseName+name+urlName;
+
+                     zip.file(fileMergeName, resData, { binary: true }) // 逐个添加文件
+
                      cache[file_name] = resData
                     })
                     promises.push(promise)
-               })
+
+                }
+
 
                 Promise.all(promises).then(() => {
                      zip.generateAsync({type:"blob"}).then(content => { // 生成二进制流
-                        console.log('content', content)
-                     saveAs(content, "文件下载.zip") // 利用file-saver保存文件
+                     saveAs(content, `${busLicenseName}证件信息.zip`) // 利用file-saver保存文件
                  })
               })
             },
-            getFile (url){
+            getFile (item = {}){
+                  const url = item.url;
+                  const name = item.name;
                   return new Promise((resolve, reject) => {
                       axios({
                          method:'get',
@@ -1040,18 +1190,12 @@
                          responseType: 'blob'
                        }).then(data => {
                             const url = window.URL.createObjectURL(new Blob([data.data]))
-                            resolve(data.data)
+                            resolve({data: data.data, name}, )
                         }).catch(error => {
                              reject(error.toString())
                        })
            })
           },
-            closeRefuseDialog() {
-                this.isRefuseDialog = false;
-            },
-            openRefuseDialog() {
-                this.isRefuseDialog = true;
-            },
             previewPortrait(type){
                 this.dialogVisiblePortrait=true
                 this.dialogImageUrl=''
@@ -1719,7 +1863,6 @@
             console.info("mounted method");
             document.getElementById('userManage').style.display = 'block';
 
-            console.log('JSZip', new JSZip())
         }
     })
 
