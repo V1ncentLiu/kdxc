@@ -711,6 +711,7 @@
     <el-dialog title="审核拒绝" :visible.sync="isRefuseDialog" width="540px" :close-on-click-modal="false">
        <div class="refuse-dialog">
            <div class="refuse-dialog-title">
+               <span style="color: red;">*</span>
                <span>拒绝原因</span>
             </div>
            <el-input type="textarea" placeholder="请输入审核拒绝原因，100字之内" v-model="textarea" maxlength="100">
@@ -1131,7 +1132,8 @@
                     trademarkLicenseUrl, //商标注册证
                     franchiseRecordUrl, // 特许经营备案
                     foodPermitUrl, // 食品流通许可证
-                    busLicenseUrl // 营业执照
+                    busLicenseUrl, // 营业执照
+                    trademarkAuthStatus
                 } = params.merchantCertDto;
                 const busLicenseName = params.name;
 
@@ -1140,8 +1142,12 @@
                      '食品经营许可证': `${trademarkLicenseUrl}?response-content-type=application/octet-stream`,
                      '特许经营备案': `${franchiseRecordUrl}?response-content-type=application/octet-stream`,
                      '商标注册证': `${foodPermitUrl}?response-content-type=application/octet-stream`,
-                     '商标授权文件': `${busLicenseUrl}?response-content-type=application/octet-stream`
                  }
+                 // 商标授权 是 才下载
+                 if(trademarkAuthUrl && +trademarkAuthStatus === 1) {
+                    data['商标授权文件'] = `${trademarkAuthUrl}?response-content-type=application/octet-stream`
+                 }
+
 
 
                 const zip = new JSZip()
@@ -1492,13 +1498,14 @@
                 param.pageNum = this.pager.currentPage;
                 param.smsStatus = this.smsStatus;
                 param.auditStatus = this.auditStatus;
+                
 
                 param.userType = 2;
                 console.info(param);
                 axios.post('/merchant/userManager/merchantlist', param)
                     .then(function (response) {
                         var result = response.data;
-                        console.info(result);
+                       
                         var table = result.data;
                         userVM.dataTable = table.data;
                         userVM.pager.total = table.total;
