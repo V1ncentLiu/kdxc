@@ -301,19 +301,25 @@ public class MechantUserController {
             UserInfoReq param= new UserInfoReq();
             param.setId(userInfoReq.getId());
             JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getUserInfo(param);
-            if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData().getSmsStatus().intValue()==0 ){
-                String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
-                Long count = 2L;
-                try {
-                    if(StringUtils.isNotBlank(merchantUserMsgCount)){
-                        count = Long.parseLong(merchantUserMsgCount);
+            if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData()!=null){
+                if(jsonResult.getData().getSmsStatus()!=null &&  jsonResult.getData().getSmsStatus().intValue()==0 ) {
+                    String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
+                    Long count = 2L;
+                    try {
+                        if(StringUtils.isNotBlank(merchantUserMsgCount)){
+                            count = Long.parseLong(merchantUserMsgCount);
+                        }
+                    } catch (NumberFormatException e) {
+                        logger.error("saveUser merchantUserMsgCount{},e:{}",merchantUserMsgCount,e);
                     }
-                } catch (NumberFormatException e) {
-                    logger.error("saveUser merchantUserMsgCount{},e:{}",merchantUserMsgCount,e);
-                }
-                //查询现在有的
-                if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
-                    return new JSONResult().fail("-1","接收新客户短信提醒账号已达到上限"+count+"!");
+                    //查询现在有的
+                    Long parentId= userInfoReq.getParentId();
+                    if(userInfoReq.getUserType().intValue()==SysConstant.USER_TYPE_TWO.intValue()){
+                        parentId=userInfoReq.getId();
+                    }
+                    if(count<=getMerchantSmsCount(parentId)){
+                        return new JSONResult().fail("-1","接收新客户短信提醒账号已达到上限"+count+"!");
+                    }
                 }
             }
         }
