@@ -16,6 +16,7 @@ import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.merchant.cert.MerchantCertFeignClient;
 import com.kuaidao.manageweb.feign.merchant.clue.MerchantClueInfoFeignClient;
 import com.kuaidao.manageweb.feign.merchant.user.MerchantUserInfoFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -25,6 +26,7 @@ import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.dto.mechant.cert.MerchantCertReq;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
@@ -96,6 +98,9 @@ public class MechantUserController {
 
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+
+    @Autowired
+    private MerchantCertFeignClient merchantCertFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -296,19 +301,25 @@ public class MechantUserController {
             UserInfoReq param= new UserInfoReq();
             param.setId(userInfoReq.getId());
             JSONResult<UserInfoReq> jsonResult = merchantUserInfoFeignClient.getUserInfo(param);
-            if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData().getSmsStatus().intValue()==0 ){
-                String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
-                Long count = 2L;
-                try {
-                    if(StringUtils.isNotBlank(merchantUserMsgCount)){
-                        count = Long.parseLong(merchantUserMsgCount);
+            if(JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData()!=null){
+                if(jsonResult.getData().getSmsStatus()!=null &&  jsonResult.getData().getSmsStatus().intValue()==0 ) {
+                    String merchantUserMsgCount = getSysSetting(SettingConstant.MERCHANT_USER_MSG_COUNT);
+                    Long count = 2L;
+                    try {
+                        if(StringUtils.isNotBlank(merchantUserMsgCount)){
+                            count = Long.parseLong(merchantUserMsgCount);
+                        }
+                    } catch (NumberFormatException e) {
+                        logger.error("saveUser merchantUserMsgCount{},e:{}",merchantUserMsgCount,e);
                     }
-                } catch (NumberFormatException e) {
-                    logger.error("saveUser merchantUserMsgCount{},e:{}",merchantUserMsgCount,e);
-                }
-                //查询现在有的
-                if(count<=getMerchantSmsCount(userInfoReq.getParentId())){
-                    return new JSONResult().fail("-1","接收新客户短信提醒账号已达到上限"+count+"!");
+                    //查询现在有的
+                    Long parentId= userInfoReq.getParentId();
+                    if(userInfoReq.getUserType().intValue()==SysConstant.USER_TYPE_TWO.intValue()){
+                        parentId=userInfoReq.getId();
+                    }
+                    if(count<=getMerchantSmsCount(parentId)){
+                        return new JSONResult().fail("-1","接收新客户短信提醒账号已达到上限"+count+"!");
+                    }
                 }
             }
         }
@@ -402,6 +413,23 @@ public class MechantUserController {
             return new JSONResult().success(null);
         }
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
+        return jsonResult;
+    }
+
+    /**
+     * @description: 修改用户上传状态
+     * @author fengyixuan
+     * @date 2021/7/13 11:28 上午
+     * @param merchantCertReq
+     * @returns com.kuaidao.common.entity.JSONResult
+    */
+    @PostMapping("/updateAuditStatus")
+    @ResponseBody
+    public JSONResult<String> updateAuditStatus(@RequestBody MerchantCertReq merchantCertReq) {
+        if (null == merchantCertReq.getUserId() || merchantCertReq.getAuditStatus()==null) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        JSONResult<String> jsonResult = merchantCertFeignClient.updateAuditStatus(merchantCertReq);
         return jsonResult;
     }
 
