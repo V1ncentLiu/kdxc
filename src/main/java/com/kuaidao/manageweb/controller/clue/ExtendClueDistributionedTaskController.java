@@ -555,6 +555,8 @@ public class ExtendClueDistributionedTaskController {
                 }
                 //首次响应间隔
                 curList.add(taskDTO.getFirstResponseInterval());
+                //加盟顾问
+                curList.add(taskDTO.getConsultantName());
                 dataList.add(curList);
 
             }
@@ -865,6 +867,7 @@ public class ExtendClueDistributionedTaskController {
                 if(queryDto.getFalg()==4){
                     curList.add(transTrueAndFalse(taskDTO.getConsultantIsCall()));
                     curList.add(transTrueAndFalse(taskDTO.getConsultantStatus()));
+                    curList.add(taskDTO.getConsultantName());
                 }
 
                 dataList.add(curList);
