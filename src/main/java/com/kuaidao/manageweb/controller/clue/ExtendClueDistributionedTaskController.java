@@ -335,7 +335,8 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
                 //如果资源类别为餐盟平台，则将留言重点放入渠道字段
                 String channel = "";
-                if(CategoryConstant.CMPT.equals(taskDTO.getCategory()) && !taskDTO.getSourceFrom().equals(AggregationConstant.CLUE_SOURCE.SOURCE_4)){
+                if(CategoryConstant.CMPT.equals(taskDTO.getCategory())
+                        && !String.valueOf(AggregationConstant.CLUE_SOURCE.SOURCE_4).equals(taskDTO.getSourceFrom())){
                     channel = taskDTO.getMessagePoint();
                 }
                 curList.add(channel);
