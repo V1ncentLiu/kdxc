@@ -335,7 +335,8 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
                 //如果资源类别为餐盟平台，则将留言重点放入渠道字段
                 String channel = "";
-                if(CategoryConstant.CMPT.equals(taskDTO.getCategory())){
+                if(CategoryConstant.CMPT.equals(taskDTO.getCategory())
+                        && !String.valueOf(AggregationConstant.CLUE_SOURCE.SOURCE_4).equals(taskDTO.getSourceFrom())){
                     channel = taskDTO.getMessagePoint();
                 }
                 curList.add(channel);
@@ -555,6 +556,8 @@ public class ExtendClueDistributionedTaskController {
                 }
                 //首次响应间隔
                 curList.add(taskDTO.getFirstResponseInterval());
+                //加盟顾问
+                curList.add(taskDTO.getConsultantName());
                 dataList.add(curList);
 
             }
@@ -865,6 +868,7 @@ public class ExtendClueDistributionedTaskController {
                 if(queryDto.getFalg()==4){
                     curList.add(transTrueAndFalse(taskDTO.getConsultantIsCall()));
                     curList.add(transTrueAndFalse(taskDTO.getConsultantStatus()));
+                    curList.add(taskDTO.getConsultantName());
                 }
 
                 dataList.add(curList);
