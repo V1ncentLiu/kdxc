@@ -333,10 +333,16 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(DateUtil.convert2String(taskDTO.getCreateTime(), "yyyy/MM/dd HH:mm:ss")); // 创建时间
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getSourceTypeName()); // 广告位
-                //如果资源类别为餐盟平台，则将留言重点放入渠道字段
+//                //如果资源类别为餐盟平台，则将留言重点放入渠道字段
+//                String channel = "";
+//                if(CategoryConstant.CMPT.equals(taskDTO.getCategory())
+//                        && !String.valueOf(AggregationConstant.CLUE_SOURCE.SOURCE_4).equals(taskDTO.getSourceFrom())){
+//                    channel = taskDTO.getMessagePoint();
+//                }
+
+                //慧聚 【资源管理-已分配资源】「导出资源情况」导出的表格中，需要将有「注册时间」的资源的「留言重点」内容，赋值给「渠道」（直接赋值），否则不需要赋值；
                 String channel = "";
-                if(CategoryConstant.CMPT.equals(taskDTO.getCategory())
-                        && !String.valueOf(AggregationConstant.CLUE_SOURCE.SOURCE_4).equals(taskDTO.getSourceFrom())){
+                if(null != taskDTO.getRegisterTime()){
                     channel = taskDTO.getMessagePoint();
                 }
                 curList.add(channel);
