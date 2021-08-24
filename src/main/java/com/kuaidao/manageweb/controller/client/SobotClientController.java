@@ -87,7 +87,7 @@ public class SobotClientController {
                 request.setAttribute("orgList", orgListJr.getData());
             }
         }
-        return "client/okccClientPage";
+        return "client/sobotClientPage";
     }
 
 
