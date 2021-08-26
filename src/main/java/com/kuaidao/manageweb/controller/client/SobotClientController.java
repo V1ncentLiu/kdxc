@@ -58,11 +58,14 @@ public class SobotClientController {
     public static final String OKCC_ACCOUNT = "okccAccount";
     public static final String OKCC_PASSWORD = "okccPassword";
 
+    //当前坐席登录方式（1-网络电话；2-sip话机；3-手机）',
+    private static final String CALL_WAY_1 = "1";
+
 
     /**
      *  跳转赤晨页面
      */
-//    @RequiresPermissions("callcenter:sobotClient:view")
+    @RequiresPermissions("callcenter:sobotClient:view")
     @RequestMapping("/toSobotClientPage")
     public String toSobotClientPage(HttpServletRequest request) {
         List<OrganizationDTO> orgList = new ArrayList<>();
@@ -91,7 +94,7 @@ public class SobotClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:sobotClient:view")
+    @RequiresPermissions("callcenter:sobotClient:view")
     @PostMapping("/listSobotClientPage")
     @ResponseBody
     public JSONResult<PageBean<SobotClientRespDTO>> listSobotClientPage(@RequestBody SobotClientQueryDTO queryClientDTO) {
@@ -108,7 +111,7 @@ public class SobotClientController {
     }
 
 
-//    @RequiresPermissions("callcenter:sobotClient:add")
+    @RequiresPermissions("callcenter:sobotClient:add")
     @PostMapping("/saveSobotClient")
     @ResponseBody
     public JSONResult<Boolean> saveSobotClient(@Valid @RequestBody AddOrUpdateSobotClientDTO reqDTO, BindingResult result) throws Exception {
@@ -124,12 +127,13 @@ public class SobotClientController {
                 return jsonResult;
             }
         }
+        reqDTO.setCallWay(CALL_WAY_1);
         JSONResult<Boolean> booleanJSONResult = sobotClientFeignClient.saveSobotClient(reqDTO);
         return booleanJSONResult;
     }
 
 
-//    @RequiresPermissions("callcenter:sobotClient:edit")
+    @RequiresPermissions("callcenter:sobotClient:edit")
     @PostMapping("/updateSobotClient")
     @ResponseBody
     public JSONResult<Boolean> updateSobotClient(@Valid @RequestBody AddOrUpdateSobotClientDTO reqDTO,BindingResult result) throws Exception {
@@ -235,9 +239,6 @@ public class SobotClientController {
                 }else if (j == 7) {
                     // 公司id
                     rowDto.setCompanyId(value);
-                }else if (j == 8) {
-                    // 当前坐席登录方式
-                    rowDto.setCallWay(value);
                 }
             }
             dataList.add(rowDto);

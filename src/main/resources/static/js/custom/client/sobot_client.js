@@ -33,9 +33,9 @@ var clientVm = new Vue({
              userId:'',
              numberAttributionCompany:'',
              attribution:'',
-             sobotClientId:'',
-             sobotCompanyId:'',
-             sobotClientSecret:'',
+             clientId:'',
+             companyId:'',
+             clientSecret:'',
              isDxzj:false
          },
          userList:[],//关联用户列表
@@ -81,13 +81,13 @@ var clientVm = new Vue({
              requestType:[
                  { required: true, message: '呼叫方式不能为空'},
              ],
-             sobotClientId:[
+             clientId:[
                  { required: true, message: '智齿外呼账号不能为空'},
              ],
-             sobotCompanyId:[
+             companyId:[
                  { required: true, message: '智齿外呼密码不能为空'},
              ],
-             sobotClientSecret:[
+             clientSecret:[
                  { required: true, message: '智齿外呼秘钥不能为空'},
              ],
         	 userId:[
@@ -101,7 +101,7 @@ var clientVm = new Vue({
          },
          addClientDialog(){//添加坐席弹窗
         	 this.addOrModifyDialogTitle='添加坐席';
-        	 this.submitClientUrl ='saveOkccClient';
+        	 this.submitClientUrl ='saveSobotClient';
         	 if (this.$refs['clientForm']!==undefined) {
          		this.$refs['clientForm'].resetFields();
          	 }
@@ -150,7 +150,7 @@ var clientVm = new Vue({
                  type: 'warning'
                }).then(() => {
             	  var param  = {idList:rowIds};
-        	      axios.post('/client/okccClient/deleteOkccClient', param)
+        	      axios.post('/client/sobotClient/deleteSobotClient', param)
                   .then(function (response) {
                       var resData = response.data;
                       if(resData.code=='0'){
@@ -194,7 +194,7 @@ var clientVm = new Vue({
 
 
         	 this.addOrModifyDialogTitle='修改坐席';
-        	 this.submitClientUrl ='uploadsobotClient';
+        	 this.submitClientUrl ='updateSobotClient';
         	 if (this.$refs['clientForm']!==undefined) {
           		this.$refs['clientForm'].resetFields();
           	}
@@ -207,7 +207,7 @@ var clientVm = new Vue({
               	    clientVm.userList = resData.data;
 
                	 var param={id:rows[0].id};
-                 axios.post('/client/okccClient/queryOkccClientById', param)
+                 axios.post('/client/sobotClient/querySobotClientById', param)
                  .then(function (response) {
                      var resData = response.data;
                      if(resData.code=='0'){
@@ -268,7 +268,7 @@ var clientVm = new Vue({
                  	//fieldMenuVM.$refs.confirmBtn.disabled=true;
                  	clientVm.confirmBtnDisabled=true;//禁用提交按钮
                     var param=this.form;
-                   axios.post('/client/okccClient/'+this.submitClientUrl, param)
+                   axios.post('/client/sobotClient/'+this.submitClientUrl, param)
                    .then(function (response) {
                        var resData = response.data;
                        if(resData.code=='0'){
@@ -327,7 +327,7 @@ var clientVm = new Vue({
         	 var param = this.searchForm;
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
-        	 axios.post('/client/okccClient/listOkccClientPage',param)
+        	 axios.post('/client/sobotClient/listSobotClientPage',param)
              .then(function (response) {
             	 var data =  response.data
                  if(data.code=='0'){
@@ -410,7 +410,7 @@ var clientVm = new Vue({
                 	 this.uploadBtnDisabled=true;
                 	 this.uploadBtnText='导入中';
 
-              	   axios.post('/client/okccClient/submitOkccClientData',{})
+              	   axios.post('/client/sobotClient/submitSobotClientData',{})
                      .then(function (response) {
                     	 var data =  response.data;
                          if(data.code=='0'){
