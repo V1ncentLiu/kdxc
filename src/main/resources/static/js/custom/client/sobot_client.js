@@ -82,10 +82,10 @@ var clientVm = new Vue({
                  { required: true, message: '呼叫方式不能为空'},
              ],
              clientId:[
-                 { required: true, message: '智齿外呼账号不能为空'},
+                 { required: true, message: '智齿外呼应用ID不能为空'},
              ],
              companyId:[
-                 { required: true, message: '智齿外呼密码不能为空'},
+                 { required: true, message: '智齿外呼公司ID不能为空'},
              ],
              clientSecret:[
                  { required: true, message: '智齿外呼秘钥不能为空'},
