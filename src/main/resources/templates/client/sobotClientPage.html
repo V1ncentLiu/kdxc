@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
+    <title>智齿坐席管理</title>
+     <style>
+        .trClientManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
+        .trClientManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .trClientManage .leftTree{padding:10px;}
+        .trClientManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .el-message-box__btns {text-align: center;}
+        .el-message-box__btns button:nth-child(2){margin-right: -125px;}
+    </style>
+</head>
+<body>
+<div id="sobotClientManage" class="trClientManage mainPadding" style="display:none">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item>智齿坐席</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <shiro:hasPermission name="callcenter:sobotClient:add">
+            <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i>添加坐席</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="callcenter:sobotClient:edit">
+            <el-button type="success" @click="modifyClientDialog"><i class="el-icon-edit"></i>编辑坐席</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="callcenter:sobotClient:import">
+            <el-button type="warning" @click="addBatchClient"><i class="el-icon-download"></i>导入坐席</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="callcenter:sobotClient:delete">
+            <el-button type="danger" @click="deleteClientDialog"><i class="el-icon-delete"></i>删除坐席</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <div class="mainSearchBg">
+        <div class="mainSearchFormBox">
+          <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+            <el-form-item label="登录坐席:" label-width="90px">
+              <el-input placeholder="请输登录坐席"  v-model="searchForm.loginClient"></el-input>
+            </el-form-item>
+              <el-form-item label="坐席编号:" label-width="90px">
+                  <el-input placeholder="请输坐席编号"  v-model="searchForm.clientNo"></el-input>
+              </el-form-item>
+              <el-form-item label="号码所属公司:" label-width="90px" style="margin-right: 10px;">
+                  <el-input placeholder="号码所属公司"  v-model="searchForm.numberAttributionCompany"></el-input>
+              </el-form-item>
+            <el-form-item label="所在组织:" label-width="90px">
+              <el-select v-model="searchForm.orgId" placeholder="请选择所在组织"  clearable filterable  value-key="value" >
+                  <el-option
+                      v-for="item in orgList"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id">
+                  </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="关联用户名:" label-width="90px">
+              <el-input placeholder="关联用户名"  v-model="searchForm.userName"></el-input>
+            </el-form-item>
+            <el-form-item label="">
+              <el-button icon="el-icon-search" type="primary" @click="initClientData">搜索</el-button>
+            </el-form-item>
+          </el-form>       
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                 @selection-change="handleSelectionChange"
+                :data="clientData" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="loginClient" label="登录坐席" width="200"></el-table-column>
+                <el-table-column align="center" prop="clientNo" label="坐席编号" width="200"></el-table-column>
+                <el-table-column align="center" prop="numberAttributionCompany" label="号码所属公司" width="200"></el-table-column>
+                <el-table-column align="center" prop="attribution" label="号码归属地" width="200"></el-table-column>
+                <el-table-column align="center" prop="clientId" label="智齿外呼应用ID"></el-table-column>
+                <el-table-column align="center" prop="companyId" label="智齿外呼公司ID"></el-table-column>
+                <el-table-column align="center" prop="clientSecret" label="智齿外呼秘钥"></el-table-column>
+                <el-table-column align="center" prop="name" label="关联用户" width="200"></el-table-column>
+                <el-table-column align="center" prop="orgName" label="所属部门" width="200"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
+                
+            </el-table>
+            <table-pagination :pager="pager" @change="initClientData"></table-pagination>
+        </el-row>
+    </div>
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog" :close-on-click-modal="false" width="540px">
+        <el-form :model="form" ref="clientForm" :rules="rules">
+            <el-form-item label="登录坐席：" :label-width="formLabelWidth" prop="loginClient">
+                <el-input v-model="form.loginClient" autocomplete="off"  maxlength="50" style="width: 290px;" :disabled="form.isDxzj"></el-input>
+            </el-form-item>
+            <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
+                <el-input v-model="form.clientNo" autocomplete="off"  maxlength="50" style="width: 290px;" :disabled="form.isDxzj"></el-input>
+            </el-form-item>
+            <el-form-item label="号码所属公司：" :label-width="formLabelWidth" prop="numberAttributionCompany">
+                <el-input v-model="form.numberAttributionCompany" autocomplete="off"  maxlength="50" style="width:290px;" :disabled="form.isDxzj"></el-input>
+            </el-form-item>
+            <el-form-item label="坐席归属地：" :label-width="formLabelWidth" prop="attribution">
+                <el-input v-model="form.attribution" autocomplete="off"  maxlength="50" style="width:290px;" :disabled="form.isDxzj"></el-input>
+            </el-form-item>
+            <el-form-item label="智齿外呼应用ID：" :label-width="formLabelWidth" prop="clientId">
+                <el-input v-model="form.clientId" autocomplete="off"  maxlength="50" style="width: 290px;" :disabled="form.isDxzj"></el-input>
+            </el-form-item>
+            <el-form-item label="智齿外呼公司ID：" :label-width="formLabelWidth" prop="companyId">
+                <el-input v-model="form.companyId" autocomplete="off"  maxlength="100" style="width: 290px;" :disabled="form.isDxzj"></el-input>
+            </el-form-item>
+            <el-form-item label="智齿外呼秘钥：" :label-width="formLabelWidth" prop="clientSecret">
+                <el-input v-model="form.clientSecret" autocomplete="off"  maxlength="100" style="width: 290px;" :disabled="form.isDxzj"></el-input>
+            </el-form-item>
+                <el-form-item label="关联用户：" :label-width="formLabelWidth" prop="userId">
+                   <el-select v-model="form.userId"  value-key="value" style="width: 290px;" filterable >
+                       <el-option
+                           v-for="item in userList"
+                           :key="item.id"
+                           :label="item.name"
+                           :value="item.id">
+                       </el-option>
+                   </el-select>
+               </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="saveClient('clientForm')" :disabled="confirmBtnDisabled">提交</el-button>
+            <el-button @click="cancelForm('clientForm')">取 消</el-button>
+        </div>
+    </el-dialog>
+    
+    <el-dialog
+	  title="选择组织"
+	  :visible.sync="orgDialogVisible" 
+	  :close-on-click-modal="false"
+	  width="30%">
+	  
+        <el-tree
+             :data="orgTreeData"              
+             node-key="id"
+             show-checkbox
+             default-expand-all
+             highlight-current
+             check-strictly
+             @check="selecedNode"
+             class="leftTree">
+         </el-tree>
+
+	  
+	</el-dialog>
+
+     <!-- 批量添加 自定义字段弹窗 start -->
+            <el-dialog title="导入智齿坐席" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog" :close-on-click-modal="false" width="540px">
+               <el-row class="marginB20">
+                                 <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
+                                 下载批量上传模版：<a href="/excel-templates/sobot-client-template.xlsx" download="智齿坐席导入模板"><span style="color:#409EFF">智齿坐席导入模板</span></a>
+               
+               </el-row>
+               <el-row>
+                  <el-upload
+                      class="upload-demo"
+                      ref="upload"
+                      :multiple="false"
+                      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                      action="/client/sobotClient/uploadSobotClient"
+                      :file-list="fileList"
+                      :on-change="handleChange"
+                      :before-upload="beforeUpload"
+                      :on-success="uploadSuccess"
+                     :on-error="uploadError"
+                      :auto-upload="false">
+                      <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件</el-button>
+                      <span slot="tip" class="el-upload__tip">只能上传xlsx文件</span>
+                    </el-upload>
+               
+               
+               </el-row>
+              <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="submitUpload">确 定</el-button>
+                <el-button @click="dialogBatchVisible = false">取 消</el-button>
+              </div>
+            </el-dialog>
+      
+            <!-- 批量添加 自定义字段弹窗 end -->
+
+      <el-dialog title="预览数据" :visible.sync="uploadPreDialogVisible" :close-on-click-modal="false">
+          预览数据 共{{uploadNum}}条资源    
+           <el-table
+		    :data="uploadClientData"
+		    height="250"
+		    border
+		    style="width: 100%">
+		    
+		  <el-table-column
+              prop="name"
+              label="关联用户">
+            </el-table-column>
+		    <el-table-column
+		      prop="loginClient"
+		      label="登录坐席"
+		      width="120">
+		    </el-table-column>
+		    <el-table-column
+		      prop="clientNo"
+		      label="坐席编号"
+		      width="120">
+		    </el-table-column>
+               <el-table-column
+                       prop="clientId"
+                       label="智齿外呼应用ID"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="companyId"
+                       label="智齿外呼公司ID"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="clientSecret"
+                       label="智齿外呼秘钥"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="numberAttributionCompany"
+                       label="号码所属公司"
+                       width="180">
+               </el-table-column>
+               <el-table-column
+                       prop="attribution"
+                       label="坐席归属地"
+                       width="120">
+               </el-table-column>
+		  </el-table>
+           
+            <span slot="footer" class="dialog-footer">
+			    <el-button type="primary" @click="submitUploadClient" :disabled="uploadBtnDisabled">{{uploadBtnText}}</el-button>
+			  </span>  
+     </el-dialog>
+
+      <el-dialog title="部分导入失败" :visible.sync="uploadErrorDialogVisible" :show-close=false>
+           以下内容导入失败，请重新导入    
+           <el-table
+            :data="uploadErrorData"
+            height="250"
+            border
+            
+            style="width: 100%">
+              <el-table-column
+                  type="index"
+                  label="序号"
+                  width="50">
+                </el-table-column>
+              <el-table-column
+              prop="name"
+              label="关联用户">
+            </el-table-column>
+               <el-table-column
+                       prop="loginClient"
+                       label="登录坐席"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="clientNo"
+                       label="坐席编号"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="clientId"
+                       label="智齿外呼应用ID"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="companyId"
+                       label="智齿外呼公司ID"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="clientSecret"
+                       label="智齿外呼秘钥"
+                       width="120">
+               </el-table-column>
+               <el-table-column
+                       prop="numberAttributionCompany"
+                       label="号码所属公司"
+                       width="180">
+               </el-table-column>
+               <el-table-column
+                       prop="attribution"
+                       label="坐席归属地"
+                       width="180">
+               </el-table-column>
+          </el-table>
+          
+          <span slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="clickMeKown">知道了</el-button>
+              </span>  
+     </el-dialog>
+
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var orgList = [[${orgList}]];
+</script>
+
+<!-- 当前页面的js -->
+<script th:src="@{/js/custom/client/sobot_client.js}"></script>
+</html>
