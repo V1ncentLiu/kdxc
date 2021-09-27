@@ -447,6 +447,12 @@ public class ExtendClueDistributionedTaskController {
                     } else if (taskDTO.getSourceFrom()
                             .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8))) {
                         sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_8_NAME;
+                    }else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_9))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_9_NAME;
+                    }else if (taskDTO.getSourceFrom()
+                            .equals(String.valueOf(com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_10))) {
+                        sourceFrom = com.kuaidao.aggregation.constant.AggregationConstant.CLUE_SOURCE.SOURCE_10_NAME;
                     }
                 }
 

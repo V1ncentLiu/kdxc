@@ -631,6 +631,7 @@ public class LoginController {
             UserInfoReq userInfoReq = new UserInfoReq();
             userInfoReq.setId(data.getId());
             userInfoReq.setPassword(updateUserPasswordReq.getOldPassword());
+            userInfoReq.setResetPasswordTime(new Date());
             // 修改密码
             return userInfoFeignClient.update(userInfoReq);
         } else {
