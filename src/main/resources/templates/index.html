@@ -1,603 +1,603 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
-    <title>后台管理系统</title>
-    <link rel="stylesheet" th:href="@{/css/custom/homepage/index.css}">
+  <title>后台管理系统</title>
+  <link rel="stylesheet" th:href="@{/css/custom/homepage/index.css}">
 
-    <link rel="stylesheet" th:href="@{/im/css/base.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/animate.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/jquery-ui.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/contextMenu/jquery.contextMenu.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/minAlert.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/main.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/uiKit.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/CEmojiEngine.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/rangeslider.css}" />
-	<link rel="stylesheet" th:href="@{/im/css/pure-min.css}">
-	<link rel="stylesheet" th:href="@{/im/css/whiteboard.css}" />
-	<link rel="icon" href="images/icon.ico" type="image/x-icon" />
-	<!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
-	<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
-    <style>
-        .rightBottom {
-            position: absolute!important;
-            right: 0!important;
-            bottom: 0!important;
-        }
-        .rightBottom .el-dialog__header:before{
-            background:none;
-        }
-    </style>
+  <link rel="stylesheet" th:href="@{/im/css/base.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/animate.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/jquery-ui.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/contextMenu/jquery.contextMenu.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/minAlert.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/uiKit.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/CEmojiEngine.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/rangeslider.css}" />
+  <link rel="stylesheet" th:href="@{/im/css/pure-min.css}">
+  <link rel="stylesheet" th:href="@{/im/css/whiteboard.css}" />
+  <link rel="icon" href="images/icon.ico" type="image/x-icon" />
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+  <style>
+    .rightBottom {
+      position: absolute !important;
+      right: 0 !important;
+      bottom: 0 !important;
+    }
+
+    .rightBottom .el-dialog__header:before {
+      background: none;
+    }
+  </style>
 </head>
+
 <body>
-<div id="Loading">
+  <div id="Loading">
     <div class="loader-inner ball-beat">
-        <div></div>
-        <div></div>
-        <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
-</div>
-<div id="app" ref="homePageVMRef">
+  </div>
+  <div id="app" ref="homePageVMRef">
     <el-container style="height: 100%;">
-        <!-- 头部 -->
-        <el-header class="elHeader">        
-            <div class="logoimg f-fl">
-                <img th:src="@{/images/logoimg.png}" alt="">
-            </div>   
-            <div class="f-fr">
-                <el-button  v-if="consoleBtnVisible" type="primary" @click="openConsolePage" class="f-fl headerBtn headerBtn1"><img th:src="@{/images/icon_stage.png}" alt="" class="f-fl marginR10">我的工作台</el-button>
-
-                <el-button type="primary" @click="openLoginClientDialog" class="f-fl headerBtn"><img th:src="@{/images/icon_head.png}" alt="" class="f-fl marginR10">{{callTitle}}</el-button>
-
-                <el-button type="primary" @click="openOutboundDialog" class="f-fl headerBtn"><img th:src="@{/images/icon_phone.png}" alt="" class="f-fl marginR10">主动外呼</el-button>
-                <span class="messageCenterBtn" @click="openMessageCenter">
-                    <img th:src="@{/images/icon_news.png}" alt="">
-                    <span id="messageCount"></span>
-                </span>  
-                <!-- 挂断按钮 -->
-                <el-button type="primary" @click="ketianHangup" class="f-fl headerBtn" v-if="isRingOff">挂断</el-button>
-                <!-- 新增资料库按钮 -->
-                <el-button type="primary" @click="opendataBase" class="f-fl headerBtn" v-if="isDataBase"><img th:src="@{/images/icon_dataBase.png}" alt="" class="f-fl marginR10">资料库</el-button>
-                <!-- 资料库按钮结束 -->
-                <!-- <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">
-                    <em style="color: #e37470;" id="messageCount"></em>
-                </el-button> -->  
-                <span class="messageCenterBtn" style="margin: 10px 30px 0 0;">
-                    <img th:src="@{/images/headIco.png}" alt="">
-                    <span v-if="isBusyStatus" id="messageText" class="messageCount">忙</span>
-                </span> 
-                <!-- 下拉 -->
-                <el-dropdown class="elDropdown f-fr" trigger="click"  @command="handleCommand">
-                    <div class="elDropdownBtn">
-                        <span>{{user.name}}</span> 
-                        <i class="el-icon-caret-bottom"></i>
-                    </div>            
-                    <el-dropdown-menu slot="dropdown">
-                        <!-- 商家版的菜单 -->
-                        <!-- <el-dropdown-item command="userInfo">用户信息</el-dropdown-item> -->
-                        <span v-if="showBusyBtn">
-                           <el-dropdown-item command="setBusyStatus" v-if="isBusyButton">设为忙碌状态</el-dropdown-item>
-                            <el-dropdown-item command="cancelBusyStatus" v-else>取消忙碌状态</el-dropdown-item> 
-                        </span>
-                        
-                        <el-dropdown-item command="modifyPwd">修改密码</el-dropdown-item>
-                        <el-dropdown-item command="logout">退出登录</el-dropdown-item>
-                    </el-dropdown-menu>
-                </el-dropdown>
-            </div>
-        </el-header>
-        <el-container>
-            <span  @click="toogleClick" :class="{'iconopenBox':isActive,'iconopenBox active':!isActive}">
-                <i  :class="{'iconfont el-icon-arrow-left':isActive,'iconfont el-icon-arrow-right':!isActive}"></i>
-            </span>
-            <!-- 左侧菜单 -->
-            <el-aside width="" class="elAside">
-                <el-menu 
-                    class="el-menu-vertical-demo" 
-                    @open="handleOpen" 
-                    @close="handleClose" 
-                    :collapse="isCollapse" 
-                    :default-openeds="defaultOpeneds"
-                    :default-active="defaultActive"
-                    background-color="rgb(56, 70, 192)" 
-                    text-color="rgb(255, 255, 255)">  
-                    <!-- foreach menuList start -->
-                      <el-submenu :index="index+''" :key="index"  v-for="(item,index) in items">
-                        <template slot="title">
-                            <!-- <i :class="'fa fa-lg '+ item.iconName"></i> -->
-                            <img :src="item.iconUrl" alt="" v-if="item.iconUrl">
-                            <span slot="title">{{item.name}}</span>
-                        </template>
-                        <el-menu-item  class="menu" :key="index+subIndex" :data-url="subItem.url" :index="index+'-'+subIndex" @click="menuClick(subItem.url)" v-for="(subItem,subIndex) in item.subList">
-                            <!-- <i :class="'fa fa-lg '+ subItem.iconName"></i> -->
-                            <span class="dot"></span>{{subItem.name}}
-                        </el-menu-item>
-                    </el-submenu> 
-                    
-                    <!-- foreach menuList end -->
-                                      
-                </el-menu>
-            </el-aside>
-            <!-- 右侧内容区 -->
-            <el-main class="elMain">
-                <iframe  :src="initUrl" id="iframeBox" ref="iframeBox" name='iframe' frameborder="0" width="100%" height="100%">
-                    <p>Your browser does not support iframes.</p>
-                </iframe>
-            </el-main>
-        </el-container>
-    </el-container>
-    
-     <!-- 修改密码 dialog start -->
-     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog" width="540px">
-        <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
-            <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
-                <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30" style="width:290px;"></el-input>
-            </el-form-item>
-            <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
-                <el-input  type="password" v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
-            </el-form-item>
-            <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
-                <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer" center="true">
-            <el-button type="primary" @click="saveModifyForm('modifyForm')">保存</el-button>
-            <el-button @click="cancelModifyForm('modifyForm')">取 消</el-button>
+      <!-- 头部 -->
+      <el-header class="elHeader">
+        <div class="logoimg f-fl">
+          <img th:src="@{/images/logoimg.png}" alt="">
         </div>
-    </el-dialog>
- <!-- 修改密码 dialog end -->
- <!-- 退出登录 dialog start -->
-     <el-dialog title="提示" :visible.sync="dialogLogoutVisible" width="350px" class="logoutDialog" :close-on-click-modal="false">
-        <p style="text-align: center;">确认退出系统吗？</p>
-        <span slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="confirmLogout">确认</el-button>
+        <div class="f-fr">
+          <el-button v-if="consoleBtnVisible" type="primary" @click="openConsolePage" class="f-fl headerBtn headerBtn1">
+            <img th:src="@{/images/icon_stage.png}" alt="" class="f-fl marginR10">我的工作台
+          </el-button>
+
+          <el-button type="primary" @click="openLoginClientDialog" class="f-fl headerBtn"><img
+              th:src="@{/images/icon_head.png}" alt="" class="f-fl marginR10">{{callTitle}}</el-button>
+
+          <el-button type="primary" @click="openOutboundDialog" class="f-fl headerBtn"><img
+              th:src="@{/images/icon_phone.png}" alt="" class="f-fl marginR10">主动外呼</el-button>
+          <span class="messageCenterBtn" @click="openMessageCenter">
+            <img th:src="@{/images/icon_news.png}" alt="">
+            <span id="messageCount"></span>
+          </span>
+          <!-- 挂断按钮 -->
+          <el-button type="primary" @click="ketianHangup" class="f-fl headerBtn" v-if="isRingOff">挂断</el-button>
+          <!-- 新增资料库按钮 -->
+          <el-button type="primary" @click="opendataBase" class="f-fl headerBtn" v-if="isDataBase"><img
+              th:src="@{/images/icon_dataBase.png}" alt="" class="f-fl marginR10">资料库</el-button>
+          <!-- 资料库按钮结束 -->
+          <!-- <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">
+                    <em style="color: #e37470;" id="messageCount"></em>
+                </el-button> -->
+          <span class="messageCenterBtn" style="margin: 10px 30px 0 0;">
+            <img th:src="@{/images/headIco.png}" alt="">
+            <span v-if="isBusyStatus" id="messageText" class="messageCount">忙</span>
+          </span>
+          <!-- 下拉 -->
+          <el-dropdown class="elDropdown f-fr" trigger="click" @command="handleCommand">
+            <div class="elDropdownBtn">
+              <span>{{user.name}}</span>
+              <i class="el-icon-caret-bottom"></i>
+            </div>
+            <el-dropdown-menu slot="dropdown">
+              <!-- 商家版的菜单 -->
+              <!-- <el-dropdown-item command="userInfo">用户信息</el-dropdown-item> -->
+              <span v-if="showBusyBtn">
+                <el-dropdown-item command="setBusyStatus" v-if="isBusyButton">设为忙碌状态</el-dropdown-item>
+                <el-dropdown-item command="cancelBusyStatus" v-else>取消忙碌状态</el-dropdown-item>
+              </span>
+
+              <el-dropdown-item command="modifyPwd">修改密码</el-dropdown-item>
+              <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
+      </el-header>
+      <el-container>
+        <span @click="toogleClick" :class="{'iconopenBox':isActive,'iconopenBox active':!isActive}">
+          <i :class="{'iconfont el-icon-arrow-left':isActive,'iconfont el-icon-arrow-right':!isActive}"></i>
         </span>
+        <!-- 左侧菜单 -->
+        <el-aside width="" class="elAside">
+          <el-menu class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse"
+            :default-openeds="defaultOpeneds" :default-active="defaultActive" background-color="rgb(56, 70, 192)"
+            text-color="rgb(255, 255, 255)">
+            <!-- foreach menuList start -->
+            <el-submenu :index="index+''" :key="index" v-for="(item,index) in items">
+              <template slot="title">
+                <!-- <i :class="'fa fa-lg '+ item.iconName"></i> -->
+                <img :src="item.iconUrl" alt="" v-if="item.iconUrl">
+                <span slot="title">{{item.name}}</span>
+              </template>
+              <el-menu-item class="menu" :key="index+subIndex" :data-url="subItem.url" :index="index+'-'+subIndex"
+                @click="menuClick(subItem.url)" v-for="(subItem,subIndex) in item.subList">
+                <!-- <i :class="'fa fa-lg '+ subItem.iconName"></i> -->
+                <span class="dot"></span>{{subItem.name}}
+              </el-menu-item>
+            </el-submenu>
+
+            <!-- foreach menuList end -->
+
+          </el-menu>
+        </el-aside>
+        <!-- 右侧内容区 -->
+        <el-main class="elMain">
+          <iframe :src="initUrl" id="iframeBox" ref="iframeBox" name='iframe' frameborder="0" width="100%"
+            height="100%">
+            <p>Your browser does not support iframes.</p>
+          </iframe>
+        </el-main>
+      </el-container>
+    </el-container>
+
+    <!-- 修改密码 dialog start -->
+    <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog" width="540px">
+      <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
+        <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
+          <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30"
+            style="width:290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
+          <el-input type="password" v-model="modifyForm.newPassword" autocomplete="off" maxlength="30"
+            style="width:290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
+          <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off" maxlength="30"
+            style="width:290px;"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer" center="true">
+        <el-button type="primary" @click="saveModifyForm('modifyForm')">保存</el-button>
+        <el-button @click="cancelModifyForm('modifyForm')">取 消</el-button>
+      </div>
     </el-dialog>
- <!-- 退出登录 dialog start -->
- <!-- 资料库 dialog start -->
-<el-dialog title="资料库" :visible.sync="dataBasedialogVisible" class="dataBasedialog" :close-on-click-modal="false" width="980px" @close="closeDataBasedialog">
-    <div class="searchIptBox">       
+    <!-- 修改密码 dialog end -->
+    <!-- 退出登录 dialog start -->
+    <el-dialog title="提示" :visible.sync="dialogLogoutVisible" width="350px" class="logoutDialog"
+      :close-on-click-modal="false">
+      <p style="text-align: center;">确认退出系统吗？</p>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmLogout">确认</el-button>
+      </span>
+    </el-dialog>
+    <!-- 退出登录 dialog start -->
+    <!-- 资料库 dialog start -->
+    <el-dialog title="资料库" :visible.sync="dataBasedialogVisible" class="dataBasedialog" :close-on-click-modal="false"
+      width="980px" @close="closeDataBasedialog">
+      <div class="searchIptBox">
         <!-- <el-input v-model="searchDatabaseKeyword" placeholder="输入关键词">
             <el-button slot="append" icon="el-icon-search" @click="searchDatabaseFun">搜索</el-button>
         </el-input> -->
         <el-input v-model="searchDatabaseKeyword" placeholder="输入关键词" class="searchIpt"></el-input>
         <img th:src="@{/images/unionSkin/icon_search.jpg}" alt="" class="searchIcon">
-        <el-button slot="append" @click="searchDatabaseFun" type="primary" style="width: 103px;height: 40px;font-size: 16px;">搜索</el-button>
-    </div>
-    <div class="searchConditions">
+        <el-button slot="append" @click="searchDatabaseFun" type="primary"
+          style="width: 103px;height: 40px;font-size: 16px;">搜索</el-button>
+      </div>
+      <div class="searchConditions">
         <div class="clearFix"><span class="f-fl">投资金额：</span>
-            <template>
-                <el-radio-group v-model="dataBaseInvestMoneyVal" @change="dataBaseClick1">
-                    <el-radio-button label="0" class="nolimit">不限</el-radio-button>
-                    <el-radio-button v-for="(item,index) in dataBaseInvestMoneyArr" :label="index+1">{{item.fee}}</el-radio-button>
-                </el-radio-group>
-            </template>
+          <template>
+            <el-radio-group v-model="dataBaseInvestMoneyVal" @change="dataBaseClick1">
+              <el-radio-button label="0" class="nolimit">不限</el-radio-button>
+              <el-radio-button v-for="(item,index) in dataBaseInvestMoneyArr" :label="index+1">{{item.fee}}
+              </el-radio-button>
+            </el-radio-group>
+          </template>
         </div>
         <div class="clearFix"><span class="f-fl">投资区域：</span>
-            <!-- <template>
+          <!-- <template>
                 <el-radio-group v-model="dataBaseInvestAreaVal" @change="dataBaseClick2">
                     <el-radio-button label="0">不限</el-radio-button>
                     <el-radio-button v-for="item in dataBaseInvestAreaArr" :label="item.name">{{item.name}}</el-radio-button>
                 </el-radio-group>
             </template> -->
-            <div class="distpicker" data-toggle="distpicker" id="distpicker">
-                <select class="form-group" id="dataProvince" data-province="全部省"></select>
-                <select class="form-group" id="dataCity" data-city="全部市"></select>
-                <select class="form-group" id="dataDistrict" data-district="全部区"></select>
-            </div>
+          <div class="distpicker" data-toggle="distpicker" id="distpicker">
+            <select class="form-group" id="dataProvince" data-province="全部省"></select>
+            <select class="form-group" id="dataCity" data-city="全部市"></select>
+            <select class="form-group" id="dataDistrict" data-district="全部区"></select>
+          </div>
         </div>
         <div class="clearFix"><span class="f-fl">意向品类：</span>
-            <!-- <template>
+          <!-- <template>
                 <el-radio-group v-model="dataBaseCategoryVal" @change="dataBaseClick3">
                     <el-radio-button label="0">不限</el-radio-button>
                     <el-radio-button v-for="item in dataBaseCategoryArr" :label="item.name">{{item.name}}</el-radio-button>
                 </el-radio-group>
             </template> -->
-            <template>                
-                <el-select class="dataBaseCategory" v-model="dataBaseCategoryVal" placeholder="请选择" @change="changeCategoryArr" clearable style="margin-right: 15px;">
-                    <el-option
-                      v-for="item in dataBaseCategoryArr"
-                      :key="item.id"
-                      :label="item.category_name"
-                      :value="item.id">
-                    </el-option>
-                </el-select>
-            </template>
-            <template>                
-                <el-select class="dataBaseCategory" v-model="dataBaseCategoryVal2" placeholder="请选择" multiple>                
-                    <el-option
-                      v-for="item in dataBaseCategoryArr2"
-                      :key="item.id"
-                      :label="item.category_name"
-                      :value="item.id">
-                    </el-option>
-                </el-select>
-            </template>
+          <template>
+            <el-select class="dataBaseCategory" v-model="dataBaseCategoryVal" placeholder="请选择"
+              @change="changeCategoryArr" clearable style="margin-right: 15px;">
+              <el-option v-for="item in dataBaseCategoryArr" :key="item.id" :label="item.category_name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </template>
+          <template>
+            <el-select class="dataBaseCategory" v-model="dataBaseCategoryVal2" placeholder="请选择" multiple>
+              <el-option v-for="item in dataBaseCategoryArr2" :key="item.id" :label="item.category_name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </template>
         </div>
-    </div>
-    <div class="searchResult">
+      </div>
+      <div class="searchResult">
         <p class="searchLoading" v-if="issearchLoading"><i class="el-icon-loading"></i><span>加载中</span></p>
         <div class="clearFix">
-            <div class="f-fl" v-if="isshowsearch">搜索结果：<span v-if="isshowsearchTip">暂无搜索结果</span></div>
-            <div class="f-fl searchResultList" v-if="issearchResult">
-                <a class="searchResultItem" :href="item.url" v-for="(item,index) in dataBaseResultArr" target="_blank"><span class="f-fl numbg">{{index+1}}</span>{{item.brand_name}}</a>
-            </div>
+          <div class="f-fl" v-if="isshowsearch">搜索结果：<span v-if="isshowsearchTip">暂无搜索结果</span></div>
+          <div class="f-fl searchResultList" v-if="issearchResult">
+            <a class="searchResultItem" :href="item.url" v-for="(item,index) in dataBaseResultArr" target="_blank"><span
+                class="f-fl numbg">{{index+1}}</span>{{item.brand_name}}</a>
+          </div>
         </div>
-    </div>
-</el-dialog>
- <!-- 资料库 dialog end -->
- 
- <!-- 呼叫中心登录 dialog start -->
-     <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="515px" v-dialog-drag>
-        <el-button type="text" icon="el-icon-minus" class="minDialog" @click="handleMin"></el-button>
-        <el-form :model="loginClientForm" ref="loginClientForm" :rules="clientRules">
-            <el-form-item label="选择呼叫中心：" :label-width="formLabelWidth105" prop="clientType">
-                <el-select v-model="loginClientForm.clientType" placeholder="请选择" value-key="value" @change="changeClientType" style="width: 350px;">
-                    <el-option
-                        v-for="item in clientTypeOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <!-- 天润 -->
-            <template v-if="loginClientForm.clientType==1">
-                <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
-                    <el-input   v-model="loginClientForm.cno" autocomplete="off"  maxlength="10" style="width: 350px;" @keyup.native="cnoNumber"></el-input>
-                </el-form-item>
-                 <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
-                    <el-input   v-model="loginClientForm.bindPhone" autocomplete="off"  maxlength="11" style="width: 350px;" @keyup.native="bindPhoneNumber"></el-input>
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
-                       <el-option
-                           v-for="item in bindPhoneTypeOptions"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value">
-                       </el-option>
-                    </el-select>
-                </el-form-item>
-            </template>
-            <!-- 七陌 -->
-            <template v-if="loginClientForm.clientType==2">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 350px;"></el-input>
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
-                       <el-option
-                           v-for="item in bindPhoneTypeOptions1"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value">
-                       </el-option>
-                    </el-select>
-                </el-form-item>
-                <!-- 新增呼叫方式 -->
-                <el-form-item label="呼叫方式：" :label-width="formLabelWidth105" prop="callPhoneType">
-                    <el-select v-model="loginClientForm.callPhoneType" placeholder="请选择" value-key="value" style="width: 350px;" @change="changeCallPhoneType">
-                       <el-option
-                           v-for="item in callPhoneTypeOptions"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value">
-                       </el-option>
-                    </el-select>
-                </el-form-item>
-                <!-- 新增绑定手机号 -->
-                <el-form-item v-if="isShowPhoneNumber" label="绑定手机号：" :label-width="formLabelWidth105" prop="mobilePhoneNumber">
-                    <el-input   v-model="loginClientForm.mobilePhoneNumber" autocomplete="off"  maxlength="11" style="width: 350px;" @keyup.native="mobilePhoneNumber" placeholder="输入绑定手机号"></el-input>
-                </el-form-item>
-                <!-- 七陌登录提示 -->
-                <div style="font-size: 12px;padding: 10px 20px;color: #f56c6c;" v-show="isShowTip">
-                    选择天翼云呼app呼叫方式，需要注意以下：<br>1，需要app是打开的状态，且当前页面不可锁屏，方可进行打电话。<br>2，只支持安卓手机
-                </div>
-            </template>
-            <!-- 合力 -->
-            <template v-if="loginClientForm.clientType==3">
-                <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
-                    <el-input   v-model="loginClientForm.cno" autocomplete="off"  maxlength="10" style="width: 350px;" @keyup.native="cnoNumber"></el-input>
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
-                       <el-option
-                           v-for="item in bindPhoneTypeOptions"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value">
-                       </el-option>
-                    </el-select>
-                </el-form-item>
-            </template>
-            <!-- 科天 -->
-            <template v-if="loginClientForm.clientType==4">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 350px;"></el-input>
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
-                       <el-option
-                           v-for="item in bindPhoneTypeOptions"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value">
-                       </el-option>
-                    </el-select>
-                </el-form-item>
-            </template>
-            <!-- 容联 -->
-            <template v-if="loginClientForm.clientType==5">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 350px;"></el-input>
-                </el-form-item>
-            </template>
-            <!--乐创-->
-            <template v-if="loginClientForm.clientType==6">
-                <el-form-item label="主叫手机号：" :label-width="formLabelWidth105" prop="caller">
-                    <el-input   v-model="loginClientForm.caller" autocomplete="off"  maxlength="20" style="width: 350px;"></el-input>
-                </el-form-item>
-                <el-form-item label="线路：" :label-width="formLabelWidth105" prop="callLine">
-                    <el-select v-model="loginClientForm.callLine" placeholder="请选择" value-key="value" style="width: 350px;">
-                        <el-option
-                                v-for="item in callLineTypeOptions"
-                                :key="item.value"
-                                :label="item.name"
-                                :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-            </template>
-            <!-- 中科呼叫中心 -->
-            <template v-if="loginClientForm.clientType==7">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="20" style="width: 350px;"></el-input>
-                </el-form-item>
-            </template>
-            <!-- 赤晨呼叫中心 -->
-            <template v-if="loginClientForm.clientType==8">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="20" style="width: 350px;"></el-input>
-                </el-form-item>
-            </template>
-        </el-form>        
-        <div slot="footer" class="dialog-footer" center="true" style="padding-top: 10px;">
-            <el-button type="primary" @click="loginClient('loginClientForm')">登录</el-button>
-            <el-button type="info" @click="cancelLoginClientForm('loginClientForm')">取 消</el-button>
-        </div>
+      </div>
     </el-dialog>
- <!-- 呼叫中心登录  dialog end -->
- 
- <!-- 呼叫中心退出dialog start -->
-     <el-dialog title="呼叫中心" :visible.sync="dialogLogoutClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="515px">
-     <el-button type="text" icon="el-icon-minus" class="minDialog" @click="logoutMin"></el-button>
-        <el-form :model="loginClientForm" ref="logoutClientForm" :rules="loginClientForm.clientType==1?trClientFormRules:qimoClientFormRules">
-             <span v-if="loginClientForm.clientType==1">已登录天润呼叫中心</span>
-             <span v-if="loginClientForm.clientType==2">已登录七陌呼叫中心</span>
-             <span v-if="loginClientForm.clientType==3">已登录合力呼叫中心</span>
-             <span v-if="loginClientForm.clientType==4">已登录科天呼叫中心</span>
-             <span v-if="loginClientForm.clientType==5">已登录容联呼叫中心</span>
-             <span v-if="loginClientForm.clientType==6">已登录乐创呼叫中心</span>
-             <span v-if="loginClientForm.clientType==7">已登录中科呼叫中心</span>
-             <span v-if="loginClientForm.clientType==8">已登录赤晨呼叫中心</span>
-            <template v-if="loginClientForm.clientType==1">
-                <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
-                    {{loginClientForm.cno}}
-                </el-form-item>
-                 <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
-                    {{loginClientForm.bindPhone}}
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
-                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
-                </el-form-item>
-            </template>
-            <template v-if="loginClientForm.clientType==2">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    {{loginClientForm.loginClient}}
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
-                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
-                </el-form-item>
-                <!-- 新增呼叫方式 -->
-                <el-form-item label="呼叫方式：" :label-width="formLabelWidth105" prop="callPhoneType">
-                    <!-- {{loginClientForm.callPhoneType}} -->
-                    <span v-if="loginClientForm.callPhoneType==1">话机呼叫</span>
-                    <span v-if="loginClientForm.callPhoneType==2">天翼云app呼叫</span>
-                    <span v-if="loginClientForm.callPhoneType==3">绑定手机号呼叫</span>
-                </el-form-item>
-            </template>
-             <template v-if="loginClientForm.clientType==3">
-                <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
-                    {{loginClientForm.cno}}
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
-                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
-                </el-form-item>
-            </template>
-            <template v-if="loginClientForm.clientType==4">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    {{loginClientForm.loginClient}}
-                </el-form-item>
-                <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
-                    <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
-                    <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
-                </el-form-item>
-            </template>
-            <template v-if="loginClientForm.clientType==5">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    {{loginClientForm.loginClient}}
-                </el-form-item>
-            </template>
-            <template v-if="loginClientForm.clientType==6">
-                <el-form-item label="登录主机号：" :label-width="formLabelWidth105" prop="loginClient">
-                    {{loginClientForm.caller}}
-                </el-form-item>
-            </template>
-            <template v-if="loginClientForm.clientType==7">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    {{loginClientForm.loginClient}}
-                </el-form-item>
-            </template>
-            <template v-if="loginClientForm.clientType==8">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
-                    {{loginClientForm.loginClient}}
-                </el-form-item>
-            </template>
+    <!-- 资料库 dialog end -->
 
-        </el-form>
-        <div slot="footer" class="dialog-footer" center="true">
-            <el-button type="primary" @click="logoutClient('loginClientForm')">退出</el-button>
-        </div>
+    <!-- 呼叫中心登录 dialog start -->
+    <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog"
+      :close-on-click-modal="false" width="515px" v-dialog-drag>
+      <el-button type="text" icon="el-icon-minus" class="minDialog" @click="handleMin"></el-button>
+      <el-form :model="loginClientForm" ref="loginClientForm" :rules="clientRules">
+        <el-form-item label="选择呼叫中心：" :label-width="formLabelWidth105" prop="clientType">
+          <el-select v-model="loginClientForm.clientType" placeholder="请选择" value-key="value" @change="changeClientType"
+            style="width: 350px;">
+            <el-option v-for="item in clientTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <!-- 天润 -->
+        <template v-if="loginClientForm.clientType==1">
+          <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
+            <el-input v-model="loginClientForm.cno" autocomplete="off" maxlength="10" style="width: 350px;"
+              @keyup.native="cnoNumber"></el-input>
+          </el-form-item>
+          <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
+            <el-input v-model="loginClientForm.bindPhone" autocomplete="off" maxlength="11" style="width: 350px;"
+              @keyup.native="bindPhoneNumber"></el-input>
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value"
+              style="width: 350px;">
+              <el-option v-for="item in bindPhoneTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </template>
+        <!-- 七陌 -->
+        <template v-if="loginClientForm.clientType==2">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            <el-input v-model="loginClientForm.loginClient" autocomplete="off" maxlength="10" style="width: 350px;">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value"
+              style="width: 350px;">
+              <el-option v-for="item in bindPhoneTypeOptions1" :key="item.value" :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <!-- 新增呼叫方式 -->
+          <el-form-item label="呼叫方式：" :label-width="formLabelWidth105" prop="callPhoneType">
+            <el-select v-model="loginClientForm.callPhoneType" placeholder="请选择" value-key="value" style="width: 350px;"
+              @change="changeCallPhoneType">
+              <el-option v-for="item in callPhoneTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <!-- 新增绑定手机号 -->
+          <el-form-item v-if="isShowPhoneNumber" label="绑定手机号：" :label-width="formLabelWidth105"
+            prop="mobilePhoneNumber">
+            <el-input v-model="loginClientForm.mobilePhoneNumber" autocomplete="off" maxlength="11"
+              style="width: 350px;" @keyup.native="mobilePhoneNumber" placeholder="输入绑定手机号"></el-input>
+          </el-form-item>
+          <!-- 七陌登录提示 -->
+          <div style="font-size: 12px;padding: 10px 20px;color: #f56c6c;" v-show="isShowTip">
+            选择天翼云呼app呼叫方式，需要注意以下：<br>1，需要app是打开的状态，且当前页面不可锁屏，方可进行打电话。<br>2，只支持安卓手机
+          </div>
+        </template>
+        <!-- 合力 -->
+        <template v-if="loginClientForm.clientType==3">
+          <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
+            <el-input v-model="loginClientForm.cno" autocomplete="off" maxlength="10" style="width: 350px;"
+              @keyup.native="cnoNumber"></el-input>
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value"
+              style="width: 350px;">
+              <el-option v-for="item in bindPhoneTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </template>
+        <!-- 科天 -->
+        <template v-if="loginClientForm.clientType==4">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            <el-input v-model="loginClientForm.loginClient" autocomplete="off" maxlength="10" style="width: 350px;">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value"
+              style="width: 350px;">
+              <el-option v-for="item in bindPhoneTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </template>
+        <!-- 容联 -->
+        <template v-if="loginClientForm.clientType==5">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            <el-input v-model="loginClientForm.loginClient" autocomplete="off" maxlength="10" style="width: 350px;">
+            </el-input>
+          </el-form-item>
+        </template>
+        <!--乐创-->
+        <template v-if="loginClientForm.clientType==6">
+          <el-form-item label="主叫手机号：" :label-width="formLabelWidth105" prop="caller">
+            <el-input v-model="loginClientForm.caller" autocomplete="off" maxlength="20" style="width: 350px;">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="线路：" :label-width="formLabelWidth105" prop="callLine">
+            <el-select v-model="loginClientForm.callLine" placeholder="请选择" value-key="value" style="width: 350px;">
+              <el-option v-for="item in callLineTypeOptions" :key="item.value" :label="item.name" :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+        </template>
+        <!-- 中科呼叫中心 -->
+        <template v-if="loginClientForm.clientType==7">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            <el-input v-model="loginClientForm.loginClient" autocomplete="off" maxlength="20" style="width: 350px;">
+            </el-input>
+          </el-form-item>
+        </template>
+        <!-- 赤晨呼叫中心 -->
+        <template v-if="loginClientForm.clientType==8">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            <el-input v-model="loginClientForm.loginClient" autocomplete="off" maxlength="20" style="width: 350px;">
+            </el-input>
+          </el-form-item>
+        </template>
+      </el-form>
+      <div slot="footer" class="dialog-footer" center="true" style="padding-top: 10px;">
+        <el-button type="primary" @click="loginClient('loginClientForm')">登录</el-button>
+        <el-button type="info" @click="cancelLoginClientForm('loginClientForm')">取 消</el-button>
+      </div>
     </el-dialog>
- <!-- 呼叫中心退出  dialog end -->
-  <!--外呼 dialog start -->
-     <el-dialog title="主动外呼" :visible.sync="dialogOutboundVisible" :close-on-click-modal="false" class="callCenterDialog1" @close="closeOutboundDialog" width="540px" v-dialog-drag>
-        <el-button type="text" icon="el-icon-minus" class="minDialog1" @click="outboundMin"></el-button>
-        <el-form>
-            <el-form-item  label-width="35px">
-                <el-input style="float: left;width: 385px;margin-right: 10px;" autocomplete="off"  maxlength="11" v-model="outboundInputPhone"></el-input>
-                <el-button type="primary" @click="clickOutbound" class="callCenterBtn"><img th:src="@{/images/icon_call2.png}" alt=""></el-button>
-            </el-form-item>
-        </el-form>
-           <!--   <input  type="hidden" id="outboundCallStartTime"/> -->
-            <div id="outboundCallTimeDiv" class="outboundCallTimeDiv"><img th:src="@{/images/icon_clock.png}" alt="" class="headIco">本次通话时长：<span id="outboundCallTime"></span></div> 
-            <div class="outboundCallTimeDiv">归属地：<span id="outboundPhoneLocaleArea"></span></div>
-    </el-dialog> 
- <!-- 外呼 dialog end -->
- <!-- 外呼 dialog start 其他页面使用 -->
-     <el-dialog  title="主动外呼" :visible.sync="tmOutboundCallDialogVisible" width="540px" :close-on-click-modal="false" class="callCenterDialog1" @close="closeTmOutboundDialog" v-dialog-drag>
-       <!--  <input  type="hidden" id="tmOutboundCallStartTime"/> -->
-        <div id="tmOutboundCallTimeDiv" class="outboundCallTimeDiv"><img th:src="@{/images/icon_clock.png}" alt="" class="headIco">本次通话时长：<span id="tmOutboundCallTime"></span></div> 
-        <div class="outboundCallTimeDiv">归属地：<span id="tmOutboundPhoneLocaleArea"></span></div>
+    <!-- 呼叫中心登录  dialog end -->
+
+    <!-- 呼叫中心退出dialog start -->
+    <el-dialog title="呼叫中心" :visible.sync="dialogLogoutClientVisible" class="callCenterDialog"
+      :close-on-click-modal="false" width="515px">
+      <el-button type="text" icon="el-icon-minus" class="minDialog" @click="logoutMin"></el-button>
+      <el-form :model="loginClientForm" ref="logoutClientForm"
+        :rules="loginClientForm.clientType==1?trClientFormRules:qimoClientFormRules">
+        <span v-if="loginClientForm.clientType==1">已登录天润呼叫中心</span>
+        <span v-if="loginClientForm.clientType==2">已登录七陌呼叫中心</span>
+        <span v-if="loginClientForm.clientType==3">已登录合力呼叫中心</span>
+        <span v-if="loginClientForm.clientType==4">已登录科天呼叫中心</span>
+        <span v-if="loginClientForm.clientType==5">已登录容联呼叫中心</span>
+        <span v-if="loginClientForm.clientType==6">已登录乐创呼叫中心</span>
+        <span v-if="loginClientForm.clientType==7">已登录中科呼叫中心</span>
+        <span v-if="loginClientForm.clientType==8">已登录赤晨呼叫中心</span>
+        <template v-if="loginClientForm.clientType==1">
+          <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
+            {{loginClientForm.cno}}
+          </el-form-item>
+          <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
+            {{loginClientForm.bindPhone}}
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+            <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+          </el-form-item>
+        </template>
+        <template v-if="loginClientForm.clientType==2">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            {{loginClientForm.loginClient}}
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+            <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+          </el-form-item>
+          <!-- 新增呼叫方式 -->
+          <el-form-item label="呼叫方式：" :label-width="formLabelWidth105" prop="callPhoneType">
+            <!-- {{loginClientForm.callPhoneType}} -->
+            <span v-if="loginClientForm.callPhoneType==1">话机呼叫</span>
+            <span v-if="loginClientForm.callPhoneType==2">天翼云app呼叫</span>
+            <span v-if="loginClientForm.callPhoneType==3">绑定手机号呼叫</span>
+          </el-form-item>
+        </template>
+        <template v-if="loginClientForm.clientType==3">
+          <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
+            {{loginClientForm.cno}}
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+            <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+          </el-form-item>
+        </template>
+        <template v-if="loginClientForm.clientType==4">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            {{loginClientForm.loginClient}}
+          </el-form-item>
+          <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+            <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
+            <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
+          </el-form-item>
+        </template>
+        <template v-if="loginClientForm.clientType==5">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            {{loginClientForm.loginClient}}
+          </el-form-item>
+        </template>
+        <template v-if="loginClientForm.clientType==6">
+          <el-form-item label="登录主机号：" :label-width="formLabelWidth105" prop="loginClient">
+            {{loginClientForm.caller}}
+          </el-form-item>
+        </template>
+        <template v-if="loginClientForm.clientType==7">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            {{loginClientForm.loginClient}}
+          </el-form-item>
+        </template>
+        <template v-if="loginClientForm.clientType==8">
+          <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+            {{loginClientForm.loginClient}}
+          </el-form-item>
+        </template>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer" center="true">
+        <el-button type="primary" @click="logoutClient('loginClientForm')">退出</el-button>
+      </div>
     </el-dialog>
- 
- <!-- 外呼 dialog end 其他页面使用 -->
+    <!-- 呼叫中心退出  dialog end -->
+    <!--外呼 dialog start -->
+    <el-dialog title="主动外呼" :visible.sync="dialogOutboundVisible" :close-on-click-modal="false"
+      class="callCenterDialog1" @close="closeOutboundDialog" width="540px" v-dialog-drag>
+      <el-button type="text" icon="el-icon-minus" class="minDialog1" @click="outboundMin"></el-button>
+      <el-form>
+        <el-form-item label-width="35px">
+          <el-input style="float: left;width: 385px;margin-right: 10px;" autocomplete="off" maxlength="11"
+            v-model="outboundInputPhone"></el-input>
+          <el-button type="primary" @click="clickOutbound" class="callCenterBtn"><img th:src="@{/images/icon_call2.png}"
+              alt=""></el-button>
+        </el-form-item>
+      </el-form>
+      <!--   <input  type="hidden" id="outboundCallStartTime"/> -->
+      <div id="outboundCallTimeDiv" class="outboundCallTimeDiv"><img th:src="@{/images/icon_clock.png}" alt=""
+          class="headIco">本次通话时长：<span id="outboundCallTime"></span></div>
+      <div class="outboundCallTimeDiv">归属地：<span id="outboundPhoneLocaleArea"></span></div>
+    </el-dialog>
+    <!-- 外呼 dialog end -->
+    <!-- 外呼 dialog start 其他页面使用 -->
+    <el-dialog title="主动外呼" :visible.sync="tmOutboundCallDialogVisible" width="540px" :close-on-click-modal="false"
+      class="callCenterDialog1" @close="closeTmOutboundDialog" v-dialog-drag>
+      <!--  <input  type="hidden" id="tmOutboundCallStartTime"/> -->
+      <div id="tmOutboundCallTimeDiv" class="outboundCallTimeDiv"><img th:src="@{/images/icon_clock.png}" alt=""
+          class="headIco">本次通话时长：<span id="tmOutboundCallTime"></span></div>
+      <div class="outboundCallTimeDiv">归属地：<span id="tmOutboundPhoneLocaleArea"></span></div>
+    </el-dialog>
+
+    <!-- 外呼 dialog end 其他页面使用 -->
     <!-- 科天外呼挂断弹窗 dialog start -->
-     <el-dialog title="提示" :visible.sync="ringOffdialogVisible" width="350px" :close-on-click-modal="false">
-        <p style="text-align: center;">{{ketianInBoundPhone}}</p>
+    <el-dialog title="提示" :visible.sync="ringOffdialogVisible" width="350px" :close-on-click-modal="false">
+      <p style="text-align: center;">{{ketianInBoundPhone}}</p>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="ketianConnection">接通</el-button>
+        <el-button @click="ketianHangup">挂断</el-button>
+      </span>
+    </el-dialog>
+    <!-- 科天外呼挂断弹窗 dialog start -->
+  </div>
+
+  <div id="anndialog">
+    <template>
+      <el-dialog title="公告通知" :visible.sync="anndialogVisible" width="60%">
+        <el-table :data="AnnDialogTableData" style="width: 100%">
+          <template v-for="(col ,index) in cols">
+            <el-table-column :prop="col.prop" :label="col.label" header-align="center">
+              <template slot-scope="scope">
+                <span style="white-space: pre-wrap">{{scope.row.content_ }}</span>
+              </template>
+            </el-table-column>
+          </template>
+        </el-table>
         <span slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="ketianConnection">接通</el-button>
-            <el-button @click="ketianHangup">挂断</el-button>
+          <el-button type="primary" @click="updateStatusAnn">我知道了</el-button>
         </span>
-    </el-dialog>
-    <!-- 科天外呼挂断弹窗 dialog start -->
-</div>
-
-<div id="anndialog">
-    <template>
-        <el-dialog
-                title="公告通知"
-                :visible.sync="anndialogVisible" width="60%">
-                <el-table
-                        :data="AnnDialogTableData"
-                        style="width: 100%">
-                    <template v-for="(col ,index) in cols">
-                        <el-table-column :prop="col.prop" :label="col.label" header-align="center">
-                            <template slot-scope="scope">
-                                <span style="white-space: pre-wrap">{{scope.row.content_ }}</span>
-                            </template>
-                        </el-table-column>
-                    </template>
-                </el-table>
-            <span slot="footer" class="dialog-footer" >
-                <el-button type="primary" @click="updateStatusAnn">我知道了</el-button>
-            </span>
-        </el-dialog>
+      </el-dialog>
     </template>
-</div>
+  </div>
 
 
-<div id="bussdialog">
+  <div id="bussdialog">
     <template>
-        <el-dialog
-                title="消息提醒"
-                :visible.sync="cols.bussdialogVisible" width="500px" v-for="(cols,index) in colss" :modal="false"
-                custom-class="rightBottom" @close='bussdialogClose(index)'>
-            <el-table
-                    :data="cols.bussDialogTableData"
-                    style="width: 100%;">
-                <template v-for="(col ,index) in cols.cols">
-                    <el-table-column :prop="col.prop" :label="col.label" header-align="center">
-                        <template slot-scope="scope">
-                            <span style="display:inline">{{scope.row.content_ }}
-                                <em  v-if="col.typeVal=='1'">
-                                    <a style="color:blue;" :href="col.urlVal" target="_blank">点击查看详情</a>
-                                </em>
-                            </span>
-                        </template>
-                    </el-table-column>
-                </template>
-            </el-table>
-            <span slot="footer" class="dialog-footer" >
-            <el-button type="primary" @click="updateStatusBuss(index)">我知道了</el-button>
-            <el-button type="primary" name="batchIgnore" @click="updateStatusBussAll()" style="display:none;">批量忽略</el-button>
+      <el-dialog title="消息提醒" :visible.sync="cols.bussdialogVisible" width="500px" v-for="(cols,index) in colss"
+        :modal="false" custom-class="rightBottom" @close='bussdialogClose(index)'>
+        <el-table :data="cols.bussDialogTableData" style="width: 100%;">
+          <template v-for="(col ,index) in cols.cols">
+            <el-table-column :prop="col.prop" :label="col.label" header-align="center">
+              <template slot-scope="scope">
+                <span style="display:inline">{{scope.row.content_ }}
+                  <em v-if="col.typeVal=='1'">
+                    <a style="color:blue;" :href="col.urlVal" target="_blank">点击查看详情</a>
+                  </em>
+                </span>
+              </template>
+            </el-table-column>
+          </template>
+        </el-table>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="updateStatusBuss(index)">我知道了</el-button>
+          <el-button type="primary" name="batchIgnore" @click="updateStatusBussAll()" style="display:none;">批量忽略
+          </el-button>
         </span>
-        </el-dialog>
+      </el-dialog>
     </template>
-</div>
+  </div>
 
-<div class="bad-network hide tc radius5px" id="errorNetwork">已与服务器断开，请检查网络连接</div>
-<div class="wrapper box-sizing">
+  <div class="bad-network hide tc radius5px" id="errorNetwork">已与服务器断开，请检查网络连接</div>
+  <div class="wrapper box-sizing">
     <div class="content">
-        <div class="left-panel radius5px" id="left-panel" style="display: none;">
-            <div class="hide loading" id="loading"></div>
-            <div class="title">
-                <img src="" alt="" width="56" height="56" class="radius-circle avatar" id="userPic" />
-                <span style="font-size:14px;color: #333;" id="userName">&nbsp;</span>
-                <!-- <span>
+      <div class="left-panel radius5px" id="left-panel" style="display: none;">
+        <div class="hide loading" id="loading"></div>
+        <div class="title">
+          <img src="" alt="" width="56" height="56" class="radius-circle avatar" id="userPic" />
+          <span style="font-size:14px;color: #333;" id="userName">&nbsp;</span>
+          <!-- <span>
                     <img src="images/pen.png" class="u-modify" id="showMyInfo">
                 </span> -->
-                <!-- <select name="select" id="newSelect" class="newSelectClass">
+          <!-- <select name="select" id="newSelect" class="newSelectClass">
                     <option value="0">在线</option>
                     <option value="1"> 忙碌</option>
                     <option value="2">离线</option>
                 </select> -->
-                <span class="customerState" id="customerStateClick">
-						<b class="customerIcon"></b>
-						<span class="valueState">在线</span>
-					</span>
-                <ul class="statusBox" id="statusBoxClick">
-                    <li class="statusBoxLi active" data="1">
-                        <b></b>
-                        <span>在线</span>
-                    </li>
-                    <li class="statusBoxLi"  data="2">
-                        <b></b>
-                        <span>忙碌</span>
-                    </li>
-                    <li class="statusBoxLi"  data="3">
-                        <b></b>
-                        <span>离线</span>
-                    </li>
-                </ul>
-                <!-- <span class="exit" title="退出" id="logout">退出</span> -->
-            </div>
-            <div class="m-devices hide">正在使用云信web版</div>
-            <div class="panel" id="switchPanel">
-                <a title="我的会话"  target="_blank" class="box-sizing tc m-unread panel_tab cur" data-type="sessions" id="tabClickSession">
-                    <span class="icon icon-session"></span>
-                    <!-- <b class="u-unread hide"> </b> -->
-                </a>
-                <a title="我的客户"  target="_blank" class="box-sizing tc panel_tab" data-type="friends">
-                    <span class="icon icon-friend"></span>
-                </a>
-                <!-- <a class="box-sizing tc panel_tab" data-type="teams">
+          <span class="customerState" id="customerStateClick">
+            <b class="customerIcon"></b>
+            <span class="valueState">在线</span>
+          </span>
+          <ul class="statusBox" id="statusBoxClick">
+            <li class="statusBoxLi active" data="1">
+              <b></b>
+              <span>在线</span>
+            </li>
+            <li class="statusBoxLi" data="2">
+              <b></b>
+              <span>忙碌</span>
+            </li>
+            <li class="statusBoxLi" data="3">
+              <b></b>
+              <span>离线</span>
+            </li>
+          </ul>
+          <!-- <span class="exit" title="退出" id="logout">退出</span> -->
+        </div>
+        <div class="m-devices hide">正在使用云信web版</div>
+        <div class="panel" id="switchPanel">
+          <a title="我的会话" target="_blank" class="box-sizing tc m-unread panel_tab cur" data-type="sessions"
+            id="tabClickSession">
+            <span class="icon icon-session"></span>
+            <!-- <b class="u-unread hide"> </b> -->
+          </a>
+          <a title="我的客户" target="_blank" class="box-sizing tc panel_tab" data-type="friends">
+            <span class="icon icon-friend"></span>
+          </a>
+          <!-- <a class="box-sizing tc panel_tab" data-type="teams">
                     <span class="icon icon-team"></span>
                 </a> -->
+        </div>
+        <div class="item" id="sessionsWrap" data-type="sessions" style="height: 585px;">
+          <!-- 最近联系人 -->
+          <div class="list">
+            <div class="searchListBar">
+              <input id="searchListInput" class="searchList" type="text" placeholder="请输入客户姓名">
+              <span><img id="inputSearchImg" th:src="@{/im/images/newImages/fada@3x.png}" alt=""></span>
+              <!-- <span><img id="inputSearchImg" src="images/newImages/qx@3x.png" alt=""></span> -->
             </div>
-            <div class="item" id="sessionsWrap" data-type="sessions" style="height: 585px;">
-                <!-- 最近联系人 -->
-                <div class="list">
-                    <div class="searchListBar">
-                        <input id="searchListInput" class="searchList" type="text" placeholder="请输入客户姓名">
-                        <span><img id="inputSearchImg" th:src="@{/im/images/newImages/fada@3x.png}" alt=""></span>
-                        <!-- <span><img id="inputSearchImg" src="images/newImages/qx@3x.png" alt=""></span> -->
-                    </div>
-                    <!-- <div class="m-panel">
+            <!-- <div class="m-panel">
                         <div class="panel_item m-sysMsg" id="showNotice">
                             <div class="panel_avatar">
                                 <img class="panel_image" src="images/notice.png" alt="消息中心" />
@@ -609,20 +609,20 @@
                         </div>
                     </div> -->
 
-                    <div id="sessions">
-                        <!-- <p>正在获取最近联系人...</p> -->
-                    </div>
-                </div>
+            <div id="sessions">
+              <!-- <p>正在获取最近联系人...</p> -->
             </div>
-            <div class="item hide" id="friendsWrap" data-type="friends">
-                <!-- 通讯录 -->
-                <div class="list">
-                    <div class="searchListBar">
-                        <input id="searchListInputFriends" class="searchList" type="text" placeholder="请输入客户姓名">
-                        <span><img id="inputSearchImgFriends" th:src="@{/im/images/newImages/fada@3x.png}" alt=""></span>
-                        <!-- <span><img id="inputSearchImg" src="images/newImages/qx@3x.png" alt=""></span> -->
-                    </div>
-                    <!-- <div class="m-panel">
+          </div>
+        </div>
+        <div class="item hide" id="friendsWrap" data-type="friends">
+          <!-- 通讯录 -->
+          <div class="list">
+            <div class="searchListBar">
+              <input id="searchListInputFriends" class="searchList" type="text" placeholder="请输入客户姓名">
+              <span><img id="inputSearchImgFriends" th:src="@{/im/images/newImages/fada@3x.png}" alt=""></span>
+              <!-- <span><img id="inputSearchImg" src="images/newImages/qx@3x.png" alt=""></span> -->
+            </div>
+            <!-- <div class="m-panel">
                         <div class="panel_item" id="addFriend">
                             <div class="panel_avatar">
                                 <img class="panel_image" src="images/addFriend.png" alt="添加好友" />
@@ -648,279 +648,287 @@
                             </div>
                         </div>
                     </div> -->
-                    <div id="friends">
-                        <p>正在获取通讯录...</p>
-                    </div>
-                </div>
+            <div id="friends">
+              <p>正在获取通讯录...</p>
             </div>
-            <div class="item hide" id="teamsWrap" data-type="teams">
-                <!-- 群 -->
-                <div class="list">
-                    <div class="m-panel">
-                        <div class="panel_item" id="createTeam">
-                            <div class="panel_avatar">
-                                <!-- <img class="panel_image" th:src="@{/im/images/addTeam.png}" alt="创建讨论组" /> -->
-                            </div>
-                            <div class="panel_text">
-                                <p class="panel_single-row">创建讨论组</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="m-panel">
-                        <div class="panel_item" id="createAdvanceTeam">
-                            <div class="panel_avatar">
-                                <!-- <img class="panel_image" th:src="@{images/addTeam.png}" alt="创建高级群" /> -->
-                            </div>
-                            <div class="panel_text">
-                                <p class="panel_single-row">创建高级群</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="m-panel">
-                        <div class="panel_item" id="searchAdvanceTeam">
-                            <div class="panel_avatar">
-                                <img class="panel_image" th:src="@{images/searchTeam.png}" alt="搜索高级群" />
-                            </div>
-                            <div class="panel_text">
-                                <p class="panel_single-row">搜索高级群</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="teams m-panel" id="teams">
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-        <!-- <div class="chatVernier" id="chatVernier">
+        <div class="item hide" id="teamsWrap" data-type="teams">
+          <!-- 群 -->
+          <div class="list">
+            <div class="m-panel">
+              <div class="panel_item" id="createTeam">
+                <div class="panel_avatar">
+                  <!-- <img class="panel_image" th:src="@{/im/images/addTeam.png}" alt="创建讨论组" /> -->
+                </div>
+                <div class="panel_text">
+                  <p class="panel_single-row">创建讨论组</p>
+                </div>
+              </div>
+            </div>
+            <div class="m-panel">
+              <div class="panel_item" id="createAdvanceTeam">
+                <div class="panel_avatar">
+                  <!-- <img class="panel_image" th:src="@{images/addTeam.png}" alt="创建高级群" /> -->
+                </div>
+                <div class="panel_text">
+                  <p class="panel_single-row">创建高级群</p>
+                </div>
+              </div>
+            </div>
+            <div class="m-panel">
+              <div class="panel_item" id="searchAdvanceTeam">
+                <div class="panel_avatar">
+                  <img class="panel_image" th:src="@{images/searchTeam.png}" alt="搜索高级群" />
+                </div>
+                <div class="panel_text">
+                  <p class="panel_single-row">搜索高级群</p>
+                </div>
+              </div>
+            </div>
+            <div class="teams m-panel" id="teams">
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="chatVernier" id="chatVernier">
             <span class="radius-circle hide"></span>
         </div> -->
-        <div class="right-panel hide radius5px" id="rightPanel" style="display: none;">
-            <!-- 聊天面板 -->
-            <div class="chat-box show-netcall-box" id="chatBox">
-                <div class="title" id="chatTitle">
-                    <img src="" width="56" height="56" class="radius-circle img" id="headImg" />
-                    <div class="customerInformation">
-							<span class="nickName">
-								<span id="nickName" style="font-size:14px;color:#333;">张三</span>
-								<span id="isOnline"> <b></b> 在线</span>
-								<!--<span>正在输入...</span> -->
-                                <span id="couponInfo"><img style="width: 13px;height: 10px;float: none;" th:src="@{/im/images/newImages/coupon.png}"><span>品牌形象店新人专享券</span><span>12888元</span><span>2020.12.26到期</span></span>
-							</span>
-                            <span id="otherInformation" class="otherInformation">
-								<span>注册时间：2020-08-14</span>
-								<span>20-30岁</span>|
-								<span>女</span>|
-								<span>30-50万</span>|
-								<span>电话： 18999008888</span>
-							</span>
-                    </div>
-                    <!-- <div class="cloudMsg tc radius4px" data-record-id="" id="cloudMsg">
+      <div class="right-panel hide radius5px" id="rightPanel" style="display: none;">
+        <!-- 聊天面板 -->
+        <div class="chat-box show-netcall-box" id="chatBox">
+          <div class="title" id="chatTitle">
+            <img src="" width="56" height="56" class="radius-circle img" id="headImg" />
+            <div class="customerInformation">
+              <span class="nickName">
+                <span id="nickName" style="font-size:14px;color:#333;">张三</span>
+                <span id="isOnline"> <b></b> 在线</span>
+                <!--<span>正在输入...</span> -->
+                <span id="couponInfo"><img style="width: 13px;height: 10px;float: none;"
+                    th:src="@{/im/images/newImages/coupon.png}"><span>品牌形象店新人专享券</span><span>12888元</span><span>2020.12.26到期</span></span>
+              </span>
+              <span id="otherInformation" class="otherInformation">
+                <span>注册时间：2020-08-14</span>
+                <span>20-30岁</span>|
+                <span>女</span>|
+                <span>30-50万</span>|
+                <span>电话： 18999008888</span>
+              </span>
+            </div>
+            <!-- <div class="cloudMsg tc radius4px" data-record-id="" id="cloudMsg">
                         <i class="icon icon-team-info"></i>
                         <p>云记录</p>
                     </div> -->
-                    <!-- <div class="team-info hide tc radius4px" data-team-id="" id="teamInfo">
+            <!-- <div class="team-info hide tc radius4px" data-team-id="" id="teamInfo">
                         <i class="icon icon-team-info"></i>
                         <p>资料</p>
                     </div> -->
+          </div>
+          <div class="netcall-box" id="netcallBox">
+            <div class="netcall-mask hide">
+              <div class="netcallTip"></div>
+            </div>
+            <div class="top hide">
+              <span class="transferAudioAndVideo switchToAudio" id="switchToAudio">切换音频</span>
+              <span class="transferAudioAndVideo switchToVideo" id="switchToVideo">切换视频</span>
+              <span class="fullScreenIcon toggleFullScreenButton" id="toggleFullScreenButton" title="切换全屏">&nbsp;</span>
+            </div>
+            <!-- p2p呼叫界面 -->
+            <div class="netcall-calling-box hide">
+              <img alt="用户头像" class="avatar">
+              <div class="nick"></div>
+              <div class="tip">等待对方接听...</div>
+              <div class="op">
+                <button id="callingHangupButton" class="netcall-button red">挂断</button>
+              </div>
+            </div>
+            <!-- p2p视频界面 -->
+            <div class="netcall-show-video hide">
+              <div class="netcall-video-left">
+                <div class="netcall-video-remote bigView">
+                  <div class="message"></div>
+                  <span class="switchViewPositionButton"></span>
                 </div>
-                <div class="netcall-box" id="netcallBox">
-                    <div class="netcall-mask hide">
-                        <div class="netcallTip"></div>
+              </div>
+              <div class="netcall-video-right">
+                <div class="netcall-video-local smallView">
+                  <div class="message"></div>
+                  <span class="switchViewPositionButton"></span>
+                </div>
+                <div class="operation">
+                  <div class="control">
+                    <div class="microphone control-item">
+                      <div class="slider hide">
+                        <div class="txt">10</div>
+                        <input class="microSliderInput" id="microSliderInput1" type="range" min="0" max="10" step="1"
+                          value="10" data-orientation="vertical">
+                      </div>
+                      <span class="icon-micro"></span>
                     </div>
-                    <div class="top hide">
-                        <span class="transferAudioAndVideo switchToAudio" id="switchToAudio">切换音频</span>
-                        <span class="transferAudioAndVideo switchToVideo" id="switchToVideo">切换视频</span>
-                        <span class="fullScreenIcon toggleFullScreenButton" id="toggleFullScreenButton" title="切换全屏">&nbsp;</span>
+                    <div class="volume control-item">
+                      <div class="slider hide">
+                        <div class="txt">10</div>
+                        <input class="volumeSliderInput" id="volumeSliderInput1" type="range" min="0" max="10" step="1"
+                          value="10" data-orientation="vertical">
+                      </div>
+                      <span class="icon-volume"></span>
                     </div>
-                    <!-- p2p呼叫界面 -->
-                    <div class="netcall-calling-box hide">
-                        <img alt="用户头像" class="avatar">
-                        <div class="nick"></div>
-                        <div class="tip">等待对方接听...</div>
-                        <div class="op">
-                            <button id="callingHangupButton" class="netcall-button red">挂断</button>
-                        </div>
+                    <div class="camera control-item">
+                      <span class="icon-camera"></span>
                     </div>
-                    <!-- p2p视频界面 -->
-                    <div class="netcall-show-video hide">
-                        <div class="netcall-video-left">
-                            <div class="netcall-video-remote bigView">
-                                <div class="message"></div>
-                                <span class="switchViewPositionButton"></span>
-                            </div>
-                        </div>
-                        <div class="netcall-video-right">
-                            <div class="netcall-video-local smallView">
-                                <div class="message"></div>
-                                <span class="switchViewPositionButton"></span>
-                            </div>
-                            <div class="operation">
-                                <div class="control">
-                                    <div class="microphone control-item">
-                                        <div class="slider hide">
-                                            <div class="txt">10</div>
-                                            <input class="microSliderInput" id="microSliderInput1" type="range" min="0" max="10" step="1" value="10" data-orientation="vertical">
-                                        </div>
-                                        <span class="icon-micro"></span>
-                                    </div>
-                                    <div class="volume control-item">
-                                        <div class="slider hide">
-                                            <div class="txt">10</div>
-                                            <input class="volumeSliderInput" id="volumeSliderInput1" type="range" min="0" max="10" step="1" value="10" data-orientation="vertical">
-                                        </div>
-                                        <span class="icon-volume"></span>
-                                    </div>
-                                    <div class="camera control-item">
-                                        <span class="icon-camera"></span>
-                                    </div>
-                                </div>
-                                <div class="op">
-                                    <button class="hangupButton netcall-button red">挂断</button>
-                                </div>
-                                <div class="tip">00 : 00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- p2p音频界面 -->
-                    <div class="netcall-show-audio hide">
-                        <img alt="用户头像" class="avatar">
-                        <div class="nick">test</div>
-                        <div class="tip">00 : 00</div>
-                        <div class="control">
-                            <div class="microphone control-item ">
-                                <div class="slider hide">
-                                    <div class="txt">10</div>
-                                    <input class="microSliderInput" id="microSliderInput" type="range" min="0" max="10" step="1" value="10" data-orientation="vertical">
-                                </div>
-                                <span class="icon-micro"></span>
-                            </div>
-                            <div class="volume control-item">
-                                <div class="slider hide">
-                                    <div class="txt">10</div>
-                                    <input class="volumeSliderInput" id="volumeSliderInput" type="range" min="0" max="10" step="1" value="10" data-orientation="vertical">
-                                </div>
-                                <span class="icon-volume"></span>
-                            </div>
-                        </div>
-                        <div class="op">
-                            <button class="hangupButton netcall-button red">挂断</button>
-                        </div>
+                  </div>
+                  <div class="op">
+                    <button class="hangupButton netcall-button red">挂断</button>
+                  </div>
+                  <div class="tip">00 : 00</div>
+                </div>
+              </div>
+            </div>
+            <!-- p2p音频界面 -->
+            <div class="netcall-show-audio hide">
+              <img alt="用户头像" class="avatar">
+              <div class="nick">test</div>
+              <div class="tip">00 : 00</div>
+              <div class="control">
+                <div class="microphone control-item ">
+                  <div class="slider hide">
+                    <div class="txt">10</div>
+                    <input class="microSliderInput" id="microSliderInput" type="range" min="0" max="10" step="1"
+                      value="10" data-orientation="vertical">
+                  </div>
+                  <span class="icon-micro"></span>
+                </div>
+                <div class="volume control-item">
+                  <div class="slider hide">
+                    <div class="txt">10</div>
+                    <input class="volumeSliderInput" id="volumeSliderInput" type="range" min="0" max="10" step="1"
+                      value="10" data-orientation="vertical">
+                  </div>
+                  <span class="icon-volume"></span>
+                </div>
+              </div>
+              <div class="op">
+                <button class="hangupButton netcall-button red">挂断</button>
+              </div>
 
-                    </div>
-                    <!-- 多人音视频互动界面 -->
-                    <div class="netcall-meeting-box hide" id="netcallMeetingBox"></div>
-                    <!-- 被叫界面 -->
-                    <div class="netcall-becalling-box hide">
-                        <img alt="用户头像" class="avatar">
-                        <div class="nick"></div>
-                        <p id="becallingText" class="tip"></p>
-                        <div class="op">
-                            <div class="normal">
-                                <div class="checking-tip">检查插件中...
-                                    <span class="netcall-icon-checking"></span>
-                                </div>
-                                <button class="netcall-button blue beCallingAcceptButton" id="beCallingAcceptButton">
-                                    <span class="txt">接听</span>
-                                    <span class="netcall-icon-checking"></span>
-                                </button>
-                                <button class="netcall-button red beCallingRejectButton" id="beCallingRejectButton">
-                                    拒绝
-                                </button>
-                            </div>
-                            <div class="exception">
-                                <button class="netcall-button blue" id="downloadAgentButton">下载音视频插件</button>
-                                <br/>
-                                <button class="netcall-button red beCallingRejectButton">拒绝</button>
-                                <div class="exception-tip">拒绝调用插件申请会导致无法唤起插件,需重启浏览器</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dialogs hide">
-                    </div>
+            </div>
+            <!-- 多人音视频互动界面 -->
+            <div class="netcall-meeting-box hide" id="netcallMeetingBox"></div>
+            <!-- 被叫界面 -->
+            <div class="netcall-becalling-box hide">
+              <img alt="用户头像" class="avatar">
+              <div class="nick"></div>
+              <p id="becallingText" class="tip"></p>
+              <div class="op">
+                <div class="normal">
+                  <div class="checking-tip">检查插件中...
+                    <span class="netcall-icon-checking"></span>
+                  </div>
+                  <button class="netcall-button blue beCallingAcceptButton" id="beCallingAcceptButton">
+                    <span class="txt">接听</span>
+                    <span class="netcall-icon-checking"></span>
+                  </button>
+                  <button class="netcall-button red beCallingRejectButton" id="beCallingRejectButton">
+                    拒绝
+                  </button>
                 </div>
-                <div id="whiteboard"></div>
-                <div class="chat-content box-sizing" id="chatContent">
-                    <!-- 聊天记录 -->
+                <div class="exception">
+                  <button class="netcall-button blue" id="downloadAgentButton">下载音视频插件</button>
+                  <br />
+                  <button class="netcall-button red beCallingRejectButton">拒绝</button>
+                  <div class="exception-tip">拒绝调用插件申请会导致无法唤起插件,需重启浏览器</div>
                 </div>
-                <div class="u-chat-notice">您已退出</div>
-                <div class="chat-mask"></div>
-                <div class="chat-editor box-sizing" id="chatEditor" data-disabled="1">
-                    <div id="emojiTag" class="m-emojiTag"></div>
-                    <a class="chat-btn u-emoji" id="showEmoji"></a>
-                    <span class="chat-btn msg-type" id="chooseFileBtn">
-							<a class="icon icon-file" data-type="file"></a>
-						</span>
-                    <a class="chat-btn u-netcall-audio-link" id="showNetcallAudioLink">&nbsp;</a>
-                    <a class="chat-btn u-netcall-video-link" id="showNetcallVideoLink">&nbsp;</a>
-                    <!-- 在netcall_ui.js的fn.whenOpenChatBox中隐藏 -->
-                    <a style="display: none;" class="chat-btn u-whiteboard" id="showWhiteboard" >&nbsp;</a>
-                    <div class="chat-btn">
-                        <a class="chat-btn u-voice" id="toRecord"></a>
-                        <span id="toRecordBox" class="u-voice-duration-box">
-								<i id="toRecordTime" class="u-voice-duration-time">00:00</i>
-								<i id="toRecordCancle" class="u-voice-duration-action"></i>
-							</span>
-                    </div>
-                    <!-- <span><a class="" data-toggle="modal" data-target="#commLangModal" id="commLang">常用语</a></span> -->
-                    <span class="chat-context" id="showTeamMsgReceipt">
-							<label for="needTeamMsgReceipt">
-							<input id="needTeamMsgReceipt" type="checkbox" name="needTeamMsgReceipt" />回执</label>
-						</span>
-                    <form action="#" id="uploadForm">
-                        <input multiple="multiple" type="file" name="file" id="uploadFile" class="hide" />
-                    </form>
-                    <div class="cloudMsg" id="commonWords">
-                        <p><img th:src="@{/im/images/newImages/icon_yycopy@3x.png}" alt="">常用语</p>
-                        <ul id="commonWordsList" class="commonWordsList">
-                            <!-- <li>你好，有什么需要帮助？</li>
+              </div>
+            </div>
+            <div class="dialogs hide">
+            </div>
+          </div>
+          <div id="whiteboard"></div>
+          <div class="chat-content box-sizing" id="chatContent">
+            <!-- 聊天记录 -->
+          </div>
+          <div class="u-chat-notice">您已退出</div>
+          <div class="chat-mask"></div>
+          <div class="chat-editor box-sizing" id="chatEditor" data-disabled="1">
+            <div id="emojiTag" class="m-emojiTag"></div>
+            <a class="chat-btn u-emoji" id="showEmoji"></a>
+            <span class="chat-btn msg-type" id="chooseFileBtn">
+              <a class="icon icon-file" data-type="file"></a>
+            </span>
+            <a class="chat-btn u-netcall-audio-link" id="showNetcallAudioLink">&nbsp;</a>
+            <a class="chat-btn u-netcall-video-link" id="showNetcallVideoLink">&nbsp;</a>
+            <!-- 在netcall_ui.js的fn.whenOpenChatBox中隐藏 -->
+            <a style="display: none;" class="chat-btn u-whiteboard" id="showWhiteboard">&nbsp;</a>
+            <div class="chat-btn">
+              <a class="chat-btn u-voice" id="toRecord"></a>
+              <span id="toRecordBox" class="u-voice-duration-box">
+                <i id="toRecordTime" class="u-voice-duration-time">00:00</i>
+                <i id="toRecordCancle" class="u-voice-duration-action"></i>
+              </span>
+            </div>
+            <!-- <span><a class="" data-toggle="modal" data-target="#commLangModal" id="commLang">常用语</a></span> -->
+            <span class="chat-context" id="showTeamMsgReceipt">
+              <label for="needTeamMsgReceipt">
+                <input id="needTeamMsgReceipt" type="checkbox" name="needTeamMsgReceipt" />回执</label>
+            </span>
+            <form action="#" id="uploadForm">
+              <input multiple="multiple" type="file" name="file" id="uploadFile" class="hide" />
+            </form>
+            <div class="cloudMsg" id="commonWords">
+              <p><img th:src="@{/im/images/newImages/icon_yycopy@3x.png}" alt="">常用语</p>
+              <ul id="commonWordsList" class="commonWordsList">
+                <!-- <li>你好，有什么需要帮助？</li>
                             <li>你好，有什么需要帮助？</li>
                             <li>你好，有什么需要帮助？</li>
                             <li>你好，有什么需要帮助？</li>
                             <li>你好，有什么需要帮助？</li>
                             <li>你好，有什么需要帮助？</li> -->
-                        </ul>
-                    </div>
-                    <div class="cloudMsg" id="brandSelection">
-                        <p><img th:src="@{/im/images/newImages/icon_xpp@3x.png}" alt="">选品牌</p>
-                    </div>
-                    <div class="cloudMsg" id="submitCustomer">
-                        <p id="submitCustomer1" style="line-height: 22px;"><img th:src="@{/im/images/newImages/icon_tj@3x.png}" alt="" style="float: left;">提交客户</p>
-                    </div>
-                    <div class="cloudMsg" id="editCustomer" style="right: 132px;display: none;">    
-                        <p id="editCustomer1" style="line-height: 22px;"><a id="editCustomer2" target="_blank" ><img th:src="@{/im/images/newImages/icon_tj@3x.png}" alt="" style="float: left;">维护客户</a></p>
-                    </div>
-                    <div class="cloudMsg tc radius4px" data-record-id="" id="cloudMsg">
-                        <p><img th:src="@{/im/images/newImages/icon_lt@3x.png}" alt="">聊天记录</p>
-                    </div>
-                </div>
-                <div class="textareaText">
-                    <textarea id="messageText" class="messageText chat-btn msg-input box-sizing radius5px p2p" rows="1" autofocus="autofocus" maxlength="500"></textarea>
-                    <a class="btn-send radius5px" id="sendBtn">发送</a>
+              </ul>
+            </div>
+            <div class="cloudMsg" id="brandSelection">
+              <p><img th:src="@{/im/images/newImages/icon_xpp@3x.png}" alt="">选品牌</p>
+            </div>
+            <div class="cloudMsg" id="submitCustomer">
+              <p id="submitCustomer1" style="line-height: 22px;"><img th:src="@{/im/images/newImages/icon_tj@3x.png}"
+                  alt="" style="float: left;">提交客户</p>
+            </div>
+            <div class="cloudMsg" id="editCustomer" style="right: 132px;display: none;">
+              <p id="editCustomer1" style="line-height: 22px;"><a id="editCustomer2" target="_blank"><img
+                    th:src="@{/im/images/newImages/icon_tj@3x.png}" alt="" style="float: left;">维护客户</a></p>
+            </div>
+            <div class="cloudMsg tc radius4px" data-record-id="" id="cloudMsg">
+              <p><img th:src="@{/im/images/newImages/icon_lt@3x.png}" alt="">聊天记录</p>
+            </div>
+          </div>
+          <div class="textareaText">
+            <textarea id="messageText" class="messageText chat-btn msg-input box-sizing radius5px p2p" rows="1"
+              autofocus="autofocus" maxlength="500"></textarea>
+            <a class="btn-send radius5px" id="sendBtn">发送</a>
 
-                </div>
-            </div>
+          </div>
         </div>
-        <div class="right-panel hide radius5px devices-container" id="devices">
-            <!-- 设备管理面板 -->
-            <div class="info-box">
-                <div class="title tc">
-                    <button class="btn back-btn radius5px" id="backBtn2">返回</button>多端登录管理
-                </div>
-                <div class="content">
-                    <div class="main">
-                        <div class="pic"></div>
-                        <div class="mobile hide">
-                            <p>云信手机版</p>
-                            <a class="u-kick j-kickMoblie">下线</a>
-                        </div>
-                        <div class="pc hide">
-                            <p>云信PC版</p>
-                            <a class="u-kick j-kickPc">下线</a>
-                        </div>
-                    </div>
-                </div>
+      </div>
+      <div class="right-panel hide radius5px devices-container" id="devices">
+        <!-- 设备管理面板 -->
+        <div class="info-box">
+          <div class="title tc">
+            <button class="btn back-btn radius5px" id="backBtn2">返回</button>多端登录管理
+          </div>
+          <div class="content">
+            <div class="main">
+              <div class="pic"></div>
+              <div class="mobile hide">
+                <p>云信手机版</p>
+                <a class="u-kick j-kickMoblie">下线</a>
+              </div>
+              <div class="pc hide">
+                <p>云信PC版</p>
+                <a class="u-kick j-kickPc">下线</a>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
     <!-- <div class="asideBox">
         <div class="m-goWhiteboard hide">
@@ -949,354 +957,359 @@
     <div class="dialog-team-container radius5px hide" id="dialogCallMethod"></div>
     <!-- 黑名单 -->
     <div class="m-blacklist radius5px hide" id="blacklist">
-        <div class="title box-sizing">
-            黑名单
-            <i class="icon icon-close j-close"></i>
-        </div>
-        <div class="notice">你不会接收到列表中联系人的任何消息</div>
-        <ul class="f-cb list">
-            <li class="items f-cb">
-                <img th:src="@{/im/images/default-icon.png}" class="head">
-                <span class="nick">未知</span>
-                <button class="btn radius4px btn-ok j-rm">解除</button>
-            </li>
-        </ul>
+      <div class="title box-sizing">
+        黑名单
+        <i class="icon icon-close j-close"></i>
+      </div>
+      <div class="notice">你不会接收到列表中联系人的任何消息</div>
+      <ul class="f-cb list">
+        <li class="items f-cb">
+          <img th:src="@{/im/images/default-icon.png}" class="head">
+          <span class="nick">未知</span>
+          <button class="btn radius4px btn-ok j-rm">解除</button>
+        </li>
+      </ul>
     </div>
     <!-- 消息中心 -->
     <div class="m-notice radius5px hide" id="notice">
-        <div class="title box-sizing">
-            消息中心
-            <i class="icon icon-close j-close"></i>
-            <b class="j-rmAllSysNotice rmAll"></b>
-        </div>
-        <ul class="tab f-cb">
-            <li class="crt" data-value="sys">系统通知</li>
-            <li data-value="other">自定义通知</li>
-        </ul>
-        <div class="content j-sysMsg">
-        </div>
-        <div class="content j-customSysMsg hide">
-        </div>
+      <div class="title box-sizing">
+        消息中心
+        <i class="icon icon-close j-close"></i>
+        <b class="j-rmAllSysNotice rmAll"></b>
+      </div>
+      <ul class="tab f-cb">
+        <li class="crt" data-value="sys">系统通知</li>
+        <li data-value="other">自定义通知</li>
+      </ul>
+      <div class="content j-sysMsg">
+      </div>
+      <div class="content j-customSysMsg hide">
+      </div>
     </div>
     <!-- 搜索高级群 -->
     <div class="m-dialog hide" id="searchTeamBox">
-        <div class="title box-sizing">
-            搜索高级群
-            <i class="icon icon-close j-close"></i>
-        </div>
-        <div class="content tc">
-            <input type="text" class="ipt radius5px box-sizing j-account" placeholder="请输入群id" />
-            <div class="info f-cb">
-                <img th:src="@{/im/images/advanced.png}">
-                <div class="desc">
-                    <p class="j-name"></p>
-                    <p>
-                        <span class="j-teamId"></span>
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="btns tc">
-            <button class="btn btn-cancel radius4px cancel j-close">取消</button>
-            <button class="btn btn-ok radius4px search j-search">确定</button>
-            <button class="btn btn-cancel radius4px back j-back">继续搜索</button>
-            <button class="btn btn-ok radius4px add j-add">申请加入</button>
-            <button class="btn btn-ok radius4px chat j-chat">聊天</button>
-        </div>
-    </div>
-    <div class="submitCustomerFormBar" id="submitCustomerFormBar" style="display: none;">
-        <div id="submitCustomerForm" class="submitCustomerForm">
-            <div class="generalForm">
-                <span> <b>*</b>姓名</span>
-                <input type="text" id="submitCustomerFormName" class="submitCustomerCurrency" maxlength="10" placeholder="请输入姓名"/>
-            </div>
-            <div class="generalForm">
-                <span> <b>*</b>手机</span>
-                <input type="text" id="submitCustomerFormIphone" class="submitCustomerCurrency" maxlength="11" placeholder="请输入手机" />
-            </div>
-            <div class="generalForm">
-                <span>手机2</span>
-                <input type="text" id="submitCustomerFormIphoneTwo" class="submitCustomerCurrency" maxlength="11" placeholder="请输入手机" />
-            </div>
-            <div class="generalForm">
-                <span>微信</span>
-                <input type="text" id="submitCustomerFormWechat" class="submitCustomerCurrency" maxlength="20" placeholder="请输入手机微信" />
-            </div>
-            <div class="generalFormBeizhu">
-                <span>备注</span>
-                <textarea name="beizhu" id="submitCustomerBeizhu" cols="30" rows="5" maxlength="80" placeholder="请输入备注"></textarea>
-            </div>
-            <div class="generalFormLast">
-                <span class="cancel" id="generalFormLastCancel">取消</span>
-                <button class="submit" id="generalFormLastSubmit" style="border:none;">提交</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- 退出确认框 -->
-<div class="dialog radius5px hide" id="logoutDialog">
-    <span class="icon icon-close j-close"></span>
-    <div class="content tc">确定要退出云信网页版吗？</div>
-    <div class="buttons tc">
-        <button class="btn radius4px btn-cancel j-close">取消</button>
-        <button class="btn radius4px btn-ok j-ok">确定</button>
-    </div>
-</div>
-<!-- 添加好友 -->
-<div class="m-dialog hide" id="addFriendBox">
-    <div class="title box-sizing">
-        添加好友
+      <div class="title box-sizing">
+        搜索高级群
         <i class="icon icon-close j-close"></i>
-    </div>
-    <div class="content tc">
-        <input type="text" class="ipt radius5px box-sizing j-account" placeholder="请输入帐号" />
+      </div>
+      <div class="content tc">
+        <input type="text" class="ipt radius5px box-sizing j-account" placeholder="请输入群id" />
         <div class="info f-cb">
-            <img src="">
-            <div class="desc">
-                <p class="j-nickname"></p>
-                <p>
-                    <span class="j-username"></span>
-                </p>
-            </div>
+          <img th:src="@{/im/images/advanced.png}">
+          <div class="desc">
+            <p class="j-name"></p>
+            <p>
+              <span class="j-teamId"></span>
+            </p>
+          </div>
         </div>
-        <div class="tip">
-        </div>
-    </div>
-    <div class="btns tc">
+      </div>
+      <div class="btns tc">
         <button class="btn btn-cancel radius4px cancel j-close">取消</button>
         <button class="btn btn-ok radius4px search j-search">确定</button>
         <button class="btn btn-cancel radius4px back j-back">继续搜索</button>
-        <button class="btn btn-ok radius4px add j-add">加为好友</button>
-        <button class="btn btn-ok radius4px done j-close">完成</button>
+        <button class="btn btn-ok radius4px add j-add">申请加入</button>
         <button class="btn btn-ok radius4px chat j-chat">聊天</button>
-        <button class="btn btn-del radius4px blacklist j-blacklist">移出黑名单</button>
+      </div>
     </div>
-</div>
-<!-- 人物信息 -->
-<div class="m-card hide" id="personCard">
+    <div class="submitCustomerFormBar" id="submitCustomerFormBar" style="display: none;">
+      <div id="submitCustomerForm" class="submitCustomerForm">
+        <div class="generalForm">
+          <span> <b>*</b>姓名</span>
+          <input type="text" id="submitCustomerFormName" class="submitCustomerCurrency" maxlength="10"
+            placeholder="请输入姓名" />
+        </div>
+        <div class="generalForm">
+          <span> <b>*</b>手机</span>
+          <input type="text" id="submitCustomerFormIphone" class="submitCustomerCurrency" maxlength="11"
+            placeholder="请输入手机" />
+        </div>
+        <div class="generalForm">
+          <span>手机2</span>
+          <input type="text" id="submitCustomerFormIphoneTwo" class="submitCustomerCurrency" maxlength="11"
+            placeholder="请输入手机" />
+        </div>
+        <div class="generalForm">
+          <span>微信</span>
+          <input type="text" id="submitCustomerFormWechat" class="submitCustomerCurrency" maxlength="20"
+            placeholder="请输入手机微信" />
+        </div>
+        <div class="generalFormBeizhu">
+          <span>备注</span>
+          <textarea name="beizhu" id="submitCustomerBeizhu" cols="30" rows="5" maxlength="80"
+            placeholder="请输入备注"></textarea>
+        </div>
+        <div class="generalFormLast">
+          <span class="cancel" id="generalFormLastCancel">取消</span>
+          <button class="submit" id="generalFormLastSubmit" style="border:none;">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 退出确认框 -->
+  <div class="dialog radius5px hide" id="logoutDialog">
+    <span class="icon icon-close j-close"></span>
+    <div class="content tc">确定要退出云信网页版吗？</div>
+    <div class="buttons tc">
+      <button class="btn radius4px btn-cancel j-close">取消</button>
+      <button class="btn radius4px btn-ok j-ok">确定</button>
+    </div>
+  </div>
+  <!-- 添加好友 -->
+  <div class="m-dialog hide" id="addFriendBox">
+    <div class="title box-sizing">
+      添加好友
+      <i class="icon icon-close j-close"></i>
+    </div>
+    <div class="content tc">
+      <input type="text" class="ipt radius5px box-sizing j-account" placeholder="请输入帐号" />
+      <div class="info f-cb">
+        <img src="">
+        <div class="desc">
+          <p class="j-nickname"></p>
+          <p>
+            <span class="j-username"></span>
+          </p>
+        </div>
+      </div>
+      <div class="tip">
+      </div>
+    </div>
+    <div class="btns tc">
+      <button class="btn btn-cancel radius4px cancel j-close">取消</button>
+      <button class="btn btn-ok radius4px search j-search">确定</button>
+      <button class="btn btn-cancel radius4px back j-back">继续搜索</button>
+      <button class="btn btn-ok radius4px add j-add">加为好友</button>
+      <button class="btn btn-ok radius4px done j-close">完成</button>
+      <button class="btn btn-ok radius4px chat j-chat">聊天</button>
+      <button class="btn btn-del radius4px blacklist j-blacklist">移出黑名单</button>
+    </div>
+  </div>
+  <!-- 人物信息 -->
+  <div class="m-card hide" id="personCard">
     <i class="icon icon-close j-close"></i>
     <div class="uInfo f-cb">
-        <img class="u-icon" src="">
-        <div class="desc">
-            <p class="j-nick nick">测试账号</p>
-            <img src="" class="j-gender gender">
-            <p>
-                <span class="j-username">帐号：test</span>
-            </p>
-            <p>
-                <span class="j-nickname">昵称：test</span>
-            </p>
-        </div>
+      <img class="u-icon" src="">
+      <div class="desc">
+        <p class="j-nick nick">测试账号</p>
+        <img src="" class="j-gender gender">
+        <p>
+          <span class="j-username">帐号：test</span>
+        </p>
+        <p>
+          <span class="j-nickname">昵称：test</span>
+        </p>
+      </div>
     </div>
     <div class="infos">
-        <div class="items alias">
-            <div class="item">备注名</div>
-            <input type="text" class="e-alias ipt" maxlength="16">
-            <a class="j-saveAlias save">保存</a>
-        </div>
-        <div class="items">
-            <div class="item">生日</div>
-            <div class="j-birth">1990-08-18</div>
-        </div>
-        <div class="items">
-            <div class="item">手机</div>
-            <div class="j-tel">18072912974</div>
-        </div>
-        <div class="items">
-            <div class="item">邮箱</div>
-            <div class="j-email">w8@173.com </div>
-        </div>
-        <div class="items">
-            <div class="item">签名</div>
-            <div class="j-sign sign">相信真善美,相信真善美相信真善美相信真善美,相信真善美,相信真善美,相信真善美,相信真善美,相信真善美</div>
-        </div>
+      <div class="items alias">
+        <div class="item">备注名</div>
+        <input type="text" class="e-alias ipt" maxlength="16">
+        <a class="j-saveAlias save">保存</a>
+      </div>
+      <div class="items">
+        <div class="item">生日</div>
+        <div class="j-birth">1990-08-18</div>
+      </div>
+      <div class="items">
+        <div class="item">手机</div>
+        <div class="j-tel">18072912974</div>
+      </div>
+      <div class="items">
+        <div class="item">邮箱</div>
+        <div class="j-email">w8@173.com </div>
+      </div>
+      <div class="items">
+        <div class="item">签名</div>
+        <div class="j-sign sign">相信真善美,相信真善美相信真善美相信真善美,相信真善美,相信真善美,相信真善美,相信真善美,相信真善美</div>
+      </div>
     </div>
     <ul>
-        <li class="mutelist">消息提醒
-            <div class="u-switch">
-                <!-- <img th:src="@{images/btn_switch.png}"> -->
-                <span class="off">off</span>
-                <span class="on">on</span>
-            </div>
-        </li>
-        <li class="blacklist">黑名单
-            <div class="u-switch">
-                <img th:src="@{images/btn_switch.png}">
-                <span class="off">off</span>
-                <span class="on">on</span>
-            </div>
-        </li>
-        <li class="mute hide" id="setTeamMute">设置禁言
-            <div class="u-switch">
-                <img th:src="@{images/btn_switch.png}">
-                <span class="off">off</span>
-                <span class="on">on</span>
-            </div>
-        </li>
+      <li class="mutelist">消息提醒
+        <div class="u-switch">
+          <!-- <img th:src="@{images/btn_switch.png}"> -->
+          <span class="off">off</span>
+          <span class="on">on</span>
+        </div>
+      </li>
+      <li class="blacklist">黑名单
+        <div class="u-switch">
+          <img th:src="@{images/btn_switch.png}">
+          <span class="off">off</span>
+          <span class="on">on</span>
+        </div>
+      </li>
+      <li class="mute hide" id="setTeamMute">设置禁言
+        <div class="u-switch">
+          <img th:src="@{images/btn_switch.png}">
+          <span class="off">off</span>
+          <span class="on">on</span>
+        </div>
+      </li>
     </ul>
     <div class="btns tc">
-        <button class="btn btn-del radius4px j-del del">删除好友</button>
-        <button class="btn btn-cancel radius4px j-add add">加为好友</button>
-        <button class="btn btn-ok radius4px j-chat chat">聊天</button>
+      <button class="btn btn-del radius4px j-del del">删除好友</button>
+      <button class="btn btn-cancel radius4px j-add add">加为好友</button>
+      <button class="btn btn-ok radius4px j-chat chat">聊天</button>
     </div>
-</div>
-<!-- 个人信息 -->
-<div class="m-card m-card-1 hide" id="myInfo">
+  </div>
+  <!-- 个人信息 -->
+  <div class="m-card m-card-1 hide" id="myInfo">
     <i class="icon icon-close j-close"></i>
     <div class="uInfo f-cb">
-        <img class="u-icon modifyAvatar j-modifyAvatar" src="" alt="更换头像">
-        <div class="desc">
-            <p class="j-nickname nick">测试账号</p>
-            <img src="" class="j-gender gender">
-            <p>
-                <span class="j-username">帐号：test</span>
-            </p>
-        </div>
+      <img class="u-icon modifyAvatar j-modifyAvatar" src="" alt="更换头像">
+      <div class="desc">
+        <p class="j-nickname nick">测试账号</p>
+        <img src="" class="j-gender gender">
+        <p>
+          <span class="j-username">帐号：test</span>
+        </p>
+      </div>
     </div>
     <div class="infos">
-        <div class="operate">
-            <span class="edit j-edit">编辑</span>
-            <span class="save j-save">保存</span>
-            <span class="cancel j-cancel"> 取消</span>
+      <div class="operate">
+        <span class="edit j-edit">编辑</span>
+        <span class="save j-save">保存</span>
+        <span class="cancel j-cancel"> 取消</span>
+      </div>
+      <div class="tt">基本信息</div>
+      <div class="showUI">
+        <div class="items">
+          <div class="item">生日</div>
+          <div class="j-birth">1990-08-18</div>
         </div>
-        <div class="tt">基本信息</div>
-        <div class="showUI">
-            <div class="items">
-                <div class="item">生日</div>
-                <div class="j-birth">1990-08-18</div>
-            </div>
-            <div class="items">
-                <div class="item">手机</div>
-                <div class="j-tel">18072912974</div>
-            </div>
-            <div class="items">
-                <div class="item">邮箱</div>
-                <div class="j-email">w8@173.com </div>
-            </div>
-            <div class="items">
-                <div class="item">签名</div>
-                <div class="j-sign sign">相信真善美,相信真善美相信真善美相信真善美,相信真善美,相信真善美,相信真善美,相信真善美,相信真善美</div>
-            </div>
+        <div class="items">
+          <div class="item">手机</div>
+          <div class="j-tel">18072912974</div>
         </div>
-        <div class="editUI">
-            <div class="items">
-                <div class="item">昵称</div>
-                <input type="text" class="e-nick ipt" maxlength="10">
-            </div>
-            <div class="items">
-                <div class="item">性别</div>
-                <select class="e-gender slt">
-                    <option value="unknown">不显示</option>
-                    <option value="male">男</option>
-                    <option value="female">女</option>
-                </select>
-            </div>
-            <div class="items">
-                <div class="item">生日</div>
-                <input type="text" class="e-birth ipt" maxlength="20" id="datepicker">
-            </div>
-            <div class="items">
-                <div class="item">手机</div>
-                <input type="text" class="e-tel ipt ipt-1" maxlength="13">
-            </div>
-            <div class="items">
-                <div class="item">邮箱</div>
-                <input type="text" class="e-email ipt ipt-1" maxlength="30">
-            </div>
-            <div class="items">
-                <div class="item">签名</div>
-                <textarea class="e-sign" maxlength="30"></textarea>
-            </div>
+        <div class="items">
+          <div class="item">邮箱</div>
+          <div class="j-email">w8@173.com </div>
         </div>
+        <div class="items">
+          <div class="item">签名</div>
+          <div class="j-sign sign">相信真善美,相信真善美相信真善美相信真善美,相信真善美,相信真善美,相信真善美,相信真善美,相信真善美</div>
+        </div>
+      </div>
+      <div class="editUI">
+        <div class="items">
+          <div class="item">昵称</div>
+          <input type="text" class="e-nick ipt" maxlength="10">
+        </div>
+        <div class="items">
+          <div class="item">性别</div>
+          <select class="e-gender slt">
+            <option value="unknown">不显示</option>
+            <option value="male">男</option>
+            <option value="female">女</option>
+          </select>
+        </div>
+        <div class="items">
+          <div class="item">生日</div>
+          <input type="text" class="e-birth ipt" maxlength="20" id="datepicker">
+        </div>
+        <div class="items">
+          <div class="item">手机</div>
+          <input type="text" class="e-tel ipt ipt-1" maxlength="13">
+        </div>
+        <div class="items">
+          <div class="item">邮箱</div>
+          <input type="text" class="e-email ipt ipt-1" maxlength="30">
+        </div>
+        <div class="items">
+          <div class="item">签名</div>
+          <textarea class="e-sign" maxlength="30"></textarea>
+        </div>
+      </div>
     </div>
-</div>
-<!-- 修改头像 -->
-<div class="m-modifyAvatar hide" id="modifyAvatar">
+  </div>
+  <!-- 修改头像 -->
+  <div class="m-modifyAvatar hide" id="modifyAvatar">
     <i class="icon icon-close j-close"></i>
     <div class="choseFileCtn">
-        <form action="#" class="j-uploadForm">
-            <input type="file" class="j-upload" style="display: none;">
-        </form>
-        <div class="choseFile j-choseFile"> 选择图片</div>
+      <form action="#" class="j-uploadForm">
+        <input type="file" class="j-upload" style="display: none;">
+      </form>
+      <div class="choseFile j-choseFile"> 选择图片</div>
     </div>
     <div class="tt">头像更换</div>
     <div class="chose" id="cropImg">
-        <img src="" class="hide">
+      <img src="" class="hide">
     </div>
     <div class="big">
-        <div class="img">
-            <img src="" class="hide">
-        </div>
-        <p>160*160</p>
+      <div class="img">
+        <img src="" class="hide">
+      </div>
+      <p>160*160</p>
     </div>
     <div class="small">
-        <div class="img">
-            <img src="" class="hide">
-        </div>
-        <p>40*40</p>
+      <div class="img">
+        <img src="" class="hide">
+      </div>
+      <p>40*40</p>
     </div>
     <div class="btns f-cb">
-        <button class="f-fr btn btn-ok radius4px j-save">保存</button>
-        <button class="f-fr btn btn-cancel radius4p j-reupload">重新选择</button>
-        <button class="f-fr btn btn-cancel radius4p j-close">取消</button>
+      <button class="f-fr btn btn-ok radius4px j-save">保存</button>
+      <button class="f-fr btn btn-cancel radius4p j-reupload">重新选择</button>
+      <button class="f-fr btn btn-cancel radius4p j-close">取消</button>
     </div>
-</div>
+  </div>
 
-<!--<script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>-->
-<script>
+  <!--<script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>-->
+  <script>
     // IE 11 polify
     if (!Object.assign) {
-        Object.assign = function () {
-            var list = arguments
-            for (var i = 1; i < list.length; i++) {
-                list[0] = extend(list[0], list[i])
-            }
-            return list[0]
+      Object.assign = function () {
+        var list = arguments
+        for (var i = 1; i < list.length; i++) {
+          list[0] = extend(list[0], list[i])
         }
+        return list[0]
+      }
 
-        function extend(obj1, obj2) {
-            for (var i in obj2) {
-                obj1[i] = obj2[i]
-            }
-            return obj1
+      function extend(obj1, obj2) {
+        for (var i in obj2) {
+          obj1[i] = obj2[i]
         }
+        return obj1
+      }
     }
-</script>
-<script th:src="@{/3rd/nim_server_conf.js}"></script>
-<script th:src="@{/3rd/NIM_Web_SDK_v7.1.1.js}"></script>
-<script th:src="@{/3rd/NIM_Web_Netcall_v7.1.1.js}"></script>
-<script th:src="@{/3rd/NIM_Web_WebRTC_v7.1.1.js}"></script>
-<script th:src="@{/3rd/NIM_Web_WhiteBoard_v7.1.1.js}"></script>
-<script th:src="@{/im/js/config.js}"></script>
-<script th:src="@{/3rd/DrawPlugin.js}"></script>
+  </script>
+  <script th:src="@{/3rd/nim_server_conf.js}"></script>
+  <script th:src="@{/3rd/NIM_Web_SDK_v7.1.1.js}"></script>
+  <script th:src="@{/3rd/NIM_Web_Netcall_v7.1.1.js}"></script>
+  <script th:src="@{/3rd/NIM_Web_WebRTC_v7.1.1.js}"></script>
+  <script th:src="@{/3rd/NIM_Web_WhiteBoard_v7.1.1.js}"></script>
+  <script th:src="@{/im/js/config.js}"></script>
+  <script th:src="@{/3rd/DrawPlugin.js}"></script>
 
-<script th:src="@{/im/js/3rd/whiteboard.js}"></script>
-<script th:src="@{/3rd/jquery-1.11.3.min.js}"></script>
-<script th:src="@{/im/js/3.1.1/layer.js}"></script>
+  <script th:src="@{/im/js/3rd/whiteboard.js}"></script>
+  <script th:src="@{/3rd/jquery-1.11.3.min.js}"></script>
+  <script th:src="@{/im/js/3.1.1/layer.js}"></script>
 
-<!--<script th:src="./3rd/zepto.min.js"></script>-->
-<script>
+  <!--<script th:src="./3rd/zepto.min.js"></script>-->
+  <script>
     // FastClick.attach(document.body);
     window.onerror = function (errorMessage, source, lineno, colno, error) {
-        var info = "错误信息：" + errorMessage + "\n" +
-            "出错文件：" + source + "\n " +
-            "出错行号：" + lineno + "\n" +
-            "出错列号：" + colno + "\n" +
-            "错误详情：" + error + "\n";
+      var info = "错误信息：" + errorMessage + "\n" +
+        "出错文件：" + source + "\n " +
+        "出错行号：" + lineno + "\n" +
+        "出错列号：" + colno + "\n" +
+        "错误详情：" + error + "\n";
 
-        // alert(JSON.stringify(ERROR));
-        // ajax.postp(monitorUrl, ERROR, null, function(e){
-        //     alert(e.stack);
-        // });
-        // console.error(JSON.stringify(info));
-        // ajax.post('/data/updateLog', ERROR);
-        // alert(JSON.stringify(info))
-        // minAlert.alert({
-        // 	msg: JSON.stringify(info),
-        // 	confirmBtnMsg: '好哒'
-        // })
+      // alert(JSON.stringify(ERROR));
+      // ajax.postp(monitorUrl, ERROR, null, function(e){
+      //     alert(e.stack);
+      // });
+      // console.error(JSON.stringify(info));
+      // ajax.post('/data/updateLog', ERROR);
+      // alert(JSON.stringify(info))
+      // minAlert.alert({
+      // 	msg: JSON.stringify(info),
+      // 	confirmBtnMsg: '好哒'
+      // })
     }
-</script>
+  </script>
 
 
 
@@ -1304,438 +1317,493 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var dataBaseUrl=[[${dataBaseUrl}]];//搜索接口
-    var isShowDataBase=[[${isShowDataBase}]];//是否展示资料库按钮
-    var menuList=[[${menuList}]];//menu list 
-    var user=[[${user}]];
-    var isUpdatePassword=[[${isUpdatePassword}]];
-    var showMenuUrl = menuList[0].subList[0].url;//进首页默认展示页面
-    var enterpriseId = [[${enterpriseId}]];
-    var token = [[${token}]];
-    var accountId = [[${user.id+''}]];
-    var isShowConsoleBtn = [[${isShowConsoleBtn}]];
-    var showIKonwFlag=[[${showIKonwFlag}]];//是否展示首次登陆提示框
-    var showBtnIndex = new Array();
-    var defaultActive =null;
-    if(isShowConsoleBtn){//console
-        showMenuUrl= "/console/console/index?type=1";
-        showBtnIndex=null;
-    }else{
-        showBtnIndex.push("0");
-        defaultActive="0-0";
-    }
-    
-    var accountType = [[${accountType}]];
+  var dataBaseUrl = [[${ dataBaseUrl }]];//搜索接口
+  var isShowDataBase = [[${ isShowDataBase }]];//是否展示资料库按钮
+  var menuList = [[${ menuList }]];//menu list 
+  var user = [[${ user }]];
+  var isUpdatePassword = [[${ isUpdatePassword }]];
+  var showMenuUrl = menuList[0].subList[0].url;//进首页默认展示页面
+  var enterpriseId = [[${ enterpriseId }]];
+  var token = [[${ token }]];
+  var accountId = [[${ user.id + '' }]];
+  var isShowConsoleBtn = [[${ isShowConsoleBtn }]];
+  var showIKonwFlag = [[${ showIKonwFlag }]];//是否展示首次登陆提示框
+  var showBtnIndex = new Array();
+  var defaultActive = null;
+  if (isShowConsoleBtn) {//console
+    showMenuUrl = "/console/console/index?type=1";
+    showBtnIndex = null;
+  } else {
+    showBtnIndex.push("0");
+    defaultActive = "0-0";
+  }
+
+  var accountType = [[${ accountType }]];
 </script>
 <style>
-    .el-dialog__footer {text-align: center;}    
-    /* 最小化按钮 */
-    .el-dialog__wrapper.callCenterDialog  button.el-dialog__headerbtn {display:none!important; }
-    .minDialog,.minDialog:hover {position: absolute;top: 12px;right: 14px;background: #fff;width: 18px;height: 18px;color: #5c6be8;border-radius: 50%;padding: 0;line-height: 18px;font-size: 12px;}
+  .el-dialog__footer {
+    text-align: center;
+  }
 
-    .minDialog1,.minDialog1:hover {position: absolute;top: 12px;right: 40px;background: #fff;width: 18px;height: 18px;color: #5c6be8;border-radius: 50%;padding: 0;line-height: 18px;font-size: 12px;}
-    .minDialog:hover,.minDialog1:hover{opacity: 0.6;}
-    /*.minDialog i,.minDialog1 i{margin-top: -4px;float: left;margin-left: 7px;}*/
+  /* 最小化按钮 */
+  .el-dialog__wrapper.callCenterDialog button.el-dialog__headerbtn {
+    display: none !important;
+  }
 
+  .minDialog,
+  .minDialog:hover {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: #fff;
+    width: 18px;
+    height: 18px;
+    color: #5c6be8;
+    border-radius: 50%;
+    padding: 0;
+    line-height: 18px;
+    font-size: 12px;
+  }
+
+  .minDialog1,
+  .minDialog1:hover {
+    position: absolute;
+    top: 12px;
+    right: 40px;
+    background: #fff;
+    width: 18px;
+    height: 18px;
+    color: #5c6be8;
+    border-radius: 50%;
+    padding: 0;
+    line-height: 18px;
+    font-size: 12px;
+  }
+
+  .minDialog:hover,
+  .minDialog1:hover {
+    opacity: 0.6;
+  }
+
+  /*.minDialog i,.minDialog1 i{margin-top: -4px;float: left;margin-left: 7px;}*/
 </style>
 
 <script>
-    document.addEventListener("click", function(){
-        $(".statusBox").hide()
-    },true);
-    var dataNum=''  //聊天列表最小化 未读消息
-    var isLayerOpen=true   //聊天框最小化 判断
-    var sessionListNum=0    //聊天框最小化未读消息数初始化
-    var isSessionListNum=false  //聊天框最小化未读消息数初始化
-    var chatWindow  //聊天框layer赋值，方便关闭打开
-    var searchLists  //新进线消息数判断是否要请求后端接口
-    var sessionListObj
-    function showLittleBit(value,num){
-        if(value&&value.length>num){
-            value=value.toString().slice(0,num)+'...'
-        }
-        return value
+  document.addEventListener("click", function () {
+    $(".statusBox").hide()
+  }, true);
+  var dataNum = ''  //聊天列表最小化 未读消息
+  var isLayerOpen = true   //聊天框最小化 判断
+  var sessionListNum = 0    //聊天框最小化未读消息数初始化
+  var isSessionListNum = false  //聊天框最小化未读消息数初始化
+  var chatWindow  //聊天框layer赋值，方便关闭打开
+  var searchLists  //新进线消息数判断是否要请求后端接口
+  var sessionListObj
+  function showLittleBit(value, num) {
+    if (value && value.length > num) {
+      value = value.toString().slice(0, num) + '...'
     }
-    if(window.localStorage.appkey){
-        layer.open({
-            type: 1,
-            title: ' ',   //标题
-            area: ['360px', '705px'],   //宽高
-            shade: 0,   //遮罩透明度
-            skin: 'mainHtmlLayer',
-            content: $("#left-panel"),//支持获取DOM元素
-            // btn: ['确定', '取消'], //按钮组
-            scrollbar: false ,//屏蔽浏览器滚动条
-            maxmin: true,
-            offset: [document.documentElement.clientHeight*(1/5)+'px', document.documentElement.clientWidth*(0.7)+'px'],
-            min:function(){
-                // $('.mainHtmlLayer').css({
-                //     // 'marginLeft': document.documentElement.clientWidth-290+'px',
-                //     'top':document.documentElement.clientHeight-66+'px'
-                // })
+    return value
+  }
+  if (window.localStorage.appkey) {
+    layer.open({
+      type: 1,
+      title: ' ',   //标题
+      area: ['360px', '705px'],   //宽高
+      shade: 0,   //遮罩透明度
+      skin: 'mainHtmlLayer',
+      content: $("#left-panel"),//支持获取DOM元素
+      // btn: ['确定', '取消'], //按钮组
+      scrollbar: false,//屏蔽浏览器滚动条
+      maxmin: true,
+      offset: [document.documentElement.clientHeight * (1 / 5) + 'px', document.documentElement.clientWidth * (0.7) + 'px'],
+      min: function () {
+        // $('.mainHtmlLayer').css({
+        //     // 'marginLeft': document.documentElement.clientWidth-290+'px',
+        //     'top':document.documentElement.clientHeight-66+'px'
+        // })
 
-                // $('.mainHtmlLayer').css({
-                //     'left': '300px',
-                //     'height':'76px'
-                // })
-                $('.mainHtmlLayer').css({
-                    'left':'800px'
-                })
-                $('.mainHtmlLayer .layui-layer-title').css({
-                    'height':'42px',
-                    'padding-left':'10px',
-                    'padding-right':'40px'
-                })
-                isLayerOpen=false
-                var str=['<div style="display: flex;align-items: center;">',
-                            '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="'+$('#userPic')[0].src+'"/>',
-                            '<span style="margin:0 10px;">我的会话</span>',
-                            dataNum>0?'<span style="font-size: 12px;text-align: center;line-height:24px;display: inline-block;width: 24px;height: 24px;background-color: red;border-radius: 50%;color: #fff;">'+(dataNum>10?10+'+':dataNum)+'</span>':'',
-                        '</div>'].join("")
-                $('.mainHtmlLayer .layui-layer-title').html(str)
+        // $('.mainHtmlLayer').css({
+        //     'left': '300px',
+        //     'height':'76px'
+        // })
+        $('.mainHtmlLayer').css({
+          'left': '800px'
+        })
+        $('.mainHtmlLayer .layui-layer-title').css({
+          'height': '42px',
+          'padding-left': '10px',
+          'padding-right': '40px'
+        })
+        isLayerOpen = false
+        var str = ['<div style="display: flex;align-items: center;">',
+          '<img style="border-radius: 50%;display: inline-block;width: 20px;height: 20px;" src="' + $('#userPic')[0].src + '"/>',
+          '<span style="margin:0 10px;">我的会话</span>',
+          dataNum > 0 ? '<span style="font-size: 12px;text-align: center;line-height:24px;display: inline-block;width: 24px;height: 24px;background-color: red;border-radius: 50%;color: #fff;">' + (dataNum > 10 ? 10 + '+' : dataNum) + '</span>' : '',
+          '</div>'].join("")
+        $('.mainHtmlLayer .layui-layer-title').html(str)
 
-            },
-            success:function(){
-                $('.mainHtmlLayer .layui-layer-title').css({
-                    'backgroundColor': 'rgb(236, 237, 242)',
-                    'borderBottom':'none',
-                    'height':'24px'
-                })
-                $('.mainHtmlLayer .layui-layer-content').css({
-                    'height':'678px'
-                })
-                $('.mainHtmlLayer .layui-layer-close').css({
-                    'display':'none'
-                })
-                isLayerOpen=true
-            },
-            restore:function(){
-                $('.mainHtmlLayer').css({
-                    'marginLeft':'0px',
-                    'left':document.documentElement.clientWidth*(0.7)+'px',
-                    'top':document.documentElement.clientHeight*(1/5)+'px'
+      },
+      success: function () {
+        $('.mainHtmlLayer .layui-layer-title').css({
+          'backgroundColor': 'rgb(236, 237, 242)',
+          'borderBottom': 'none',
+          'height': '24px'
+        })
+        $('.mainHtmlLayer .layui-layer-content').css({
+          'height': '678px'
+        })
+        $('.mainHtmlLayer .layui-layer-close').css({
+          'display': 'none'
+        })
+        isLayerOpen = true
+      },
+      restore: function () {
+        $('.mainHtmlLayer').css({
+          'marginLeft': '0px',
+          'left': document.documentElement.clientWidth * (0.7) + 'px',
+          'top': document.documentElement.clientHeight * (1 / 5) + 'px'
 
-                })
-                $('.mainHtmlLayer .layui-layer-content').css({
-                    'height':'678px'
-                })
-                $('.mainHtmlLayer .layui-layer-title').css({
-                    'height':'24px'
-                })
-                $('.mainHtmlLayer .layui-layer-title').html('')
-                isLayerOpen=true
-            }
-        });
-    
-    }
-
-    var annDialogVm = new Vue({
-        el: '#anndialog',
-        data:{
-            anndialogVisible:false,
-            id:"1084034513090117632",
-            annRevid:"",
-            AnnDialogTableData:[],
-            cols:[]
-        },
-        methods:{
-             updateStatusAnn(){
-                 var param = {};
-                 param.ids = this.annRevid;
-                 axios.post('/annReceive/batchUpdate', param)
-                     .then(function (response) {
-                         annDialogVm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
-                                 homePageVM.messageCount();
-                         }});
-                     }).catch(function (error) {console.log(error);});
-                 annDialogVm.anndialogVisible = false;
-             },
-             initDialogData(){
-                var param = {};
-                param.id = this.id;
-                axios.post('/ann/queryOneAnn', param)
-                    .then(function (response) {
-                        console.log(response.data)
-                        if(response.data.code==0){
-                            console.log( response.data.data)
-                            annDialogVm.AnnDialogTableData = [{content_:response.data.data.content}]
-                            annDialogVm.cols =[{ label: response.data.data.title, prop: "content_", type: "normal" }];
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-            },
-            showOutVisiable:function(){
-            }
-        }
+        })
+        $('.mainHtmlLayer .layui-layer-content').css({
+          'height': '678px'
+        })
+        $('.mainHtmlLayer .layui-layer-title').css({
+          'height': '24px'
+        })
+        $('.mainHtmlLayer .layui-layer-title').html('')
+        isLayerOpen = true
+      }
     });
 
+  }
 
-    var bussDialogVm = new Vue({
-        el: '#bussdialog',
-        data:{
-            bussdialogVisible:false,
-            title:"",
-            content:"",
-            bussRevid:"",
-            bussDialogTableData:[],
-            colss:[],
-            urlVal:"",
-            typeVal:0,
-        },
-        methods:{
-            updateStatusBussAll(){
-                var param = {};
-                var idsStr="";
-                var idsArr=[];
-                for(var i=0;i<this.colss.length;i++){
-                    idsArr.push(this.colss[i].bussRevid)
-                }
-                if(idsArr.length!=0){
-                    idsStr=idsArr.join(',')
-                }else{
-                    idsStr=""
-                }
-                param.ids = idsStr;
-                axios.post('/bussReceive/batchUpdate', param)
-                    .then(function (response) {
-                        bussDialogVm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
-                                homePageVM.messageCount();
-                            }});
-                    }).catch(function (error) {console.log(error);});
-                // 清空数组
-                this.colss = [] ;
-            },
-            updateStatusBuss(index){
-                var param = {};
-                param.ids = this.colss[index].bussRevid;
-                axios.post('/bussReceive/batchUpdate', param)
-                    .then(function (response) {
-                        bussDialogVm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
-                                homePageVM.messageCount();
-                            }});
-                    }).catch(function (error) {console.log(error);});
-                this.colss[index].bussdialogVisible=false;
-                // 删除该指定元素
-                this.colss.splice(index, 1)
-            },
-            checkMessboxStatus() {
-                var count = 0;
-                for (let i = 0; i < this.cols.length; i++) {
-                    const item = this.cols[i];
-                    if (!item.bussdialogVisible) {
-                        count++
-                    }
-                }
-                return count == this.cols.length;
-            },
-            initDialogData(title,content,bussRevid){
-                var cols ={
-                    bussRevid:bussRevid,
-                    bussDialogTableData:[{content_:bussDialogVm.content}],
-                    cols:[{ label: this.title, prop: "content_", type: "normal" }],
-                    bussdialogVisible: true,
-                }
-                bussDialogVm.colss.push(cols)
-            },
-            initDialogDataTourl(title,content,bussRevid,type,url){
-                var cols ={
-                    bussRevid:bussRevid,
-                    bussDialogTableData:[{content_:bussDialogVm.content}],
-                    cols:[{ label: this.title, prop: "content_", typeVal: type,urlVal:url }],
-                    bussdialogVisible: true,
-                }
-                bussDialogVm.colss.push(cols)
-            },
-            showOutVisiable:function(){
-            },
-            bussdialogClose:function(index){
-                this.colss[index].bussdialogVisible=false;
-                // 删除该指定元素
-                this.colss.splice(index, 1)
+  var annDialogVm = new Vue({
+    el: '#anndialog',
+    data: {
+      anndialogVisible: false,
+      id: "1084034513090117632",
+      annRevid: "",
+      AnnDialogTableData: [],
+      cols: []
+    },
+    methods: {
+      updateStatusAnn() {
+        var param = {};
+        param.ids = this.annRevid;
+        axios.post('/annReceive/batchUpdate', param)
+          .then(function (response) {
+            annDialogVm.$message({
+              type: 'success', message: '更新完成!', duration: 2000, onClose: function () {
+                homePageVM.messageCount();
+              }
+            });
+          }).catch(function (error) { console.log(error); });
+        annDialogVm.anndialogVisible = false;
+      },
+      initDialogData() {
+        var param = {};
+        param.id = this.id;
+        axios.post('/ann/queryOneAnn', param)
+          .then(function (response) {
+            console.log(response.data)
+            if (response.data.code == 0) {
+              console.log(response.data.data)
+              annDialogVm.AnnDialogTableData = [{ content_: response.data.data.content }]
+              annDialogVm.cols = [{ label: response.data.data.title, prop: "content_", type: "normal" }];
             }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      },
+      showOutVisiable: function () {
+      }
+    }
+  });
+
+
+  var bussDialogVm = new Vue({
+    el: '#bussdialog',
+    data: {
+      bussdialogVisible: false,
+      title: "",
+      content: "",
+      bussRevid: "",
+      bussDialogTableData: [],
+      colss: [],
+      urlVal: "",
+      typeVal: 0,
+    },
+    methods: {
+      updateStatusBussAll() {
+        var param = {};
+        var idsStr = "";
+        var idsArr = [];
+        for (var i = 0; i < this.colss.length; i++) {
+          idsArr.push(this.colss[i].bussRevid)
         }
-    });
+        if (idsArr.length != 0) {
+          idsStr = idsArr.join(',')
+        } else {
+          idsStr = ""
+        }
+        param.ids = idsStr;
+        axios.post('/bussReceive/batchUpdate', param)
+          .then(function (response) {
+            bussDialogVm.$message({
+              type: 'success', message: '更新完成!', duration: 2000, onClose: function () {
+                homePageVM.messageCount();
+              }
+            });
+          }).catch(function (error) { console.log(error); });
+        // 清空数组
+        this.colss = [];
+      },
+      updateStatusBuss(index) {
+        var param = {};
+        param.ids = this.colss[index].bussRevid;
+        axios.post('/bussReceive/batchUpdate', param)
+          .then(function (response) {
+            bussDialogVm.$message({
+              type: 'success', message: '更新完成!', duration: 2000, onClose: function () {
+                homePageVM.messageCount();
+              }
+            });
+          }).catch(function (error) { console.log(error); });
+        this.colss[index].bussdialogVisible = false;
+        // 删除该指定元素
+        this.colss.splice(index, 1)
+      },
+      checkMessboxStatus() {
+        var count = 0;
+        for (let i = 0; i < this.cols.length; i++) {
+          const item = this.cols[i];
+          if (!item.bussdialogVisible) {
+            count++
+          }
+        }
+        return count == this.cols.length;
+      },
+      initDialogData(title, content, bussRevid) {
+        var cols = {
+          bussRevid: bussRevid,
+          bussDialogTableData: [{ content_: bussDialogVm.content }],
+          cols: [{ label: this.title, prop: "content_", type: "normal" }],
+          bussdialogVisible: true,
+        }
+        bussDialogVm.colss.push(cols)
+      },
+      initDialogDataTourl(title, content, bussRevid, type, url) {
+        var cols = {
+          bussRevid: bussRevid,
+          bussDialogTableData: [{ content_: bussDialogVm.content }],
+          cols: [{ label: this.title, prop: "content_", typeVal: type, urlVal: url }],
+          bussdialogVisible: true,
+        }
+        bussDialogVm.colss.push(cols)
+      },
+      showOutVisiable: function () {
+      },
+      bussdialogClose: function (index) {
+        this.colss[index].bussdialogVisible = false;
+        // 删除该指定元素
+        this.colss.splice(index, 1)
+      }
+    }
+  });
 
 </script>
 
 <script th:src="@{/js/custom/homepage/index.js}"></script>
 <script th:src="@{/js/rabbitmq/stomp.js}"></script>
 <script th:src="@{/js/rabbitmq/sockjs.js}"></script>
-
+<script charset="UTF-8" src="https://cdn.jsdelivr.net/npm/sa-sdk-javascript@1.18.18/sensorsdata.min.js"></script>
+<script charset="UTF-8">
+  var sensors = window['sensorsDataAnalytic201505'];
+  sensors.init({
+    server_url: 'https://canmeng.datasink.sensorsdata.cn/sa?project=production&token=561151e8ccfe43da',
+    heatmap: { scroll_notice_map: 'not_collect' },
+    is_track_single_page: true,
+    use_client_time: true,
+    send_type: 'beacon'
+  });
+  sensors.quick('autoTrack');
+</script>
 
 
 <script type="text/javascript">
-    var client;
-    var ws_url = '[[${wsUrlHttp}]]';
-    var ws_url_https = '[[${wsUrlHttps}]]';
-    var mqUserName = '[[${mqUserName}]]';
-    var mqPassword = '[[${mqPassword}]]';
-    var userId = '[[${userId}]]';
+  var client;
+  var ws_url = '[[${wsUrlHttp}]]';
+  var ws_url_https = '[[${wsUrlHttps}]]';
+  var mqUserName = '[[${mqUserName}]]';
+  var mqPassword = '[[${mqPassword}]]';
+  var userId = '[[${userId}]]';
 
-    // var sessionid = '[[${sessionid}]]'
-    console.log(userId)
-    var urlpath = window.location.href;
-    //判断访问地址是否为htts协议
-    if(urlpath.indexOf("https://")!=-1){
-        ws_url=ws_url_https;
+  // var sessionid = '[[${sessionid}]]'
+  console.log(userId)
+  var urlpath = window.location.href;
+  //判断访问地址是否为htts协议
+  if (urlpath.indexOf("https://") != -1) {
+    ws_url = ws_url_https;
+  }
+  var ws = null;
+  var numberopt = 0;
+  function connectMQ() {
+    console.log(ws_url + '/ws')
+    if (location.search == '?ws') {
+      ws = new WebSocket(ws_url + '/ws');
+    } else {
+      ws = new SockJS(ws_url + '/stomp');
     }
-    var ws=null ;
-    var numberopt=0;
-    function connectMQ() {
-        console.log(ws_url+'/ws')
-        if (location.search == '?ws') {
-            ws = new WebSocket(ws_url+'/ws');
-        } else {
-            ws = new SockJS(ws_url+'/stomp');
-        }
-        client = Stomp.over(ws);
-        client.heartbeat.outgoing = 30000;//客户端会发送心跳每30000ms
-        client.heartbeat.incoming = 0;
-        var sessionid='[[${session.sessionid}]]';
-        var on_connect = function(x) {
-            //只有在登录的时候才能够接收到消息，其他的别的时候是接收不到消息提醒的。
-            client.subscribe("/topic/#."+userId, function(data) {
-                var msg = data.body;
-                console.log("=============================")
-                console.log(msg)
-                if(msg.indexOf("announce") != -1){
-                    var annid = msg.split(",")[1];
-                    var annRevid = msg.split(",")[2];
-                    setTimeout(function(){homePageVM.messageCount();},1000);
-                    annDialogVm.id = annid;
-                    annDialogVm.annRevid =annRevid
-                    annDialogVm.anndialogVisible=true;
-                    annDialogVm.initDialogData();
-                }else   if(msg.indexOf("business") != -1){
-                    var bussRevid = msg.split(",")[1];
-                    var title = msg.split(",")[2];
-                    var ccontent = msg.split(",")[3];
+    client = Stomp.over(ws);
+    client.heartbeat.outgoing = 30000;//客户端会发送心跳每30000ms
+    client.heartbeat.incoming = 0;
+    var sessionid = '[[${session.sessionid}]]';
+    var on_connect = function (x) {
+      //只有在登录的时候才能够接收到消息，其他的别的时候是接收不到消息提醒的。
+      client.subscribe("/topic/#." + userId, function (data) {
+        var msg = data.body;
+        console.log("=============================")
+        console.log(msg)
+        if (msg.indexOf("announce") != -1) {
+          var annid = msg.split(",")[1];
+          var annRevid = msg.split(",")[2];
+          setTimeout(function () { homePageVM.messageCount(); }, 1000);
+          annDialogVm.id = annid;
+          annDialogVm.annRevid = annRevid
+          annDialogVm.anndialogVisible = true;
+          annDialogVm.initDialogData();
+        } else if (msg.indexOf("business") != -1) {
+          var bussRevid = msg.split(",")[1];
+          var title = msg.split(",")[2];
+          var ccontent = msg.split(",")[3];
 
-                    // homePageVM.messageCount();
-                    setTimeout(function(){homePageVM.messageCount();},1000);
-                    bussDialogVm.bussRevid =bussRevid
-                    bussDialogVm.title = title;
-                    bussDialogVm.content = ccontent;
-                    bussDialogVm.typeVal=0
-                    bussDialogVm.urlVal="";
-                    // bussDialogVm.bussdialogVisible=true;
-                    bussDialogVm.initDialogData(title,ccontent,bussRevid);
-                    // 窗口未打开-延迟执行
-                    setTimeout(function(){
-                        // 批量忽略是否显示和隐藏
-                        let batchIgnores =  $("[name='batchIgnore']");
-                        for(let z =  0 ; z <  batchIgnores.length ; z++ ){
-                            if( z === 0 ){
-                                $(batchIgnores[z]).attr("style","display:none;");
-                            }else{
-                                $(batchIgnores[z]).attr("style","display:inline;");
-                            }
-                        }},1000);
-                }else   if(msg.indexOf("mestoUrl") != -1){
-                    var bussRevid = msg.split(",")[1];
-                    var title = msg.split(",")[2];
-                    var ccontent = msg.split(",")[3];
-                    var type = msg.split(",")[4];
-                    var url = msg.split(",")[5];
-                    // homePageVM.messageCount();
-                    setTimeout(function(){homePageVM.messageCount();},1000);
-                    bussDialogVm.bussRevid =bussRevid
-                    bussDialogVm.title = title;
-                    bussDialogVm.content = ccontent;
-                    bussDialogVm.typeVal=type
-                    bussDialogVm.urlVal=url;
-                    // bussDialogVm.bussdialogVisible=true;
-                    bussDialogVm.initDialogDataTourl(title,ccontent,bussRevid,type,url);
-                    // 批量忽略
-                    setTimeout(function(){
-                        // 批量忽略是否显示和隐藏
-                        let batchIgnores =  $("[name='batchIgnore']");
-                        for(let z =  0 ; z <  batchIgnores.length ; z++ ){
-                            if( z === 0 ){
-                                $(batchIgnores[z]).attr("style","display:none;");
-                            }else{
-                                $(batchIgnores[z]).attr("style","display:inline;");
-                            }
-                        }},1000);
-                }else if(msg.indexOf("ImMsg")!=-1){
-                    var flag = msg.split(":")[1];
-                    console.log("flag==refresh::",(flag=="refresh"))
-                    if(flag=="refresh"){
-                        console.log("IM 会话列表已经能够刷新了");
-                         setTimeout(function(){
-                            console.log("点击")
-                            $("#tabClickSession").click();
-                        },1000)
-                    }
-                }else if(msg.indexOf("updateNewSessionState")!=-1){
-                    var msgSplit = msg.split(":");
-                    var account = msgSplit[1];
-                    var idServer = msgSplit[2];
-                    var time = msgSplit[3];
-                    // 更新会话列表
-                    var msgEventDingyi =  {
-                        "msgEvents": [{
-                            "type": "1",
-                            "value": "1",
-                            "idClient": "1001",
-                            "time":  time ,
-                            "idServer":  idServer ,
-                            "clientType": "",
-                            "serverConfig": "{\"online\":[-1]}",
-                            "account": account,
-                            "custom": {}
-                        }]
-                    };
-                    // 更新状态
-                    yunXin.mysdk.pushOnlineEvents(msgEventDingyi);
-                }else if(msg.indexOf("onlineLeaveStatus")!=-1){
-                    var msgSplit = msg.split(":");
-                    var type = msgSplit[1];
-                    // 更新在线状态1在线2忙碌3离线
-                    if(type=="1"){
-                        $('.customerIcon').css({
-                            'backgroundColor': '#4AB65C'
-                        })
-                        $('.valueState').html('在线')
-                    }else if(type=="2"){
-                        $('.customerIcon').css({
-                            'backgroundColor': '#F5A82E'
-                        })
-                        $('.valueState').html('忙碌')
-                    }else if(type=="3"){
-                        $('.customerIcon').css({
-                            'backgroundColor': '#8F97A0'
-                        })
-                        $('.valueState').html('离线')
-                    }
-                    
-                }
-            });
-            
-            client.subscribe("/topic/"+sessionid, function(data) {
-                document.location.href = "/index/logout?type=1";
-            });
-            client.subscribe("/topic/"+sessionid+"?notUser", function(data) {
-                document.location.href = "/index/logout?type=3";
-            });
-        };
-
-        var on_error =  function(data) {
-            console.log('error');
-            if(data.body){data = data.body;}
-            //链接一段时间后：链接会断开，断开后自动重连
-            if(numberopt==0 && data.indexOf("Whoops! Lost connection")==0) {
-                connectMQ();
-                // numberopt=1;
-                // var param = {"data" : data};
-                //$.ajax({type: 'POST', url:rootPath+"/management/index/webSocketLog", contentType : 'application/json', data : JSON.stringify(param), dataType:"json", cache: false, success: function(result){},});
+          // homePageVM.messageCount();
+          setTimeout(function () { homePageVM.messageCount(); }, 1000);
+          bussDialogVm.bussRevid = bussRevid
+          bussDialogVm.title = title;
+          bussDialogVm.content = ccontent;
+          bussDialogVm.typeVal = 0
+          bussDialogVm.urlVal = "";
+          // bussDialogVm.bussdialogVisible=true;
+          bussDialogVm.initDialogData(title, ccontent, bussRevid);
+          // 窗口未打开-延迟执行
+          setTimeout(function () {
+            // 批量忽略是否显示和隐藏
+            let batchIgnores = $("[name='batchIgnore']");
+            for (let z = 0; z < batchIgnores.length; z++) {
+              if (z === 0) {
+                $(batchIgnores[z]).attr("style", "display:none;");
+              } else {
+                $(batchIgnores[z]).attr("style", "display:inline;");
+              }
             }
-        };
-        client.connect(mqUserName, mqPassword, on_connect, on_error, '/');
-    }
-    connectMQ();
+          }, 1000);
+        } else if (msg.indexOf("mestoUrl") != -1) {
+          var bussRevid = msg.split(",")[1];
+          var title = msg.split(",")[2];
+          var ccontent = msg.split(",")[3];
+          var type = msg.split(",")[4];
+          var url = msg.split(",")[5];
+          // homePageVM.messageCount();
+          setTimeout(function () { homePageVM.messageCount(); }, 1000);
+          bussDialogVm.bussRevid = bussRevid
+          bussDialogVm.title = title;
+          bussDialogVm.content = ccontent;
+          bussDialogVm.typeVal = type
+          bussDialogVm.urlVal = url;
+          // bussDialogVm.bussdialogVisible=true;
+          bussDialogVm.initDialogDataTourl(title, ccontent, bussRevid, type, url);
+          // 批量忽略
+          setTimeout(function () {
+            // 批量忽略是否显示和隐藏
+            let batchIgnores = $("[name='batchIgnore']");
+            for (let z = 0; z < batchIgnores.length; z++) {
+              if (z === 0) {
+                $(batchIgnores[z]).attr("style", "display:none;");
+              } else {
+                $(batchIgnores[z]).attr("style", "display:inline;");
+              }
+            }
+          }, 1000);
+        } else if (msg.indexOf("ImMsg") != -1) {
+          var flag = msg.split(":")[1];
+          console.log("flag==refresh::", (flag == "refresh"))
+          if (flag == "refresh") {
+            console.log("IM 会话列表已经能够刷新了");
+            setTimeout(function () {
+              console.log("点击")
+              $("#tabClickSession").click();
+            }, 1000)
+          }
+        } else if (msg.indexOf("updateNewSessionState") != -1) {
+          var msgSplit = msg.split(":");
+          var account = msgSplit[1];
+          var idServer = msgSplit[2];
+          var time = msgSplit[3];
+          // 更新会话列表
+          var msgEventDingyi = {
+            "msgEvents": [{
+              "type": "1",
+              "value": "1",
+              "idClient": "1001",
+              "time": time,
+              "idServer": idServer,
+              "clientType": "",
+              "serverConfig": "{\"online\":[-1]}",
+              "account": account,
+              "custom": {}
+            }]
+          };
+          // 更新状态
+          yunXin.mysdk.pushOnlineEvents(msgEventDingyi);
+        } else if (msg.indexOf("onlineLeaveStatus") != -1) {
+          var msgSplit = msg.split(":");
+          var type = msgSplit[1];
+          // 更新在线状态1在线2忙碌3离线
+          if (type == "1") {
+            $('.customerIcon').css({
+              'backgroundColor': '#4AB65C'
+            })
+            $('.valueState').html('在线')
+          } else if (type == "2") {
+            $('.customerIcon').css({
+              'backgroundColor': '#F5A82E'
+            })
+            $('.valueState').html('忙碌')
+          } else if (type == "3") {
+            $('.customerIcon').css({
+              'backgroundColor': '#8F97A0'
+            })
+            $('.valueState').html('离线')
+          }
+
+        }
+      });
+
+      client.subscribe("/topic/" + sessionid, function (data) {
+        document.location.href = "/index/logout?type=1";
+      });
+      client.subscribe("/topic/" + sessionid + "?notUser", function (data) {
+        document.location.href = "/index/logout?type=3";
+      });
+    };
+
+    var on_error = function (data) {
+      console.log('error');
+      if (data.body) { data = data.body; }
+      //链接一段时间后：链接会断开，断开后自动重连
+      if (numberopt == 0 && data.indexOf("Whoops! Lost connection") == 0) {
+        connectMQ();
+        // numberopt=1;
+        // var param = {"data" : data};
+        //$.ajax({type: 'POST', url:rootPath+"/management/index/webSocketLog", contentType : 'application/json', data : JSON.stringify(param), dataType:"json", cache: false, success: function(result){},});
+      }
+    };
+    client.connect(mqUserName, mqPassword, on_connect, on_error, '/');
+  }
+  connectMQ();
 </script>
 
 <!-- <script th:src="@{/js/custom/call/cti-link.js?v=1.0.0}"></script> -->
@@ -1870,4 +1938,5 @@
         $("#tabClickSession").click();
     },10000)
 </script> -->
+
 </html>
