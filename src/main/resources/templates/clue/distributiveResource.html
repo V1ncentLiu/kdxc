@@ -1,1695 +1,1624 @@
 <!DOCTYPE html>
 <html>
+
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
-    <title>已分发资源</title>
-    <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
-    <style>
-        .dialogForm .el-form-item{margin-bottom: 5px;}
-        /*.el-checkbox{margin-right: 30px!important;}*/
-        /*.el-checkbox+.el-checkbox{margin-left: 0;}*/
-        .phoneBox .el-form-item__content{max-width: 247px;word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;}
-   		.widthauto1 .el-form-item__label {
-            width: auto!important;
-            color: #606266;
-        }
-        .mainSearchForm .el-date-editor {
-            width: 142px!important;
-        }
-        @media screen and (max-width: 1366px){
-            .mainSearchBg .el-form-item__label{width: 90px;}
-        }
-        
-    </style>
+  <title>已分发资源</title>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="css/element-ui.css">
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    .dialogForm .el-form-item {
+      margin-bottom: 5px;
+    }
+
+    /*.el-checkbox{margin-right: 30px!important;}*/
+    /*.el-checkbox+.el-checkbox{margin-left: 0;}*/
+    .phoneBox .el-form-item__content {
+      max-width: 247px;
+      word-wrap: break-word;
+      word-break: break-all;
+      white-space: pre-wrap !important;
+    }
+
+    .widthauto1 .el-form-item__label {
+      width: auto !important;
+      color: #606266;
+    }
+
+    .mainSearchForm .el-date-editor {
+      width: 142px !important;
+    }
+
+    @media screen and (max-width: 1366px) {
+      .mainSearchBg .el-form-item__label {
+        width: 90px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
+  <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
-        <el-breadcrumb-item>已分配资源</el-breadcrumb-item>
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+      <el-breadcrumb-item>已分配资源</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
-        <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
-        <shiro:hasPermission name="DistributiveResource:recall">
-            <el-button type="success" @click="toRecall">撤回</el-button>
-        </shiro:hasPermission>
-        <shiro:hasPermission name="DistributiveResource:exportCRecord">
-            <el-button v-if="isExport1" icon="el-icon-download" type="warning" @click="exportFun(1)">导出电销资源沟通记录</el-button>
-            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出电销资源沟通记录中</el-button>
-        </shiro:hasPermission>
-        <shiro:hasPermission name="DistributiveResource:exportPhtraRecord">
-            <el-button v-if="isExport3" icon="el-icon-download" type="warning" @click="exportFun(3)">导出话务资源沟通记录</el-button>
-            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出话务资源沟通记录中</el-button>
-        </shiro:hasPermission>
-        <shiro:hasPermission name="DistributiveResource:exportClues">
-            <el-button v-if="isExport2" icon="el-icon-download" type="warning" @click="exportFun(2)">导出资源情况</el-button>
-            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源情况中</el-button>
-        </shiro:hasPermission>
+      <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
+      <shiro:hasPermission name="DistributiveResource:recall">
+        <el-button type="success" @click="toRecall">撤回</el-button>
+      </shiro:hasPermission>
+      <shiro:hasPermission name="DistributiveResource:exportCRecord">
+        <el-button v-if="isExport1" icon="el-icon-download" type="warning" @click="exportFun(1)">导出电销资源沟通记录</el-button>
+        <el-button v-else icon="el-icon-loading" type="warning" disabled>导出电销资源沟通记录中</el-button>
+      </shiro:hasPermission>
+      <shiro:hasPermission name="DistributiveResource:exportPhtraRecord">
+        <el-button v-if="isExport3" icon="el-icon-download" type="warning" @click="exportFun(3)">导出话务资源沟通记录</el-button>
+        <el-button v-else icon="el-icon-loading" type="warning" disabled>导出话务资源沟通记录中</el-button>
+      </shiro:hasPermission>
+      <shiro:hasPermission name="DistributiveResource:exportClues">
+        <el-button v-if="isExport2" icon="el-icon-download" type="warning" @click="exportFun(2)">导出资源情况</el-button>
+        <el-button v-else icon="el-icon-loading" type="warning" disabled>导出资源情况中</el-button>
+      </shiro:hasPermission>
 
-        <shiro:hasPermission name="DistributiveResource:exportTrackRecord">
-            <el-button v-if="isExport4" icon="el-icon-download" type="warning" @click="exportFun(4)">导出顾问/经纪跟进记录</el-button>
-            <el-button v-else icon="el-icon-loading" type="warning" disabled>导出顾问/经纪跟进记录中</el-button>
-        </shiro:hasPermission>
+      <shiro:hasPermission name="DistributiveResource:exportTrackRecord">
+        <el-button v-if="isExport4" icon="el-icon-download" type="warning" @click="exportFun(4)">导出顾问/经纪跟进记录</el-button>
+        <el-button v-else icon="el-icon-loading" type="warning" disabled>导出顾问/经纪跟进记录中</el-button>
+      </shiro:hasPermission>
 
     </el-row>
     <div class="mainSearchBg">
-        <div class="mainSearchFormBox">
-            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <el-form-item label="手机号:">
-                    <el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number" class="ipt100"></el-input>
-                </el-form-item>
-                <el-form-item label="资源ID:" class="widthauto1">
-                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number" class="ipt100"></el-input>
-                </el-form-item>
-                <el-form-item label="电销分公司:" class="widthauto1">
-                    <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" clearable filterable class="ipt100">
-                        <el-option
-                                v-for="item in dxBusinessList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="事业部:" class="widthauto1">
-                    <el-select v-model="form.businessUnit" placeholder="事业部"   clearable filterable class="ipt100">
-                        <el-option
-                                v-for="item in dxCauseBList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>                
-                <el-form-item label="创建时间:" class="widthauto1">
-                    <el-date-picker
-                            v-model="form.starTime"
-                            type="datetime"
-                            placeholder="选择日期时间" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
-                    </el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                    <el-date-picker
-                            v-model="form.endTime"
-                            type="datetime"
-                            placeholder="选择日期时间" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
-                    </el-date-picker>
-                </el-form-item>
-                <el-row v-show="isShow">
-                    <el-form-item label="电销组:">
-                        <el-select v-model="form.telemarketingItem" placeholder="电销组" clearable filterable>
-                            <el-option
-                                    v-for="item in dxList"
-                                    :key="item.id"
-                                    :label="item.name"
-                                    :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源项目:">
-                        <el-select v-model="form.resourceProjectList" reserve-keyword=true placeholder="资源项目" clearable filterable multiple>
-                            <el-option
-                                    v-for="item in proSelectArr"
-                                    :key="item.id"
-                                    :label="item.projectName"
-                                    :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="媒介:">
-                        <el-select v-model="form.medium" placeholder="媒介" clearable filterable>
-                            <el-option
-                                    v-for="item in mediumArry"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="分发时间:">
-                        <el-date-picker
-                                v-model="form.assignTimeStart"
-                                type="datetime"
-                                placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker
-                                v-model="form.assignTimeEnd"
-                                type="datetime"
-                                placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="资源类别:">
-                        <el-select v-model="form.resourceTypeList" placeholder="资源类别" clearable filterable multiple>
-                            <el-option
-                                    v-for="item in categoryArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源类型:">
-                        <el-select v-model="form.type" placeholder="资源类型" clearable filterable>
-                            <el-option
-                                    v-for="item in typeArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="行业类别:">
-                        <el-select v-model="form.tradeType" placeholder="行业类别" clearable filterable>
-                            <el-option
-                                    v-for="item in industryCategoryArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源阶段:">
-                        <el-select v-model="form.resourceStage" placeholder="资源阶段" clearable filterable>
-                            <el-option
-                                    v-for="item in phaseArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源专员:">
-                        <el-select v-model="form.resourcePerson" placeholder="资源专员" clearable   filterable >
-                            <el-option
-                                    v-for="item in userArr"
-                                    :key="item.id"
-                                    :label="item.name"
-                                    :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="所属组:">
-                        <el-input v-model="form.sourcetwo" placeholder="所属组"></el-input>
-                    </el-form-item>
-                    <el-form-item label="首次是否接通:">
-                        <el-select v-model="form.firstCall" placeholder="首次是否接通" clearable >
-                            <el-option
-                                    v-for="item in comArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源是否有效:">
-                        <el-select v-model="form.status" placeholder="资源是否有效" clearable >
-                            <el-option
-                                    v-for="item in comArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <!--<el-form-item label="资源ID:">
+      <div class="mainSearchFormBox">
+        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+          <el-form-item label="手机号:">
+            <el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number" class="ipt100">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="资源ID:" class="widthauto1">
+            <el-input v-model="form.clueId" placeholder="资源ID" @keyup.native="number" class="ipt100"></el-input>
+          </el-form-item>
+          <el-form-item label="电销分公司:" class="widthauto1">
+            <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" clearable filterable class="ipt100">
+              <el-option v-for="item in dxBusinessList" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="事业部:" class="widthauto1">
+            <el-select v-model="form.businessUnit" placeholder="事业部" clearable filterable class="ipt100">
+              <el-option v-for="item in dxCauseBList" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="创建时间:" class="widthauto1">
+            <el-date-picker v-model="form.starTime" type="datetime" placeholder="选择日期时间"
+              value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="—" class="widthauto">
+            <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择日期时间"
+              value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss">
+            </el-date-picker>
+          </el-form-item>
+          <el-row v-show="isShow">
+            <el-form-item label="电销组:">
+              <el-select v-model="form.telemarketingItem" placeholder="电销组" clearable filterable>
+                <el-option v-for="item in dxList" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="资源项目:">
+              <el-select v-model="form.resourceProjectList" reserve-keyword=true placeholder="资源项目" clearable filterable
+                multiple>
+                <el-option v-for="item in proSelectArr" :key="item.id" :label="item.projectName" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="媒介:">
+              <el-select v-model="form.medium" placeholder="媒介" clearable filterable>
+                <el-option v-for="item in mediumArry" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="分发时间:">
+              <el-date-picker v-model="form.assignTimeStart" type="datetime" placeholder="选择日期时间">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="—" class="widthauto">
+              <el-date-picker v-model="form.assignTimeEnd" type="datetime" placeholder="选择日期时间">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="资源类别:">
+              <el-select v-model="form.resourceTypeList" placeholder="资源类别" clearable filterable multiple>
+                <el-option v-for="item in categoryArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="资源类型:">
+              <el-select v-model="form.type" placeholder="资源类型" clearable filterable>
+                <el-option v-for="item in typeArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="行业类别:">
+              <el-select v-model="form.tradeType" placeholder="行业类别" clearable filterable>
+                <el-option v-for="item in industryCategoryArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="资源阶段:">
+              <el-select v-model="form.resourceStage" placeholder="资源阶段" clearable filterable>
+                <el-option v-for="item in phaseArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="资源专员:">
+              <el-select v-model="form.resourcePerson" placeholder="资源专员" clearable filterable>
+                <el-option v-for="item in userArr" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="所属组:">
+              <el-input v-model="form.sourcetwo" placeholder="所属组"></el-input>
+            </el-form-item>
+            <el-form-item label="首次是否接通:">
+              <el-select v-model="form.firstCall" placeholder="首次是否接通" clearable>
+                <el-option v-for="item in comArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="资源是否有效:">
+              <el-select v-model="form.status" placeholder="资源是否有效" clearable>
+                <el-option v-for="item in comArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <!--<el-form-item label="资源ID:">
                         <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
                     </el-form-item>-->
-                    <el-form-item label="是否接通:">
-                        <el-select v-model="form.isCall" placeholder="是否接通" clearable >
-                            <el-option
-                                    v-for="item in comArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="QQ:">
-                        <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
-                    </el-form-item>
-                    <el-form-item label="微信:">
-                        <el-input v-model="form.wechat" placeholder="微信"></el-input>
-                    </el-form-item>
-                    <el-form-item label="邮箱:">
-                        <el-input v-model="form.email" placeholder="邮箱"></el-input>
-                    </el-form-item>
-                    <el-form-item label="搜索词:">
-                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
-                    </el-form-item>
-                    <el-form-item label="站点是否为空:">
-                        <el-select v-model="form.siteIsNull" placeholder="站点是否为空" clearable >
-                            <el-option
-                                    v-for="item in comArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="是否自建:">
-                        <el-select v-model="form.buildSelf" placeholder="是否自建" clearable >
-                            <el-option
-                                    v-for="item in buildSelfArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="话务是否有效:">
-                        <el-select v-model="form.phstatus" placeholder="话务是否有效" clearable >
-                            <el-option
-                                    v-for="item in comArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="话务是否接通:">
-                        <el-select v-model="form.phtraIsCall" placeholder="话务是否接通" clearable >
-                            <el-option
-                                    v-for="item in comArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="业务线:">
-                        <el-select v-model="form.businessLine" placeholder="业务线" clearable   filterable>
-                            <el-option
-                                    v-for="item in businessLineArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="话务专员:">
-                        <el-select v-model="form.operatorId" placeholder="话务专员" clearable   filterable >
-                            <el-option
-                                    v-for="item in hwzyUserArr"
-                                    :key="item.id"
-                                    :label="item.name"
-                                    :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="首次分配话务组:">
-                        <el-select v-model="form.firstAsssignTrafficGroupId" placeholder="首次分配话务组" clearable filterable>
-                            <el-option
-                                    v-for="item in hwzyGroupList"
-                                    :key="item.id"
-                                    :label="item.name"
-                                    :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="平台资源来源:">
-                        <el-select v-model="form.sourceFrom" placeholder="平台资源来源" clearable >
-                            <el-option
-                                    v-for="item in sourceFromArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源词根:">
-                        <el-input v-model="form.rootWord" placeholder="资源词根"></el-input>
-                    </el-form-item>
-                    <el-form-item label="客户类别:">
-                        <el-select v-model="form.haveParent" placeholder="客户类别" clearable >
-                            <el-option
-                                    v-for="item in haveParentArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
+            <el-form-item label="是否接通:">
+              <el-select v-model="form.isCall" placeholder="是否接通" clearable>
+                <el-option v-for="item in comArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="QQ:">
+              <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
+            </el-form-item>
+            <el-form-item label="微信:">
+              <el-input v-model="form.wechat" placeholder="微信"></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱:">
+              <el-input v-model="form.email" placeholder="邮箱"></el-input>
+            </el-form-item>
+            <el-form-item label="搜索词:">
+              <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+            </el-form-item>
+            <el-form-item label="站点是否为空:">
+              <el-select v-model="form.siteIsNull" placeholder="站点是否为空" clearable>
+                <el-option v-for="item in comArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="是否自建:">
+              <el-select v-model="form.buildSelf" placeholder="是否自建" clearable>
+                <el-option v-for="item in buildSelfArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="话务是否有效:">
+              <el-select v-model="form.phstatus" placeholder="话务是否有效" clearable>
+                <el-option v-for="item in comArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="话务是否接通:">
+              <el-select v-model="form.phtraIsCall" placeholder="话务是否接通" clearable>
+                <el-option v-for="item in comArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="业务线:">
+              <el-select v-model="form.businessLine" placeholder="业务线" clearable filterable>
+                <el-option v-for="item in businessLineArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="话务专员:">
+              <el-select v-model="form.operatorId" placeholder="话务专员" clearable filterable>
+                <el-option v-for="item in hwzyUserArr" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="首次分配话务组:">
+              <el-select v-model="form.firstAsssignTrafficGroupId" placeholder="首次分配话务组" clearable filterable>
+                <el-option v-for="item in hwzyGroupList" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="平台资源来源:">
+              <el-select v-model="form.sourceFrom" placeholder="平台资源来源" clearable>
+                <el-option v-for="item in sourceFromArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="资源词根:">
+              <el-input v-model="form.rootWord" placeholder="资源词根"></el-input>
+            </el-form-item>
+            <el-form-item label="客户类别:">
+              <el-select v-model="form.haveParent" placeholder="客户类别" clearable>
+                <el-option v-for="item in haveParentArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
 
-                    <el-form-item label="首次分配部门:">
-                        <el-select v-model="form.firstAssignGroupId" placeholder="首次分配部门" clearable filterable multiple>
-                            <el-option
-                                    v-for="item in firstAssignGroupArr"
-                                    :key="item.id"
-                                    :label="item.name"
-                                    :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="资源项目归属:">
-                        <el-input v-model="form.ascriptionProject" placeholder="资源项目归属"></el-input>
-                    </el-form-item>
-                    <el-form-item label="首次下发类别:">
-                        <el-select v-model="form.firstAssignGroupType" placeholder="首次下发类别" clearable multiple>
-                            <el-option
-                                    v-for="item in groupTypeArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-row>
-                <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
-                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-                </div>
-            </el-form>
-        </div>
-        <el-row>
-            <el-table
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    border
-                    :data="tableData"
-                    @row-dblclick="toUpdatePage"
-                    @selection-change="handleSelectionChange"
-            >
-                <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column>
-                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums"  v-if="item.fieldCode == 'isTrack'">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.isTrack ==1">
-                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
-                        </div>
-                        <div v-else></div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums"  v-if="item.fieldCode == 'hasCallRecord'">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.hasCallRecord ==1">
-                            <el-button @click="openCallRecordDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
-                        </div>
-                        <div v-else></div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'status'">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status == 0">否</div>
-                        <div v-else-if="scope.row.status ==1">是</div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">
-                    <template slot-scope="scope">
-                        {{scope.row.cusName}}
-                        <span v-if="scope.row.inputType ==1">
-                             <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
-                         </span>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'firstCall'">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.firstCall == 0">否</div>
-                        <div v-else-if="scope.row.firstCall ==1">是</div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phstatus'">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.phstatus == 0">否</div>
-                        <div v-else-if="scope.row.phstatus ==1">是</div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phtraIsCall'">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.phtraIsCall == 0">否</div>
-                        <div v-else-if="scope.row.phtraIsCall ==1">是</div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isCall'">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.isCall == 0">否</div>
-                        <div v-else-if="scope.row.isCall ==1">是</div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
-                                 :width="item.width"  v-else-if="item.fieldCode == 'province'">
-                    <template slot-scope="scope">
-                        {{scope.row.province}}{{scope.row.city}}{{scope.row.district}}
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else></el-table-column>
-            </el-table>
-            <table-pagination v-if="paginationShow" :pager="pager" :papernum="papernum" @change="initTableData"></table-pagination>
-        </el-row>
+            <el-form-item label="首次分配部门:">
+              <el-select v-model="form.firstAssignGroupId" placeholder="首次分配部门" clearable filterable multiple>
+                <el-option v-for="item in firstAssignGroupArr" :key="item.id" :label="item.name" :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="资源项目归属:">
+              <el-input v-model="form.ascriptionProject" placeholder="资源项目归属"></el-input>
+            </el-form-item>
+            <el-form-item label="首次下发类别:">
+              <el-select v-model="form.firstAssignGroupType" placeholder="首次下发类别" clearable multiple>
+                <el-option v-for="item in groupTypeArr" :key="item.value" :label="item.name" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-row>
+          <div class="mainSearchBtnBox">
+            <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
+            <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+            <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
+                v-if="isShow">收起</span><span v-else>展开更多</span><i
+                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+          </div>
+        </el-form>
+      </div>
+      <el-row>
+        <el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="tableData"
+          @row-dblclick="toUpdatePage" @selection-change="handleSelectionChange">
+          <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column>
+          <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isTrack'">
+            <template slot-scope="scope">
+              <div v-if="scope.row.isTrack ==1">
+                <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
+              </div>
+              <div v-else></div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'hasCallRecord'">
+            <template slot-scope="scope">
+              <div v-if="scope.row.hasCallRecord ==1">
+                <el-button @click="openCallRecordDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
+              </div>
+              <div v-else></div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else-if="item.fieldCode == 'status'">
+            <template slot-scope="scope">
+              <div v-if="scope.row.status == 0">否</div>
+              <div v-else-if="scope.row.status ==1">是</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else-if="item.fieldCode == 'cusName'">
+            <template slot-scope="scope">
+              {{scope.row.cusName}}
+              <span v-if="scope.row.inputType ==1">
+                <input type='hidden'><img th:src="@{/images/self_build.png}"
+                  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else-if="item.fieldCode == 'firstCall'">
+            <template slot-scope="scope">
+              <div v-if="scope.row.firstCall == 0">否</div>
+              <div v-else-if="scope.row.firstCall ==1">是</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else-if="item.fieldCode == 'phstatus'">
+            <template slot-scope="scope">
+              <div v-if="scope.row.phstatus == 0">否</div>
+              <div v-else-if="scope.row.phstatus ==1">是</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else-if="item.fieldCode == 'phtraIsCall'">
+            <template slot-scope="scope">
+              <div v-if="scope.row.phtraIsCall == 0">否</div>
+              <div v-else-if="scope.row.phtraIsCall ==1">是</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else-if="item.fieldCode == 'isCall'">
+            <template slot-scope="scope">
+              <div v-if="scope.row.isCall == 0">否</div>
+              <div v-else-if="scope.row.isCall ==1">是</div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else-if="item.fieldCode == 'province'">
+            <template slot-scope="scope">
+              {{scope.row.province}}{{scope.row.city}}{{scope.row.district}}
+            </template>
+          </el-table-column>
+          <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName"
+            :width="item.width" v-else></el-table-column>
+        </el-table>
+        <table-pagination v-if="paginationShow" :pager="pager" :papernum="papernum" @change="initTableData">
+        </table-pagination>
+      </el-row>
     </div>
     <!-- dialog -->
     <el-dialog title="资源详细信息" :visible.sync="dialogFormVisible" width="870px">
-        <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
-            <div class="fs16 redcolor marginB20">资源ID：{{basic.id}}</div>
-            <div class="borderbox padding20">
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="客户姓名：" :label-width="formLabelWidth">{{customer.cusName}}</el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="手机号：" :label-width="formLabelWidth" class="phoneBox">{{customer.phone}}</el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="微信：" :label-width="formLabelWidth">
-                            {{customer.wechat}}<span @click="wechatVisible = true" v-if="(customer.wechat2 !=null && customer.wechat2 !='')||(customer.wechatCode !=null && customer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="邮箱：" :label-width="formLabelWidth">
-                            {{customer.email}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="QQ：" :label-width="formLabelWidth">
-                            {{customer.qq}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
-                            {{basic.typeName}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
-                            {{basic.projectName}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            {{basic.categoryName}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="媒介：" :label-width="formLabelWidth">
-                            {{basic.sourceName}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                            {{basic.searchWord}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="行业类别：" :label-width="formLabelWidth">
-                            {{basic.industryCategoryName}}
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            {{basic.messageTime}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="24">
-                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            {{basic.messagePoint}}
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </div>
-        </el-form>
+      <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
+        <div class="fs16 redcolor marginB20">资源ID：{{basic.id}}</div>
+        <div class="borderbox padding20">
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="客户姓名：" :label-width="formLabelWidth">{{customer.cusName}}</el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="手机号：" :label-width="formLabelWidth" class="phoneBox">{{customer.phone}}
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="微信：" :label-width="formLabelWidth">
+                {{customer.wechat}}<span @click="wechatVisible = true"
+                  v-if="(customer.wechat2 !=null && customer.wechat2 !='')||(customer.wechatCode !=null && customer.wechatCode !='')"
+                  style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="邮箱：" :label-width="formLabelWidth">
+                {{customer.email}}
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="QQ：" :label-width="formLabelWidth">
+                {{customer.qq}}
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                {{basic.typeName}}
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                {{basic.projectName}}
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                {{basic.categoryName}}
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="媒介：" :label-width="formLabelWidth">
+                {{basic.sourceName}}
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                {{basic.searchWord}}
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="行业类别：" :label-width="formLabelWidth">
+                {{basic.industryCategoryName}}
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                {{basic.messageTime}}
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                {{basic.messagePoint}}
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+      </el-form>
     </el-dialog>
     <dialog-tracking :param="trackingParam"></dialog-tracking>
     <!-- 选择列 -->
     <el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup" width="870px">
-        <el-form :model="fieldFrom">
-            <el-form-item label="" prop="type">
-                <el-checkbox-group v-model="fieldFrom.type">
-                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
-                        {{item.displayName}}
-                    </el-checkbox>
-                </el-checkbox-group>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="confirmColumn">确 定</el-button>
-            <el-button @click="dialogChooseList = false">取 消</el-button>
-        </div>
+      <el-form :model="fieldFrom">
+        <el-form-item label="" prop="type">
+          <el-checkbox-group v-model="fieldFrom.type">
+            <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"
+              name="type" :key="item.fieldCode" v-for="(item,index) in  allTableColums ">
+              {{item.displayName}}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmColumn">确 定</el-button>
+        <el-button @click="dialogChooseList = false">取 消</el-button>
+      </div>
     </el-dialog>
     <el-dialog title="查看微信/二维码" :visible.sync="wechatVisible">
-        <el-form :model="dialogForm" ref="dialogForm">
-            <!--展示phone2  phone3  phone4 phone5-->
-            <el-form-item  label="微信2：" :label-width="formLabelWidth"  >
-                <el-button type="text" disabled>{{customer.wechat2}}</el-button>
-            </el-form-item>
-            <el-form-item  label="图片二维码：" :label-width="formLabelWidth"  >
-                <img v-show="customer.wechatCode!=''"  :src="customer.wechatCode">
-            </el-form-item>
-        </el-form>
+      <el-form :model="dialogForm" ref="dialogForm">
+        <!--展示phone2  phone3  phone4 phone5-->
+        <el-form-item label="微信2：" :label-width="formLabelWidth">
+          <el-button type="text" disabled>{{customer.wechat2}}</el-button>
+        </el-form-item>
+        <el-form-item label="图片二维码：" :label-width="formLabelWidth">
+          <img v-show="customer.wechatCode!=''" :src="customer.wechatCode">
+        </el-form-item>
+      </el-form>
     </el-dialog>
 
     <el-dialog title="通话记录" :visible.sync="callRecordParam.callRecordDialogVisible" width="1000px">
-        <el-table ref="multipleTable" :data="callRecordParam.tableData" tooltip-effect="dark" style="width: 100%" border >
-            <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
-            <el-table-column prop="startTime" label="通话时间" :formatter="getStartTimeText"  align="center" width="140"></el-table-column>
-            <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
-            <el-table-column prop="accountName" label="姓名" align="center"  width="120"></el-table-column>
-            <el-table-column prop="talkTime" label="接通时长"  :formatter="getTalkTimeText"  align="center" width="140"></el-table-column>
-            <el-table-column prop="callStatus" label="是否接通" align="center"  width="120"></el-table-column>
-            <el-table-column label="操作" align="center">
-                <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
-                    <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-                        <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
-                    </a>
-                    <a class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
-                </template>
-            </el-table-column>
-        </el-table>
+      <el-table ref="multipleTable" :data="callRecordParam.tableData" tooltip-effect="dark" style="width: 100%" border>
+        <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+        <el-table-column prop="startTime" label="通话时间" :formatter="getStartTimeText" align="center" width="140">
+        </el-table-column>
+        <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
+        <el-table-column prop="accountName" label="姓名" align="center" width="120"></el-table-column>
+        <el-table-column prop="talkTime" label="接通时长" :formatter="getTalkTimeText" align="center" width="140">
+        </el-table-column>
+        <el-table-column prop="callStatus" label="是否接通" align="center" width="120"></el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+            <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP"
+              @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+              <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
+            </a>
+            <a class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-dialog>
 
-</div>
+  </div>
 </body>
 <script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 
 <style>
-    .fa-play-1 {
-        width: 34px;
-        height: 34px;
-        display: inline-block;
-        background-image: url(/images/icon_play.png);
-        background-repeat: no-repeat;
-    }
-    .fa-stop-1 {
-        width: 34px;
-        height: 34px;
-        display: inline-block;
-        background-image: url(/images/icon_stop.png);
-        background-repeat: no-repeat;
-    }
-    .download_img {
-        width: 34px;
-        height: 34px;
-        display: inline-block;
-        background-image: url(/images/icon_download.png);
-        background-repeat: no-repeat;
-    }
+  .fa-play-1 {
+    width: 34px;
+    height: 34px;
+    display: inline-block;
+    background-image: url(/images/icon_play.png);
+    background-repeat: no-repeat;
+  }
+
+  .fa-stop-1 {
+    width: 34px;
+    height: 34px;
+    display: inline-block;
+    background-image: url(/images/icon_stop.png);
+    background-repeat: no-repeat;
+  }
+
+  .download_img {
+    width: 34px;
+    height: 34px;
+    display: inline-block;
+    background-image: url(/images/icon_download.png);
+    background-repeat: no-repeat;
+  }
 </style>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-<script th:inline="javascript" >
-    var proSelect=[[${proSelect}]];
-    var orgs=[[${orgs}]];
-    var userList=[[${userList}]];
-    var hwzyUserList=[[${hwzyUserList}]];
-    var fieldList=[[${fieldList}]];//自定义字段
-    var userFieldList=[[${userFieldList}]];//用户自定义字段
-    var ocmVM = new Vue({
-        el: '#optimizeClueManagement',
-        data: function() {
-            return {
-                isShowTime:false,
-                timer:null,//计时器
-                isExport1:true,
-                isExport2:true,
-                isExport3:true,
-                isExport4:true,
-                oldPage:1,
-                paginationShow: false,
-                isShow:false,
-                dialogFormVisible: false,
-                dialogChooseList: false,
-                wechatVisible: false,
-                multipleSelection: [],//选择行
-                allTableColums:[],//自定义列
-                tableColums:[],
-                fieldFrom: {
-                    type: []
-                },
-                form: {
-                    starTime:'',
-                    endTime:'',
-                    starTime1:'',
-                    endTime1:'',
-                    telemarketingBranch:'',
-                    businessUnit:'',
-                    telemarketingItem:'',
-                    resourceProject:'',
-                    medium:'',
-                    resourceType:'',
-                    sourcetwo:'',
-                    type:'',
-                    tradeType:'',
-                    resourceStage:'',
-                    resourcePerson:'',
-                    phone:'',
-                    clueId:'',
-                    isCall:"",
-                    status:"",
-                    phstatus:"",
-                    phtraIsCall:"",
-                    firstCall:"",
-                    qq:"",
-                    wechat:"",
-                    email:"",
-                    siteIsNull:"",
-                    buildSelf:"",
-                    resourceProjectList:[],
-                    resourceTypeList:[],
-                    businessLine:"",
-                    operatorId:"",
-                    firstAsssignTrafficGroupId:"",
-                    im:"",
-                    sourceFrom:'',
-                    haveParent:'',
-                    firstAssignGroupId:[],
-                    firstAssignGroupType:[],
-                    ascriptionProject:""
-                },
-                pager:{
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 20,
-                },
-                papernum:[20, 50, 100,500],
-                trackingParam:{
-                    trackingDialogVisible:false,
-                    tableData:[]
-                },
-                callRecordParam:{
-                    callRecordDialogVisible:false,
-                    tableData:[]
-                },
-                dialogForm:{},
-                formLabelWidth: '120px',
-                dxBusinessList:[],
-                hwzyGroupList:[],
-                firstAssignGroupArr:orgs,
-                industryCategoryArr:[],
-                categoryArr:[],
-                typeArr:[],
-                mediumArry:[],
-                phaseArr:[],
-                dxList:[],
-                businessLineArr:[],
-                dxCauseBList:[],
-                proSelectArr:proSelect,
-                userArr:userList,
-                hwzyUserArr:hwzyUserList,
-                comArr:[
-                    {value:"",name:"全部"},
-                    {value:"1",name:"是"},
-                    {value:"0",name:"否"}
-                ],
-                sourceFromArr:[
-                    {value:"6,7,8,9",name:"餐盟平台全部"},
-                    {value:"6",name:"餐盟（IM顾问提交）"},
-                    {value:"7",name:"餐盟（自动推送）"},
-                    {value:"8",name:"餐盟（咨询后自动推送）"},
-                    {value:"9",name:"餐盟（线下门店）"}
-                ],
-                haveParentArr:[
-                    {value:"",name:"全部"},
-                    {value:"0",name:"直发资源"},
-                    {value:"1",name:"顾问匹配"}
-                ],
-                groupTypeArr:[
-                    {value:"1",name:"电销顾问"},
-                    {value:"2",name:"话务"},
-                    {value:"3",name:"加盟经纪"},
-                    {value:"4",name:"加盟顾问"}
-                ],
-                buildSelfArr:[
-                    {value:"",name:"全部"},
-                    {value:"1",name:"是"},
-                    {value:"0",name:"否"}
-                ],
-                tableData:[],
-                customer:'',
-                basic:'',
-                storeForm: {
-                    starTime:'',
-                    endTime:'',
-                    starTime1:'',
-                    endTime1:'',
-                    telemarketingBranch:'',
-                    businessUnit:'',
-                    telemarketingItem:'',
-                    resourceProject:'',
-                    medium:'',
-                    resourceType:'',
-                    type:'',
-                    tradeType:'',
-                    resourceStage:'',
-                    resourcePerson:'',
-                    phone:'',
-                    clueId:'',
-                    isCall:"",
-                    status:"",
-                    phstatus:"",
-                    phtraIsCall:"",
-                    firstCall:"",
-                    qq:"",
-                    wechat:"",
-                    email:"",
-                    siteIsNull:""
-                },
-                storeId: '',
-                scrollTop: 0,
-            }
+<script th:inline="javascript">
+  var proSelect = [[${ proSelect }]];
+  var orgs = [[${ orgs }]];
+  var userList = [[${ userList }]];
+  var hwzyUserList = [[${ hwzyUserList }]];
+  var fieldList = [[${ fieldList }]];//自定义字段
+  var userFieldList = [[${ userFieldList }]];//用户自定义字段
+  var ocmVM = new Vue({
+    el: '#optimizeClueManagement',
+    data: function () {
+      return {
+        isShowTime: false,
+        timer: null,//计时器
+        isExport1: true,
+        isExport2: true,
+        isExport3: true,
+        isExport4: true,
+        oldPage: 1,
+        paginationShow: false,
+        isShow: false,
+        dialogFormVisible: false,
+        dialogChooseList: false,
+        wechatVisible: false,
+        multipleSelection: [],//选择行
+        allTableColums: [],//自定义列
+        tableColums: [],
+        fieldFrom: {
+          type: []
         },
-        methods: {
-            handleSelectionChange(val) {//选择节点的事件
-                this.multipleSelection = val;
-            },
-            submitForm(formName){//表格搜索
-                var starTime=this.form.starTime;
-                var endTime=this.form.endTime;
-                if(endTime){
-                    if(starTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-            },
-            openTrackingDialog(cid){
-                var param = {};
-                param.clueId = cid;
-                axios.post('/aggregation/tracking/queryListWithSale', param)
-                    .then(function (response) {
-                        // console.log(response.data)
-                        if (response.data.code == 0) {
-                            ocmVM.trackingParam.tableData = response.data.data
-                            ocmVM.trackingParam.trackingDialogVisible = true;
-                        } else {
-                            ocmVM.$message.error(response.data.msg);
-                        }
-                    }).catch(function (error) {
-                    console.log(error);
-                });
-            },
-            openCallRecordDialog(cid){
-                var param = {};
-                param.clueId = cid;
-                axios.post('/call/callRecord/listCallReacordNoPage', param)
-                    .then(function (response) {
-                        if (response.data.code == 0) {
-                            ocmVM.callRecordParam.tableData = response.data.data
-                            ocmVM.callRecordParam.callRecordDialogVisible = true;
-                        } else {
-                            ocmVM.$message.error(response.data.msg);
-                        }
-                    }).catch(function (error) {
-                    console.log(error);
-                });
-            },
-            getStartTimeText(row, column, value, index){
-                var valText="";
-                if(value){
-                    valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
-                }
-                return valText;
-            },
+        form: {
+          starTime: '',
+          endTime: '',
+          starTime1: '',
+          endTime1: '',
+          telemarketingBranch: '',
+          businessUnit: '',
+          telemarketingItem: '',
+          resourceProject: '',
+          medium: '',
+          resourceType: '',
+          sourcetwo: '',
+          type: '',
+          tradeType: '',
+          resourceStage: '',
+          resourcePerson: '',
+          phone: '',
+          clueId: '',
+          isCall: "",
+          status: "",
+          phstatus: "",
+          phtraIsCall: "",
+          firstCall: "",
+          qq: "",
+          wechat: "",
+          email: "",
+          siteIsNull: "",
+          buildSelf: "",
+          resourceProjectList: [],
+          resourceTypeList: [],
+          businessLine: "",
+          operatorId: "",
+          firstAsssignTrafficGroupId: "",
+          im: "",
+          sourceFrom: '',
+          haveParent: '',
+          firstAssignGroupId: [],
+          firstAssignGroupType: [],
+          ascriptionProject: ""
+        },
+        pager: {
+          total: 0,
+          currentPage: 1,
+          pageSize: 20,
+        },
+        papernum: [20, 50, 100, 500],
+        trackingParam: {
+          trackingDialogVisible: false,
+          tableData: []
+        },
+        callRecordParam: {
+          callRecordDialogVisible: false,
+          tableData: []
+        },
+        dialogForm: {},
+        formLabelWidth: '120px',
+        dxBusinessList: [],
+        hwzyGroupList: [],
+        firstAssignGroupArr: orgs,
+        industryCategoryArr: [],
+        categoryArr: [],
+        typeArr: [],
+        mediumArry: [],
+        phaseArr: [],
+        dxList: [],
+        businessLineArr: [],
+        dxCauseBList: [],
+        proSelectArr: proSelect,
+        userArr: userList,
+        hwzyUserArr: hwzyUserList,
+        comArr: [
+          { value: "", name: "全部" },
+          { value: "1", name: "是" },
+          { value: "0", name: "否" }
+        ],
+        sourceFromArr: [
+          { value: "6,7,8,9,10", name: "餐盟平台全部" },
+          { value: "6", name: "餐盟（IM顾问提交）" },
+          { value: "7", name: "餐盟（自动推送）" },
+          { value: "8", name: "餐盟（咨询后自动推送）" },
+          { value: "9", name: "餐盟（线下门店）" },
+          { value: "10", name: "餐盟（留言后自动推送）" }
+        ],
+        haveParentArr: [
+          { value: "", name: "全部" },
+          { value: "0", name: "直发资源" },
+          { value: "1", name: "顾问匹配" }
+        ],
+        groupTypeArr: [
+          { value: "1", name: "电销顾问" },
+          { value: "2", name: "话务" },
+          { value: "3", name: "加盟经纪" },
+          { value: "4", name: "加盟顾问" }
+        ],
+        buildSelfArr: [
+          { value: "", name: "全部" },
+          { value: "1", name: "是" },
+          { value: "0", name: "否" }
+        ],
+        tableData: [],
+        customer: '',
+        basic: '',
+        storeForm: {
+          starTime: '',
+          endTime: '',
+          starTime1: '',
+          endTime1: '',
+          telemarketingBranch: '',
+          businessUnit: '',
+          telemarketingItem: '',
+          resourceProject: '',
+          medium: '',
+          resourceType: '',
+          type: '',
+          tradeType: '',
+          resourceStage: '',
+          resourcePerson: '',
+          phone: '',
+          clueId: '',
+          isCall: "",
+          status: "",
+          phstatus: "",
+          phtraIsCall: "",
+          firstCall: "",
+          qq: "",
+          wechat: "",
+          email: "",
+          siteIsNull: ""
+        },
+        storeId: '',
+        scrollTop: 0,
+      }
+    },
+    methods: {
+      handleSelectionChange(val) {//选择节点的事件
+        this.multipleSelection = val;
+      },
+      submitForm(formName) {//表格搜索
+        var starTime = this.form.starTime;
+        var endTime = this.form.endTime;
+        if (endTime) {
+          if (starTime > endTime) {
+            this.$message({
+              message: '开始时间不能大于结束时间',
+              type: 'warning'
+            });
+            return;
+          }
+        }
+      },
+      openTrackingDialog(cid) {
+        var param = {};
+        param.clueId = cid;
+        axios.post('/aggregation/tracking/queryListWithSale', param)
+          .then(function (response) {
+            // console.log(response.data)
+            if (response.data.code == 0) {
+              ocmVM.trackingParam.tableData = response.data.data
+              ocmVM.trackingParam.trackingDialogVisible = true;
+            } else {
+              ocmVM.$message.error(response.data.msg);
+            }
+          }).catch(function (error) {
+            console.log(error);
+          });
+      },
+      openCallRecordDialog(cid) {
+        var param = {};
+        param.clueId = cid;
+        axios.post('/call/callRecord/listCallReacordNoPage', param)
+          .then(function (response) {
+            if (response.data.code == 0) {
+              ocmVM.callRecordParam.tableData = response.data.data
+              ocmVM.callRecordParam.callRecordDialogVisible = true;
+            } else {
+              ocmVM.$message.error(response.data.msg);
+            }
+          }).catch(function (error) {
+            console.log(error);
+          });
+      },
+      getStartTimeText(row, column, value, index) {
+        var valText = "";
+        if (value) {
+          valText = moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+        }
+        return valText;
+      },
 
 
-            getTalkTimeText(row, column, value, index){
-                var valText="";
-                if(value){
-                    valText =  this.formatSeconds(value);
-                }
-                return valText;
-            },
-            formatSeconds(s){
-                var t="";
-                var hour = Math.floor(s/3600);
-                var min = Math.floor(s/60) % 60;
-                var sec = s % 60;
-                if(hour<10){
-                    t+="0";
-                }
-                t+=hour+":";
-                if(min < 10){
-                    t += "0";
-                }
-                t += min + ":";
-                if(sec < 10){
-                    t += "0";
-                }
-                t+=sec;
-                // t += sec.toFixed(2);
-                return t;
-            },
-            switchSoundBtn(id, url, callSource) {
-                // this.audioShow=true;
-                if (callSource == '2') {
-                    // switchSound(id, url);
-                    window.parent.open(url)
+      getTalkTimeText(row, column, value, index) {
+        var valText = "";
+        if (value) {
+          valText = this.formatSeconds(value);
+        }
+        return valText;
+      },
+      formatSeconds(s) {
+        var t = "";
+        var hour = Math.floor(s / 3600);
+        var min = Math.floor(s / 60) % 60;
+        var sec = s % 60;
+        if (hour < 10) {
+          t += "0";
+        }
+        t += hour + ":";
+        if (min < 10) {
+          t += "0";
+        }
+        t += min + ":";
+        if (sec < 10) {
+          t += "0";
+        }
+        t += sec;
+        // t += sec.toFixed(2);
+        return t;
+      },
+      switchSoundBtn(id, url, callSource) {
+        // this.audioShow=true;
+        if (callSource == '2') {
+          // switchSound(id, url);
+          window.parent.open(url)
+          return;
+        }
+        if (callSource == '6') {
+          var httpUrl = url.replace("https", "http");
+          var page = window.open();
+          var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='" + httpUrl + "' controls='controls' autoplay></audio></div></body>";
+          page.document.write(html);
+          return;
+        }
+        var newWindow = window.open();
+        var param = {};
+        param.id = id;
+        axios.post('/call/callRecord/getRecordFileWithAgent', param)
+          .then(function (response) {
+            var data = response.data
+            if (data.code == '0') {
+              var url = data.data;
+              // switchSound(id, url);
+              newWindow.location.href = url;
+            } else {
+              console.error(data);
+              myCallRecordVm.$message({ message: data.msg, type: 'error' });
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error);
+          }).then(function () {
+          });
+      },
+      downloadAudio(id, url, callSource) {
+        var param = {};
+        param.id = id;
+        axios.post('/call/callRecord/getRecordFileWithAgent', param)
+          .then(function (response) {
+            var data = response.data;
+            if (data.code == '0') {
+              var datas = data.data.split("#+#");
+              var url = datas[0];
+              if (url) {
+                if (datas.length > 1) {
+                  var fileName = url.split('?')[0];
+                  var fileNameArr = fileName.split("/");
+                  //                                download(url, fileNameArr[fileNameArr.length - 1]);
+                  if (callSource == 4) {
+                    decodeUrl = encodeURI(fileName.substring(0, fileName.lastIndexOf("/")));
+                    url = "/client/heliClient/downloadHeliClientAudio?url=" + decodeUrl;
+                  } else if (callSource == '3' || callSource == '5' || callSource == '8') {
+                    var decodeUrl = encodeURI(url);
+                    url = "/client/heliClient/downloadHeliClientAudio?url=" + decodeUrl;
+                  } else if (callSource == 7 || callSource == 2) {
+                    var httpUrl = url.replace("https", "http");
+                    window.parent.open(httpUrl);
                     return;
-                }
-                if(callSource == '6'){
-                    var httpUrl = url.replace("https","http");
-                    var page = window.open();
-                    var html = "<body style='background: #000;text-align: center;position: relative'><div style='position: absolute;top: 50%;left: 50%;margin-left: -150px;margin-top:-30px;'><audio src='"+httpUrl+"' controls='controls' autoplay></audio></div></body>";
-                    page.document.write(html);
-                    return;
-                }
-                var newWindow = window.open();
-                var param = {};
-                param.id = id;
-                axios.post('/call/callRecord/getRecordFileWithAgent', param)
-                    .then(function (response) {
-                        var data = response.data
-                        if (data.code == '0') {
-                            var url = data.data;
-                            // switchSound(id, url);
-                            newWindow.location.href = url;
-                        } else {
-                            console.error(data);
-                            myCallRecordVm.$message({message: data.msg, type: 'error'});
-                        }
-
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    }).then(function () {
-                });
-            },
-            downloadAudio(id,url,callSource){
-                var param = {};
-                param.id=id;
-                axios.post('/call/callRecord/getRecordFileWithAgent', param)
-                    .then(function (response) {
-                        var data = response.data;
-                        if (data.code == '0') {
-                            var datas = data.data.split("#+#");
-                            var url = datas[0];
-                            if (url) {
-                                if(datas.length>1){
-                                    var fileName = url.split('?')[0];
-                                    var fileNameArr = fileName.split("/");
-//                                download(url, fileNameArr[fileNameArr.length - 1]);
-                                    if(callSource == 4){
-                                        decodeUrl = encodeURI(fileName.substring(0,fileName.lastIndexOf("/")));
-                                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                                    }else if(callSource=='3'||callSource =='5' || callSource =='8'){
-                                        var decodeUrl = encodeURI(url);
-                                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                                    }else if(callSource == 7|| callSource == 2){
-                                        var httpUrl = url.replace("https","http");
-                                        window.parent.open(httpUrl);
-                                        return;
-                                    }
-                                }else{
-                                    var fileName = url.split('?')[0];
-                                    var fileNameArr = fileName.split("/");
-                                    if(callSource=='3'){
-                                        var decodeUrl = encodeURI(url);
-                                        url = "/client/heliClient/downloadHeliClientAudio?url="+decodeUrl;
-                                    }else if(callSource == 7){
-                                        var httpUrl = url.replace("https","http");
-                                        window.parent.open(httpUrl);
-                                        return;
-                                    }
-                                }
-                                var x=new XMLHttpRequest();
-                                x.open("GET", url, true);
-                                x.responseType = 'blob';
-                                x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/\\*' ); }
-                                x.send();
-                            }
-
-                        }else{
-                            console.error(data);
-                            addCustomerVM.$message({message:data.msg,type:'error'});
-                        }
-
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    }).then(function(){
-                });
-
-            },
-            initTableData(){
-                var param = {};
-                if(!this.isShowTime){
-                    var a = new Date();
-                    var year = a.getFullYear();
-                    var month = a.getMonth();
-                    var date = a.getDate();
-                    param.createTimeStart=new Date(year+"-" + month + "-" + date+" 00:00:00");
-                    param.createTimeEnd=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
-                }
-                var pageSize = this.pager.pageSize;
-                var pageNum = this.pager.currentPage;
-                param.pageNum=pageNum;
-                param.pageSize=pageSize;
-                if(this.form.starTime){
-                    param.createTimeStart=new Date(this.form.starTime);
-                }
-                if(this.form.endTime){
-                    param.createTimeEnd=new Date(this.form.endTime);
-                }
-                param.spreadAssignTimeStart=this.form.assignTimeStart;
-                param.spreadAssignTimeEnd=this.form.assignTimeEnd;
-                param.teleCompanyId=this.form.telemarketingBranch;
-                param.teleDeptId=this.form.businessUnit;
-                param.teleGorupId=this.form.telemarketingItem;
-                param.teleGorupId=this.form.telemarketingItem;
-                param.projectId=this.form.resourceProject;
-                param.operationId=this.form.resourcePerson;
-                param.phase=this.form.resourceStage;
-                param.source=this.form.medium;
-                param.phone=this.form.phone;
-                param.category=this.form.resourceType;
-                param.type=this.form.type;
-                param.industryCategory=this.form.tradeType;
-                param.status = this.form.status;
-                param.phstatus = this.form.phstatus;
-                param.phtraIsCall = this.form.phtraIsCall;
-                param.clueId = this.form.clueId;
-                param.isCall = this.form.isCall;
-                param.firstCall = this.form.firstCall;
-                param.siteIsNull = this.form.siteIsNull;
-                param.qq = this.form.qq;
-                param.email = this.form.email;
-                param.wechat = this.form.wechat;
-                param.searchWord=this.form.searchWord;
-                param.rootWord=this.form.rootWord;
-                param.sourcetwo=this.form.sourcetwo;
-                param.buildSelf = this.form.buildSelf;
-
-                param.projectList = this.form.resourceProjectList;
-                param.categoryList = this.form.resourceTypeList;
-                param.businessLine = this.form.businessLine;
-                param.businessLine = this.form.businessLine;
-                param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
-                param.operatorId = this.form.operatorId;
-                param.im = this.form.im;
-                param.sourceFrom = this.form.sourceFrom;
-                param.haveParent = this.form.haveParent;
-                param.firstAssignGroupId=this.form.firstAssignGroupId;
-                param.firstAssignGroupType=this.form.firstAssignGroupType;
-                param.ascriptionProject=this.form.ascriptionProject;
-
-                var starTime=this.form.starTime;
-                var endTime=this.form.endTime;
-                if(pageNum > 5000){
-                    axios.post('','').then(function (response) {
-                        ocmVM.pager.currentPage = ocmVM.oldPage;
-                    })
-                    this.$message({
-                        message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
-                        type: 'warning'
-                    });
-                    return;
-                }else {
-                    this.oldPage = pageNum;
-                }
-                if(endTime){
-                    if(starTime>endTime){
-                        this.$message({
-                            message: '创建开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-                var start=this.form.assignTimeStart;
-                var end=this.form.assignTimeEnd;
-                if(end){
-                    if(start>end){
-                        this.$message({
-                            message: '分发开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-
-                axios.post('/exetend/distributionedTaskManager/queryPageDistributionedTask',param).then(function (response) {
-                    if(!response){
-                        ocmVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    var resobj= response.data;
-                    if(!resobj){
-                        ocmVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    if(resobj.code!='0'){
-                        ocmVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    var pageData=resobj.data;
-                    ocmVM.pager.total=pageData.total;
-                    ocmVM.pager.currentPage = pageData.currentPage;
-                    ocmVM.pager.pageSize = pageData.pageSize;
-                    ocmVM.tableData =pageData.data;
-
-                    // 取出存储的id
-                    if(!ocmVM.paginationShow){
-                        if(ocmVM.storeId){
-                            ocmVM.$nextTick(function(){
-                                var storage = [];
-                                ocmVM.tableData.forEach(function(item, index){
-                                    if(item.clueId === ocmVM.storeId ){
-                                        storage.push(ocmVM.tableData[index]);
-                                    }
-                                })
-                                ocmVM.toggleSelection(storage);
-                                ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
-                            })
-                        }
-                    }else{
-                        ocmVM.removeSessionStore ("distributiveResourceStoreForm");
-                        ocmVM.removeSessionStore ("distributiveResourceOtherVal");
-                    }
-                    ocmVM.paginationShow = true;
-                    ocmVM.storeForm = ocmVM.form;
-                })
-            },
-            toggleSelection(rows) { // table select 默认选中fn
-                if (rows) {
-                    rows.forEach(row => {
-                        this.$refs.multipleTable.toggleRowSelection(row,true);
-                });
+                  }
                 } else {
-                    this.$refs.multipleTable.clearSelection();
-                }
-            },
-            //跳转编辑页
-            toUpdatePage(row) {
-                var clueId=row.clueId;
-                // 存储选中信息--start
-                this.setSessionStore("distributiveResourceStoreForm", this.storeForm);
-                var otherVal = {
-                    "currentPage": this.pager.currentPage,
-                    "clueId": clueId,
-                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
-                }
-                this.setSessionStore("distributiveResourceOtherVal", otherVal);
-                // 存储选中信息--end
-                document.location.href='/exetend/distributionedTaskManager/toUpdatePage?id='+clueId;
-            },
-            rowDblClick(row, column, event){
-                //双击查看详情
-                var  param={};
-                param.clueId=row.clueId;
-                axios.post('/exetend/agendaTaskManager/customerInfoView',param).then(function (response) {
-                    if(!response){
-                        ocmVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    var resobj= response.data;
-                    if(!resobj){
-                        ocmVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    if(resobj.code!='0'){
-                        ocmVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    var customer=response.data.data.clueCustomer;
-                    var phone = '';
-                    if(customer.phone){
-                        phone+=customer.phone;
-                    }
-                    if(customer.phone2){
-                        if(phone){
-                            phone+=",";
-                        }
-                        phone+=customer.phone2;
-                    }
-                    if(customer.phone3){
-                        if(phone){
-                            phone+=",";
-                        }
-                        phone+=customer.phone3;
-                    }
-                    if(customer.phone4){
-                        if(phone){
-                            phone+=",";
-                        }
-                        phone+=customer.phone4;
-                    }
-                    if(customer.phone5){
-                        if(phone){
-                            phone+=",";
-                        }
-                        phone+=customer.phone5;
-                    }
-                    customer.phone=phone;
-                    ocmVM.customer=customer;
-                    var messageTime= response.data.data.clueBasic.messageTime;
-                    if(null!=messageTime){
-                        response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
-                    }
-                    ocmVM.basic=response.data.data.clueBasic;
-                })
-
-                this.dialogFormVisible = true
-            },
-            number(){
-                this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
-                this.form.phone=this.form.phone.replace('.','');
-            },
-            //级联查询机构
-            showTele(type){
-                var param={};
-                if(type==1){
-                    param.orgType="1";
-                    // param.parentId = this.form.businessUnit;
-                }else if(type ==7){
-                    param.orgType="7";
-                    // param.parentId = this.form.telemarketingBranch;
-                }else if(type ==0){
-                    param.orgType="8";
-                }else if(type ==21){
-                    param.orgType="21";
-                }
-                axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
-                    //    console.log(response);
-                    if(type==1){
-                        ocmVM.dxList = response.data.data;
-                    }else if(type ==7){
-                        ocmVM.dxCauseBList = response.data.data;
-                    }else if(type ==21){
-                        ocmVM.hwzyGroupList = response.data.data;
-                    }else{
-                        ocmVM.dxBusinessList = response.data.data;
-                    }
-                }).catch(function (error) {
-                    console.log(error);
-                })
-                    .then(function () {
-                        // always executed
-                    });
-            },
-            confirmColumn(){
-                this.dialogChooseList = false;
-                //处理用户选择的列
-                console.info(this.fieldFrom.type);
-                if(this.fieldFrom.type.length==0){
-                    this.$message({
-                        message: "请至少保留一列",
-                        type: 'error'
-                    });
+                  var fileName = url.split('?')[0];
+                  var fileNameArr = fileName.split("/");
+                  if (callSource == '3') {
+                    var decodeUrl = encodeURI(url);
+                    url = "/client/heliClient/downloadHeliClientAudio?url=" + decodeUrl;
+                  } else if (callSource == 7) {
+                    var httpUrl = url.replace("https", "http");
+                    window.parent.open(httpUrl);
                     return;
+                  }
                 }
-                var customerShowColun = [];
-                var customerColumn = this.fieldFrom.type;
-                customerColumn.sort(this.sortNumber);//对选择的列排序
-                var idList=[];
-                for(var i=0;i<customerColumn.length;i++){
-                    var curItem = customerColumn[i];
-                    var itemArr = curItem.split("_");
-                    var obj = {};
-                    obj.fieldCode=itemArr[1];
-                    obj.displayName=itemArr[2];
-                    obj.width=itemArr[4];
-                    customerShowColun.push(obj);
-                    idList.push(itemArr[3])
-                }
-                this.tableColums = customerShowColun;
-                var param ={};
-                param.fieldIdList = idList;
-                param.menuCode = "DistributiveResource";
-                console.info(param);
-                if(idList.length!=0){
-                    axios.post('/customfield/customField/saveUserField', param)
-                        .then(function (response) {
+                var x = new XMLHttpRequest();
+                x.open("GET", url, true);
+                x.responseType = 'blob';
+                x.onload = function (e) { download(x.response, fileNameArr[fileNameArr.length - 1], 'audio/\\*'); }
+                x.send();
+              }
 
-                        })
-                        .catch(function (error) {
-                            console.log(error);
-                        });
-                }
-            },
-            initColumn(){
-                //初始化table 列 和 用户自定义列
-                this.allTableColums = fieldList;
-                if(userFieldList.length!=0){
-                    var type=[];
-                    for(var i=0;i<userFieldList.length;i++){
-                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
-                    }
-                    this.fieldFrom.type = type;
-                    this.confirmColumn();
-                }else{
-                    var type=[];
-                    for(var i=0;i<fieldList.length;i++){
-                        type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
-                    }
-                    this.fieldFrom.type = type;
-                    this.confirmColumn();
-                }
+            } else {
+              console.error(data);
+              addCustomerVM.$message({ message: data.msg, type: 'error' });
+            }
 
-            },
-            sortNumber(a,b) {
-                //对数组中元素，按照数字 从小到大 排序
-                return a.split("_")[0] - b.split("_")[0];
-            },
-            toogleClick(){
-                if(this.isShow){
-                    this.isShow=false
-                }else{
-                    this.isShow=true
-                }
-            },
-            exportFun(falg){ // 导出
-                var param = {};
-                var pageSize = this.pager.pageSize;
-                var pageNum = this.pager.currentPage;
-                param.pageNum=pageNum;
-                param.pageSize=pageSize;
-                if(!this.isShowTime){
-                    var a = new Date();
-                    var year = a.getFullYear();
-                    var month = a.getMonth();
-                    var date = a.getDate();
-                    param.createTimeStart=new Date(year+"-" + month + "-" + date+" 00:00:00");
-                    param.createTimeEnd=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59");
-                }
-                if(this.form.starTime){
-                    param.createTimeStart=new Date(this.form.starTime);
-                }
-                if(this.form.endTime){
-                    param.createTimeEnd=new Date(this.form.endTime);
-                }
-                param.spreadAssignTimeStart=this.form.assignTimeStart;
-                param.spreadAssignTimeEnd=this.form.assignTimeEnd;
-                param.teleCompanyId=this.form.telemarketingBranch;
-                param.teleDeptId=this.form.businessUnit;
-                param.teleGorupId=this.form.telemarketingItem;
-                param.teleGorupId=this.form.telemarketingItem;
-                param.projectId=this.form.resourceProject;
-                param.operationId=this.form.resourcePerson;
-                param.phase=this.form.resourceStage;
-                param.source=this.form.medium;
-                param.phone=this.form.phone;
-                param.category=this.form.resourceType;
-                param.type=this.form.type;
-                param.industryCategory=this.form.tradeType;
-                param.status = this.form.status;
-                param.phstatus = this.form.phstatus;
-                param.phtraIsCall = this.form.phtraIsCall;
-                param.clueId = this.form.clueId;
-                param.isCall = this.form.isCall;
-                param.firstCall = this.form.firstCall;
-                param.siteIsNull = this.form.siteIsNull;
-                param.qq = this.form.qq;
-                param.email = this.form.email;
-                param.wechat = this.form.wechat;
-                param.searchWord = this.form.searchWord;
-                param.rootWord = this.form.rootWord;
-                param.sourcetwo = this.form.sourcetwo;
-                param.buildSelf = this.form.buildSelf;
-                param.businessLine = this.form.businessLine;
-                param.operatorId = this.form.operatorId;
-                param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
-                param.categoryList = this.form.resourceTypeList;
-                param.projectList = this.form.resourceProjectList;
-                param.im = this.form.im;
-                param.sourceFrom = this.form.sourceFrom;
-                param.haveParent = this.form.haveParent;
-                param.falg = falg;
-                param.firstAssignGroupType=this.form.firstAssignGroupType;
-                param.ascriptionProject=this.form.ascriptionProject;
-                var starTime=this.form.starTime;
-                var endTime=this.form.endTime;
-                if(endTime){
-                    if(starTime>endTime){
-                        this.$message({
-                            message: '创建开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-                var start=this.form.assignTimeStart;
-                var end=this.form.assignTimeEnd;
-                if(end){
-                    if(start>end){
-                        this.$message({
-                            message: '分发开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-                if (falg == 3){
-                    param.phtraExport = true;
-                }else{
-                    param.phtraExport = false;
-                }
-                param.firstAssignGroupId=this.form.firstAssignGroupId;
-                var falgNew=falg;
-                axios.post('/exetend/distributionedTaskManager/findCluesCount', param)
-                    .then(function (response) {
-                        if(response.data.data>150000){
-                            ocmVM.$message({
-                                message: '选择数据过多，不允许进行一次性导出',
-                                type: 'warning'
-                            });
-                            return;
-                        }
-                        ocmVM.$confirm("当前导出数据量为"+response.data.data+"条，确认导出吗？", '提示', {
-                            confirmButtonText: '确认',
-                            cancelButtonText: '取消',
-                            type: 'warning'
-                        }).then(() => {
+          })
+          .catch(function (error) {
+            console.log(error);
+          }).then(function () {
+          });
 
-                            if(falg==1){ // 导出电销沟通情况
-                            ocmVM.isExport1=false;
-                            // 存localstorage
-                            localStorage.setItem('distributeExport1','1');
-                        }else if(falg==3){ // 导出话务沟通情况
-                            ocmVM.isExport3=false;
-                            // 存localstorage
-                            localStorage.setItem('distributeExport3','3');
-                        }else if(falg == 4){
-                            ocmVM.isExport4=false;
-                            localStorage.setItem('distributeExport4','4');
-                        }else{ // 资源记录
-                            ocmVM.isExport2=false;
-                            // 存localstorage
-                            localStorage.setItem('distributeExport2','2');
-                        }
-                        ocmVM.timedown();
-                        window.parent.distributeExportFun(falgNew,param)
-                    }).catch(() => {
-                            this.$message({
-                            type: 'info',
-                            message: '已取消导出'
-                        });
-                    });
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+      },
+      initTableData() {
+        var param = {};
+        if (!this.isShowTime) {
+          var a = new Date();
+          var year = a.getFullYear();
+          var month = a.getMonth();
+          var date = a.getDate();
+          param.createTimeStart = new Date(year + "-" + month + "-" + date + " 00:00:00");
+          param.createTimeEnd = new Date(year + "-" + (month + 1) + "-" + date + " 23:59:59");
+        }
+        var pageSize = this.pager.pageSize;
+        var pageNum = this.pager.currentPage;
+        param.pageNum = pageNum;
+        param.pageSize = pageSize;
+        if (this.form.starTime) {
+          param.createTimeStart = new Date(this.form.starTime);
+        }
+        if (this.form.endTime) {
+          param.createTimeEnd = new Date(this.form.endTime);
+        }
+        param.spreadAssignTimeStart = this.form.assignTimeStart;
+        param.spreadAssignTimeEnd = this.form.assignTimeEnd;
+        param.teleCompanyId = this.form.telemarketingBranch;
+        param.teleDeptId = this.form.businessUnit;
+        param.teleGorupId = this.form.telemarketingItem;
+        param.teleGorupId = this.form.telemarketingItem;
+        param.projectId = this.form.resourceProject;
+        param.operationId = this.form.resourcePerson;
+        param.phase = this.form.resourceStage;
+        param.source = this.form.medium;
+        param.phone = this.form.phone;
+        param.category = this.form.resourceType;
+        param.type = this.form.type;
+        param.industryCategory = this.form.tradeType;
+        param.status = this.form.status;
+        param.phstatus = this.form.phstatus;
+        param.phtraIsCall = this.form.phtraIsCall;
+        param.clueId = this.form.clueId;
+        param.isCall = this.form.isCall;
+        param.firstCall = this.form.firstCall;
+        param.siteIsNull = this.form.siteIsNull;
+        param.qq = this.form.qq;
+        param.email = this.form.email;
+        param.wechat = this.form.wechat;
+        param.searchWord = this.form.searchWord;
+        param.rootWord = this.form.rootWord;
+        param.sourcetwo = this.form.sourcetwo;
+        param.buildSelf = this.form.buildSelf;
 
-            },
-            timedown(){
-                console.log(0)
-                clearInterval(this.timer);
-                var storageDistributeExport1 = localStorage.getItem("distributeExport1");
-                var storageDistributeExport2 = localStorage.getItem("distributeExport2");
-                var storageDistributeExport3 = localStorage.getItem("distributeExport3");
-                var storageDistributeExport4 = localStorage.getItem("distributeExport4");
-                if(storageDistributeExport1){
-                    this.isExport1=false;
-                }else{
-                    this.isExport1=true;
-                }
-                if(storageDistributeExport2){
-                    this.isExport2=false;
-                }else{
-                    this.isExport2=true;
-                }
-                if(storageDistributeExport3){
-                    this.isExport3=false;
-                }else{
-                    this.isExport3=true;
-                }
-                if(storageDistributeExport4){
-                    this.isExport4=false;
-                }else{
-                    this.isExport4=true;
-                }
+        param.projectList = this.form.resourceProjectList;
+        param.categoryList = this.form.resourceTypeList;
+        param.businessLine = this.form.businessLine;
+        param.businessLine = this.form.businessLine;
+        param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
+        param.operatorId = this.form.operatorId;
+        param.im = this.form.im;
+        param.sourceFrom = this.form.sourceFrom;
+        param.haveParent = this.form.haveParent;
+        param.firstAssignGroupId = this.form.firstAssignGroupId;
+        param.firstAssignGroupType = this.form.firstAssignGroupType;
+        param.ascriptionProject = this.form.ascriptionProject;
+
+        var starTime = this.form.starTime;
+        var endTime = this.form.endTime;
+        if (pageNum > 5000) {
+          axios.post('', '').then(function (response) {
+            ocmVM.pager.currentPage = ocmVM.oldPage;
+          })
+          this.$message({
+            message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
+            type: 'warning'
+          });
+          return;
+        } else {
+          this.oldPage = pageNum;
+        }
+        if (endTime) {
+          if (starTime > endTime) {
+            this.$message({
+              message: '创建开始时间不能大于结束时间',
+              type: 'warning'
+            });
+            return;
+          }
+        }
+        var start = this.form.assignTimeStart;
+        var end = this.form.assignTimeEnd;
+        if (end) {
+          if (start > end) {
+            this.$message({
+              message: '分发开始时间不能大于结束时间',
+              type: 'warning'
+            });
+            return;
+          }
+        }
+
+        axios.post('/exetend/distributionedTaskManager/queryPageDistributionedTask', param).then(function (response) {
+          if (!response) {
+            ocmVM.$message({
+              message: "接口调用失败",
+              type: 'error'
+            });
+            return;
+          }
+          var resobj = response.data;
+          if (!resobj) {
+            ocmVM.$message({
+              message: "接口调用失败",
+              type: 'error'
+            });
+            return;
+          }
+          if (resobj.code != '0') {
+            ocmVM.$message({
+              message: "接口调用失败",
+              type: 'error'
+            });
+            return;
+          }
+          var pageData = resobj.data;
+          ocmVM.pager.total = pageData.total;
+          ocmVM.pager.currentPage = pageData.currentPage;
+          ocmVM.pager.pageSize = pageData.pageSize;
+          ocmVM.tableData = pageData.data;
+
+          // 取出存储的id
+          if (!ocmVM.paginationShow) {
+            if (ocmVM.storeId) {
+              ocmVM.$nextTick(function () {
+                var storage = [];
+                ocmVM.tableData.forEach(function (item, index) {
+                  if (item.clueId === ocmVM.storeId) {
+                    storage.push(ocmVM.tableData[index]);
+                  }
+                })
+                ocmVM.toggleSelection(storage);
+                ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+              })
+            }
+          } else {
+            ocmVM.removeSessionStore("distributiveResourceStoreForm");
+            ocmVM.removeSessionStore("distributiveResourceOtherVal");
+          }
+          ocmVM.paginationShow = true;
+          ocmVM.storeForm = ocmVM.form;
+        })
+      },
+      toggleSelection(rows) { // table select 默认选中fn
+        if (rows) {
+          rows.forEach(row => {
+            this.$refs.multipleTable.toggleRowSelection(row, true);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
+      //跳转编辑页
+      toUpdatePage(row) {
+        var clueId = row.clueId;
+        // 存储选中信息--start
+        this.setSessionStore("distributiveResourceStoreForm", this.storeForm);
+        var otherVal = {
+          "currentPage": this.pager.currentPage,
+          "clueId": clueId,
+          "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+        }
+        this.setSessionStore("distributiveResourceOtherVal", otherVal);
+        // 存储选中信息--end
+        document.location.href = '/exetend/distributionedTaskManager/toUpdatePage?id=' + clueId;
+      },
+      rowDblClick(row, column, event) {
+        //双击查看详情
+        var param = {};
+        param.clueId = row.clueId;
+        axios.post('/exetend/agendaTaskManager/customerInfoView', param).then(function (response) {
+          if (!response) {
+            ocmVM.$message({
+              message: "接口调用失败",
+              type: 'error'
+            });
+            return;
+          }
+          var resobj = response.data;
+          if (!resobj) {
+            ocmVM.$message({
+              message: "接口调用失败",
+              type: 'error'
+            });
+            return;
+          }
+          if (resobj.code != '0') {
+            ocmVM.$message({
+              message: "接口调用失败",
+              type: 'error'
+            });
+            return;
+          }
+          var customer = response.data.data.clueCustomer;
+          var phone = '';
+          if (customer.phone) {
+            phone += customer.phone;
+          }
+          if (customer.phone2) {
+            if (phone) {
+              phone += ",";
+            }
+            phone += customer.phone2;
+          }
+          if (customer.phone3) {
+            if (phone) {
+              phone += ",";
+            }
+            phone += customer.phone3;
+          }
+          if (customer.phone4) {
+            if (phone) {
+              phone += ",";
+            }
+            phone += customer.phone4;
+          }
+          if (customer.phone5) {
+            if (phone) {
+              phone += ",";
+            }
+            phone += customer.phone5;
+          }
+          customer.phone = phone;
+          ocmVM.customer = customer;
+          var messageTime = response.data.data.clueBasic.messageTime;
+          if (null != messageTime) {
+            response.data.data.clueBasic.messageTime = crtTimeFtt1(messageTime);
+          }
+          ocmVM.basic = response.data.data.clueBasic;
+        })
+
+        this.dialogFormVisible = true
+      },
+      number() {
+        this.form.phone = this.form.phone.replace(/[^\.\d]/g, '');
+        this.form.phone = this.form.phone.replace('.', '');
+      },
+      //级联查询机构
+      showTele(type) {
+        var param = {};
+        if (type == 1) {
+          param.orgType = "1";
+          // param.parentId = this.form.businessUnit;
+        } else if (type == 7) {
+          param.orgType = "7";
+          // param.parentId = this.form.telemarketingBranch;
+        } else if (type == 0) {
+          param.orgType = "8";
+        } else if (type == 21) {
+          param.orgType = "21";
+        }
+        axios.post('/organization/organization/queryOrgByType', param).then(function (response) {
+          //    console.log(response);
+          if (type == 1) {
+            ocmVM.dxList = response.data.data;
+          } else if (type == 7) {
+            ocmVM.dxCauseBList = response.data.data;
+          } else if (type == 21) {
+            ocmVM.hwzyGroupList = response.data.data;
+          } else {
+            ocmVM.dxBusinessList = response.data.data;
+          }
+        }).catch(function (error) {
+          console.log(error);
+        })
+          .then(function () {
+            // always executed
+          });
+      },
+      confirmColumn() {
+        this.dialogChooseList = false;
+        //处理用户选择的列
+        console.info(this.fieldFrom.type);
+        if (this.fieldFrom.type.length == 0) {
+          this.$message({
+            message: "请至少保留一列",
+            type: 'error'
+          });
+          return;
+        }
+        var customerShowColun = [];
+        var customerColumn = this.fieldFrom.type;
+        customerColumn.sort(this.sortNumber);//对选择的列排序
+        var idList = [];
+        for (var i = 0; i < customerColumn.length; i++) {
+          var curItem = customerColumn[i];
+          var itemArr = curItem.split("_");
+          var obj = {};
+          obj.fieldCode = itemArr[1];
+          obj.displayName = itemArr[2];
+          obj.width = itemArr[4];
+          customerShowColun.push(obj);
+          idList.push(itemArr[3])
+        }
+        this.tableColums = customerShowColun;
+        var param = {};
+        param.fieldIdList = idList;
+        param.menuCode = "DistributiveResource";
+        console.info(param);
+        if (idList.length != 0) {
+          axios.post('/customfield/customField/saveUserField', param)
+            .then(function (response) {
+
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        }
+      },
+      initColumn() {
+        //初始化table 列 和 用户自定义列
+        this.allTableColums = fieldList;
+        if (userFieldList.length != 0) {
+          var type = [];
+          for (var i = 0; i < userFieldList.length; i++) {
+            type.push(userFieldList[i].sortNum + '_' + userFieldList[i].fieldCode + '_' + userFieldList[i].displayName + '_' + userFieldList[i].fieldId + '_' + userFieldList[i].width)
+          }
+          this.fieldFrom.type = type;
+          this.confirmColumn();
+        } else {
+          var type = [];
+          for (var i = 0; i < fieldList.length; i++) {
+            type.push(fieldList[i].sortNum + '_' + fieldList[i].fieldCode + '_' + fieldList[i].displayName + '_' + fieldList[i].id + '_' + fieldList[i].width)
+          }
+          this.fieldFrom.type = type;
+          this.confirmColumn();
+        }
+
+      },
+      sortNumber(a, b) {
+        //对数组中元素，按照数字 从小到大 排序
+        return a.split("_")[0] - b.split("_")[0];
+      },
+      toogleClick() {
+        if (this.isShow) {
+          this.isShow = false
+        } else {
+          this.isShow = true
+        }
+      },
+      exportFun(falg) { // 导出
+        var param = {};
+        var pageSize = this.pager.pageSize;
+        var pageNum = this.pager.currentPage;
+        param.pageNum = pageNum;
+        param.pageSize = pageSize;
+        if (!this.isShowTime) {
+          var a = new Date();
+          var year = a.getFullYear();
+          var month = a.getMonth();
+          var date = a.getDate();
+          param.createTimeStart = new Date(year + "-" + month + "-" + date + " 00:00:00");
+          param.createTimeEnd = new Date(year + "-" + (month + 1) + "-" + date + " 23:59:59");
+        }
+        if (this.form.starTime) {
+          param.createTimeStart = new Date(this.form.starTime);
+        }
+        if (this.form.endTime) {
+          param.createTimeEnd = new Date(this.form.endTime);
+        }
+        param.spreadAssignTimeStart = this.form.assignTimeStart;
+        param.spreadAssignTimeEnd = this.form.assignTimeEnd;
+        param.teleCompanyId = this.form.telemarketingBranch;
+        param.teleDeptId = this.form.businessUnit;
+        param.teleGorupId = this.form.telemarketingItem;
+        param.teleGorupId = this.form.telemarketingItem;
+        param.projectId = this.form.resourceProject;
+        param.operationId = this.form.resourcePerson;
+        param.phase = this.form.resourceStage;
+        param.source = this.form.medium;
+        param.phone = this.form.phone;
+        param.category = this.form.resourceType;
+        param.type = this.form.type;
+        param.industryCategory = this.form.tradeType;
+        param.status = this.form.status;
+        param.phstatus = this.form.phstatus;
+        param.phtraIsCall = this.form.phtraIsCall;
+        param.clueId = this.form.clueId;
+        param.isCall = this.form.isCall;
+        param.firstCall = this.form.firstCall;
+        param.siteIsNull = this.form.siteIsNull;
+        param.qq = this.form.qq;
+        param.email = this.form.email;
+        param.wechat = this.form.wechat;
+        param.searchWord = this.form.searchWord;
+        param.rootWord = this.form.rootWord;
+        param.sourcetwo = this.form.sourcetwo;
+        param.buildSelf = this.form.buildSelf;
+        param.businessLine = this.form.businessLine;
+        param.operatorId = this.form.operatorId;
+        param.firstAsssignTrafficGroupId = this.form.firstAsssignTrafficGroupId;
+        param.categoryList = this.form.resourceTypeList;
+        param.projectList = this.form.resourceProjectList;
+        param.im = this.form.im;
+        param.sourceFrom = this.form.sourceFrom;
+        param.haveParent = this.form.haveParent;
+        param.falg = falg;
+        param.firstAssignGroupType = this.form.firstAssignGroupType;
+        param.ascriptionProject = this.form.ascriptionProject;
+        var starTime = this.form.starTime;
+        var endTime = this.form.endTime;
+        if (endTime) {
+          if (starTime > endTime) {
+            this.$message({
+              message: '创建开始时间不能大于结束时间',
+              type: 'warning'
+            });
+            return;
+          }
+        }
+        var start = this.form.assignTimeStart;
+        var end = this.form.assignTimeEnd;
+        if (end) {
+          if (start > end) {
+            this.$message({
+              message: '分发开始时间不能大于结束时间',
+              type: 'warning'
+            });
+            return;
+          }
+        }
+        if (falg == 3) {
+          param.phtraExport = true;
+        } else {
+          param.phtraExport = false;
+        }
+        param.firstAssignGroupId = this.form.firstAssignGroupId;
+        var falgNew = falg;
+        axios.post('/exetend/distributionedTaskManager/findCluesCount', param)
+          .then(function (response) {
+            if (response.data.data > 150000) {
+              ocmVM.$message({
+                message: '选择数据过多，不允许进行一次性导出',
+                type: 'warning'
+              });
+              return;
+            }
+            ocmVM.$confirm("当前导出数据量为" + response.data.data + "条，确认导出吗？", '提示', {
+              confirmButtonText: '确认',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+
+              if (falg == 1) { // 导出电销沟通情况
+                ocmVM.isExport1 = false;
+                // 存localstorage
+                localStorage.setItem('distributeExport1', '1');
+              } else if (falg == 3) { // 导出话务沟通情况
+                ocmVM.isExport3 = false;
+                // 存localstorage
+                localStorage.setItem('distributeExport3', '3');
+              } else if (falg == 4) {
+                ocmVM.isExport4 = false;
+                localStorage.setItem('distributeExport4', '4');
+              } else { // 资源记录
+                ocmVM.isExport2 = false;
+                // 存localstorage
+                localStorage.setItem('distributeExport2', '2');
+              }
+              ocmVM.timedown();
+              window.parent.distributeExportFun(falgNew, param)
+            }).catch(() => {
+              this.$message({
+                type: 'info',
+                message: '已取消导出'
+              });
+            });
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+      },
+      timedown() {
+        console.log(0)
+        clearInterval(this.timer);
+        var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+        var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+        var storageDistributeExport3 = localStorage.getItem("distributeExport3");
+        var storageDistributeExport4 = localStorage.getItem("distributeExport4");
+        if (storageDistributeExport1) {
+          this.isExport1 = false;
+        } else {
+          this.isExport1 = true;
+        }
+        if (storageDistributeExport2) {
+          this.isExport2 = false;
+        } else {
+          this.isExport2 = true;
+        }
+        if (storageDistributeExport3) {
+          this.isExport3 = false;
+        } else {
+          this.isExport3 = true;
+        }
+        if (storageDistributeExport4) {
+          this.isExport4 = false;
+        } else {
+          this.isExport4 = true;
+        }
 
 
 
-                if(storageDistributeExport1||storageDistributeExport2||storageDistributeExport3||storageDistributeExport4){
-                    this.timer=setInterval(this.timedown,1000)
-                }else{
-                    clearInterval(this.timer)
-                }
-            },
+        if (storageDistributeExport1 || storageDistributeExport2 || storageDistributeExport3 || storageDistributeExport4) {
+          this.timer = setInterval(this.timedown, 1000)
+        } else {
+          clearInterval(this.timer)
+        }
+      },
 
-            toRecall() {
-                var rows = this.multipleSelection;
-                if(rows.length < 1){
-                    this.$message({
-                        message: '请选择至少一条数据进行撤回',
-                        type: 'warning'
-                    });
-                    return;
-                }else{
-                    var clueIds =[];
-                    if(rows.length == 1) {
-                        if (rows[0].phase > 3 &&rows[0].phase != 13) {
-                            this.$message({
-                                message: '该资源已分配电销顾问，不可撤回',
-                                type: 'warning'
-                            });
-                            clueIds = [];
-                            return;
-                        }
-                    } else {
-                        for (var i = 0; i < rows.length; i++) {
-                            if (rows[i].phase > 3 &&rows[i].phase != 13) {
-                                this.$message({
-                                    message: '该批资源包含已分配电销顾问，不可批量撤回',
-                                    type: 'warning'
-                                });
-                                clueIds = [];
-                                return;
-                            } else {
-                                clueIds.push(rows[i].clueId);
-                            }
-                        }
-                    }
-                    console.log('撤回'+clueIds);
-                    this.$confirm('撤回资源后分配人员不可见，同时该资源转移至待分发资源中，确定将资源撤回?', '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        debugger;
-                    var url ='';
-                    var param={};
-                    var rows = this.multipleSelection;
-                    if(rows.length == 1){
-                        param.id=rows[0].clueId;
-                        url = '/exetend/agendaTaskManager/recallClue';
-                    }else {
-                        var rows = this.multipleSelection;
-                        param.idList=clueIds;
-                        url = '/exetend/agendaTaskManager/recallClues';
-                    }
-                    // var param={};
-                    // var rows = this.multipleSelection;
-                    // param.clueIds=clueIds;
-                    axios.post(url,param).then(function (response) {
-                        if(!response||!response.data){
-                            ocmVM.$message({
-                                message: "接口调用失败",
-                                type: 'error'
-                            });
-                            return ;
-                        }
-                        if(response.data.code!='0'){
-                            ocmVM.$message({
-                                message: response.data.msg,
-                                type: 'error'
-                            });
-                            return ;
-                        }
-                        var resobj= response.data;
-                        ocmVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
-                                ocmVM.initTableData();
-                            }});
-                    });
-                }).catch(() => {
-                        this.$message({
-                        type: 'info',
-                        message: '已取消操作'
-                    });
+      toRecall() {
+        var rows = this.multipleSelection;
+        if (rows.length < 1) {
+          this.$message({
+            message: '请选择至少一条数据进行撤回',
+            type: 'warning'
+          });
+          return;
+        } else {
+          var clueIds = [];
+          if (rows.length == 1) {
+            if (rows[0].phase > 3 && rows[0].phase != 13) {
+              this.$message({
+                message: '该资源已分配电销顾问，不可撤回',
+                type: 'warning'
+              });
+              clueIds = [];
+              return;
+            }
+          } else {
+            for (var i = 0; i < rows.length; i++) {
+              if (rows[i].phase > 3 && rows[i].phase != 13) {
+                this.$message({
+                  message: '该批资源包含已分配电销顾问，不可批量撤回',
+                  type: 'warning'
                 });
+                clueIds = [];
+                return;
+              } else {
+                clueIds.push(rows[i].clueId);
+              }
+            }
+          }
+          console.log('撤回' + clueIds);
+          this.$confirm('撤回资源后分配人员不可见，同时该资源转移至待分发资源中，确定将资源撤回?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            debugger;
+            var url = '';
+            var param = {};
+            var rows = this.multipleSelection;
+            if (rows.length == 1) {
+              param.id = rows[0].clueId;
+              url = '/exetend/agendaTaskManager/recallClue';
+            } else {
+              var rows = this.multipleSelection;
+              param.idList = clueIds;
+              url = '/exetend/agendaTaskManager/recallClues';
+            }
+            // var param={};
+            // var rows = this.multipleSelection;
+            // param.clueIds=clueIds;
+            axios.post(url, param).then(function (response) {
+              if (!response || !response.data) {
+                ocmVM.$message({
+                  message: "接口调用失败",
+                  type: 'error'
+                });
+                return;
+              }
+              if (response.data.code != '0') {
+                ocmVM.$message({
+                  message: response.data.msg,
+                  type: 'error'
+                });
+                return;
+              }
+              var resobj = response.data;
+              ocmVM.$message({
+                message: '撤回成功', type: 'success', duration: 2000, onClose: function () {
+                  ocmVM.initTableData();
                 }
-            },
-            setSessionStore (name, content) {
-                if (!name) return
-                if (typeof content !== 'string') {
-                    content = JSON.stringify(content)
-                }
-                window.sessionStorage.setItem(name, content)
-            },
-            getSessionStore (name) {
-                if (!name) return;
-                var content = window.sessionStorage.getItem(name);
-                if (typeof content == 'string') {
-                    content = JSON.parse(content)
-                }
-                return content;
-            },
-            removeSessionStore (name) {
-                if (!name) return
-                return window.sessionStorage.removeItem(name)
-            },
-            search(){
-                this.isShowTime = true;
-                this.initTableData();
-            }
-        },
-        mounted(){
-            document.getElementById('optimizeClueManagement').style.display = 'block';
-        },
-        created(){
-
-            /*   var a = new Date();
-              var year = a.getFullYear();
-              var month = a.getMonth();
-              var date = a.getDate();
-
-              this.form.starTime=new Date(year+"-" + month + "-" + date+" 00:00:00");
-              this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59"); */
-            var storageDistributeExport1 = localStorage.getItem("distributeExport1");
-            var storageDistributeExport2 = localStorage.getItem("distributeExport2");
-            var storageDistributeExport3 = localStorage.getItem("distributeExport3");
-            if(storageDistributeExport1){
-                this.isExport1=false;
-            }else{
-                this.isExport1=true;
-            }
-            if(storageDistributeExport2){
-                this.isExport2=false;
-            }else{
-                this.isExport2=true;
-            }
-            if(storageDistributeExport3){
-                this.isExport3=false;
-            }else{
-                this.isExport3=true;
-            }
-            if(storageDistributeExport1 || storageDistributeExport2 || storageDistributeExport3){
-                this.timedown();
-            }
-            // 进入页面判断有是否有存储值
-            if(!this.paginationShow){
-                var storeVal = this.getSessionStore("distributiveResourceStoreForm");
-                var otherVal = this.getSessionStore("distributiveResourceOtherVal");
-                if(storeVal && otherVal){
-                    this.form = storeVal;
-                    this.$set(this.pager,"currentPage",otherVal.currentPage);
-                    this.storeId = otherVal.clueId;
-                    this.scrollTop = otherVal.scrollTop;
-                }
-            }
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pager.pageSize = localVal;}
-            this.initColumn();
-            this.initTableData();
-            var param={};
-            param.groupCode="medium";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                ocmVM.mediumArry=response.data.data;
+              });
             });
-
-            //初始资源类别数据
-            param={};
-            param.groupCode="clueCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                ocmVM.categoryArr=response.data.data;
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消操作'
             });
-            //初始资源类型数据
-            param={};
-            param.groupCode="clueType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                ocmVM.typeArr=response.data.data;
-            });
-            //初始行业类别
-            param={};
-            param.groupCode="industryCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                ocmVM.industryCategoryArr=response.data.data;
-            });
-            //初始化业务线数据
-            param={};
-            param.groupCode="businessLine";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                // console.log(response.data.data)
-                ocmVM.businessLineArr=response.data.data;
-            });
-            //初始化线索阶段
-            param={};
-            param.groupCode="phase";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                var phaseArr = response.data.data;
-                var resArr = [];
-
-                for(var i = 0 ; i < phaseArr.length ; i++){
-                    if(phaseArr[i].value != '0'){
-                        resArr.push(phaseArr[i])
-                    }
-                }
-                ocmVM.phaseArr=resArr;
-            });
-
-            //初始化电销分公司
-            this.showTele(0);
-            this.showTele(7);
-            this.showTele(1);
-            //话务组
-            this.showTele(21);
+          });
         }
-    })
-
-    function crtTimeFtt1(val, row) {
-        if (val != null) {
-            var date = new Date(val);
-
-            var month = (date.getMonth() + 1);
-            if(month<10){
-                month = "0"+month;
-            }
-            var day = date.getDate();
-            if(day<10){
-                day = "0"+day;
-            }
-            var hour = date.getHours();
-            if(hour<10){
-                hour = "0"+hour;
-            }
-            var minu = date.getMinutes();
-            if(minu<10){
-                minu = "0"+minu;
-            }
-            var mill = date.getSeconds();
-            if(mill<10){
-                mill = "0"+mill;
-            }
-            return date.getFullYear()+''+(month) + ''+day+' '+hour+":"+minu+":"+mill;
+      },
+      setSessionStore(name, content) {
+        if (!name) return
+        if (typeof content !== 'string') {
+          content = JSON.stringify(content)
         }
+        window.sessionStorage.setItem(name, content)
+      },
+      getSessionStore(name) {
+        if (!name) return;
+        var content = window.sessionStorage.getItem(name);
+        if (typeof content == 'string') {
+          content = JSON.parse(content)
+        }
+        return content;
+      },
+      removeSessionStore(name) {
+        if (!name) return
+        return window.sessionStorage.removeItem(name)
+      },
+      search() {
+        this.isShowTime = true;
+        this.initTableData();
+      }
+    },
+    mounted() {
+      document.getElementById('optimizeClueManagement').style.display = 'block';
+    },
+    created() {
+
+      /*   var a = new Date();
+        var year = a.getFullYear();
+        var month = a.getMonth();
+        var date = a.getDate();
+
+        this.form.starTime=new Date(year+"-" + month + "-" + date+" 00:00:00");
+        this.form.endTime=new Date(year+"-"+(month+1)+"-"+date+" 23:59:59"); */
+      var storageDistributeExport1 = localStorage.getItem("distributeExport1");
+      var storageDistributeExport2 = localStorage.getItem("distributeExport2");
+      var storageDistributeExport3 = localStorage.getItem("distributeExport3");
+      if (storageDistributeExport1) {
+        this.isExport1 = false;
+      } else {
+        this.isExport1 = true;
+      }
+      if (storageDistributeExport2) {
+        this.isExport2 = false;
+      } else {
+        this.isExport2 = true;
+      }
+      if (storageDistributeExport3) {
+        this.isExport3 = false;
+      } else {
+        this.isExport3 = true;
+      }
+      if (storageDistributeExport1 || storageDistributeExport2 || storageDistributeExport3) {
+        this.timedown();
+      }
+      // 进入页面判断有是否有存储值
+      if (!this.paginationShow) {
+        var storeVal = this.getSessionStore("distributiveResourceStoreForm");
+        var otherVal = this.getSessionStore("distributiveResourceOtherVal");
+        if (storeVal && otherVal) {
+          this.form = storeVal;
+          this.$set(this.pager, "currentPage", otherVal.currentPage);
+          this.storeId = otherVal.clueId;
+          this.scrollTop = otherVal.scrollTop;
+        }
+      }
+      var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+      if (localVal) { this.pager.pageSize = localVal; }
+      this.initColumn();
+      this.initTableData();
+      var param = {};
+      param.groupCode = "medium";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+        ocmVM.mediumArry = response.data.data;
+      });
+
+      //初始资源类别数据
+      param = {};
+      param.groupCode = "clueCategory";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+        ocmVM.categoryArr = response.data.data;
+      });
+      //初始资源类型数据
+      param = {};
+      param.groupCode = "clueType";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+        ocmVM.typeArr = response.data.data;
+      });
+      //初始行业类别
+      param = {};
+      param.groupCode = "industryCategory";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+        ocmVM.industryCategoryArr = response.data.data;
+      });
+      //初始化业务线数据
+      param = {};
+      param.groupCode = "businessLine";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+        // console.log(response.data.data)
+        ocmVM.businessLineArr = response.data.data;
+      });
+      //初始化线索阶段
+      param = {};
+      param.groupCode = "phase";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+        var phaseArr = response.data.data;
+        var resArr = [];
+
+        for (var i = 0; i < phaseArr.length; i++) {
+          if (phaseArr[i].value != '0') {
+            resArr.push(phaseArr[i])
+          }
+        }
+        ocmVM.phaseArr = resArr;
+      });
+
+      //初始化电销分公司
+      this.showTele(0);
+      this.showTele(7);
+      this.showTele(1);
+      //话务组
+      this.showTele(21);
     }
+  })
+
+  function crtTimeFtt1(val, row) {
+    if (val != null) {
+      var date = new Date(val);
+
+      var month = (date.getMonth() + 1);
+      if (month < 10) {
+        month = "0" + month;
+      }
+      var day = date.getDate();
+      if (day < 10) {
+        day = "0" + day;
+      }
+      var hour = date.getHours();
+      if (hour < 10) {
+        hour = "0" + hour;
+      }
+      var minu = date.getMinutes();
+      if (minu < 10) {
+        minu = "0" + minu;
+      }
+      var mill = date.getSeconds();
+      if (mill < 10) {
+        mill = "0" + mill;
+      }
+      return date.getFullYear() + '' + (month) + '' + day + ' ' + hour + ":" + minu + ":" + mill;
+    }
+  }
 </script>
+
 </html>
