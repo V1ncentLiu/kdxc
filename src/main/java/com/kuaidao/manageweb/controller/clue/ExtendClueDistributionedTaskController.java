@@ -570,6 +570,12 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getFirstResponseInterval());
                 //加盟顾问
                 curList.add(taskDTO.getConsultantName());
+
+                curList.add(taskDTO.getFirstAssignConsultantName());
+                curList.add(taskDTO.getUrlAddress());
+                curList.add(taskDTO.getReleaseReasonName());
+                curList.add(taskDTO.getReleaseTime());
+                curList.add(taskDTO.getRelateFocusPoint());
                 dataList.add(curList);
 
             }
