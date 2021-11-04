@@ -12,6 +12,7 @@ import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.service.IAnnounceService;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.msgpush.dto.SmsTemplateCodeReq;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
 import com.kuaidao.sys.dto.user.MerchantUserReq;
@@ -147,6 +148,23 @@ public class AnnounceServiceImpl implements IAnnounceService {
                 annReceiveFeignClient.batchInsert(annrList);
                 sendOtherMessaage(userList,dto,userAnnMap);
                 merchantUserInfoFeignClient.batchUpdateMerchantUser(merchantUserReqList);
+            }
+        }else if(dto.getOrgId().equals(99)){//招商主账号及子账号站内信
+            List<Integer> statusList = new ArrayList<>();
+            // 启用
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            // 锁定
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            UserInfoDTO userInfoDTO = new UserInfoDTO();
+            userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
+            userInfoDTO.setStatusList(statusList);
+            JSONResult<List<UserInfoDTO>> merchantUserListMain =  merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+            userInfoDTO.setUserType(SysConstant.USER_TYPE_THREE);
+            JSONResult<List<UserInfoDTO>> merchantUserListSub =  merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
+            if(JSONResult.SUCCESS.equals(merchantUserListMain.getCode())){
+                List<UserInfoDTO> data = merchantUserListMain.getData();
+                data.addAll(merchantUserListSub.getData());
+                InsertBatch(merchantUserListMain, 5, new ArrayList<>(), dto.getId());
             }
         }else{
             if (dto.getType() != 0) { // 全部用户
