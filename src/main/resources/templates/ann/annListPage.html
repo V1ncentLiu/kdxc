@@ -1,91 +1,96 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
 <head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>公告管理</title>
+  <title>公告管理</title>
 </head>
+
 <body>
 
-<div id="queryForm" class="mainPadding" style="padding-bottom: 0;display: none;">
+  <div id="queryForm" class="mainPadding" style="padding-bottom: 0;display: none;">
 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item>公告管理</el-breadcrumb-item>
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>公告管理</el-breadcrumb-item>
     </el-breadcrumb>
 
     <el-row class="row-bg" justify="end">
-        <el-form :inline="true" :model="annForm" class="demo-form-inline" ref="queryForm" >
+      <el-form :inline="true" :model="annForm" class="demo-form-inline" ref="queryForm">
 
-            <el-col :span="4">
-                <el-form-item>
-                    <el-button type="primary" @click="publishAnnPage">发布公告</el-button>
-                </el-form-item>
-            </el-col>
-            <el-col :span="20" style="text-align: right;">
-                <el-form-item label="公告内容:" prop="content" style="margin-right: 10px;">
-                    <el-input v-model="annForm.content" placeholder="公告内容"></el-input>
-                </el-form-item>
-                <el-form-item label="发布时间:">
-                    <!--<el-date-picker v-model="annForm.time" type="datetimerange" align="right" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '23:59:59']">-->
-                    <!--</el-date-picker>-->
-                    <el-date-picker v-model="annForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
-                    <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                </el-form-item>
-                <el-form-item>
-                    <el-button icon="el-icon-search" type="primary" @click="onSubmit">搜索</el-button>
-                </el-form-item>
-            </el-col>
+        <el-col :span="4">
+          <el-form-item>
+            <el-button type="primary" @click="publishAnnPage">发布公告</el-button>
+          </el-form-item>
+        </el-col>
+        <el-col :span="20" style="text-align: right;">
+          <el-form-item label="公告内容:" prop="content" style="margin-right: 10px;">
+            <el-input v-model="annForm.content" placeholder="公告内容"></el-input>
+          </el-form-item>
+          <el-form-item label="发布时间:">
+            <!--<el-date-picker v-model="annForm.time" type="datetimerange" align="right" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '23:59:59']">-->
+            <!--</el-date-picker>-->
+            <el-date-picker v-model="annForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+          </el-form-item>
+          <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
+            <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-button icon="el-icon-search" type="primary" @click="onSubmit">搜索</el-button>
+          </el-form-item>
+        </el-col>
 
-        </el-form>
+      </el-form>
     </el-row>
-</div>
+  </div>
 
-<div id="pagination"  class="mainPadding" style="padding-top: 0;">
-  <div class="mainSearchBg">
-    <template>
-            <el-table :data="tableData3" style="width: 100%" border ref="multipleTable" @row-dblclick="rowDblClick()" tooltip-effect="light">
-                <el-table-column prop="xh" label="序号" width="180" align="center"  type="index" >
-                </el-table-column>
-                <el-table-column prop="title" label="标题" width="180" show-overflow-tooltip align="center"></el-table-column>
-                <el-table-column prop="content" label="消息内容" width="500"  show-overflow-tooltip header-align="center">
-                    <template slot-scope="scope">
-                        <span style="white-space: pre-wrap;">{{ scope.row.content }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="orgId" label="接收范围" width="180" :formatter="formatOrgId" show-overflow-tooltip align="center"></el-table-column>
-                <el-table-column prop="publishTime" label="发布时间" align="center"></el-table-column>
-            </el-table>
-        
-    </template>
+  <div id="pagination" class="mainPadding" style="padding-top: 0;">
+    <div class="mainSearchBg">
+      <template>
+        <el-table :data="tableData3" style="width: 100%" border ref="multipleTable" @row-dblclick="rowDblClick()"
+          tooltip-effect="light">
+          <el-table-column prop="xh" label="序号" width="180" align="center" type="index">
+          </el-table-column>
+          <el-table-column prop="title" label="标题" width="180" show-overflow-tooltip align="center"></el-table-column>
+          <el-table-column prop="content" label="消息内容" width="500" show-overflow-tooltip header-align="center">
+            <template slot-scope="scope">
+              <span style="white-space: pre-wrap;">{{ scope.row.content }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="orgId" label="接收范围" width="180" :formatter="formatOrgId" show-overflow-tooltip
+            align="center"></el-table-column>
+          <el-table-column prop="publishTime" label="发布时间" align="center"></el-table-column>
+        </el-table>
 
-    <template>
+      </template>
+
+      <template>
         <div class="block">
-            <el-pagination @size-change="handleSizeChange" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[20, 50, 100]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
-            </el-pagination>
+          <el-pagination @size-change="handleSizeChange" background @current-change="handleCurrentChange"
+            :current-page="currentPage" :page-sizes="[20, 50, 100]" :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper" :total="total">
+          </el-pagination>
         </div>
-    </template>
- </div>
-</div>
+      </template>
+    </div>
+  </div>
 
-<!--<div id="bussdialog">-->
-    <!--<el-dialog title="公告通知" :visible.sync="bussdialogVisible" width="100%">-->
+  <!--<div id="bussdialog">-->
+  <!--<el-dialog title="公告通知" :visible.sync="bussdialogVisible" width="100%">-->
 
-        <!--<el-table :data="bussDialogTableData" style="width: 100%">-->
-            <!--<template v-for="(col ,index) in cols">-->
-                <!--<el-table-column :prop="col.prop" :label="col.label" header-align="center"></el-table-column>-->
-            <!--</template>-->
-        <!--</el-table>-->
+  <!--<el-table :data="bussDialogTableData" style="width: 100%">-->
+  <!--<template v-for="(col ,index) in cols">-->
+  <!--<el-table-column :prop="col.prop" :label="col.label" header-align="center"></el-table-column>-->
+  <!--</template>-->
+  <!--</el-table>-->
 
-    <!--</el-dialog>-->
-<!--</div>-->
+  <!--</el-dialog>-->
+  <!--</div>-->
 
-<!-- import common js-->
-<div th:include="_footer_include :: #jsLib"></div>
+  <!-- import common js-->
+  <div th:include="_footer_include :: #jsLib"></div>
 
-<script>
+  <script>
     // var annDialogVm = new Vue({
     //     el: '#anndialog',
     //     data:{
@@ -111,153 +116,157 @@
 
     // 查询 模块
     var queryFormVM = new Vue({
-        el: '#queryForm',
-        data: {
-            annForm: {
-                content: '',
-                date1: '',
-                date2: ''
-            }
-        },
-        methods: {
-            publishAnnPage:function(){
-                window.location.href = '/ann/annPublishPage'
-            },
-            onSubmit() {
-                console.log('submit!');
-                var param = queryFormVM.annForm;
-                param.pageSize = paginationVm.pageSize;
-                param.pageNum = paginationVm.pageNum;
-                console.info(param);
-                axios.post("/ann/queryAnnList", param)
-                    .then(function (response) {
-
-                        if(response.data.code==-1){
-                            queryFormVM.$message.error(response.data.msg)
-                            return false ;
-                        }
-
-                        var data = response.data.data;
-                        paginationVm.tableData3 = data.data;
-                        console.info(data);
-                        paginationVm.total = data.total;
-                        paginationVm.currentPage = data.currentPage;
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-
-            },
-            resetForm(formName) {
-                console.info(this.$refs[formName]);
-                queryFormVM.$refs[formName].resetFields();
-                this.$refs[formName].resetFields();
-            }
-        },
-        mounted(){
-            document.getElementById('queryForm').style.display = 'block';
+      el: '#queryForm',
+      data: {
+        annForm: {
+          content: '',
+          date1: '',
+          date2: ''
         }
+      },
+      methods: {
+        publishAnnPage: function () {
+          window.location.href = '/ann/annPublishPage'
+        },
+        onSubmit() {
+          console.log('submit!');
+          var param = queryFormVM.annForm;
+          param.pageSize = paginationVm.pageSize;
+          param.pageNum = paginationVm.pageNum;
+          console.info(param);
+          axios.post("/ann/queryAnnList", param)
+            .then(function (response) {
+
+              if (response.data.code == -1) {
+                queryFormVM.$message.error(response.data.msg)
+                return false;
+              }
+
+              var data = response.data.data;
+              paginationVm.tableData3 = data.data;
+              console.info(data);
+              paginationVm.total = data.total;
+              paginationVm.currentPage = data.currentPage;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+
+        },
+        resetForm(formName) {
+          console.info(this.$refs[formName]);
+          queryFormVM.$refs[formName].resetFields();
+          this.$refs[formName].resetFields();
+        }
+      },
+      mounted() {
+        document.getElementById('queryForm').style.display = 'block';
+      }
 
 
     });
 
     //带分页的table
     var paginationVm = new Vue({
-        el: '#pagination',
-        data: {
-            tableData3: [],
-            multipleSelection:[],
-            currentPage: 1,
-            total: 0,
-            pageNum: 1,
-            pageSize: 20
+      el: '#pagination',
+      data: {
+        tableData3: [],
+        multipleSelection: [],
+        currentPage: 1,
+        total: 0,
+        pageNum: 1,
+        pageSize: 20
+      },
+      methods: {
+        formatOrgId(row, column) {
+          if (row.type == 3) {
+            return "喜报";
+          } else if (row.orgId == -1) {
+            return '商家主账户';
+          } else if (row.orgId == 99) {
+            return '商家主账户及子账户'
+          }
+          return row.orgId == 0 ? "系统全用户" : row.orgnames;
         },
-        methods: {
-            formatOrgId(row, column){
-                if(row.type == 3){
-                    return "喜报";
-                }else if(row.orgId==-1){
-                    return '商家主账户';
-                }
-                return row.orgId == 0 ? "系统全用户" : row.orgnames;
-            },
-            formatDate(row, column) {
-                let date = new Date(parseInt(row.publishTime) * 1000);
-                let Y = date.getFullYear() + '-';
-                let M = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) + '-' : date.getMonth() + 1 + '-';
-                let D = date.getDate() < 10 ? '0' + date.getDate() + ' ' : date.getDate() + ' ';
-                let h = date.getHours() < 10 ? '0' + date.getHours() + ':' : date.getHours() + ':';
-                let m = date.getMinutes()  < 10 ? '0' + date.getMinutes() + ':' : date.getMinutes() + ':';
-                let s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+        formatDate(row, column) {
+          let date = new Date(parseInt(row.publishTime) * 1000);
+          let Y = date.getFullYear() + '-';
+          let M = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) + '-' : date.getMonth() + 1 + '-';
+          let D = date.getDate() < 10 ? '0' + date.getDate() + ' ' : date.getDate() + ' ';
+          let h = date.getHours() < 10 ? '0' + date.getHours() + ':' : date.getHours() + ':';
+          let m = date.getMinutes() < 10 ? '0' + date.getMinutes() + ':' : date.getMinutes() + ':';
+          let s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
 
-                return Y + M + D + h + m + s;
-            },
-            rowDblClick(row, event){
-                // alert("行双击事件")
-            },
-            selectRow(row){
-            },
-            handleSelectionChange(val) {
-                console.info(val);
-                this.multipleSelection = val;
-            },
-            handleSizeChange(val) {
-                //下拉框  每页 10,20条切换 调用
-                console.log(`每页 ${val} 条`);
-                this.pageSize = val;
-                localStorage.setItem('allChangePageSize', val);
-                this.initTableData(1);
-            },
-            handleCurrentChange(val) {
-                //点击 页码
-                console.log(`当前页: ${val}`);
-                this.initTableData(val);
-            },
-            initTableData(v_pageNum) {
-                var param = queryFormVM.annForm;
-                console.log(param);
-                param.pageSize =  this.pageSize;
-                param.pageNum = v_pageNum;
-                axios.post("/ann/queryAnnList", param)
-                    .then(function (response) {
-                        var data = response.data.data
-                        console.info(data);
-                        paginationVm.tableData3 = data.data;
-                        paginationVm.total = data.total;
-                        paginationVm.currentPage = data.currentPage;
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    })
-                    .then(function () {
-                        // always executed
-                    });
-            }
+          return Y + M + D + h + m + s;
         },
-
-        created() {
-            // console.info("create method");
-            var localVal=localStorage.getItem('allChangePageSize')?parseInt(localStorage.getItem('allChangePageSize')):'';
-            if(localVal){this.pageSize = localVal;}
-            this.initTableData(1);
+        rowDblClick(row, event) {
+          // alert("行双击事件")
         },
-        mounted() {
-            console.info("mounted method");
+        selectRow(row) {
+        },
+        handleSelectionChange(val) {
+          console.info(val);
+          this.multipleSelection = val;
+        },
+        handleSizeChange(val) {
+          //下拉框  每页 10,20条切换 调用
+          console.log(`每页 ${val} 条`);
+          this.pageSize = val;
+          localStorage.setItem('allChangePageSize', val);
+          this.initTableData(1);
+        },
+        handleCurrentChange(val) {
+          //点击 页码
+          console.log(`当前页: ${val}`);
+          this.initTableData(val);
+        },
+        initTableData(v_pageNum) {
+          var param = queryFormVM.annForm;
+          console.log(param);
+          param.pageSize = this.pageSize;
+          param.pageNum = v_pageNum;
+          axios.post("/ann/queryAnnList", param)
+            .then(function (response) {
+              var data = response.data.data
+              console.info(data);
+              paginationVm.tableData3 = data.data;
+              paginationVm.total = data.total;
+              paginationVm.currentPage = data.currentPage;
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+            .then(function () {
+              // always executed
+            });
         }
+      },
+
+      created() {
+        // console.info("create method");
+        var localVal = localStorage.getItem('allChangePageSize') ? parseInt(localStorage.getItem('allChangePageSize')) : '';
+        if (localVal) { this.pageSize = localVal; }
+        this.initTableData(1);
+      },
+      mounted() {
+        console.info("mounted method");
+      }
 
     });
 
-</script>
-<style>
+  </script>
+  <style>
     .el-button--primary {
-        /*background-color: #6f7180;
+      /*background-color: #6f7180;
         border: #6f7180;*/
     }
+
     .el-tooltip__popper {
-        max-width: 50%;
-        line-height: 130%;
-        margin-left: 2%;
+      max-width: 50%;
+      line-height: 130%;
+      margin-left: 2%;
     }
-</style>
+  </style>
 </body>
+
 </html>

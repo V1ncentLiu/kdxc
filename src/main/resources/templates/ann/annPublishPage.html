@@ -1,383 +1,379 @@
 <!DOCTYPE html>
-<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
-    <title>发布公告</title>
-    <style>
-        .addPublishPage .mainWhitePadding{}
-    </style>
+  <title>发布公告</title>
+  <style>
+    .addPublishPage .mainWhitePadding {}
+  </style>
 </head>
 
 <body>
-<div id="form" class="mainPadding addPublishPage" style="display: none;">
+  <div id="form" class="mainPadding addPublishPage" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item>公告管理</el-breadcrumb-item>
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>公告管理</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="mainWhiteBg">
-        <div class="inforTitle">发布公告</div>
-        <el-form :model="annForm"  :rules="rules" ref="annForm" label-width="100px" class="demo-annForm mainWhitePadding">
-            <el-form-item label="公告标题：" prop="title" style="width:700px">
-                <el-input v-model="annForm.title" type="text" maxlength="100" size="small"></el-input>
-            </el-form-item>
-            <el-form-item label="公告接收：" prop="type">
-<!--                <el-radio-group v-model="annForm.type" @change="redioChangeType">-->
-<!--                    <el-radio :label="1" >站内公告通知</el-radio>-->
-<!--                    <el-radio :label="2" >短信</el-radio>-->
-<!--                    <el-radio :label="3" >邮件</el-radio>-->
-<!--                </el-radio-group>-->
-                <el-checkbox-group v-model="annForm.type">
-                    <el-checkbox :label="1">站内公告通知</el-checkbox>
-                    <el-checkbox :label="2">短信</el-checkbox>
-                    <el-checkbox :label="3">邮件</el-checkbox>
-                </el-checkbox-group>
+      <div class="inforTitle">发布公告</div>
+      <el-form :model="annForm" :rules="rules" ref="annForm" label-width="100px" class="demo-annForm mainWhitePadding">
+        <el-form-item label="公告标题：" prop="title" style="width:700px">
+          <el-input v-model="annForm.title" type="text" maxlength="100" size="small"></el-input>
+        </el-form-item>
+        <el-form-item label="公告接收：" prop="type">
+          <!--                <el-radio-group v-model="annForm.type" @change="redioChangeType">-->
+          <!--                    <el-radio :label="1" >站内公告通知</el-radio>-->
+          <!--                    <el-radio :label="2" >短信</el-radio>-->
+          <!--                    <el-radio :label="3" >邮件</el-radio>-->
+          <!--                </el-radio-group>-->
+          <el-checkbox-group v-model="annForm.type">
+            <el-checkbox :label="1">站内公告通知</el-checkbox>
+            <el-checkbox :label="2">短信</el-checkbox>
+            <el-checkbox :label="3">邮件</el-checkbox>
+          </el-checkbox-group>
 
 
 
-            </el-form-item>
-            <el-form-item label="业务场景：" >
-                <el-select v-model="annForm.scene" placeholder="请选择" @change="sceneSelectChange">
-                    <el-option
-                            v-for="item in sceneOptions"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item  label="接收范围：" v-if="isShowRange">
-                    <el-form-item v-show="isShowAll"  prop="redio" style="float: left;margin-right: 20px;">
-                        <el-radio-group v-model="annForm.radio" @change="redioChange">
-                            <el-radio   label="0">系统全用户</el-radio>
-                            <el-radio  label="1">指定组织</el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                    <el-form-item prop="org" id="org" v-show="showOrg" style="float: left;">
-                        <el-input v-model="annForm.org" readonly placeholder="请选择指定组织" style="float: left;width: 300px;margin-top: 4px;">
-                            <el-button slot="append" size="small"  @click="selectOrgs">选择组织</el-button> <!--icon="el-icon-search"-->
-                        </el-input>
-                    </el-form-item>
-            </el-form-item>
-<!--            :autosize="{ minRows: 10, maxRows: 50}"-->
-            <el-form-item label="公告内容：" prop="content" style="width:700px">
-                <el-input type="textarea" v-model="annForm.content"
-                          :autosize="{ minRows: 10, maxRows: 10}"
-                          maxlength="990"
-                ></el-input>
-            </el-form-item>
-            <el-row>
-                <el-form-item class="f-tac">
-                    <el-button type="primary" @click="submitForm('annForm')" :disabled="isDisabled">提交</el-button>
-                    <el-button @click="reListPage">取消</el-button>
-                </el-form-item>
-             </el-row>
-        </el-form>
+        </el-form-item>
+        <el-form-item label="业务场景：">
+          <el-select v-model="annForm.scene" placeholder="请选择" @change="sceneSelectChange">
+            <el-option v-for="item in sceneOptions" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="接收范围：" v-if="isShowRange">
+          <el-form-item v-show="isShowAll" prop="redio" style="float: left;margin-right: 20px;">
+            <el-radio-group v-model="annForm.radio" @change="redioChange">
+              <el-radio label="0">系统全用户</el-radio>
+              <el-radio label="1">指定组织</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item v-show="annForm.radio == 0" style="float: left;">
+            <el-checkbox v-model="annForm.orgIdType" :label="99">商家主账户及子账户</el-checkbox>
+
+          </el-form-item>
+          <el-form-item prop="org" id="org" v-show="showOrg" style="float: left;">
+            <el-input v-model="annForm.org" readonly placeholder="请选择指定组织"
+              style="float: left;width: 300px;margin-top: 4px;">
+              <el-button slot="append" size="small" @click="selectOrgs">选择组织</el-button>
+              <!--icon="el-icon-search"-->
+            </el-input>
+          </el-form-item>
+        </el-form-item>
+        <!--            :autosize="{ minRows: 10, maxRows: 50}"-->
+        <el-form-item label="公告内容：" prop="content" style="width:700px">
+          <el-input type="textarea" v-model="annForm.content" :autosize="{ minRows: 10, maxRows: 10}" maxlength="990">
+          </el-input>
+        </el-form-item>
+        <el-row>
+          <el-form-item class="f-tac">
+            <el-button type="primary" @click="submitForm('annForm')" :disabled="isDisabled">提交</el-button>
+            <el-button @click="reListPage">取消</el-button>
+          </el-form-item>
+        </el-row>
+      </el-form>
     </el-row>
 
-    <el-dialog :visible.sync="OraTreeMuliCheckDialog" title="选择组织"  width="540px" @close="closeDialog" >
-        <div style="height: 300px;overflow-y:auto;overflow-x:auto;">
-            <el-tree
-                    :data="dataTree"
-                    node-key="id"
-                    :default-expanded-keys="expandedKeys"
-                    :default-checked-keys="multipleSelection"
-                    :check-strictly="true"
-                    ref="tree"
-                    show-checkbox
-                    highlight-current
-                    :expand-on-click-node=false
-                    @check="handleSelectionChange"
-                    class="leftTree">
-            </el-tree>    <!-- @check-change="handleCheckChange"-->
-        </div>
-        <span slot="footer" class="dialog-footer" align="center">
-            <el-button type="primary" @click="returnCheckNodekeys">提 交</el-button>
-            <el-button @click="closeOraTreeMultiCheck">取 消</el-button>
-        </span>
+    <el-dialog :visible.sync="OraTreeMuliCheckDialog" title="选择组织" width="540px" @close="closeDialog">
+      <div style="height: 300px;overflow-y:auto;overflow-x:auto;">
+        <el-tree :data="dataTree" node-key="id" :default-expanded-keys="expandedKeys"
+          :default-checked-keys="multipleSelection" :check-strictly="true" ref="tree" show-checkbox highlight-current
+          :expand-on-click-node=false @check="handleSelectionChange" class="leftTree">
+        </el-tree> <!-- @check-change="handleCheckChange"-->
+      </div>
+      <span slot="footer" class="dialog-footer" align="center">
+        <el-button type="primary" @click="returnCheckNodekeys">提 交</el-button>
+        <el-button @click="closeOraTreeMultiCheck">取 消</el-button>
+      </span>
     </el-dialog>
-</div>
+  </div>
 
-<div th:include="_footer_include :: #jsLib"></div>
+  <div th:include="_footer_include :: #jsLib"></div>
 
-<script th:inline="javascript">
-var roleCode = [[${roleCode}]];//当前用户角色
-var orgId = [[${orgId}]];//当前用户机构
-    Array.prototype.remove = function(val) {
-        var index = this.indexOf(val);
-        if (index > -1) {
-            this.splice(index, 1);
-        }
+  <script th:inline="javascript">
+    var roleCode = [[${ roleCode }]];//当前用户角色
+    var orgId = [[${ orgId }]];//当前用户机构
+    Array.prototype.remove = function (val) {
+      var index = this.indexOf(val);
+      if (index > -1) {
+        this.splice(index, 1);
+      }
     };
 
     var vm = new Vue({
-        el:'#form',
-        data:{
-            showOrg:false,
-        	isShowAll:true,
-            isShowRange:true,
-            isDisabled:false,
-            expandedKeys:[],
-            dataTree:[],
-            OraTreeMuliCheckDialog: false,
-            multipleSelection:[],
-            multipleSelectionName:[],
-            sceneOptions:[
-                {
-                    value: '0',
-                    label: '通用'
-                },
-                {
-                    value: '1',
-                    label: '招商宝充值协议变更'
-                }
-            ],
-            annForm: {
-                title: "",
-                type: [1],
-                content:"",
-                radio:"0",
-                org:"",
-                scene:'0'
-            },
-            rules: {
-                title: [
-                    { required: true, message: '标题不能为空', trigger: 'blur' },
-                    { min: 1, max: 100, message: '长度在 1 到  100 个字符', trigger: 'blur' }
-                ],
-                type: [
-                    { type: 'array', required: true, message: '请至少选择一个接收方式', trigger: 'change' }
-                ],
-                redio: [ // 默认选中则一定不会为空
-                ],
-                content: [
-                    { required: true, message: '公告内容不能为空', trigger: 'blur' },
-                    { min: 1, max: 990, message: '长度在 1 到 990 个字符', trigger: 'blur' }
-                ]
-            },
-
+      el: '#form',
+      data: {
+        showOrg: false,
+        isShowAll: true,
+        isShowRange: true,
+        isDisabled: false,
+        expandedKeys: [],
+        dataTree: [],
+        OraTreeMuliCheckDialog: false,
+        multipleSelection: [],
+        multipleSelectionName: [],
+        sceneOptions: [
+          {
+            value: '0',
+            label: '通用'
+          },
+          {
+            value: '1',
+            label: '招商宝充值协议变更'
+          }
+        ],
+        annForm: {
+          title: "",
+          type: [1],
+          content: "",
+          radio: "0",
+          org: "",
+          scene: '0'
         },
-        methods:{
-            reListPage:function(){
-                window.location.href = '/ann/annlistPage';
-            },
-            selectOrgs:function(){
-                console.log("--------选择组织结构---多选-------------")
-                if(vm.annForm.radio!=1){
-                    vm.$message( {type: 'warning',message:'接收范围为：指定组织，才能选择组织机构！'});
-                    return false
+        rules: {
+          title: [
+            { required: true, message: '标题不能为空', trigger: 'blur' },
+            { min: 1, max: 100, message: '长度在 1 到  100 个字符', trigger: 'blur' }
+          ],
+          type: [
+            { type: 'array', required: true, message: '请至少选择一个接收方式', trigger: 'change' }
+          ],
+          redio: [ // 默认选中则一定不会为空
+          ],
+          content: [
+            { required: true, message: '公告内容不能为空', trigger: 'blur' },
+            { min: 1, max: 990, message: '长度在 1 到 990 个字符', trigger: 'blur' }
+          ]
+        },
+
+      },
+      methods: {
+        reListPage: function () {
+          window.location.href = '/ann/annlistPage';
+        },
+        selectOrgs: function () {
+          console.log("--------选择组织结构---多选-------------")
+          if (vm.annForm.radio != 1) {
+            vm.$message({ type: 'warning', message: '接收范围为：指定组织，才能选择组织机构！' });
+            return false
+          }
+          //  打开 组织机构多选框
+          vm.OraTreeMuliCheckDialog = true;
+          var param = {};
+          var url = "/organization/organization/query";
+          if (roleCode == "YWGLY") {
+            param.id = orgId;
+            url = "/organization/organization/listOrgTreeDataByParentId";
+          }
+          axios.post(url, param).then(function (response) {
+            console.log(response.data)
+            vm.expandedKeys = [];
+            vm.dataTree = response.data.data;
+            for (var i = 0; i < vm.dataTree.length; i++) {
+              var curNode = vm.dataTree[i];
+              vm.expandedKeys.push(curNode.id);
+              var childs = curNode.children;
+              if (childs) {
+                for (var j = 0; j < childs.length; j++) {
+                  var curChildNode = childs[j];
+                  vm.expandedKeys.push(curChildNode.id);
                 }
-            //  打开 组织机构多选框
-                vm.OraTreeMuliCheckDialog = true;
-                var param = {};
-                var url="/organization/organization/query";
-                if(roleCode=="YWGLY"){
-                	param.id=orgId;
-                	url="/organization/organization/listOrgTreeDataByParentId";
-                }
-                axios.post(url, param).then(function (response) {
-                    console.log(response.data)
-                    vm.expandedKeys = [];
-                    vm.dataTree = response.data.data;
-                    for(var i=0;i<vm.dataTree.length;i++){
-                        var curNode = vm.dataTree[i];
-                        vm.expandedKeys.push(curNode.id);
-                        var childs = curNode.children;
-                        if(childs){
-                            for(var j=0;j<childs.length;j++){
-                                var curChildNode = childs[j];
-                                vm.expandedKeys.push(curChildNode.id);
-                            }
-                        }
+              }
 
-                        console.log(vm.multipleSelection,vm.expandedKeys,vm.dataTree,22222)
-                    }
-                }).catch(function (error) { console.log(error);});
-            },
-            handleCheckChange(currentNode,isCheck,childsCheck){
-                console.log("bababbababababababbabababab")
-            },
-            handleSelectionChange(currentNode,allCheckNodes) {//选择节点的事件
-                console.log(currentNode)
-                var flag = true;
-                // this.multipleSelection
-                var v_selection = allCheckNodes.checkedKeys;  // 获取已经勾选的id
-                var v_selectName= [];
-                var nodes = allCheckNodes.checkedNodes;
-                for(var i = 0 ; i < nodes.length ; i++){   //获取已经勾选的name
-                    v_selectName.push(nodes[i].label)
-                }
+              console.log(vm.multipleSelection, vm.expandedKeys, vm.dataTree, 22222)
+            }
+          }).catch(function (error) { console.log(error); });
+        },
+        handleCheckChange(currentNode, isCheck, childsCheck) {
+          console.log("bababbababababababbabababab")
+        },
+        handleSelectionChange(currentNode, allCheckNodes) {//选择节点的事件
+          console.log(currentNode)
+          var flag = true;
+          // this.multipleSelection
+          var v_selection = allCheckNodes.checkedKeys;  // 获取已经勾选的id
+          var v_selectName = [];
+          var nodes = allCheckNodes.checkedNodes;
+          for (var i = 0; i < nodes.length; i++) {   //获取已经勾选的name
+            v_selectName.push(nodes[i].label)
+          }
 
 
-               var childsSeting=function(vnode){
-                    for(var i = 0 ; i < vnode.children.length;i++){
-                        v_selection.remove(vnode.children[i].id)
-                        v_selectName.remove(vnode.children[i].label)
-                        v_selection.push(vnode.children[i].id)
-                        v_selectName.push(vnode.children[i].label)
-                        if(vnode.children[i].children) {
-                            childsSeting(vnode.children[i])
-                        }
-                    }
-                }
+          var childsSeting = function (vnode) {
+            for (var i = 0; i < vnode.children.length; i++) {
+              v_selection.remove(vnode.children[i].id)
+              v_selectName.remove(vnode.children[i].label)
+              v_selection.push(vnode.children[i].id)
+              v_selectName.push(vnode.children[i].label)
+              if (vnode.children[i].children) {
+                childsSeting(vnode.children[i])
+              }
+            }
+          }
 
-                //遍历放入子节点
-                for(var i = 0 ; i < nodes.length ; i++){
-                    if(currentNode.id==nodes[i].id){
-                        flag = false;
-                        if(currentNode.children) {
-                            childsSeting(currentNode)
-                        }
-                    }
-                }
+          //遍历放入子节点
+          for (var i = 0; i < nodes.length; i++) {
+            if (currentNode.id == nodes[i].id) {
+              flag = false;
+              if (currentNode.children) {
+                childsSeting(currentNode)
+              }
+            }
+          }
 
-                var childsRemoving=function(vnode){
-                    for(var i = 0 ; i < vnode.children.length;i++){
-                        v_selection.remove(vnode.children[i].id)
-                        v_selectName.remove(vnode.children[i].label)
-                        if(vnode.children[i].children) {
-                            childsRemoving(vnode.children[i])
-                        }
-                    }
-                }
+          var childsRemoving = function (vnode) {
+            for (var i = 0; i < vnode.children.length; i++) {
+              v_selection.remove(vnode.children[i].id)
+              v_selectName.remove(vnode.children[i].label)
+              if (vnode.children[i].children) {
+                childsRemoving(vnode.children[i])
+              }
+            }
+          }
 
-                //遍历移除子节点
-                if(flag){
-                    var id =  "";
-                    var label = "";
-                    if(currentNode.children){
-                        childsRemoving(currentNode)
-                    }
-                }
+          //遍历移除子节点
+          if (flag) {
+            var id = "";
+            var label = "";
+            if (currentNode.children) {
+              childsRemoving(currentNode)
+            }
+          }
 
-                this.multipleSelection = v_selection
-                this.multipleSelectionName = v_selectName
-                console.log(this.multipleSelection)
-                console.log(this.multipleSelectionName)
-                //设置勾选
-                this.$refs.tree.setCheckedNodes(v_selection);
-            },
-            returnCheckNodekeys(){
-                console.log(this.multipleSelection.length)
-                if( this.multipleSelection.length ==0){
-                    this.$message({type:"warning",message:"请选择组织结构"})
-                    return false;
-                }
-                var names = this.multipleSelectionName.join(',')
-                console.log(names)
-                vm.annForm.org = names
-                this.OraTreeMuliCheckDialog = false
-            },
-            redioChangeType(val){
-                console.log(val)
-            },
-            sceneSelectChange(val){
-                if(val==1){
-                    vm.isShowRange=false
-                }else {
-                    vm.isShowRange=true
-                }
-                this.annForm.radio='0'
-                vm.showOrg=false;
-                vm.multipleSelection =[];
-                vm.multipleSelectionName = [];
-            },
-            redioChange:function(val){
+          this.multipleSelection = v_selection
+          this.multipleSelectionName = v_selectName
+          console.log(this.multipleSelection)
+          console.log(this.multipleSelectionName)
+          //设置勾选
+          this.$refs.tree.setCheckedNodes(v_selection);
+        },
+        returnCheckNodekeys() {
+          console.log(this.multipleSelection.length)
+          if (this.multipleSelection.length == 0) {
+            this.$message({ type: "warning", message: "请选择组织结构" })
+            return false;
+          }
+          var names = this.multipleSelectionName.join(',')
+          console.log(names)
+          vm.annForm.org = names
+          this.OraTreeMuliCheckDialog = false
+        },
+        redioChangeType(val) {
+          console.log(val)
+        },
+        sceneSelectChange(val) {
+          if (val == 1) {
+            vm.isShowRange = false
+          } else {
+            vm.isShowRange = true
+          }
+          this.annForm.radio = '0'
+          vm.showOrg = false;
+          vm.multipleSelection = [];
+          vm.multipleSelectionName = [];
+        },
+        redioChange: function (val) {
 
-                if(val==0){//全体用户
-                    console.log("选择了全体用户")
-                    // document.getElementById("org").setAttribute('style', 'display:none');
-                    vm.showOrg=false;
-                    vm.multipleSelection =[];
-                    vm.multipleSelectionName = [];
-                }else{//指定组织:多选
-                    // document.getElementById("org").setAttribute('style', 'display:block');
-                    vm.showOrg=true;
-                    console.log("选择了指定组织")
-                }
-            },
-            submitForm(formName) {
-                console.log()
-                if(vm.annForm.radio==1&&vm.annForm.org==""){
-                    vm.$message.error('请选择指定组织');
-                    return false;
-                }
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        vm.isDisabled = true;
-                        var formData = vm.annForm;
-                        var param={};
-                        param.title = formData.title;
-                        param.content = formData.content;
-                        param.businessType=this.annForm.scene
-                        if(formData.radio==0){
-                            param.orgId = 0;
-                        }else{
-                            param.orgId = 1;
-                            param.orgids = this.multipleSelection;
-                        }
-                        param.types=this.annForm.type.toString()
-                        // console.log(formData.type.length)
-                        // console.log(formData.type)
-                        // if(formData.type.length == 2){
-                        //     param.type = 0;
-                        // }else{
-                        //     param.type = formData.type[0];
-                        // }
+          if (val == 0) {//全体用户
+            console.log("选择了全体用户")
+            // document.getElementById("org").setAttribute('style', 'display:none');
+            vm.showOrg = false;
+            vm.multipleSelection = [];
+            vm.multipleSelectionName = [];
+          } else {//指定组织:多选
+            // document.getElementById("org").setAttribute('style', 'display:block');
+            vm.showOrg = true;
+            console.log("选择了指定组织")
+          }
+        },
+        submitForm(formName) {
+          console.log()
+          if (vm.annForm.radio == 1 && vm.annForm.org == "") {
+            vm.$message.error('请选择指定组织');
+            return false;
+          }
+          this.$refs[formName].validate((valid) => {
+            if (valid) {
+              debugger
+              vm.isDisabled = true;
+              var formData = vm.annForm;
+              var param = {};
+              param.title = formData.title;
+              param.content = formData.content;
+              param.businessType = this.annForm.scene
+              if (formData.radio == 0) {
 
-                        // console.log("=---P----_---P----=")
-                        // console.log(param)
+                param.orgId = formData.orgIdType ? 99 : 0;
+              } else {
+                param.orgId = 1;
+                param.orgids = this.multipleSelection;
+              }
+              param.types = this.annForm.type.toString()
+              // console.log(formData.type.length)
+              // console.log(formData.type)
+              // if(formData.type.length == 2){
+              //     param.type = 0;
+              // }else{
+              //     param.type = formData.type[0];
+              // }
+
+              // console.log("=---P----_---P----=")
+              // console.log(param)
 
 
-                        axios.post("/ann/newpublishAnn", param)
-                            .then(function (response) {
-                                if(response.data.code==0){
-                                    vm.$message({type: 'success',message:'提交成功',duration:2000,onClose:function(){
-                                        vm.isDisabled = false;
-                                        window.location.href = '/ann/annlistPage'
-                                    }});
-                                }else{
-                                    vm.$message.error(response.data.msg);
-                                    vm.isDisabled = false;
-                                }
-                            })
-                            .catch(function (error) {
-                                vm.isDisabled = false;
-                                console.log(error);
-                            });
-
-                    } else {
-                        console.log('数据未通过校验！');
-                        return false;
-                    }
+              axios.post("/ann/newpublishAnn", param)
+                .then(function (response) {
+                  if (response.data.code == 0) {
+                    vm.$message({
+                      type: 'success', message: '提交成功', duration: 2000, onClose: function () {
+                        vm.isDisabled = false;
+                        window.location.href = '/ann/annlistPage'
+                      }
+                    });
+                  } else {
+                    vm.$message.error(response.data.msg);
+                    vm.isDisabled = false;
+                  }
+                })
+                .catch(function (error) {
+                  vm.isDisabled = false;
+                  console.log(error);
                 });
-            },
-            resetForm(formName) {
-                this.$refs[formName].resetFields();
-            },
-            closeOraTreeMultiCheck(){
-                this.OraTreeMuliCheckDialog = false
-                this.$refs.tree.setCheckedKeys([]);//清空树的选项
-            },
-            closeDialog(){//关闭选择树弹窗
-                this.$refs.tree.setCheckedKeys([]);//清空树的选项
+
+            } else {
+              console.log('数据未通过校验！');
+              return false;
             }
+          });
         },
-        created(){
-            console.info("create method");
-            if(roleCode=="YWGLY"){
-            	this.isShowAll=false;
-            	this.annForm.radio=1;
-            	this.showOrg=true;
-            }
-           // this.getFormData();
+        resetForm(formName) {
+          this.$refs[formName].resetFields();
         },
-        mounted(){
-            console.info("mounted method");
-            document.getElementById('form').style.display = 'block';
+        closeOraTreeMultiCheck() {
+          this.OraTreeMuliCheckDialog = false
+          this.$refs.tree.setCheckedKeys([]);//清空树的选项
+        },
+        closeDialog() {//关闭选择树弹窗
+          this.$refs.tree.setCheckedKeys([]);//清空树的选项
         }
+      },
+      created() {
+        console.info("create method");
+        if (roleCode == "YWGLY") {
+          this.isShowAll = false;
+          this.annForm.radio = 1;
+          this.showOrg = true;
+        }
+        // this.getFormData();
+      },
+      mounted() {
+        console.info("mounted method");
+        document.getElementById('form').style.display = 'block';
+      }
     });
 
-</script>
+  </script>
 </body>
 
 </html>
