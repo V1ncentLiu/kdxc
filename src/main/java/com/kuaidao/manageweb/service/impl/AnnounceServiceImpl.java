@@ -149,7 +149,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
                 sendOtherMessaage(userList,dto,userAnnMap);
                 merchantUserInfoFeignClient.batchUpdateMerchantUser(merchantUserReqList);
             }
-        }else if(dto.getOrgId().equals(99)){//招商主账号及子账号站内信
+        }else if(dto.getOrgId() == 99){//招商主账号及子账号站内信
             List<Integer> statusList = new ArrayList<>();
             // 启用
             statusList.add(SysConstant.USER_STATUS_ENABLE);
