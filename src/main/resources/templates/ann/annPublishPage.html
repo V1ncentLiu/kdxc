@@ -47,12 +47,10 @@
             <el-radio-group v-model="annForm.radio" @change="redioChange">
               <el-radio label="0">系统全用户</el-radio>
               <el-radio label="1">指定组织</el-radio>
+              <el-radio label="99">商家主账户及子账户</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item v-show="annForm.radio == 0" style="float: left;">
-            <el-checkbox v-model="annForm.orgIdType" :label="99">商家主账户及子账户</el-checkbox>
 
-          </el-form-item>
           <el-form-item prop="org" id="org" v-show="showOrg" style="float: left;">
             <el-input v-model="annForm.org" readonly placeholder="请选择指定组织"
               style="float: left;width: 300px;margin-top: 4px;">
@@ -281,7 +279,7 @@
             vm.showOrg = false;
             vm.multipleSelection = [];
             vm.multipleSelectionName = [];
-          } else {//指定组织:多选
+          } else if (val == 1) {//指定组织:多选
             // document.getElementById("org").setAttribute('style', 'display:block');
             vm.showOrg = true;
             console.log("选择了指定组织")
@@ -304,8 +302,11 @@
               param.businessType = this.annForm.scene
               if (formData.radio == 0) {
 
-                param.orgId = formData.orgIdType ? 99 : 0;
-              } else {
+                param.orgId = 0;
+              } else if (formData.radio == 99) {
+                param.orgId = 99;
+              }
+              else {
                 param.orgId = 1;
                 param.orgids = this.multipleSelection;
               }
