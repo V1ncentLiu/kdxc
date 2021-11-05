@@ -164,7 +164,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
             if(JSONResult.SUCCESS.equals(merchantUserListMain.getCode())){
                 List<UserInfoDTO> data = merchantUserListMain.getData();
                 data.addAll(merchantUserListSub.getData());
-                InsertBatch(merchantUserListMain, 5, new ArrayList<>(), dto.getId());
+                InsertBatch(merchantUserListMain, 1, new ArrayList<>(), dto.getId());
             }
         }else{
             if (dto.getType() != 0) { // 全部用户
