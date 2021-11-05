@@ -153,8 +153,6 @@ public class AnnounceServiceImpl implements IAnnounceService {
             List<Integer> statusList = new ArrayList<>();
             // 启用
             statusList.add(SysConstant.USER_STATUS_ENABLE);
-            // 锁定
-            statusList.add(SysConstant.USER_STATUS_LOCK);
             UserInfoDTO userInfoDTO = new UserInfoDTO();
             userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
             userInfoDTO.setStatusList(statusList);
