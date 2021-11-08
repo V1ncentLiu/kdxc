@@ -149,12 +149,10 @@ public class AnnounceServiceImpl implements IAnnounceService {
                 sendOtherMessaage(userList,dto,userAnnMap);
                 merchantUserInfoFeignClient.batchUpdateMerchantUser(merchantUserReqList);
             }
-        }else if(dto.getOrgId().equals(99)){//招商主账号及子账号站内信
+        }else if(dto.getOrgId() == 99){//招商主账号及子账号站内信
             List<Integer> statusList = new ArrayList<>();
             // 启用
             statusList.add(SysConstant.USER_STATUS_ENABLE);
-            // 锁定
-            statusList.add(SysConstant.USER_STATUS_LOCK);
             UserInfoDTO userInfoDTO = new UserInfoDTO();
             userInfoDTO.setUserType(SysConstant.USER_TYPE_TWO);
             userInfoDTO.setStatusList(statusList);
@@ -164,7 +162,7 @@ public class AnnounceServiceImpl implements IAnnounceService {
             if(JSONResult.SUCCESS.equals(merchantUserListMain.getCode())){
                 List<UserInfoDTO> data = merchantUserListMain.getData();
                 data.addAll(merchantUserListSub.getData());
-                InsertBatch(merchantUserListMain, 5, new ArrayList<>(), dto.getId());
+                InsertBatch(merchantUserListMain, 1, new ArrayList<>(), dto.getId());
             }
         }else{
             if (dto.getType() != 0) { // 全部用户
