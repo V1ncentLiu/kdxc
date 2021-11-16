@@ -576,6 +576,11 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getReleaseReasonName());
                 curList.add(taskDTO.getReleaseTime());
                 curList.add(taskDTO.getRelateFocusPoint());
+
+                curList.add(taskDTO.getClueFirstAssignTime());
+                curList.add(taskDTO.getClueFirstTrackTime());
+                curList.add(taskDTO.getClueFowEndTime());
+                curList.add(taskDTO.getClueFowNum());
                 dataList.add(curList);
 
             }
