@@ -30,6 +30,12 @@ public interface MerchantCertFeignClient {
     @PostMapping("/updateAuditStatus")
     JSONResult<String> updateAuditStatus(@RequestBody  MerchantCertReq merchantCertReq);
 
+    /**
+     * 新增修改商户证件信息
+     */
+    @PostMapping("/addOrUpdate")
+    JSONResult<Boolean> addOrUpdate(@RequestBody MerchantCertReq merchantCertReq) ;
+
     @Component
     static class HystrixClientFallback implements MerchantCertFeignClient {
         private static Logger logger = LoggerFactory.getLogger(MerchantCertFeignClient.class);
@@ -43,6 +49,11 @@ public interface MerchantCertFeignClient {
         @Override
         public JSONResult<String> updateAuditStatus(MerchantCertReq merchantCertReq) {
            return fallBackError("修改证件上传状态");
+        }
+
+        @Override
+        public JSONResult<Boolean> addOrUpdate(MerchantCertReq merchantCertReq) {
+            return fallBackError("修改商户证件信息");
         }
     }
 }

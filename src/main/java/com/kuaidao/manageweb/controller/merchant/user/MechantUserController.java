@@ -445,4 +445,14 @@ public class MechantUserController {
                 merchantUserInfoFeignClient.merchantUserList(userInfoDTO);
         return merchantUserList.getData();
     }
+
+    /**
+     *  新增修改证件信息
+     */
+    @RequestMapping(value = "/addOrUpdate")
+    @ResponseBody
+    public JSONResult<Boolean> addOrUpdate(@RequestBody MerchantCertReq merchantCertReq) {
+        JSONResult<Boolean> jsonResult = merchantCertFeignClient.addOrUpdate(merchantCertReq);
+        return jsonResult;
+    }
 }
