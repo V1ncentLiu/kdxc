@@ -501,7 +501,7 @@
           <el-form-item label="营业执照" prop="busLicenseUrl">
             <el-upload class="upload-demo" :action="uploadOssHost" ref="certifUpLoad" :on-preview="certifPre"
               :on-remove="certifRemove" :on-success="certifSuc" :on-error="handleError" :before-upload="CertifBefore"
-              accept=".jpg,.jpeg,.png,.pdf" multiple :data="uploadParamData" :limit='1' :on-change="selectFile"
+              accept=".jpg,.jpeg,.png,.pdf" multiple :data="uploadParamData" :on-change="selectFile"
               :file-list="fileList">
               <el-button v-if="certifForm.busLicenseUrl" @click="certifSubmitUpload('busLicense')" size="small"
                 type="success">重新上传</el-button>
@@ -1355,9 +1355,9 @@
           });
       },
       uploadUrl(row) {
-
+        this.getUploadParam()
         this.certificatesVis = true;
-        this.$refs.certifForm.resetFields();
+
         this.fileList = [];
         this.certifForm = {}
         this.showUrl = {};
@@ -1381,15 +1381,15 @@
       },
       certifSuc(response, file, fileList) {
         this.$message.success(`上传成功！`);
-
         var realName = file.name;
         var randomName = userVM.uploadParamData.key;
         var imgUrl = userVM.uploadOssHost + "/" + randomName;
-        console.log(imgUrl, '上传成功地址');
         this.showUrl[realName] = { url: imgUrl, name: this.certifType };
 
         this.$set(this.certifForm, `${this.certifType}Url`, imgUrl)
         this.$set(this.certifForm, `${this.certifType}Name`, realName)
+
+
         // this.certifForm[`${this.certifType}Url`] = imgUrl;
         // this.certifForm[`${this.certifType}Name`] = realName;
 
@@ -1400,6 +1400,7 @@
         this.$refs[formName].validate((valid) => {
           if (valid) {
             this.certificatesVis = false;
+            debugger
             this.certifForm.userId = this.certifId;
             if (this.certifForm.trademarkAuthUrl) {
               this.certifForm.trademarkAuthStatus = 1 //1授权 2否
@@ -1407,7 +1408,7 @@
               this.certifForm.trademarkAuthStatus = 2 //1授权 2否
             }
             axios.post('/merchant/userManager/addOrUpdate', this.certifForm).then(res => {
-              this.$message.success(`保存成功！`);
+              this.$message.success(`上传成功！记得手动点击「审核通过」`);
               userVM.searchTable();
             })
           } else {
